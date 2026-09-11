@@ -1,0 +1,9 @@
+{
+  "message": "Which orders are most at risk?",
+  "history": [],
+  "context": {
+    "page": "ai",
+    "selected_order_id": null,
+    "visible_order_ids": []
+  }
+}
