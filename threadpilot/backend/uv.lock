@@ -339,8 +339,9 @@ version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
-    { name = "jiter" },
+    { name = "httpx" },
     { name = "openai" },
+    { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "uvicorn" },
 ]
@@ -354,8 +355,9 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115,<1" },
-    { name = "jiter", specifier = ">=0.10,<1" },
+    { name = "httpx", specifier = ">=0.28,<1" },
     { name = "openai", specifier = ">=2,<3" },
+    { name = "pydantic", specifier = ">=2,<3" },
     { name = "python-dotenv", specifier = ">=1,<2" },
     { name = "uvicorn", specifier = ">=0.34,<1" },
 ]

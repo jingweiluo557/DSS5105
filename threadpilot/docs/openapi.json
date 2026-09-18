@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "ThreadPilot AI API",
-    "description": "Streaming and JSON local development API. CSV-grounded multi-turn chat.",
+    "description": "Intent-driven, CSV-grounded workflow with persistent sessions and confirmed actions.",
     "version": "1.1.0"
   },
   "servers": [
@@ -18,26 +18,32 @@
           "Health"
         ],
         "summary": "Health",
+        "description": "场景 1.1–3.3：查询客户端配置状态，不调用模型。",
         "operationId": "health_api_v1_health_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Api V1 Health Get"
+                }
               }
             }
           }
         }
       }
     },
-    "/api/v1/chat": {
+    "/api/v1/workflow/chat": {
       "post": {
         "tags": [
-          "AI"
+          "Workflow"
         ],
-        "summary": "Chat",
-        "operationId": "chat_api_v1_chat_post",
+        "summary": "Workflow Chat",
+        "description": "场景 1.1–3.3：JSON 工作流入口，传回 session_id 延续上下文。",
+        "operationId": "workflow_chat_api_v1_workflow_chat_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -59,17 +65,47 @@
               }
             }
           },
-          "503": {
-            "description": "API key not configured"
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat": {
+      "post": {
+        "tags": [
+          "Workflow"
+        ],
+        "summary": "Workflow Chat",
+        "description": "场景 1.1–3.3：JSON 工作流入口，传回 session_id 延续上下文。",
+        "operationId": "workflow_chat_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
           },
-          "429": {
-            "description": "Provider quota or rate limit"
-          },
-          "502": {
-            "description": "Provider response or configuration error"
-          },
-          "504": {
-            "description": "Provider timeout"
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -84,13 +120,14 @@
         }
       }
     },
-    "/api/v1/chat/stream": {
+    "/api/v1/workflow/chat/stream": {
       "post": {
         "tags": [
-          "AI"
+          "Workflow"
         ],
-        "summary": "Chat Stream",
-        "operationId": "chat_stream_api_v1_chat_stream_post",
+        "summary": "Workflow Stream",
+        "description": "场景 1.1–3.3：完成规则验证后发送 SSE，避免未验证文本抢先展示。",
+        "operationId": "workflow_stream_api_v1_workflow_chat_stream_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -103,11 +140,157 @@
         },
         "responses": {
           "200": {
-            "description": "SSE events: start, delta, done, error",
+            "description": "Validated workflow SSE: start, delta, done",
             "content": {
               "text/event-stream": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evidence/{source}/{row}": {
+      "get": {
+        "tags": [
+          "Evidence"
+        ],
+        "summary": "Evidence Row",
+        "description": "场景 1.3/2.1/2.2：白名单访问原始记录，展示引用对应数据。",
+        "operationId": "evidence_row_api_v1_evidence__source___row__get",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Source"
+            }
+          },
+          {
+            "name": "row",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Row"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Evidence"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflow/notifications/{session_id}": {
+      "get": {
+        "tags": [
+          "Workflow"
+        ],
+        "summary": "Notifications",
+        "description": "场景 3.3：读取已评估的站内通知；会话 ID 是本地单用户访问凭证。",
+        "operationId": "notifications_api_v1_workflow_notifications__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Notifications Api V1 Workflow Notifications  Session Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflow/replies": {
+      "post": {
+        "tags": [
+          "Integrations"
+        ],
+        "summary": "Receive Reply",
+        "description": "场景 3.3：已认证上游回复事件入库；聊天消息不能伪造已收到回复。",
+        "operationId": "receive_reply_api_v1_workflow_replies_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplyEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Receive Reply Api V1 Workflow Replies Post"
                 }
               }
             }
@@ -136,16 +319,40 @@
             "minLength": 1,
             "title": "Message"
           },
-          "history": {
-            "items": {
-              "$ref": "#/components/schemas/HistoryMessage"
-            },
-            "type": "array",
-            "maxItems": 20,
-            "title": "History"
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9-]{36}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
           },
-          "context": {
-            "$ref": "#/components/schemas/PageContext"
+          "confirmation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmation Id"
+          },
+          "selected_order_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^ORD-\\d{3}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Order Id"
           }
         },
         "additionalProperties": false,
@@ -159,16 +366,73 @@
         "properties": {
           "answer": {
             "type": "string",
-            "title": "Answer",
-            "description": "Complete user-facing English answer; plain text, never HTML."
+            "title": "Answer"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/Intent"
+          },
+          "slots": {
+            "$ref": "#/components/schemas/Slots"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "needs_clarification": {
+            "type": "boolean",
+            "title": "Needs Clarification",
+            "default": false
+          },
+          "clarification_question": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clarification Question"
+          },
+          "confirmation_required": {
+            "type": "boolean",
+            "title": "Confirmation Required",
+            "default": false
+          },
+          "confirmation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmation Id"
+          },
+          "state": {
+            "$ref": "#/components/schemas/DialogState"
+          },
+          "tool_calls": {
+            "items": {
+              "$ref": "#/components/schemas/ToolCall"
+            },
+            "type": "array",
+            "title": "Tool Calls"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "type": "array",
+            "title": "Evidence"
           },
           "order_ids": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "title": "Order Ids",
-            "description": "Ordered result list, at most ten existing order IDs."
+            "title": "Order Ids"
           },
           "selected_order_id": {
             "anyOf": [
@@ -179,56 +443,196 @@
                 "type": "null"
               }
             ],
-            "title": "Selected Order Id",
-            "description": "The specific order being explained, otherwise null."
+            "title": "Selected Order Id"
           },
           "sources": {
             "items": {
-              "type": "string",
-              "enum": [
-                "orders.csv",
-                "production_log.csv",
-                "workshops.csv"
-              ]
+              "type": "string"
             },
             "type": "array",
-            "title": "Sources",
-            "description": "Source files actually used in the answer."
+            "title": "Sources"
           },
           "request_id": {
             "type": "string",
-            "title": "Request Id"
+            "title": "Request Id",
+            "default": ""
           },
           "model": {
             "type": "string",
-            "title": "Model"
+            "title": "Model",
+            "default": "gpt-4.1"
           },
           "business_date": {
             "type": "string",
-            "title": "Business Date",
-            "default": "2026-04-01"
+            "title": "Business Date"
           },
           "usage": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Usage"
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Usage"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "answer",
+          "intent",
+          "slots",
+          "confidence",
+          "state",
+          "business_date"
+        ],
+        "title": "ChatResponse"
+      },
+      "DialogState": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "active_order": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Order"
+          },
+          "active_customer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Customer"
+          },
+          "pending_clarification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PendingClarification"
               },
               {
                 "type": "null"
               }
             ]
+          },
+          "pending_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PendingAction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_intent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Intent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "slots": {
+            "$ref": "#/components/schemas/Slots"
+          },
+          "comparison_orders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Comparison Orders"
+          },
+          "last_order_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Last Order Ids"
+          },
+          "draft": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft"
+          },
+          "history": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "History"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision",
+            "default": 0
           }
         },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "DialogState"
+      },
+      "Evidence": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "record": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Record"
+          }
+        },
+        "additionalProperties": false,
         "type": "object",
         "required": [
-          "answer",
-          "order_ids",
-          "selected_order_id",
-          "sources",
-          "request_id",
-          "model"
+          "source",
+          "row",
+          "url",
+          "record"
         ],
-        "title": "ChatResponse"
+        "title": "Evidence"
       },
       "HTTPValidationError": {
         "properties": {
@@ -243,86 +647,453 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "HistoryMessage": {
+      "Intent": {
+        "type": "string",
+        "enum": [
+          "order.lookup",
+          "order.refresh",
+          "order.risk",
+          "order.compare",
+          "order.commitment",
+          "order.prioritize",
+          "operations.normality",
+          "operations.deviation",
+          "execution.chase",
+          "execution.note",
+          "execution.reminder",
+          "unknown"
+        ],
+        "title": "Intent"
+      },
+      "PendingAction": {
         "properties": {
-          "role": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
             "type": "string",
             "enum": [
-              "user",
-              "assistant"
+              "send",
+              "note",
+              "reminder"
             ],
-            "title": "Role"
+            "title": "Kind"
           },
-          "content": {
+          "order_id": {
             "type": "string",
-            "maxLength": 12000,
-            "minLength": 1,
-            "title": "Content"
+            "title": "Order Id"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "preview": {
+            "type": "string",
+            "title": "Preview"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "source_snapshot": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Source Snapshot"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "role",
-          "content"
+          "kind",
+          "order_id",
+          "payload",
+          "preview",
+          "created_at"
         ],
-        "title": "HistoryMessage"
+        "title": "PendingAction"
       },
-      "PageContext": {
+      "PendingClarification": {
         "properties": {
-          "page": {
-            "type": "string",
-            "maxLength": 60,
-            "title": "Page",
-            "default": "ai"
+          "intent": {
+            "$ref": "#/components/schemas/Intent"
           },
-          "selected_order_id": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "slots": {
+            "$ref": "#/components/schemas/Slots"
+          },
+          "candidates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Candidates"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "intent",
+          "question",
+          "slots"
+        ],
+        "title": "PendingClarification"
+      },
+      "ReplyEvent": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Event Id"
+          },
+          "order_id": {
+            "type": "string",
+            "pattern": "^ORD-\\d{3}$",
+            "title": "Order Id"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "order_id",
+          "received_at"
+        ],
+        "title": "ReplyEvent"
+      },
+      "Slots": {
+        "properties": {
+          "order_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Order Ids"
+          },
+          "customer": {
             "anyOf": [
               {
-                "type": "string",
-                "pattern": "^ORD-\\d{3}$"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Selected Order Id"
+            "title": "Customer"
           },
-          "visible_order_ids": {
+          "product": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "KNITTING",
+                  "ASSEMBLY",
+                  "WASHING",
+                  "PACKING"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "observed_output": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed Output"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "same_weekday"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "comparison_fields": {
             "items": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "due_date",
+                "last_activity_date",
+                "current_stage",
+                "status"
+              ]
             },
             "type": "array",
-            "maxItems": 120,
-            "title": "Visible Order Ids"
+            "title": "Comparison Fields"
+          },
+          "criterion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "due_date",
+                  "last_activity_date"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Criterion"
+          },
+          "window_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Window Days"
+          },
+          "delivery_point": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "factory",
+                  "customer"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Point"
+          },
+          "delivery_buffer_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 60.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Buffer Days"
+          },
+          "packing_loss_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 60.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Packing Loss Days"
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipient"
+          },
+          "tone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tone"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "condition": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "no_reply",
+                  "no_activity"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Condition"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "read",
+              "draft",
+              "revise",
+              "send",
+              "save",
+              "create",
+              "update",
+              "explain",
+              "evidence",
+              "recommend",
+              "rank",
+              "confirm_target"
+            ],
+            "title": "Action",
+            "default": "read"
+          },
+          "reference": {
+            "type": "string",
+            "enum": [
+              "explicit",
+              "active",
+              "ambiguous",
+              "none"
+            ],
+            "title": "Reference",
+            "default": "none"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "PageContext"
+        "title": "Slots"
       },
-      "Usage": {
+      "ToolCall": {
         "properties": {
-          "input_tokens": {
-            "type": "integer",
-            "title": "Input Tokens"
+          "name": {
+            "type": "string",
+            "title": "Name"
           },
-          "output_tokens": {
-            "type": "integer",
-            "title": "Output Tokens"
+          "arguments": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Arguments"
           },
-          "total_tokens": {
-            "type": "integer",
-            "title": "Total Tokens"
+          "result": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Result"
+          },
+          "idempotent": {
+            "type": "boolean",
+            "title": "Idempotent",
+            "default": true
+          },
+          "requires_confirmation": {
+            "type": "boolean",
+            "title": "Requires Confirmation",
+            "default": false
+          },
+          "executed": {
+            "type": "boolean",
+            "title": "Executed",
+            "default": true
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
-          "input_tokens",
-          "output_tokens",
-          "total_tokens"
+          "name"
         ],
-        "title": "Usage"
+        "title": "ToolCall"
       },
       "ValidationError": {
         "properties": {

@@ -24,6 +24,6 @@ OpenAPI 与 Markdown 随同一个 PR 更新；Apipost 导入后检查实际 Base
 
 源 CSV 维护于 data/。修改后在 backend 运行 scripts.build_frontend_data，提交 frontend/data.js，并核对页面和后端一致。
 
-流式 UI 修改运行 tests/e2e 的 mock 测试。scripts.smoke_stream 与 smoke_live 会调用真实 API，手动按需执行。错误报告和截图不包含 Key。
+流式 UI 修改运行 tests/e2e 的 mock 测试。scripts.smoke_stream 与 smoke_live 分别查询当前工作流 SSE 和 JSON 接口，会调用真实 API，手动按需执行。错误报告和截图不包含 Key。
 
 archive/ 只用于历史回溯，不运行其中的旧升级脚本来维护当前应用。

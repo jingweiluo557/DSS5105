@@ -1,10 +1,10 @@
-"""One real streaming request to the running local backend; no credentials printed."""
+"""场景 1.1：验证运行中服务的工作流 SSE；不打印密钥。"""
 import json
 import httpx
 
 deltas = 0
 done = False
-with httpx.stream('POST', 'http://127.0.0.1:8000/api/v1/chat/stream', json={'message': 'In one short sentence, state the business date of this dataset. Do not list orders.'}, timeout=100) as response:
+with httpx.stream('POST', 'http://127.0.0.1:8000/api/v1/workflow/chat/stream', json={'message': 'Open ORD-005.'}, timeout=100) as response:
     print({'http_status': response.status_code})
     response.raise_for_status()
     name = ''

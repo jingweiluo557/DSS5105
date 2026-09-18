@@ -1,5 +1,7 @@
 # ThreadPilot 操作手册
 
+> 范围说明：本手册主要描述原驾驶舱和浏览器内模拟交互。新聊天页面已经接入服务端意图工作流、SQLite 备注/提醒及可配置发送网关；下文“浏览器存储”“没有后台监控”“模拟发送”等描述仅适用于原本地操作流程。新聊天的启动、接口、确认和监控行为以 [项目 README](../README.md)、[API 文档](../backend/API_DOCUMENTATION.md) 和 [工作流设计](INTENT_WORKFLOW.md) 为准。
+
 **适用版本：Track 1 数据版 · FastAPI + OpenAI · uv 管理 · 流式回答**  
 **使用对象：项目演示人员、管理者及本地开发人员**
 
@@ -60,7 +62,6 @@ uv --version
 OPENAI_API_KEY=填入你自己的实际Key
 OPENAI_MODEL=gpt-4.1
 OPENAI_TIMEOUT_SECONDS=60
-OPENAI_MAX_OUTPUT_TOKENS=2500
 ```
 
 检查以下事项：
@@ -334,19 +335,16 @@ cd "D:\sem1 课程\DSS5102\output\threadpilot-v2\backend"
 uv run --locked pytest -q
 ```
 
-接口检查：启动服务后打开 `/docs`。**POST /api/v1/chat/stream** 是当前网页使用的流式接口；原 **POST /api/v1/chat** 保留完整 JSON 返回，适合在 Swagger 中调试同一请求体：
+接口检查：启动服务后打开 `/docs`。当前网页使用 **POST /api/v1/workflow/chat/stream**；**POST /chat**（或 `/api/v1/workflow/chat`）返回同一工作流的完整 JSON。首轮示例：
 
 ```json
 {
   "message": "Why is ORD-002 at risk?",
-  "history": [],
-  "context": {
-    "page": "ai",
-    "selected_order_id": "ORD-002",
-    "visible_order_ids": []
-  }
+  "selected_order_id": "ORD-002"
 }
 ```
+
+后续传入响应 `state.session_id` 延续会话；写操作须先预览，再传明确确认文本和 `confirmation_id`。不传客户端 history/context。
 
 点击 **Execute** 会发起真实模型请求，需要已配置 Key。接口不接受浏览器传入 Key、模型名或 `stream` 参数。完整字段、错误码、返回示例见 `backend/API_DOCUMENTATION.md`；机器定义见 `/openapi.json`。
 

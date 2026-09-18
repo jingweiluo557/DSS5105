@@ -15,6 +15,6 @@ def test_shared_data_and_static_paths(client):
 def test_export_matches_runtime(client):
     schema = client.get('/openapi.json').json()
     assert schema['servers'][0]['url'] == 'http://127.0.0.1:8000'
-    assert 'text/event-stream' in schema['paths']['/api/v1/chat/stream']['post']['responses']['200']['content']
+    assert 'text/event-stream' in schema['paths']['/api/v1/workflow/chat/stream']['post']['responses']['200']['content']
     exported = Path(__file__).resolve().parents[2] / 'docs' / 'openapi.json'
     assert schema == json.loads(exported.read_text(encoding='utf-8'))

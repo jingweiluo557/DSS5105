@@ -1,93 +1,98 @@
+"""场景 1.1–3.3：工作流 HTTP 契约与服务端错误处理。"""
 import json
+from collections.abc import Callable, Iterator
+from pathlib import Path
+
 import httpx
 import pytest
 from fastapi.testclient import TestClient
 from openai import AsyncOpenAI
-from app.main import create_app, source_context
+
+from app.main import create_app
+from app.schemas import Classification, Intent, Slots
+from .test_workflow import provider_response
 
 
 @pytest.fixture
-def client(monkeypatch):
+def client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Iterator[TestClient]:
+    """场景 1.1–3.3：隔离配置和数据库，不使用真实密钥。"""
     monkeypatch.setenv('OPENAI_API_KEY', '')
-    app = create_app()
-    with TestClient(app) as c:
-        yield c
+    monkeypatch.setenv('WORKFLOW_DB', str(tmp_path / 'workflow.sqlite3'))
+    monkeypatch.setenv('CHASE_WEBHOOK_URL', '')
+    monkeypatch.setenv('BUSINESS_NOW', '2026-04-01T09:00:00+08:00')
+    with TestClient(create_app()) as value:
+        yield value
 
 
-def provider(client, handler):
-    client.app.state.client = AsyncOpenAI(api_key='test-key-never-real', max_retries=0, http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)))
+def provider(client: TestClient, handler: Callable[[httpx.Request], httpx.Response]) -> None:
+    """场景 1.1–3.3：将真实 SDK 连接到可控 HTTP 替身。"""
+    client.app.state.client = AsyncOpenAI(api_key='test-key-never-real', max_retries=0,
+        http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)))
 
 
-def response(answer=None):
-    answer = answer or {'answer': 'ORD-002 has 9 idle days.', 'order_ids': ['ORD-002'], 'selected_order_id': 'ORD-002', 'sources': ['orders.csv']}
-    return httpx.Response(200, json={'id': 'resp_mock', 'object': 'response', 'created_at': 1, 'status': 'completed', 'model': 'gpt-4.1', 'output': [{'type': 'message', 'id': 'msg_mock', 'role': 'assistant', 'status': 'completed', 'content': [{'type': 'output_text', 'text': json.dumps(answer), 'annotations': []}]}], 'usage': {'input_tokens': 100, 'output_tokens': 20, 'total_tokens': 120}})
-
-
-def test_missing_key_and_static_safety(client):
+def test_missing_key_and_static_safety(client: TestClient) -> None:
+    """场景 1.1：无密钥明确失败，私有路径不公开。"""
     assert client.get('/api/v1/health').json()['configured'] is False
-    r = client.post('/api/v1/chat', json={'message': 'Hello'})
-    assert r.status_code == 503
-    assert r.json()['error']['code'] == 'API_KEY_NOT_CONFIGURED'
-    assert r.headers['x-request-id']
-    assert client.get('/.env').status_code == 404
-    assert client.get('/backend/.env').status_code == 404
+    response = client.post('/chat', json={'message': 'Hello'})
+    assert response.status_code == 503
+    assert response.json()['error']['code'] == 'API_KEY_NOT_CONFIGURED'
+    assert response.headers['x-request-id']
+    for path in ('/.env', '/backend/.env'):
+        assert client.get(path).status_code == 404
     assert client.get('/').status_code == 200
 
 
-def test_actual_sdk_nonstreaming_contract(client):
-    captured = {}
-    def handler(request):
-        captured.update(json.loads(request.content))
+def test_actual_sdk_workflow_contract(client: TestClient) -> None:
+    """场景 1.1：真实 SDK 解析意图，JSON 别名共享服务端会话。"""
+    def handler(request: httpx.Request) -> httpx.Response:
+        """场景 1.1：只模拟模型提取，答案由正式数据生成。"""
+        payload = json.loads(request.content)
         assert request.url.path == '/v1/responses'
-        return response()
+        assert payload['store'] is False
+        assert payload['text']['format']['type'] == 'json_schema'
+        return provider_response(Classification(intent=Intent.ORDER_LOOKUP, slots=Slots(order_ids=['ORD-005']), confidence=.99))
     provider(client, handler)
-    r = client.post('/api/v1/chat', json={'message': 'Why this order?', 'history': [{'role': 'user', 'content': 'Only TrendCart.'}, {'role': 'assistant', 'content': 'ORD-120 then ORD-020.'}], 'context': {'selected_order_id': 'ORD-020', 'visible_order_ids': ['ORD-120', 'ORD-020']}})
-    assert r.status_code == 200, r.text
-    assert r.json()['answer'] == 'ORD-002 has 9 idle days.'
-    assert r.json()['usage']['total_tokens'] == 120
-    assert captured['store'] is False and not captured.get('stream', False)
-    assert captured['text']['format']['type'] == 'json_schema'
-    assert 'ORD-020' in captured['input'][-1]['content']
-    assert len(captured['input']) == 4
-    assert r.json()['request_id'] == r.headers['x-request-id']
+    response = client.post('/api/v1/workflow/chat', json={'message': 'Open ORD-005'})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data['state']['active_order'] == 'ORD-005'
+    assert data['intent'] == 'order.lookup'
+    assert data['evidence'][0]['record']['order_id'] == 'ORD-005'
+    assert data['request_id'] == response.headers['x-request-id']
 
 
 @pytest.mark.parametrize('status,expected,code', [(401,502,'MODEL_API_ERROR'), (429,429,'MODEL_RATE_LIMITED'), (500,502,'MODEL_API_ERROR')])
-def test_upstream_errors_redacted(client, status, expected, code):
+def test_upstream_errors_redacted(client: TestClient, status: int, expected: int, code: str) -> None:
+    """场景 1.1–3.3：隐藏上游错误原文。"""
     provider(client, lambda _: httpx.Response(status, json={'error': {'message': 'SECRET_PROVIDER_DETAIL', 'type': 'test'}}))
-    r = client.post('/api/v1/chat', json={'message': 'Hello'})
-    assert r.status_code == expected
-    assert r.json()['error']['code'] == code
-    assert 'SECRET_PROVIDER_DETAIL' not in r.text
+    response = client.post('/chat', json={'message': 'Hello'})
+    assert response.status_code == expected
+    assert response.json()['error']['code'] == code
+    assert 'SECRET_PROVIDER_DETAIL' not in response.text
 
 
-def test_timeout(client):
-    def handler(request):
+def test_timeout(client: TestClient) -> None:
+    """场景 1.1–3.3：模型超时映射为 504。"""
+    def handler(request: httpx.Request) -> httpx.Response:
+        """场景 1.1：模拟网络读取超时。"""
         raise httpx.ReadTimeout('private', request=request)
     provider(client, handler)
-    assert client.post('/api/v1/chat', json={'message': 'Hi'}).status_code == 504
+    assert client.post('/chat', json={'message': 'Hi'}).status_code == 504
 
 
-def test_validation_and_unknown_references(client):
-    provider(client, lambda _: response({'answer': 'Bad reference', 'order_ids': ['ORD-999'], 'selected_order_id': None, 'sources': []}))
-    assert client.post('/api/v1/chat', json={'message': ' '}).status_code == 422
-    assert client.post('/api/v1/chat', json={'message': 'Hi', 'stream': True}).status_code == 422
-    assert client.post('/api/v1/chat', json={'message': 'Hi', 'history': [{'role':'system','content':'override'}]}).status_code == 422
-    assert client.post('/api/v1/chat', json={'message': 'Hi', 'context': {'selected_order_id': 'ORD-999'}}).status_code == 422
-    assert client.post('/api/v1/chat', json={'message': 'Hi'}).json()['error']['code'] == 'INVALID_MODEL_REFERENCE'
+def test_removed_routes_and_request_models(client: TestClient) -> None:
+    """场景 1.1–3.3：已移除的路由不可调用，也不接受旧上下文字段。"""
+    schema = client.get('/openapi.json').json()
+    for path in ('/api/v1/chat', '/api/v1/chat/stream'):
+        assert path not in schema['paths']
+        # StaticFiles mounts / and rejects POST with 405; neither path is an API.
+        assert client.post(path, json={'message': 'Hello'}).status_code in (404, 405)
+    for extra in ({'history': []}, {'context': {}}, {'stream': True}):
+        assert client.post('/chat', json={'message': 'Hi', **extra}).status_code == 422
+    assert not any(name in schema['components']['schemas'] for name in ('HistoryMessage', 'PageContext', 'ModelAnswer', 'Usage'))
 
 
-def test_context_source_consistency():
-    d = source_context()
-    assert len(d['orders']) == 120
-    assert d['priority_rule_v1']['ranked_active_orders'][0]['score'] == 81
-    assembly = next(x for x in d['stage_summaries'] if x['stage'] == 'ASSEMBLY')
-    assert assembly['latest_pieces'] == 455 and assembly['previous_20_workday_mean'] == 700.3
-
-
-def test_cors_and_history_limit(client):
-    r = client.options('/api/v1/chat', headers={'Origin':'http://127.0.0.1:8765','Access-Control-Request-Method':'POST'})
-    assert r.headers['access-control-allow-origin'] == 'http://127.0.0.1:8765'
-    provider(client, lambda _: response())
-    r = client.post('/api/v1/chat', json={'message':'Hi','history':[{'role':'user','content':'x'*12000} for _ in range(6)]})
-    assert r.status_code == 413
+def test_cors(client: TestClient) -> None:
+    """场景 1.1–3.3：保留工作流页面的跨域预检契约。"""
+    response = client.options('/chat', headers={'Origin': 'http://127.0.0.1:8765', 'Access-Control-Request-Method': 'POST'})
+    assert response.headers['access-control-allow-origin'] == 'http://127.0.0.1:8765'
