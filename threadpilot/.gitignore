@@ -13,3 +13,12 @@ playwright-report/
 *.log
 .DS_Store
 Thumbs.db
+
+data/raw/*
+!data/raw/.gitkeep
+data/staging/*
+!data/staging/.gitkeep
+data/snapshots/*
+!data/snapshots/.gitkeep
+backend/runtime/*
+!backend/runtime/.gitkeep

@@ -1,9 +1,14 @@
-# Data Dictionary — Track 1 (The General Manager's Co-Pilot)
+# Seed Dataset Dictionary
 
-Three small, clean CSV files. There are no missing values, no joins to figure out, and no
-traps — every number can be taken at face value. The data is deliberately not the challenge.
+The three CSV files provide reproducible seed data for import and regression tests. Online
+queries read committed MySQL records. Row counts below describe the seed files, not runtime
+constraints. Nullable fields include completion details and workshop batch limits.
 
-"Today" in the dataset is **2026-04-01**; the files cover the 90 days before it. The factory
+Database types, validation rules and column aliases are specified in [schema.yaml](dictionary/schema.yaml)
+and [field_mapping.yaml](dictionary/field_mapping.yaml).
+
+The dataset reference date is **2026-04-01**; production history covers the preceding 90 days.
+The application uses its configured business clock; this reference date does not freeze runtime dates. The factory
 is closed on Sundays. Garments move through four stages:
 **KNITTING → ASSEMBLY → WASHING → PACKING**.
 
@@ -41,9 +46,8 @@ and is that normal?"*
 
 ## `workshops.csv`
 
-The eight outside workshops the factory can rent capacity from when it is full. For
-Track 1 this is the table behind feasibility questions — *"can we take 800 hoodies by the
-25th?"* needs to know what capacity exists beyond the factory's own.
+Workshop profiles support capacity feasibility estimates. Availability, queue duration,
+quality constraints and category compatibility must be considered before recommending outsourcing.
 
 | Column | Meaning |
 |---|---|

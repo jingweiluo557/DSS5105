@@ -55,10 +55,10 @@ class WorkflowEngine:
         """场景 1.1–3.3：统一返回结构和逐行证据，不让模型覆盖已计算结论。"""
         evidence = list({(e.source, e.row): e for e in evidence}.values())
         if evidence:
-            answer += '\n\nSource evidence: ' + '; '.join(f'[{e.source} row {e.row}]({e.url})' for e in evidence[:12])
+            answer += '\n\nSource evidence: ' + '; '.join(f'[{e.source} {"record" if e.record_id is not None else "row"} {e.row}]({e.url})' + (f' (imported from {e.original_source})' if e.original_source else '') for e in evidence[:12])
             if len(evidence) > 12:
                 answer += f'. All {len(evidence)} source rows are included in the evidence field.'
-        answer += f'\nAs of {now.isoformat()}; refreshed local CSV snapshot, not a live factory feed.'
+        answer += f'\nAs of {now.isoformat()}; {getattr(self.tools, "freshness", "refreshed CSV test fixture")}.'
         return ChatResponse(answer=answer, intent=result.intent, slots=state.slots,
                             confidence=result.confidence, needs_clarification=bool(question), clarification_question=question,
                             confirmation_required=state.pending_action is not None,

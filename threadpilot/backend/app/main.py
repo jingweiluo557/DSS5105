@@ -15,6 +15,11 @@ from fastapi.staticfiles import StaticFiles
 from openai import AsyncOpenAI
 
 from .workflow_api import initialize_workflow, install_workflow_routes, monitor_loop
+from .config import Settings
+from .db.session import Database
+from .services.sync_service import SyncService
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from pydantic import ValidationError
 
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT.parent / 'frontend'
@@ -28,7 +33,12 @@ def create_app() -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         """场景 1.1–3.3：共用模型客户端并管理已确认提醒的检查任务。"""
         key = os.getenv('OPENAI_API_KEY', '').strip()
-        app.state.client = AsyncOpenAI(api_key=key, timeout=float(os.getenv('OPENAI_TIMEOUT_SECONDS', '60')), max_retries=0) if key else None
+        app.state.settings = Settings()
+        app.state.database = Database(app.state.settings)
+        app.state.sql_agent = None
+        app.state.sync = SyncService(app.state.database, app.state.settings)
+        app.state.sync.start()
+        app.state.client = AsyncOpenAI(api_key=key, base_url=app.state.settings.openai_base_url, timeout=app.state.settings.openai_timeout_seconds, max_retries=0) if key else None
         initialize_workflow(app, DATA, ROOT)
         monitor = asyncio.create_task(monitor_loop(app))
         try:
@@ -39,10 +49,14 @@ def create_app() -> FastAPI:
                 await monitor
             if app.state.client:
                 await app.state.client.close()
+            app.state.sync.close()
+            if app.state.sql_agent:
+                app.state.sql_agent.close()
+            app.state.database.close()
 
     app = FastAPI(
-        title='ThreadPilot AI API', version='1.1.0',
-        description='Intent-driven, CSV-grounded workflow with persistent sessions and confirmed actions.',
+        title='ThreadPilot AI API', version='2.0.0',
+        description='MySQL-grounded intent workflow, incremental synchronization and read-only SQL Agent.',
         lifespan=lifespan,
         servers=[{'url': 'http://127.0.0.1:8000', 'description': 'Local development; replace with your team server when deployed'}],
     )
@@ -50,7 +64,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=['http://127.0.0.1:8765', 'http://localhost:8765', 'http://127.0.0.1:8000', 'http://localhost:8000'],
-        allow_methods=['GET', 'POST'], allow_headers=['Content-Type'],
+        allow_methods=['GET', 'POST', 'PUT', 'DELETE'], allow_headers=['Content-Type', 'Authorization', 'X-Confirm-Write'],
     )
 
     @app.middleware('http')
@@ -64,7 +78,21 @@ def create_app() -> FastAPI:
     @app.exception_handler(HTTPException)
     async def app_error(request: Request, error: HTTPException) -> JSONResponse:
         """场景 1.1–3.3：返回已定义的业务错误及请求标识。"""
-        return JSONResponse(status_code=error.status_code, content={'error': {**error.detail, 'request_id': request.state.request_id}})
+        detail = error.detail if isinstance(error.detail, dict) else {'code': 'HTTP_ERROR', 'message': str(error.detail)}
+        return JSONResponse(status_code=error.status_code, content={'error': {**detail, 'request_id': request.state.request_id}})
+
+    @app.exception_handler(SQLAlchemyError)
+    async def database_error(request: Request, error: SQLAlchemyError) -> JSONResponse:
+        """场景 1.2：数据库错误不泄露连接字符串或 SQL 参数。"""
+        conflict = isinstance(error, IntegrityError)
+        return JSONResponse(status_code=409 if conflict else 503, content={'error': {'code': 'DATA_CONFLICT' if conflict else 'DATABASE_UNAVAILABLE', 'message': 'Duplicate/inconsistent record.' if conflict else 'Check database connectivity and run migrations.'}})
+
+    @app.exception_handler(ValueError)
+    async def invalid_data(request: Request, error: ValueError) -> JSONResponse:
+        """场景 1.2：返回导入校验错误，避免输出上传的原始值。"""
+        from .services.importer import ImportConflict
+        message = 'Invalid data fields/types; check the data dictionary.' if isinstance(error, ValidationError) else str(error)[:300]
+        return JSONResponse(status_code=409 if isinstance(error, ImportConflict) else 422, content={'error': {'code': 'IMPORT_CONFLICT' if isinstance(error, ImportConflict) else 'INVALID_DATA', 'message': message}})
 
     @app.get('/api/v1/health', tags=['Health'])
     async def health() -> dict[str, Any]:
@@ -72,7 +100,9 @@ def create_app() -> FastAPI:
         return {'status': 'ok', 'configured': app.state.client is not None, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1'), 'streaming': True}
 
     install_workflow_routes(app, DATA)
-    app.mount('/data', StaticFiles(directory=DATA), name='data')
+    from .api import data_api, sync_api, snapshot_api, ai_api
+    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router):
+        app.include_router(router)
     app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')
     return app
 

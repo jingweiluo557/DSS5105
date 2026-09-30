@@ -5,10 +5,10 @@ from .test_api import client
 
 
 def test_shared_data_and_static_paths(client):
-    for url in ('/', '/ai-stream.js', '/assets/factory-hero.png', '/data/orders.csv'):
+    for url in ('/', '/ai-stream.js', '/assets/factory-hero.png', '/api/snapshot'):
         assert client.get(url).status_code == 200, url
-    assert 'order_id' in client.get('/data/orders.csv').text
-    for url in ('/.env', '/backend/.env', '/app/main.py'):
+    assert len(client.get('/api/snapshot').json()['orders']) == 120
+    for url in ('/.env', '/backend/.env', '/app/main.py', '/data/orders.csv', '/data/raw/source.xlsx', '/data/dialogs.xlsx'):
         assert client.get(url).status_code == 404, url
 
 

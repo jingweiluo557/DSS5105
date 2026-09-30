@@ -64,6 +64,10 @@ class Evidence(StrictModel):
     row: int
     url: str
     record: dict[str, str]
+    record_id: int | None = None
+    version: int | None = None
+    updated_at: str | None = None
+    original_source: str | None = None
 
 
 class ToolCall(StrictModel):

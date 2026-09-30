@@ -1,9 +1,11 @@
-# AI 后端文档入口
+# 后端文档入口
 
-- [项目 README](README.md)：功能、启动、配置和运行边界。
-- [后端 README](backend/README.md)：环境变量、持久化和维护命令。
-- [API 文档](backend/API_DOCUMENTATION.md)：工作流、会话、确认、证据与提醒。
-- [SSE 说明](backend/STREAMING_API.md)：工作流事件顺序、错误与取消语义。
-- [工作流设计](docs/INTENT_WORKFLOW.md)：11 个子场景的意图、槽位、状态、工具和测试。
+- [启动、配置、导入与测试](README.md)
+- [MySQL 数据链路与 SQL Agent 安全设计](docs/data_pipeline.md)
+- [完整 API 契约](backend/API_DOCUMENTATION.md)
+- [真实模型验证](docs/live_model_verification.md)
+- [API 调用示例](docs/request_examples.md)
+- [意图体系、槽位与确认工作流](docs/INTENT_WORKFLOW.md)
+- [OpenAPI](docs/openapi.json)
 
-当前聊天页面使用 `/api/v1/workflow/chat/stream`；JSON 入口为 `/chat`。JSON 别名为 `/api/v1/workflow/chat`，所有聊天入口使用同一工作流。
+`/chat` 提供基于最新数据库记录的意图工作流；`/api/ai/ask` 提供独立会话的只读 SQL Agent。

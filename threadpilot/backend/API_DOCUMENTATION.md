@@ -1,10 +1,10 @@
 # ThreadPilot API 文档
 
-本文以当前 `backend/app/` 实现和 [OpenAPI 定义](../docs/openapi.json) 为准。应用元数据版本为 `1.1.0`；所有聊天入口统一使用意图工作流的请求体、会话和确认规则。当前网页使用 `POST /api/v1/workflow/chat/stream`。
+本文描述 `backend/app/` 提供的接口，契约见 [OpenAPI 定义](../docs/openapi.json) 为准。应用元数据版本为 `2.0.0`；`/chat` 系列使用意图工作流；`/api/ai/ask` 使用独立的只读 SQL Agent 会话。Web 客户端使用 `POST /api/v1/workflow/chat/stream`。
 
 ## 1. 启动与接口总览
 
-在 `backend` 目录配置 `.env` 后执行：
+先按 [项目 README](../README.md) 配置 MySQL、执行 Alembic 迁移并导入数据，再在 `backend` 目录执行：
 
 ```powershell
 uv sync --locked
@@ -18,16 +18,16 @@ Base URL：`http://127.0.0.1:8000`。配置详情见 [后端 README](README.md)�
 | 方法 | 路径 | 功能 / 成功类型 |
 |---|---|---|
 | GET | `/api/v1/health` | 配置状态；JSON |
-| POST | `/chat` | 新工作流 JSON，等价于下一行 |
-| POST | `/api/v1/workflow/chat` | 新工作流 JSON |
+| POST | `/chat` | 意图工作流 JSON，等价于下一行 |
+| POST | `/api/v1/workflow/chat` | 意图工作流 JSON |
 | POST | `/api/v1/workflow/chat/stream` | 验证完成后的工作流 SSE |
-| GET | `/api/v1/evidence/{source}/{row}` | 单条原始 CSV 证据；JSON |
+| GET | `/api/v1/evidence/{source}/{row}` | 按结果序号读取数据库证据；推荐使用稳定 ID 入口 |
 | GET | `/api/v1/workflow/notifications/{session_id}` | 已生成的站内通知数组；JSON |
 | POST | `/api/v1/workflow/replies` | 受认证的回复事件接入；JSON |
 
-POST 请求使用 `Content-Type: application/json`；SSE 可增加 `Accept: text/event-stream`。浏览器不传 OpenAI Key、model、intent、slots、state 或 stream 参数。应用没有登录系统；工作流会话 ID 应作为本地访问凭证保管。仅回复事件入口单独要求集成 Bearer token。
+数据管理与 SQL 问答接口见第 11 节。除表格上传使用 `multipart/form-data` 外，POST/PUT 请求使用 `Content-Type: application/json`；SSE 可增加 `Accept: text/event-stream`。浏览器不传 OpenAI Key、model、intent、slots、state 或 stream 参数。应用没有登录系统；工作流会话 ID 应作为本地访问凭证保管。数据管理写操作和同步日志使用 DATA_API_TOKEN；回复事件使用独立的 REPLY_INGEST_TOKEN。
 
-CORS 允许 localhost / 127.0.0.1 的 8000、8765 端口，允许 GET/POST 和 Content-Type；回复事件应由服务端集成调用，当前不开放浏览器跨域 Authorization 头。
+CORS 允许 localhost / 127.0.0.1 的 8000、8765 端口，允许 GET/POST/PUT/DELETE，以及 Content-Type、Authorization、X-Confirm-Write 请求头。
 
 ## 2. 健康检查
 
@@ -43,7 +43,7 @@ HTTP 200 示例：
 
 不调用模型。`configured` 仅表示已创建客户端，不验证凭证、余额、模型权限、数据完整性、发送网关或提醒是否可触发。
 
-## 3. 新工作流：请求与会话
+## 3. 意图工作流：请求与会话
 
 `POST /chat`、`POST /api/v1/workflow/chat`、`POST /api/v1/workflow/chat/stream` 共用请求体。
 
@@ -55,7 +55,7 @@ HTTP 200 示例：
 }
 ```
 
-续轮示例；必须替换成**本机服务器上一轮返回的** ID：
+续轮示例；必须替换成**目标服务器上一轮返回的** ID：
 
 ```json
 {
@@ -96,11 +96,11 @@ JSON 接口 HTTP 200 的 body 与新 SSE 的 `done.data` 使用同一个 `ChatRe
 | evidence | Evidence[] | 参与回答/计算的原始记录及对应链接 |
 | order_ids | string[] | 当前结果列表，最多 10 个；可为空，不能假定第一条就是用户选择 |
 | selected_order_id | string / null | 当前 active_order；双订单比较时可能为 null |
-| sources | string[] | 从 evidence 派生的实际来源文件名 |
+| sources | string[] | 从 evidence 派生的数据库表名；original_source 记录文件来源或 api |
 | request_id | string | 请求标识，对应 X-Request-ID |
 | model | string | 当前配置的模型名，不保证为上游版本快照名 |
 | business_date | string | 工作流时钟对应 YYYY-MM-DD；由 BUSINESS_NOW 决定 |
-| usage | object / null | 当前新工作流未汇总 token 用量，返回 null |
+| usage | object / null | 当前意图工作流未汇总 token 用量，返回 null |
 
 ### 意图枚举与槽位
 
@@ -143,9 +143,13 @@ JSON 接口 HTTP 200 的 body 与新 SSE 的 `done.data` 使用同一个 `ChatRe
 
 ```json
 {
-  "source": "orders.csv",
-  "row": 105,
-  "url": "/api/v1/evidence/orders.csv/105",
+  "source": "orders",
+  "row": 104,
+  "record_id": 104,
+  "version": 1,
+  "updated_at": "2026-09-18T12:00:00Z",
+  "original_source": "orders.csv",
+  "url": "/api/evidence/orders/104",
   "record": {
     "order_id": "ORD-005",
     "customer": "TrendCart",
@@ -163,7 +167,7 @@ JSON 接口 HTTP 200 的 body 与新 SSE 的 `done.data` 使用同一个 `ChatRe
 }
 ```
 
-这是当前数据包示例。CSV 字段保留字符串原值。行号从表头后的第 2 行开始计记录序号；以后若改动 CSV，使用实际响应的 URL，不要写死行号。
+这是响应结构示例，ID、时间与版本必须以实际响应为准。record 为数据库业务字段的字符串表示；row 在数据库适配器中等于稳定 record_id，不是 Excel 行号。原文件行号可在证据端点的 source_row 中查看。回答保存当时的字段和版本，链接读取当前记录。
 
 ## 5. 确认与业务操作结果
 
@@ -188,7 +192,7 @@ JSON 接口 HTTP 200 的 body 与新 SSE 的 `done.data` 使用同一个 `ChatRe
 [确认 JSON 模板](../docs/examples/workflow-confirm-request.json) 不能直接使用占位 ID 执行。服务端也接受不带确认 ID、但明确确认当前唯一预览的文本；客户端应始终携带 ID，防止旧界面确认新内容。
 
 - 新的非确认提问或修订撤销旧预览；每次新预览生成不同 ID。
-- 预览有效期为业务时钟的 15 分钟。默认冻结时钟下时间不会自然推进。
+- 预览有效期为业务时钟的 15 分钟。显式配置回放时钟时，业务时间不会自然推进。
 - 确认前再次读取订单；订单记录改变、提醒时间已过或预览过期时，要求重新预览。
 - 目标确认“yes, ORD-005”不等于保存备注。内部备注不会自动发送给外部联系人。
 - 已成功操作再次使用同一确认 ID，返回已有记录，不重复操作。普通聊天请求没有请求级幂等键；不要对所有 POST 无条件自动重试。
@@ -218,7 +222,7 @@ JSON 接口 HTTP 200 的 body 与新 SSE 的 `done.data` 使用同一个 `ChatRe
 
 Header：`Authorization: Bearer <CHASE_WEBHOOK_TOKEN>`、`Idempotency-Key: <action UUID>`。网关必须支持同键去重，并负责将收件人名称映射成实际地址。只有成功 HTTP 响应且正文为 `{"status":"sent","receipt":"provider-message-id"}` 才视为发送成功；没有配置时不会用模拟回执代替真实发送。
 
-## 6. 新工作流 SSE
+## 6. 意图工作流 SSE
 
 `POST /api/v1/workflow/chat/stream` 会先完成意图识别、规则检查及本轮必要操作，再返回 HTTP 200 SSE。它使用流式传输协议，但**当前不是边调用模型边显示 token**。在规则完成前可能没有任何流数据。
 
@@ -232,9 +236,9 @@ Header：`Authorization: Bearer <CHASE_WEBHOOK_TOKEN>`、`Idempotency-Key: <acti
 
 正常顺序：**start → delta → done**。以 `done` 判断响应是否接收完整；以响应业务字段判断是否需要澄清、确认或是否已经发送。
 
-新接口的已处理模型/数据错误在进入 SSE 前返回非 200 JSON，当前不会生成 `error` 事件。传输中断仍可能导致没有 done。客户端用 POST fetch + ReadableStream + TextDecoder，按空行分隔事件；网络 chunk 不等于一个 SSE 事件。实现见 [ai-stream.js](../frontend/ai-stream.js)。
+接口的已处理模型/数据错误在进入 SSE 前返回非 200 JSON，当前不会生成 `error` 事件。传输中断仍可能导致没有 done。客户端用 POST fetch + ReadableStream + TextDecoder，按空行分隔事件；网络 chunk 不等于一个 SSE 事件。实现见 [ai-stream.js](../frontend/ai-stream.js)。
 
-浏览器 90 秒没有数据会中止读取；此时服务器操作可能已经完成。**AbortController 只取消客户端读取，不保证撤销已确认的写操作。** 对确认操作重试时保留同一会话和 confirmation_id；没有拿到 done 不等于没有发送。新接口没有心跳、Last-Event-ID 或断点续传。
+浏览器 90 秒没有数据会中止读取；此时服务器操作可能已经完成。**AbortController 只取消客户端读取，不保证撤销已确认的写操作。** 对确认操作重试时保留同一会话和 confirmation_id；没有拿到 done 不等于没有发送。接口没有心跳、Last-Event-ID 或断点续传。
 
 ## 7. 证据、通知与回复事件
 
@@ -244,7 +248,7 @@ Header：`Authorization: Bearer <CHASE_WEBHOOK_TOKEN>`、`Idempotency-Key: <acti
 
 - source 白名单：`orders.csv`、`production_log.csv`、`workshops.csv`。
 - row 为整数，首条记录是 2；越界、不支持的来源或无法读取的来源返回 404 UNKNOWN_SOURCE_ROW。
-- 链接返回当前文件记录；回答的 evidence.record 保存当次计算看到的值，不提供不可变历史版本。
+- 此入口按当前数据库结果顺序定位，不读取 CSV；删除或插入可能改变位置。客户端应使用 `/api/evidence/{dataset}/{record_id}` 的稳定 ID 链接。回答的 evidence.record 保留当次计算值，链接不提供不可变历史版本。
 - 不需要 OpenAI Key，不调用模型。
 
 ### 条件提醒通知
@@ -255,7 +259,7 @@ Header：`Authorization: Bearer <CHASE_WEBHOOK_TOKEN>`、`Idempotency-Key: <acti
 
 后端按约 30 秒间隔检查已确认提醒（繁忙时可延后）。`no_reply` 检查创建以来到截止时间之间的记录回复；`no_activity` 使用日期粒度的 last_activity_date，不能证明同日精确到小时的更新。条件满足则静默，未满足时生成一次站内通知。同一提醒截止时间重复评估不会重复生成通知。
 
-默认 BUSINESS_NOW 冻结，不会自动走到明天；实际监控需 `BUSINESS_NOW=live`，并保持服务和数据接入运行。更改时钟不等于已接工厂实时数据。服务停止期间不检查，重启后补检到期提醒。
+默认 `BUSINESS_NOW=live`；只有显式指定回放时间时业务时钟才冻结。实际监控需保持服务和数据接入运行。更改时钟不等于已接工厂实时数据。服务停止期间不检查，重启后补检到期提醒。
 
 ### 回复事件接入
 
@@ -306,28 +310,28 @@ FastAPI 字段校验错误使用 `{"detail":[...]}`，客户端需兼容两种�
 |---|---|---|
 | 503 | API_KEY_NOT_CONFIGURED | 聊天未配置模型客户端 |
 | 503 | DATA_UNAVAILABLE | 聊天来源读取失败 |
-| 404 | UNKNOWN_SESSION | 新工作流/通知使用不存在的会话 |
+| 404 | UNKNOWN_SESSION | 意图工作流/通知使用不存在的会话 |
 | 404 | UNKNOWN_SOURCE_ROW | 证据来源或行不可用 |
-| 422 | EMPTY_MESSAGE | 新工作流全空白消息 |
-| 422 | INVALID_WORKFLOW_INPUT | 新工作流未知记录、非法日期或无效结构化输出 |
+| 422 | EMPTY_MESSAGE | 意图工作流全空白消息 |
+| 422 | INVALID_WORKFLOW_INPUT | 意图工作流未知记录、非法日期或无效结构化输出 |
 | 429 | MODEL_RATE_LIMITED | 聊天上游限流或额度问题 |
 | 504 | MODEL_TIMEOUT | 聊天模型超时 |
-| 502 | MODEL_API_ERROR | 新工作流连接或上游请求错误 |
+| 502 | MODEL_API_ERROR | 意图工作流连接或上游请求错误 |
 | 401 | UNAUTHORIZED | 回复接入认证未通过 |
 | 422 | INVALID_REPLY | 回复订单不存在或时间在业务时钟之后 |
 | 422 | detail 数组 | 请求字段类型、长度、格式或额外字段不符合对应模型 |
 
-新工作流的业务澄清、无效/过期确认、未配置外发、送达未知通常为 **HTTP 200 的 ChatResponse**，按 needs_clarification、confirmation_required、tool_calls.result 判断，不按 HTTP 状态推断成功。
+意图工作流的业务澄清、无效/过期确认、未配置外发、送达未知通常为 **HTTP 200 的 ChatResponse**，按 needs_clarification、confirmation_required、tool_calls.result 判断，不按 HTTP 状态推断成功。
 
 ## 9. curl / PowerShell / Apipost
 
 在项目根目录执行，先启动后端。聊天调用真实模型并消耗额度：
 
 ```powershell
-# 新工作流 JSON
+# 意图工作流 JSON
 curl.exe -X POST "http://127.0.0.1:8000/chat" -H "Content-Type: application/json" --data-binary "@docs/examples/workflow-chat-request.json"
 
-# 新工作流 SSE：验证完成后返回事件
+# 意图工作流 SSE：验证完成后返回事件
 curl.exe -N -X POST "http://127.0.0.1:8000/api/v1/workflow/chat/stream" -H "Content-Type: application/json" -H "Accept: text/event-stream" --data-binary "@docs/examples/workflow-chat-request.json"
 
 ```
@@ -345,24 +349,71 @@ $second.answer
 
 Apipost 导入 [OpenAPI 文件](../docs/openapi.json) 或在线 /openapi.json，核对 Base URL 和具体请求体。SSE 路由在 OpenAPI 中声明 text/event-stream；事件顺序以本文为准，done 的完整负载对应 JSON 路由的 ChatResponse 模型。
 
-404 时检查主机、端口、方法和路径；`#/ai` 是网页路由，不是 API 地址。响应为 HTML 通常表示命中了静态资源路径或其他服务。接口工具缓冲整个响应时，用网页或 curl -N 检查事件；新接口本来就会等待业务验证完成。
+404 时检查主机、端口、方法和路径；`#/ai` 是网页路由，不是 API 地址。响应为 HTML 通常表示命中了静态资源路径或其他服务。接口工具缓冲整个响应时，用网页或 curl -N 检查事件；接口在业务验证完成后返回事件。
 
 ## 10. 数据、部署与维护
 
-正式数据是课程快照，刷新本地 CSV 不代表接入实时系统。生产日志为工厂级，不能推导单个订单的进度百分比或活动详情。新优先级采用公开字段顺序；产能是带假设的情景估算。算法、完整工具清单及场景差异见 [Intent Workflow](../docs/INTENT_WORKFLOW.md)。
+初始三表由仓库种子数据导入；在线业务工具读取 MySQL。API 提交后下一次查询可见，文件变动需经过上传或定时同步，最新数据库值仍取决于上游更新。生产日志为工厂级，不能推导单个订单的进度百分比或活动详情。异常优先级采用公开字段顺序；产能是带假设的情景估算。算法、完整工具清单及场景差异见 [Intent Workflow](../docs/INTENT_WORKFLOW.md)。
 
 工作流会话、备注、操作审计、提醒、回复和通知保存在私有 SQLite；不向客户端暴露数据库文件。尚无会话用户归属鉴权、删除会话 API、多 worker 锁或外部通知推送。发送网关负责实际地址解析与幂等送达。原驾驶舱浏览器内的模拟动作不自动同步为这些服务端操作。
 
-FastAPI 托管前端 / 与 /data 来源目录，不托管 backend 或 docs；仓库里的文档/示例链接不代表同名在线 API。
+FastAPI 托管前端 /，不公开 /data、backend、runtime 或 docs；仓库里的文档/示例链接不代表同名在线 API。
 
 在 backend 执行：
 
 ```powershell
 uv run --locked pytest -q
 uv run --locked python -m scripts.export_openapi
-# 可选：真实模型的完整场景评测，发送用测试替身
-uv run --locked python -m scripts.evaluate_workflow
+# 可选：先配置 LIVE_DATABASE_URL/LIVE_AI_DATABASE_URL 指向专用 threadpilot_test；会产生真实模型用量
+uv run --locked python -m scripts.verify_live_llm
 ```
 
 接口改动同步更新实现、回归、本文、docs/openapi.json 及调用方。离线 pytest 不消耗模型额度；真实评测会消耗额度。浏览器测试见 [tests/e2e](../tests/e2e/README.md)。
 
+
+
+## 11. MySQL、同步和 SQL Agent 接口
+
+| 方法 | 路径 | 认证/语义 |
+|---|---|---|
+| GET | `/api/data` | dataset 默认 orders；offset≥0，limit 默认100、最大1000 |
+| GET | `/api/data/{record_id}` | dataset 参数选择表，返回当前版本 |
+| POST | `/api/data` | 管理 Bearer + X-Confirm-Write: true；成功201 |
+| PUT | `/api/data/{record_id}` | 同上，完整业务字段 + expected_version |
+| DELETE | `/api/data/{record_id}` | 同上，dataset + expected_version；成功204 |
+| GET | `/api/evidence/{dataset}/{record_id}` | 当前记录、来源、版本和时间 |
+| POST | `/api/sync/import` | 管理 Bearer + 确认头；multipart file，可选 dataset |
+| GET | `/api/sync/logs` | 仅管理 Bearer，最近100条审计，无需确认头 |
+| GET | `/api/snapshot` | 当前三表快照，Cache-Control: no-store |
+| POST | `/api/ai/ask` | 只读 SQL 问答，独立 session_id |
+
+`dataset` 仅允许 `orders`、`production_log`、`workshops`。创建/更新 body 为 `{"dataset":"orders","data":{...},"expected_version":1}`，POST 可省略版本。字段定义见 [schema.yaml](../data/dictionary/schema.yaml)。业务唯一键不可通过 PUT 改写；DELETE 留下墓碑，旧文件不会重新插入，显式 POST 可以重建。
+
+`RecordRead` 返回 id、dataset、data、version、source、source_row、created_at、updated_at。证据端点还返回同内容的 record，供工作流客户端使用。数据库时间列按 UTC 保存。
+
+表格多 sheet 名称必须对应三张业务表；单 sheet 可用 dataset 指定。一个文件整体事务提交，重复业务键且内容相同则去重，冲突重复行或非法字段拒绝。输入未变时保留 API 修改；文件与 API 同时改动同一行返回409，不全量覆盖。上传不会覆盖服务器原文件。
+
+SQL 问答请求：
+
+```json
+{"message":"Show order_id and pieces for ORD-005.","session_id":null}
+```
+
+message 为1–3000字符，续轮携带此接口返回的 UUID。响应包含 `session_id`、`answer`、`business_time` 和 `queries[]`；每条查询包含 `sql`、`columns`、`rows`、`possibly_truncated`、`queried_at`。SQL 是实际执行的限行版本；无当前查询证据时返回无法验证/澄清提示。响应为普通 JSON，不提供此入口的 SSE。
+
+SQL Agent 使用独立 SELECT-only MySQL 账号，并检查 SQL AST、表/函数白名单、LIMIT 和执行超时。它不能发送、保存备注或创建提醒；这些操作继续走 `/chat`。SQL 会话与工作流会话不可互换。
+
+| 状态 | 接口错误 | 处理 |
+|---|---|---|
+| 401 | UNAUTHORIZED | 配置并携带 DATA_API_TOKEN |
+| 409 | CONFIRMATION_REQUIRED | 核对写入后添加 X-Confirm-Write: true |
+| 409 | VERSION_CONFLICT / DATA_CONFLICT / IMPORT_CONFLICT | 刷新版本，或人工协调文件与数据库 |
+| 413 | FILE_TOO_LARGE | 缩小上传文件或调整 MAX_UPLOAD_BYTES |
+| 422 | INVALID_DATA / IMMUTABLE_KEY / 参数校验错误 | 按数据字典更正请求 |
+| 503 | DATABASE_UNAVAILABLE | 检查连接与迁移 |
+| 503 | SQL_AGENT_UNAVAILABLE | 检查模型和独立只读连接/权限 |
+| 502 | SQL_AGENT_FAILED | 上游模型或查询处理失败；包括此入口内部的限流错误 |
+
+工作流接口的模型限流返回429 MODEL_RATE_LIMITED；SQL Agent 当前统一映射为502，不应把两者错误码混同。参数校验错误使用 FastAPI 的 detail 格式；业务错误通常使用 error.code/message。客户端应同时处理这两种结构。
+
+可复制的 PowerShell 请求见 [调用示例](../docs/request_examples.md)。真实模型测试结果、失败分类及验证范围见 [验证报告](../docs/live_model_verification.md)。

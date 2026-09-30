@@ -2,13 +2,13 @@
 
 ## 环境
 
-按 [README](README.md) 使用 uv sync --locked；从 backend/.env.example 创建本地 .env。提交 pyproject.toml、uv.lock，不提交 .env、.venv。已添加根目录 .gitignore，但它不会自动取消已被 Git 跟踪的文件。
+按 [README](README.md) 使用 uv sync --locked；从 backend/.env.example 创建本地 .env。提交 pyproject.toml、uv.lock，不提交 .env、.venv。忽略规则由根目录 .gitignore 定义；已跟踪文件须单独检查，忽略规则不会取消其跟踪。
 
 ## 分支与 PR
 
 从主分支创建 feat/功能、fix/问题 或 docs/主题分支。完成后提交 PR，请队友检查再合并。PR 说明问题、修改后的行为、受影响接口与页面、验证结果，以及是否要同步依赖或更新配置。
 
-本次没有新增 CI 或 GitHub 分支保护；检查在本地执行。
+提交前须在本地执行以下检查。仓库未配置自动化 CI，检查结果应随评审提交。
 
 ## 接口修改
 
@@ -22,8 +22,17 @@ OpenAPI 与 Markdown 随同一个 PR 更新；Apipost 导入后检查实际 Base
 
 ## 数据与测试
 
-源 CSV 维护于 data/。修改后在 backend 运行 scripts.build_frontend_data，提交 frontend/data.js，并核对页面和后端一致。
+前端导航或布局修改时，同步更新 `frontend/README_ZH.md` 的模块、路由与状态边界，更新 `docs/USER_MANUAL.md` 的按钮和入口；架构或文件结构变化时同步更新项目 README 和 `docs/workflow_design.md`。仅展示层变化且接口契约不变时，无需修改 API 版本或重新生成 OpenAPI。
+
+导航与工作台变更运行 `node tests/e2e/verify_workspace.cjs`；对话展示变更同时运行 `node tests/e2e/verify_stream_ui.cjs`。环境、模拟测试与按需真实联调步骤见 [浏览器测试说明](tests/e2e/README.md)。验收报告区分脚本断言、人工核对和独立数据库检查。
+
+data/*.csv 是种子和回归基准。在线数据通过管理 API、上传或白名单定时同步写入 MySQL。frontend/data.js 是动态加载器，不覆盖、不提交生成快照；scripts.gen_snapshot 与 scripts.build_frontend_data 仅导出被忽略的 data/snapshots/data.snapshot.json。
 
 流式 UI 修改运行 tests/e2e 的 mock 测试。scripts.smoke_stream 与 smoke_live 分别查询当前工作流 SSE 和 JSON 接口，会调用真实 API，手动按需执行。错误报告和截图不包含 Key。
 
-archive/ 只用于历史回溯，不运行其中的旧升级脚本来维护当前应用。
+应用维护使用 backend/scripts 中的脚本，数据库结构变更使用 Alembic 迁移。
+
+
+数据库变更遵循 [数据链路](docs/data_pipeline.md)：修改 ORM/Pydantic 后生成并审核 Alembic 迁移，更新 schema.yaml、OpenAPI 和锁文件。原始数据、runtime、凭据不入 Git。生产代码必须从数据库读取，CSV 适配器只用于回归和导入基准。
+
+真实模型评测按 [验证报告](docs/live_model_verification.md) 配置独立测试库；会消耗实际 API 用量。记录初次失败和限流重跑，不将合并覆盖率写成一次运行通过率，不将测试库通过等同于正式部署完成。

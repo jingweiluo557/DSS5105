@@ -131,12 +131,16 @@ def provider_response(classification: Classification) -> httpx.Response:
          'content': [{'type': 'output_text', 'text': classification.model_dump_json(), 'annotations': []}]}]})
 
 
+@pytest.mark.parametrize('storage', ['csv', 'database'])
 @pytest.mark.parametrize('scenario', SCENARIOS)
-def test_workbook_multiturn_scenario(scenario: str, tmp_path: Path) -> None:
+def test_workbook_multiturn_scenario(scenario: str, tmp_path: Path, storage: str, business_database) -> None:
     """场景 1.1–3.3：11 个参数化用例逐轮使用工作簿原始输入并验证路由。"""
     async def run() -> None:
         """场景 1.1–3.3：每轮断言意图、追问、工具、回复约束和写操作确认。"""
         engine = make_engine(tmp_path)
+        if storage == 'database':
+            from app.services.snapshot_service import DatabaseDataTools
+            engine.tools = DatabaseDataTools(business_database)
         state = DialogState(active_order='ORD-005' if scenario in ('1.2', '1.3', '3.2', '3.3') else None)
         engine.store.save(state)
         for row, intent, slots, clarification, tool, phrase in SCENARIOS[scenario]:
