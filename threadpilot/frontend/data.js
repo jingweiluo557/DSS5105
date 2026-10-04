@@ -1,4 +1,5 @@
 /* Live database snapshot. No bundled data fallback. */
+const frontendAssetQuery = new URL(document.currentScript.src).search;
 (async function loadDatabaseSnapshot() {
   const app = document.getElementById('app');
   app.textContent = 'Loading current factory records…';
@@ -15,7 +16,7 @@
     for (const file of ['app.js', 'data-views.js', 'ai-api.js', 'ai-stream.js', 'workspace.js']) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = file; script.onload = resolve; script.onerror = reject;
+        script.src = file + frontendAssetQuery; script.onload = resolve; script.onerror = reject;
         document.body.appendChild(script);
       });
     }
