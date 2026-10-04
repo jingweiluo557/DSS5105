@@ -1,5 +1,5 @@
 'use strict';
-const SNAPSHOT='Apr 01, 2026 · dataset business date';
+const SNAPSHOT=TRACK1_DATA.today+' · database business date';
 const TODAY=TRACK1_DATA.today;
 const dayDiff=(a,b)=>Math.round((Date.parse(a+'T12:00:00Z')-Date.parse(b+'T12:00:00Z'))/86400000);
 const stages=['KNITTING','ASSEMBLY','WASHING','PACKING'];
@@ -8,7 +8,7 @@ const orders=TRACK1_DATA.orders.map((r,index)=>{
  const active=r.status==='IN_PROGRESS',idle=active?Math.max(0,dayDiff(TODAY,r.last_activity_date)):0,daysToDue=dayDiff(r.due_date,TODAY);
  const share=activeRaw.filter(x=>x.customer===r.customer).length/activeRaw.length;
  const factors=active?[Math.min(35,idle*5),daysToDue<0?35:daysToDue<=3?28:daysToDue<=7?20:daysToDue<=14?10:0,(4-stages.indexOf(r.current_stage))*5,Math.round(share*10)]:[0,0,0,0];
- return {id:r.order_id,customer:r.customer,product:r.product,category:r.category,qty:Number(r.pieces),stage:r.current_stage,due:r.due_date,last:r.last_activity_date,idle,score:factors.reduce((a,b)=>a+b,0),factors,status:active?'In progress':'Complete',completed:r.completed_date,daysLate:r.days_late===''?null:Number(r.days_late),daysToDue,sourceRow:index+2,raw:r};
+ return {id:r.order_id,customer:r.customer,product:r.product,category:r.category,qty:Number(r.pieces),stage:r.current_stage,due:r.due_date,last:r.last_activity_date,idle,score:factors.reduce((a,b)=>a+b,0),factors,status:active?'In progress':'Complete',completed:r.completed_date,daysLate:r.days_late===''?null:Number(r.days_late),daysToDue,sourceRow:r._record_id||index+2,raw:r};
 });
 const defaults={notes:[],watches:[],messages:[],audit:[],assessments:[],settings:{time:'07:00',idle:'3',voice:false,briefing:true},chat:[],chatIds:[],selected:'ORD-002'};
 let state;try{state={...JSON.parse(JSON.stringify(defaults)),...JSON.parse(localStorage.getItem('threadpilot-track1-v2')||'{}')}}catch{state=JSON.parse(JSON.stringify(defaults))}

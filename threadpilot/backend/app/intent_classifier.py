@@ -51,15 +51,27 @@ the server has searched. After comparison 'Which one is more risky?' remains ord
 
 
 class IntentClassifier:
-    def __init__(self, client: AsyncOpenAI, model: str = 'gpt-4.1') -> None:
+    def __init__(self, client: AsyncOpenAI, model: str = 'gpt-4.1', api_style: str = 'responses') -> None:
         """场景 1.1–3.3：注入已有 OpenAI 客户端与模型。"""
         self.client = client
         self.model = model
+        self.api_style = api_style
 
     async def classify(self, message: str, state: DialogState, now: datetime) -> Classification:
         """场景 1.1–3.3：使用 ChatGPT 严格 JSON Schema 输出并由 Pydantic 验证。"""
         context = state.model_dump(mode='json')
         context['history'] = [{**item, 'content': item['content'][:1200]} for item in state.history[-8:]]
+        if self.api_style == 'chat_completions':
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[{'role': 'system', 'content': SYSTEM_PROMPT + '\nReturn only a JSON object matching this schema: ' + json.dumps(Classification.model_json_schema())},
+                          {'role': 'user', 'content': json.dumps({'business_now': now.isoformat(), 'state': context, 'message': message}, ensure_ascii=False)}],
+                response_format={'type': 'json_object'}, max_tokens=2500,
+            )
+            choice = response.choices[0]
+            if choice.finish_reason != 'stop' or not choice.message.content:
+                raise ValueError('Incomplete or refused intent classification')
+            return Classification.model_validate_json(choice.message.content)
         response = await self.client.responses.parse(
             model=self.model, instructions=SYSTEM_PROMPT, store=False,
             input=[{'role': 'user', 'content': json.dumps({

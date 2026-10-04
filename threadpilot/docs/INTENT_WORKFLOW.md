@@ -1,8 +1,8 @@
-# 意图驱动工厂 Co-pilot 实现说明
+# 意图工作流设计
 
-本实现扩展已有 `backend/app/main.py`，保留 FastAPI、OpenAI Responses SDK 和原静态前端。聊天统一使用 `/chat`、`/api/v1/workflow/chat` 和 `/api/v1/workflow/chat/stream`；现有聊天页面使用新工作流。使用 Responses API 的严格 JSON Schema（`responses.parse` + Pydantic v2），保持原 SDK 集成方式，支持 `gpt-4.1` / `gpt-4o`。这比仅保证合法 JSON 的 JSON mode 多一层结构校验。参见 [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)。
+系统由 FastAPI、OpenAI SDK、Pydantic v2 和 Web 客户端组成。JSON 聊天入口为 `/chat` 和 `/api/v1/workflow/chat`，Web 客户端使用 `/api/v1/workflow/chat/stream`。意图提取默认使用 Responses API 严格 JSON Schema（`responses.parse` + Pydantic v2）；兼容网关可通过 `INTENT_API_STYLE=chat_completions` 使用 JSON mode，并由 Pydantic 验证结果。模型通过环境变量配置。
 
-`dialogs.xlsx` 是场景和验收输入，G 列是示例而非事实来源。事实仅来自正式 CSV：120 个订单、360 条工厂级日产量、8 家外协厂。默认业务时钟为 **2026-04-01 09:00 +08:00**，与数据字典一致。读取磁盘刷新不等于已接工厂实时系统。
+`dialogs.xlsx` 是场景和验收输入，G 列是示例而非事实来源。正式三表初始导入 MySQL：120 个订单、360 条工厂级日产量、8 家外协厂。在线工具读取数据库最新提交记录；CSV 用于种子导入与回归测试。默认业务时钟为 `live`，回归时显式设 **2026-04-01 09:00 +08:00**。数据库最新值仍取决于 API/文件同步。详见 [数据链路](data_pipeline.md)。
 
 ## 1. Intent Taxonomy
 
@@ -43,7 +43,7 @@
 
 字段约束：quantity > 0，observed_output ≥ 0，window_days 0–365；阶段只接受四个枚举；订单列表最多 10 条。`reference` 为 explicit/active/ambiguous/none，`action` 为 read/draft/revise/send/save/create/update/explain/evidence/recommend/rank/confirm_target。`confidence < 0.65` 或 unknown 不执行业务工具。高置信度意图的缺槽由 Python 判断，不依赖模型的 `needs_clarification` 建议。
 
-时间解析：以业务时钟解析 today/yesterday/tomorrow、当月 25th、ISO 日期，时间支持 ISO 带时区或 noon、a.m./p.m.；无精确小时追问。`tomorrow noon` 在默认时钟下是 `2026-04-02T12:00:00+08:00`，随后 `2 p.m.` 保留日期。未知表达不回退为“现在”。
+时间解析：以业务时钟解析 today/yesterday/tomorrow、当月 25th、ISO 日期，时间支持 ISO 带时区或 noon、a.m./p.m.；无精确小时追问。`tomorrow noon` 在回放时钟 `2026-04-01T09:00:00+08:00` 下是 `2026-04-02T12:00:00+08:00`，随后 `2 p.m.` 保留日期。未知表达不回退为“现在”。
 
 ## 3. DialogState
 
@@ -70,7 +70,7 @@
 | 工具 | 入参 | 出参 | 幂等性 | 二次确认 |
 |---|---|---|---|---|
 | search_orders | ID/客户/产品/数量/日期筛选 | 正式候选记录与行引用 | 只读；源变化则结果变化 | 否 |
-| refresh_order | order_id | 当前 CSV 完整记录 | 只读 | 否 |
+| refresh_order | order_id | 当前数据库完整记录 | 只读 | 否 |
 | assess_order_risk | order_id，业务时钟 | idle_days、days_to_due、overdue、completed_late、原因、局限 | 确定性 | 否 |
 | compare_orders | 两 ID、字段 | 并排原始字段 | 只读 | 否 |
 | rank_comparison | criterion | 活动订单的透明顺序 | 确定性 | 否 |
@@ -94,7 +94,7 @@
 - 产能模型明确保守：当前阶段及后续阶段都计完整剩余订单量；取过去 20 个工作日均值；每阶段 ceil((backlog + new quantity)/rate)，串行相加；周日不工作；再加运输缓冲与 packing 损失日。这是估算而非排产，不能无条件承诺。外协排除暂停厂，展示类别、批量上限、队列、运输、缺陷批次概率，阶段兼容性仍待确认。
 - no_reply 只考虑创建以来、截止前的真实回复事件；no_activity 基于日粒度 last_activity_date，无法判断同一天几点的更新，因此不承诺小时级生产事件判断。提醒写入私有 notifications 表，页面每 30 秒读取，API 也可读取。
 
-每个回答含结构化 `evidence`（source、row、url、原始 record）。点击 `/api/v1/evidence/orders.csv/具体行号` 可查看对应当前 CSV 行；回答同时保留计算当时的记录内容。引用不是不可变审计存档，正式系统可改用记录版本 ID。
+每个回答含结构化 `evidence`（source、row、url、record、record_id、version、updated_at、original_source）。`row` 在数据库适配器中是稳定记录 ID；`/api/evidence/orders/{id}` 返回当前记录及来源。回答保留计算时的内容和版本，链接不是不可变历史存档。
 
 ## 5. FastAPI 目录
 
@@ -106,12 +106,12 @@ backend/
     schemas.py              # Intent/Slots/DialogState/ToolCall/ChatResponse
     intent_classifier.py    # 独立 SYSTEM_PROMPT + OpenAI 结构化识别
     workflow_engine.py      # 路由、状态机、确认门禁、回复
-    workflow_tools.py       # CSV 刷新、证据、风险/比较/产能/正常性
+    workflow_tools.py       # 业务算法，在线使用 DatabaseDataTools 适配器
     workflow_store.py       # SQLite、发送适配器、内部备注、提醒、回复事件
     workflow_api.py         # 新 JSON/SSE/证据/通知/回复集成接口
   runtime/                  # 已 gitignore；私有 SQLite 与本地评测报告
   tests/
-    fixtures/dialogs.json   # 原工作簿 A:G 非空单元格转录，带行号
+    fixtures/dialogs.json   # 场景工作簿 A:G 非空单元格转录，带行号
     test_workflow.py        # 11 场景逐轮 + 确认/刷新/提醒边界
   scripts/evaluate_workflow.py # 可选真实模型逐轮评测，发送始终用测试替身
 data/                       # 正式业务 CSV 与原 dialogs.xlsx，不改写
@@ -120,7 +120,7 @@ docs/openapi.json           # 从运行代码导出的接口契约
 
 ## 6. 实现与运行
 
-三个核心模块已经实现，并由其余工具/存储模块支撑运行。每个新增 Python 函数有中文 docstring 和对应场景编号。回复的数值、状态、证据、限制由 Python 模板产生，避免第二次自由生成覆盖确定性结论。
+分类器负责意图提取，工作流引擎负责规则与路由，工具及存储模块负责数据访问和状态持久化。回复的数值、状态、证据、限制由 Python 模板产生，避免第二次自由生成覆盖确定性结论。
 
 ```powershell
 cd D:\GitProjects\DSS5105\threadpilot\backend
@@ -152,11 +152,11 @@ uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
 
 发送适配器：配置 `CHASE_WEBHOOK_URL` 与 `CHASE_WEBHOOK_TOKEN`，服务接收订单、recipient、text、tone 与 `Idempotency-Key`，成功响应必须是 `{"status":"sent","receipt":"provider-message-id"}`。网关负责把 Maya 等联系人映射为真实地址并实施同一 key 的幂等发送。未配置则返回 `not_sent`，不会模拟成功；网络结果不确定则 `unknown`，重试保持原键。
 
-提醒模式：默认冻结数据时钟便于演示及回归；实际持续监控需 `BUSINESS_NOW=live`，且持续更新 CSV / 上游回复事件。离线重启后评估到期的未处理提醒。业务日回放可把 BUSINESS_NOW 改为另一个带时区时间并重启。服务停止时没有后台执行能力，重启后补检。
+提醒模式：默认使用 `BUSINESS_NOW=live`；历史演示及回归需显式冻结时钟。实际持续监控需持续更新 MySQL / 上游回复事件。离线重启后评估到期的未处理提醒。业务日回放可把 BUSINESS_NOW 改为另一个带时区时间并重启。服务停止时没有后台执行能力，重启后补检。
 
 回复集成：`POST /api/v1/workflow/replies`，头 `Authorization: Bearer <REPLY_INGEST_TOKEN>`，body 包含 event_id/order_id/received_at。没有上游回复接入时“无回复”仅表示本地系统未记录回复，不等于现实中没有回复。站内通知通过 `/api/v1/workflow/notifications/{session_id}` 读取。
 
-新 SSE 接口在规则验证和必要操作完成后输出 start/delta/done，传输兼容现有前端，但不把未验证模型 token 流直接展示给用户。取消浏览器读取不等于撤销已经确认并完成的写操作；客户端可以用原确认键安全重试。所有聊天入口统一使用 `/chat` 或 workflow 路径及其会话、确认契约。
+SSE 接口在规则验证和必要操作完成后输出 start/delta/done，客户端接收经验证的完整答案。取消浏览器读取不等于撤销已经确认并完成的写操作；客户端可以用原确认键安全重试。所有聊天入口统一使用 `/chat` 或 workflow 路径及其会话、确认契约。
 
 ## 7. pytest 与真实模型评测
 
@@ -164,19 +164,13 @@ uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
 uv run --locked pytest -q
 uv run --locked python -m scripts.export_openapi
 # 可选：实际调用 API、消耗额度；不会发出业务消息
-uv run --locked python -m scripts.evaluate_workflow
+uv run --locked python -m scripts.verify_live_llm
 ```
 
-`test_workbook_multiturn_scenario` 参数化生成每子场景一个 pytest 用例（共 11 个），从工作簿原始 F 列读 Turn 1–N，逐轮断言 intent、追问、工具和回复约束。合计 45 轮。3.1/3.2/3.3 的确认轮不调用分类模型，由服务器直接校验。离线使用真实 SDK + MockTransport 验证 JSON Schema 协议，模型输出是人工标注意图，**不能用离线通过率代表实际 LLM 准确率**。可选评测保存逐轮实际输出及四类检查到 `runtime/live-evaluation.json`。
+`test_workbook_multiturn_scenario` 在 CSV 与数据库两种适配器下分别参数化生成 11 个 pytest 用例（共 22 个场景用例），从工作簿原始 F 列读 Turn 1–N，逐轮断言 intent、追问、工具和回复约束。合计 45 轮。3.1/3.2/3.3 的确认轮不调用分类模型，由服务器直接校验。离线使用真实 SDK + MockTransport 验证 JSON Schema 协议，模型输出是人工标注意图，**不能用离线通过率代表实际 LLM 准确率**。真实评测使用专用 MySQL 测试库，需配置 LIVE_DATABASE_URL/LIVE_AI_DATABASE_URL；输出保存在 `runtime/live-*/report.json`。`scripts.evaluate_workflow` 用于 CSV 基准评测；MySQL 实时读取验收使用 `scripts.verify_live_llm`。
 
-工作簿事实修正：TrendCart 仅一个活动 Scarf（ORD-005），因此第 1.1 的 Turn 2 已可唯一识别，不能为模拟示例而谎称两个；ORD-021 和 ORD-014 已完成，不能把 ORD-014 说成每日异常第一名；生产日志没有活动事件明细或 blocker，相关轮次展示现有记录并声明缺口。
+种子数据的事实边界：TrendCart 仅一个活动 Scarf（ORD-005），因此第 1.1 的 Turn 2 已可唯一识别，应按唯一候选处理；ORD-021 和 ORD-014 已完成，不能把 ORD-014 说成每日异常第一名；生产日志没有活动事件明细或 blocker，相关轮次展示可查询记录并说明数据缺口。
 
 独立边界用例覆盖：多候选不选第一条、磁盘字段刷新、比较代词、变更后旧确认失效、重复确认、重启恢复、提醒原位修改、已有回复时静默、截止前不通知、重复评估不重复提醒、packing 损失日重新计算、未配置发送通道不能报告发送成功。
 
-本次验证结果：
-
-- 完整 pytest：移除独立只读链路后，**37 passed**，统一覆盖工作流、静态资源、错误、SSE 及已删除路由不可调用；有两条依赖库弃用警告。
-- 真实 `gpt-4.1`：11 个场景、**45/45 轮**通过意图、追问、工具和回复约束检查。这是一次有界场景回归结果，不代表任意输入的准确率保证。
-- Edge/Playwright：回复展示、验证后卡片、停止、重试和新会话隔离通过。
-- OpenAPI 导出与运行时契约一致，`git diff --check` 无差错。
-- 发送测试使用隔离测试替身；没有向 Maya 或其他联系人发送真实业务消息。真实发送需按上文配置并验证实际网关。
+验收结果集中记录于 [验证报告](live_model_verification.md)，包括离线回归、MySQL 集成、真实模型调用及浏览器测试。真实外部送达和目标部署环境需单独验收。

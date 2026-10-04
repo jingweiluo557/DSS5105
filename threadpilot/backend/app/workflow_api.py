@@ -18,12 +18,13 @@ from .schemas import ChatRequest, ChatResponse, Evidence
 from .streaming import event
 from .workflow_engine import WorkflowEngine
 from .workflow_store import WebhookSender, WorkflowStore
-from .workflow_tools import DataTools
+from .services.snapshot_service import DatabaseDataTools
+from sqlalchemy.exc import SQLAlchemyError
 
 
 def business_now() -> datetime:
     """场景 1.2/3.3：默认复现数据日期；设 BUSINESS_NOW=live 后使用实际时钟。"""
-    value = os.getenv('BUSINESS_NOW', '2026-04-01T09:00:00+08:00')
+    value = os.getenv('BUSINESS_NOW', 'live')
     if value == 'live':
         return datetime.now(timezone(timedelta(hours=8)))
     result = datetime.fromisoformat(value)
@@ -36,7 +37,7 @@ def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
     """场景 1.1–3.3：复用现有客户端，业务数据和私有 SQLite 分离。"""
     sender_url = os.getenv('CHASE_WEBHOOK_URL', '')
     sender = WebhookSender(sender_url, os.getenv('CHASE_WEBHOOK_TOKEN', '')) if sender_url else None
-    app.state.workflow = WorkflowEngine(DataTools(data), WorkflowStore(Path(os.getenv('WORKFLOW_DB', str(backend / 'runtime' / 'workflow.sqlite3')))), business_now, sender)
+    app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), WorkflowStore(app.state.settings.workflow_db), business_now, sender)
 
 
 async def monitor_loop(app: FastAPI) -> None:
@@ -46,7 +47,7 @@ async def monitor_loop(app: FastAPI) -> None:
             engine = app.state.workflow
             async with engine.lock:
                 engine.store.evaluate_reminders(engine.clock(), engine.tools)
-        except (OSError, ValueError, sqlite3.Error):
+        except (OSError, ValueError, sqlite3.Error, SQLAlchemyError):
             logging.getLogger(__name__).warning('Reminder source unavailable; pending checks retained')
         await asyncio.sleep(30)
 
@@ -67,7 +68,7 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
         if classifier is None:
             if app.state.client is None:
                 raise HTTPException(503, {'code': 'API_KEY_NOT_CONFIGURED', 'message': 'Configure OPENAI_API_KEY.'})
-            classifier = IntentClassifier(app.state.client, os.getenv('OPENAI_MODEL', 'gpt-4.1'))
+            classifier = IntentClassifier(app.state.client, app.state.settings.openai_model, app.state.settings.intent_api_style)
         try:
             result = await app.state.workflow.chat(body, classifier)
             return result.model_copy(update={'request_id': request.state.request_id, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1')})
@@ -79,7 +80,7 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
             raise HTTPException(429, {'code': 'MODEL_RATE_LIMITED', 'message': 'Provider quota or rate limit reached.'})
         except (APIConnectionError, APIStatusError):
             raise HTTPException(502, {'code': 'MODEL_API_ERROR', 'message': 'Classification provider unavailable.'})
-        except OSError:
+        except (OSError, SQLAlchemyError):
             raise HTTPException(503, {'code': 'DATA_UNAVAILABLE', 'message': 'Source data is unavailable.'})
         except ValueError:
             raise HTTPException(422, {'code': 'INVALID_WORKFLOW_INPUT', 'message': 'Unknown record, invalid date or invalid structured model output. Please clarify or retry.'})
@@ -108,7 +109,7 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
     async def evidence_row(source: str, row: int) -> Evidence:
         """场景 1.3/2.1/2.2：白名单访问原始记录，展示引用对应数据。"""
         try:
-            rows = DataTools(data).rows(source)
+            rows = app.state.workflow.tools.rows(source)
             if row < 2 or row > len(rows) + 1:
                 raise ValueError('No row')
             return rows[row - 2]
