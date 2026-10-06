@@ -4,7 +4,7 @@ const frontendAssetQuery = new URL(document.currentScript.src).search;
   const app = document.getElementById('app');
   app.textContent = 'Loading current factory records…';
   try {
-    const response = await fetch('/api/snapshot', {cache: 'no-store'});
+    const response = await window.threadpilotFetch(window.THREADPILOT_API_BASE + '/api/snapshot', {cache: 'no-store'});
     if (!response.ok) throw new Error('Database unavailable. Check migrations and connection settings.');
     const data = await response.json();
     if (!data.orders?.length || !data.production_log?.length || !data.workshops?.length)

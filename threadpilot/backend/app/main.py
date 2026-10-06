@@ -2,6 +2,7 @@
 import asyncio
 import os
 import uuid
+import secrets
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
@@ -37,16 +38,18 @@ def create_app() -> FastAPI:
         app.state.database = Database(app.state.settings)
         app.state.sql_agent = None
         app.state.sync = SyncService(app.state.database, app.state.settings)
-        app.state.sync.start()
+        if app.state.settings.background_tasks_enabled:
+            app.state.sync.start()
         app.state.client = AsyncOpenAI(api_key=key, base_url=app.state.settings.openai_base_url, timeout=app.state.settings.openai_timeout_seconds, max_retries=0) if key else None
         initialize_workflow(app, DATA, ROOT)
-        monitor = asyncio.create_task(monitor_loop(app))
+        monitor = asyncio.create_task(monitor_loop(app)) if app.state.settings.background_tasks_enabled else None
         try:
             yield
         finally:
-            monitor.cancel()
-            with suppress(asyncio.CancelledError):
-                await monitor
+            if monitor:
+                monitor.cancel()
+                with suppress(asyncio.CancelledError):
+                    await monitor
             if app.state.client:
                 await app.state.client.close()
             app.state.sync.close()
@@ -61,19 +64,27 @@ def create_app() -> FastAPI:
         servers=[{'url': 'http://127.0.0.1:8000', 'description': 'Local development; replace with your team server when deployed'}],
     )
     app.state.client = None
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=['http://127.0.0.1:8765', 'http://localhost:8765', 'http://127.0.0.1:8000', 'http://localhost:8000'],
-        allow_methods=['GET', 'POST', 'PUT', 'DELETE'], allow_headers=['Content-Type', 'Authorization', 'X-Confirm-Write'],
-    )
-
     @app.middleware('http')
     async def request_identity(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """场景 1.1–3.3：为每次请求添加可追踪标识。"""
         request.state.request_id = str(uuid.uuid4())
+        settings = getattr(app.state, 'settings', None)
+        token = settings.api_access_token.get_secret_value() if settings else ''
+        protected = request.url.path == '/chat' or request.url.path.startswith('/api/')
+        exempt = request.url.path in ('/api/v1/health', '/api/internal/reminders/run', '/api/v1/workflow/replies')
+        if token and protected and not exempt and request.method != 'OPTIONS':
+            supplied = request.headers.get('X-ThreadPilot-Token', '')
+            if not secrets.compare_digest(supplied.encode(), token.encode()):
+                return JSONResponse(status_code=401, content={'error': {'code': 'UNAUTHORIZED', 'message': 'Application access token required.'}})
         response = await call_next(request)
         response.headers['X-Request-ID'] = request.state.request_id
         return response
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=Settings().cors_origins,
+        allow_methods=['GET', 'POST', 'PUT', 'DELETE'], allow_headers=['Content-Type', 'Authorization', 'X-Confirm-Write', 'X-ThreadPilot-Token'],
+    )
 
     @app.exception_handler(HTTPException)
     async def app_error(request: Request, error: HTTPException) -> JSONResponse:
@@ -103,7 +114,8 @@ def create_app() -> FastAPI:
     from .api import data_api, sync_api, snapshot_api, ai_api
     for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router):
         app.include_router(router)
-    app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')
+    if Settings().serve_frontend:
+        app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')
     return app
 
 

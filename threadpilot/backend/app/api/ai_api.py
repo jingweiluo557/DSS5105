@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 from ..services.ai_sql_service import AISQLService
 from ..workflow_api import business_now
+from ..sql_workflow_store import WorkflowBusy
 
 router = APIRouter(tags=['SQL Agent'])
 initialization_lock = threading.Lock()
@@ -44,6 +45,8 @@ def ask(body: AskRequest, request: Request) -> dict[str, Any]:
                 raise HTTPException(503, {'code': 'SQL_AGENT_UNAVAILABLE', 'message': 'Check the model configuration, migrations and independent SELECT-only database account.'})
     try:
         return request.app.state.sql_agent.ask(body.message, str(body.session_id) if body.session_id else None, business_now().isoformat())
+    except WorkflowBusy:
+        raise HTTPException(409, {'code': 'SESSION_BUSY', 'message': 'Retry when the previous SQL request completes.'})
     except KeyError:
         raise HTTPException(404, {'code': 'UNKNOWN_SESSION', 'message': 'Start a new SQL conversation.'})
     except Exception:

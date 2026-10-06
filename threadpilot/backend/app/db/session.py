@@ -23,7 +23,10 @@ def make_engine(url: str) -> Engine:
     """场景 1.2：MySQL 使用 READ COMMITTED，SQLite 仅用于隔离测试。"""
     if url.startswith('sqlite'):
         return create_engine(url, connect_args={'check_same_thread': False})
-    return create_engine(url, pool_pre_ping=True, pool_recycle=1800, isolation_level='READ COMMITTED')
+    return create_engine(url, pool_pre_ping=True, pool_recycle=300, pool_size=2,
+                         max_overflow=2, pool_timeout=10,
+                         connect_args={'connect_timeout': 10, 'read_timeout': 30, 'write_timeout': 30},
+                         isolation_level='READ COMMITTED')
 
 
 def get_session(request: Request) -> Iterator[Session]:

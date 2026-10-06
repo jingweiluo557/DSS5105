@@ -1,0 +1,5 @@
+#!/bin/bash
+set -eu
+cd /var/user
+export PYTHONDONTWRITEBYTECODE=1
+exec /var/lang/python311/bin/python3.11 app.py

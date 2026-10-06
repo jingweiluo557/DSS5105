@@ -120,6 +120,31 @@
         }
       }
     },
+    "/api/internal/reminders/run": {
+      "post": {
+        "tags": [
+          "Internal"
+        ],
+        "summary": "Evaluate Scheduled Reminders",
+        "operationId": "evaluate_scheduled_reminders_api_internal_reminders_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Evaluate Scheduled Reminders Api Internal Reminders Run Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workflow/chat/stream": {
       "post": {
         "tags": [

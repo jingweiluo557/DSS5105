@@ -2,6 +2,7 @@
 import asyncio
 import json
 import re
+from contextlib import nullcontext
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import Any, Literal, Protocol
@@ -27,23 +28,27 @@ class WorkflowEngine:
     async def chat(self, request: ChatRequest, classifier: Classifier) -> ChatResponse:
         """场景 1.1–3.3：原子处理一个本地会话轮次，客户端不能提交状态或工具。"""
         async with self.lock:
-            state = self.store.load(request.session_id) if request.session_id else DialogState()
-            now = self.clock()
-            if request.selected_order_id and not state.active_order and not state.comparison_orders:
-                state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
-            confirmed = self.confirmation_word(request.message)
-            if confirmed:
-                response = await self.confirm(request, state, now)
-            else:
-                # Any new turn revokes the old preview, including revisions and topic changes.
-                state.pending_action = None
-                classification = await classifier.classify(request.message, state, now)
-                response = self.route(request.message, classification, state, now)
-            state.revision += 1
-            state.history = (state.history + [{'role': 'user', 'content': request.message},
-                                             {'role': 'assistant', 'content': response.answer}])[-16:]
-            self.store.save(state)
-            return response.model_copy(update={'state': state.model_copy(deep=True)})
+            with self.store.turn_lock('chat:' + request.session_id) if request.session_id and hasattr(self.store, 'turn_lock') else nullcontext():
+                return await self._chat(request, classifier)
+
+    async def _chat(self, request: ChatRequest, classifier: Classifier) -> ChatResponse:
+        state = self.store.load(request.session_id) if request.session_id else DialogState()
+        now = self.clock()
+        if request.selected_order_id and not state.active_order and not state.comparison_orders:
+            state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
+        confirmed = self.confirmation_word(request.message)
+        if confirmed:
+            response = await self.confirm(request, state, now)
+        else:
+            # Any new turn revokes the old preview, including revisions and topic changes.
+            state.pending_action = None
+            classification = await classifier.classify(request.message, state, now)
+            response = self.route(request.message, classification, state, now)
+        state.revision += 1
+        state.history = (state.history + [{'role': 'user', 'content': request.message},
+                                         {'role': 'assistant', 'content': response.answer}])[-16:]
+        self.store.save(state)
+        return response.model_copy(update={'state': state.model_copy(deep=True)})
 
     @staticmethod
     def confirmation_word(message: str) -> bool:

@@ -26,4 +26,10 @@ class Settings(BaseSettings):
     sql_timeout_ms: int = Field(default=5000, ge=100, le=60000)
     sql_agent_steps: int = Field(default=16, ge=4, le=50)
     workflow_db: Path = ROOT / 'backend/runtime/workflow.sqlite3'
+    cors_origins: list[str] = ['http://127.0.0.1:8765', 'http://localhost:8765', 'http://127.0.0.1:8000', 'http://localhost:8000']
     business_now: str = 'live'
+    workflow_storage: Literal['sqlite', 'database'] = 'sqlite'
+    background_tasks_enabled: bool = True
+    serve_frontend: bool = True
+    api_access_token: SecretStr = SecretStr('')
+    scheduler_token: SecretStr = SecretStr('')

@@ -2,7 +2,7 @@
 name = "threadpilot-backend"
 version = "1.0.0"
 description = "ThreadPilot FastAPI and OpenAI backend"
-requires-python = ">=3.12,<3.14"
+requires-python = ">=3.11,<3.14"
 dependencies = [
     "fastapi>=0.121,<1",
     "uvicorn>=0.34,<1",
@@ -30,3 +30,5 @@ dev = ["httpx>=0.28,<1", "pytest>=8,<10"]
 
 [tool.uv]
 package = false
+# Cloud function Python 3.11 uses the manylinux2014/glibc 2.17 ABI.
+constraint-dependencies = ["greenlet==3.2.4", "numpy<2.3", "pandas<2.3", "tiktoken<0.10"]
