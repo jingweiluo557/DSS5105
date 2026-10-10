@@ -46,3 +46,7 @@ with ZipFile(timer_output, 'w', ZIP_DEFLATED) as archive:
     add(archive, source / 'timer.py', 'timer.py')
     add(archive, source / 'index.py', 'index.py')
 print(f'Created {timer_output}')
+morning_output = output.with_name('threadpilot-morning-timer.zip')
+with ZipFile(morning_output, 'w', ZIP_DEFLATED) as archive:
+    add(archive, source / 'morning_timer.py', 'index.py')
+print(f'Created {morning_output}')

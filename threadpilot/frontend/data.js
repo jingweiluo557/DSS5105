@@ -13,7 +13,7 @@ const frontendAssetQuery = new URL(document.currentScript.src).search;
       throw new Error('Dashboard needs a working-day production record for each stage. Data APIs remain available.');
     window.TRACK1_DATA = data;
     app.style.visibility = 'hidden';
-    for (const file of ['app.js', 'data-views.js', 'ai-api.js', 'ai-stream.js', 'workspace.js']) {
+    for (const file of ['app.js', 'data-views.js', 'ai-api.js', 'ai-stream.js', 'workspace.js', 'dashboard.js', 'predictions.js']) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = file + frontendAssetQuery; script.onload = resolve; script.onerror = reject;

@@ -76,7 +76,8 @@
     e.preventDefault();
     const dialog = document.createElement('dialog');
     dialog.className = 'record-dialog';
-    dialog.innerHTML = '<form method="dialog"><button aria-label="Close record">Close</button></form><h2>Current database record</h2><pre>Loading…</pre>';
+    dialog.innerHTML = '<button type="button" aria-label="Close record">Close</button><h2>Current database record</h2><pre>Loading…</pre>';
+    dialog.querySelector('button').addEventListener('click', () => dialog.close());
     document.body.append(dialog);
     dialog.addEventListener('close', () => dialog.remove());
     dialog.showModal();

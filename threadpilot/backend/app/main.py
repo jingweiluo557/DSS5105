@@ -43,9 +43,15 @@ def create_app() -> FastAPI:
         app.state.client = AsyncOpenAI(api_key=key, base_url=app.state.settings.openai_base_url, timeout=app.state.settings.openai_timeout_seconds, max_retries=0) if key else None
         initialize_workflow(app, DATA, ROOT)
         monitor = asyncio.create_task(monitor_loop(app)) if app.state.settings.background_tasks_enabled else None
+        from .api.dashboard_api import morning_loop
+        morning = asyncio.create_task(morning_loop(app)) if app.state.settings.morning_scheduler_enabled else None
         try:
             yield
         finally:
+            if morning:
+                morning.cancel()
+                with suppress(asyncio.CancelledError):
+                    await morning
             if monitor:
                 monitor.cancel()
                 with suppress(asyncio.CancelledError):
@@ -71,7 +77,7 @@ def create_app() -> FastAPI:
         settings = getattr(app.state, 'settings', None)
         token = settings.api_access_token.get_secret_value() if settings else ''
         protected = request.url.path == '/chat' or request.url.path.startswith('/api/')
-        exempt = request.url.path in ('/api/v1/health', '/api/internal/reminders/run', '/api/v1/workflow/replies')
+        exempt = request.url.path in ('/api/v1/health', '/api/internal/reminders/run', '/api/internal/briefings/run', '/api/v1/workflow/replies')
         if token and protected and not exempt and request.method != 'OPTIONS':
             supplied = request.headers.get('X-ThreadPilot-Token', '')
             if not secrets.compare_digest(supplied.encode(), token.encode()):
@@ -111,8 +117,8 @@ def create_app() -> FastAPI:
         return {'status': 'ok', 'configured': app.state.client is not None, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1'), 'streaming': True}
 
     install_workflow_routes(app, DATA)
-    from .api import data_api, sync_api, snapshot_api, ai_api
-    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router):
+    from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api
+    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router, dashboard_api.router):
         app.include_router(router)
     if Settings().serve_frontend:
         app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')

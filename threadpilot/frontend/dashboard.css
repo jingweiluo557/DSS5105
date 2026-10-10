@@ -1,0 +1,68 @@
+.dashboard-refresh .dashboard-kpis .kpi{display:flex;flex-direction:column;gap:9px;min-width:0}
+.dashboard-refresh .metric-value{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.dashboard-refresh .metric-value strong{margin:0;flex:1}
+.dashboard-refresh .metric-spark{width:96px;height:40px;color:var(--blue)}
+.dashboard-refresh .metric-change{font-size:11px;line-height:1.5}
+.prediction-overview{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:22px}
+.prediction-note{font-size:13px;margin-top:18px}
+.prediction-table{min-width:950px}
+.predictions-page .filters input{min-width:220px}
+.dashboard-refresh .metric-change{width:100%;color:var(--muted)}
+.dashboard-refresh .trend-pending{font-size:11px;color:var(--muted);max-width:100px;line-height:1.5}
+.dashboard-refresh .metric-comparison{height:5px;border-radius:8px;background:var(--line);overflow:hidden;margin-top:auto}
+.dashboard-refresh .metric-comparison i{display:block;height:100%;background:var(--blue);border-radius:8px}
+.dashboard-refresh .dashboard-main{align-items:stretch;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.dashboard-refresh .dashboard-brief{background:linear-gradient(135deg,#eaf0e8,#f9faf7)}
+.dashboard-refresh .briefing-stamp{font-size:13px;margin-top:0}
+.dashboard-refresh .summary-rows{margin:28px 0}
+.dashboard-refresh .summary-rows>div{display:grid;grid-template-columns:85px minmax(0,1fr);gap:15px;padding:20px 0;border-bottom:1px solid var(--line)}
+.dashboard-refresh .summary-rows dt{color:var(--muted);font-size:14px}
+.dashboard-refresh .summary-rows dd{margin:0;font-size:17px;line-height:1.8}
+.dashboard-refresh .briefing-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.dashboard-refresh .cleared-tasks{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.dashboard-refresh .todo-tabs{display:flex;gap:8px;margin:20px 0 10px}
+.dashboard-refresh .todo-tabs [aria-pressed=true]{background:var(--sage);border-color:#b7cbbb}
+.dashboard-refresh .todo-scroll{position:relative;max-height:390px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:8px}
+.dashboard-refresh .todo-item{display:flex;gap:12px;padding:20px 0;border-bottom:1px solid var(--line)}
+.dashboard-refresh .todo-check{padding-top:4px;flex:0 0 20px}
+.dashboard-refresh .todo-check input{width:19px;height:19px;accent-color:var(--blue);cursor:pointer}
+.dashboard-refresh .todo-content{min-width:0;overflow-wrap:anywhere}
+.dashboard-refresh .todo-content p{font-size:13px;margin:7px 0 12px}
+.dashboard-refresh .todo-content strong{font-size:16px}
+.dashboard-refresh .todo-content .actions{gap:7px}
+.dashboard-refresh .is-done strong{color:var(--muted)}
+.dashboard-refresh #dashboard-task-form{border-top:1px solid var(--line);margin-top:18px;padding-top:18px}
+.dashboard-refresh #dashboard-task-form label{display:block;margin-bottom:8px;font-size:14px}
+.dashboard-refresh .todo-input{display:flex;gap:8px;margin-bottom:14px}
+.dashboard-refresh .todo-input input{min-width:0;flex:1}
+.dashboard-refresh .dashboard-lower{align-items:stretch}
+.dashboard-refresh .dashboard-diagnosis{display:flex;flex-direction:column;height:0;min-height:100%;overflow:hidden}
+.dashboard-refresh .diagnosis-scroll{position:relative;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:8px}
+.dashboard-refresh .dashboard-diagnosis>h2{margin-bottom:28px}
+.dashboard-refresh .health-heading{align-items:baseline;flex-wrap:wrap;gap:6px}
+.dashboard-refresh .health-bar{display:flex;height:13px;border-radius:8px;overflow:hidden;background:var(--line);margin:20px 0 14px}
+.dashboard-refresh .on-track{background:#829e91}.dashboard-refresh .at-risk{background:#c6ab7b}.dashboard-refresh .late{background:#be8982}
+.dashboard-refresh .health-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.dashboard-refresh .health-counts>div{padding:12px;border:1px solid var(--line);border-radius:12px}
+.dashboard-refresh .health-counts small{display:flex;align-items:center;gap:6px}
+.dashboard-refresh .health-counts i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.dashboard-refresh .health-counts strong{display:block;font-size:28px;margin-top:6px}
+.dashboard-refresh .delivery-rate{border-block:1px solid var(--line);padding:18px 0;margin-top:20px}
+.dashboard-refresh .delivery-rate p{font-size:14px;color:var(--muted);margin:0 0 8px}
+.dashboard-refresh .delivery-rate strong{font-size:28px}.dashboard-refresh .delivery-rate span{font-size:13px}
+.dashboard-refresh .delivery-rate small{display:block;color:var(--muted)}
+.dashboard-refresh .diagnosis-advice article{padding:20px 0;border-bottom:1px solid var(--line)}
+.dashboard-refresh .diagnosis-advice h3{margin:0 0 8px}.dashboard-refresh .diagnosis-advice p{font-size:15px;margin:0 0 12px}
+@media(max-width:1150px){.dashboard-refresh .dashboard-main{grid-template-columns:1fr}.dashboard-refresh .dashboard-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.dashboard-refresh .dashboard-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-refresh .summary-rows>div{grid-template-columns:1fr;gap:5px}.dashboard-refresh .health-counts>div{padding:9px}.dashboard-refresh .health-counts small{font-size:11px}.dashboard-refresh .trend-pending{max-width:none}.dashboard-refresh .section-heading{flex-wrap:wrap}.dashboard-refresh .todo-scroll{max-height:420px}}
+@media(max-width:650px){.app-main:has(.dashboard-refresh)+.floating,.app-main:has(.predictions-page)+.floating{display:none}}
+
+@media(max-width:1200px){.dashboard-refresh .dashboard-diagnosis{height:auto;min-height:0}.dashboard-refresh .diagnosis-scroll{flex:auto;max-height:450px}}
+
+.briefing-email-dialog{width:min(720px,calc(100vw - 32px));max-height:90vh;overflow:auto;padding:28px;border:1px solid var(--line);border-radius:22px;color:var(--ink);background:white}
+.briefing-email-dialog::backdrop{background:#23344670}
+.briefing-email-dialog label{font-size:15px;margin:18px 0}
+.briefing-email-dialog textarea{min-height:320px;font-size:16px;line-height:1.7}
+.briefing-email-dialog input{font-size:16px}
+.briefing-email-dialog .email-status{font-size:14px;color:var(--muted)}
+@media(max-width:650px){.briefing-email-dialog{padding:20px}.briefing-email-dialog h2{font-size:23px}.briefing-email-dialog textarea{min-height:260px}}

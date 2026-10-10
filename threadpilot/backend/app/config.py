@@ -33,3 +33,4 @@ class Settings(BaseSettings):
     serve_frontend: bool = True
     api_access_token: SecretStr = SecretStr('')
     scheduler_token: SecretStr = SecretStr('')
+    morning_scheduler_enabled: bool = False

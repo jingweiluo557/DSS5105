@@ -45,7 +45,10 @@ const screenshots = process.env.WORKSPACE_SCREENSHOT_DIR || require('os').tmpdir
     assert.equal(requests[1].session_id,'session-1');
     assert.equal(requests[1].confirmation_id,'confirmation-1');
     assert.equal(await page.locator('.turn-list li').count(),2);
-    assert.equal(await page.locator('.evidence-record').count(),2);
+    assert.equal(await page.locator('.copilot-evidence').count(),0);
+    assert.equal(await page.getByText('SOURCE RECORDS',{exact:true}).count(),0);
+    assert.equal(await page.getByRole('heading',{name:'Conversation record',exact:true}).count(),1);
+    assert.equal(await page.locator('.copilot-chat a[href$="/api/evidence/orders/20"]').count(),1);
     await page.locator('[data-action=jump-turn]').first().click();
     const downloadEvent=page.waitForEvent('download');
     await page.getByRole('button',{name:'Export conversation'}).click();
