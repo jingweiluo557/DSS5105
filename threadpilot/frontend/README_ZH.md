@@ -26,6 +26,7 @@
 |---|---|---|
 | 品牌标识 / 封面 | `#/cover` | 封面；进入 Dashboard |
 | 侧边栏 Dashboard | `#/dashboard` | 数据快照、指标与生产趋势 |
+| 侧边栏 Morning Briefing | `briefing/index.html` | 独立静态页面：模拟两周的晨报回放（不读数据库）；页面内 Live app 按钮返回本应用 |
 | 侧边栏 AI workspace | `#/ai` | 对话、日报入口、当前对话记录与证据 |
 | 侧边栏 Activity Log | `#/activity` | 浏览器本地操作日志、筛选与 JSON 导出 |
 | 侧边栏 Settings | `#/settings` | 本地偏好、数据说明与本地状态重置 |

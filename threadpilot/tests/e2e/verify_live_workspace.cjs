@@ -77,7 +77,7 @@ const save=()=>fs.writeFileSync(path.join(output,'report.json'),JSON.stringify(r
   assert.equal(await page.evaluate(()=>workflowSession),note.state.session_id);report.checks.push('Session survives reload');
   await page.setViewportSize({width:390,height:844});
   await page.waitForFunction(()=>document.querySelector('.sidebar').getBoundingClientRect().right<=0);
-  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth));
   await page.screenshot({path:path.join(output,'mobile.png'),fullPage:true});
   report.checks.push('Mobile layout has no horizontal overflow');
   await page.setViewportSize({width:1600,height:1000});

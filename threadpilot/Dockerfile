@@ -4,6 +4,8 @@ WORKDIR /srv/threadpilot
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend ./backend
+# The discovery and risk engine shared with the morning briefing (standard library only; see backend/app/discovery.py)
+COPY simulation/__init__.py simulation/briefing.py simulation/prediction.py simulation/workdays.py ./simulation/
 COPY frontend ./frontend
 COPY data/dictionary ./data/dictionary
 COPY data/migrations ./data/migrations
@@ -12,4 +14,4 @@ RUN mkdir -p backend/runtime data/raw data/snapshots && useradd -m app && chown 
 USER app
 WORKDIR /srv/threadpilot/backend
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["python", "-m", "scripts.serve"]

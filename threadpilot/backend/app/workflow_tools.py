@@ -4,11 +4,16 @@ import math
 import re
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
-from statistics import mean
+from statistics import mean, pstdev
 from typing import Any
 
+from . import discovery
 from .schemas import Evidence, Slots
 
+# One definition of 'normal' for the whole product (briefing, dashboard, chat tools): the previous 8 same weekdays,
+# band = mean +/- max(BAND_SD x standard deviation, BAND_MIN_PCT x mean). Kept in step with simulation/briefing.py by a test.
+BAND_SD = 1.5
+BAND_MIN_PCT = 0.05
 STAGES = ['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING']
 
 
@@ -54,10 +59,37 @@ def resolve_date(value: str, now: datetime) -> date:
     return now.date().replace(day=int(match[1])) if match else date.fromisoformat(value)
 
 
+# What this system does not hold. The wording is chosen by plain code from the user's own words, never written by the model, so the
+# refusal cannot be talked into inventing a figure. Order matters: the first matching reason wins.
+NO_DATA_REASONS = [
+    ('modify', re.compile(r'\b(cancel|delete|remove|void|reschedule|reassign|postpone)\b.*\b(order|ord-?\d+)|\b(change|update|edit|move|extend|push back)\b.*\bdue date\b', re.I),
+     "I can't cancel, delete or change orders. I only read the data and, after you confirm, record notes, chase-ups and reminders. Nothing was changed."),
+    ('price', re.compile(r'\b(revenue|profit|margin|price|prices|pricing|sales|income|turnover|worth|value of)\b', re.I),
+     'This system holds no prices, revenue or profit. Orders have pieces, dates and stages only, so any figure would be invented.'),
+    ('people', re.compile(r'\b(worker|workers|operator|operators|staff|employee|employees|headcount|shift|shifts|overtime)\b', re.I),
+     'No worker names or staffing data are held. Output is recorded per stage per day, not per person.'),
+    ('demand', re.compile(r'\b(demand|forecast|next (month|quarter|year)|season)\b', re.I),
+     'This chat holds no demand forecast. The dashboard forecasts delay risk for orders already placed, not future sales.'),
+]
+
+
+def explain_no_data(message: str) -> dict[str, str]:
+    """What the data cannot answer, and why. Used for out-of-scope questions so the system says so instead of asking an unrelated question."""
+    for topic, pattern, reason in NO_DATA_REASONS:
+        if pattern.search(message):
+            return {'topic': topic, 'reason': reason}
+    return {'topic': 'other', 'reason': 'The data holds orders (customer, product, pieces, dates, stage), daily output per stage and workshop profiles. '
+                                         'It does not hold what you asked about, so I will not guess.'}
+
+
 class DataTools:
     def __init__(self, directory: Path) -> None:
         """场景 1.1–2.2：只读取正式数据目录。"""
         self.directory = directory
+
+    def briefing(self) -> dict[str, Any] | None:
+        """The newest saved morning briefing. The CSV adapter keeps none, so the caller says so; the database adapter overrides this."""
+        return None
 
     def rows(self, source: str) -> list[Evidence]:
         """场景 1.2/2.2：每次重新读取原始记录，保留 CSV 记录行号。"""
@@ -95,8 +127,19 @@ class DataTools:
             raise ValueError('Unknown or duplicate order ID')
         return matches[0]
 
-    def assess_risk(self, order: Evidence, now: datetime) -> dict[str, Any]:
-        """场景 1.3：把已完成迟交、当前逾期和风险判断分别计算。"""
+    def findings(self, now: datetime) -> dict[str, Any]:
+        """Tool list_findings (discovery): the ranked findings of the morning-briefing engine, recomputed from current rows."""
+        return discovery.findings(self, now.date())
+
+    def risk_levels(self, now: datetime) -> dict[str, dict[str, Any]]:
+        """Risk level per in-progress order from the briefing engine's queue projection: one definition of risk for every screen."""
+        return discovery.risk_levels(self, now.date())
+
+    def assess_risk(self, order: Evidence, now: datetime, levels: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
+        """场景 1.3：把已完成迟交、当前逾期和风险判断分别计算。
+
+        The risk LEVEL is the dashboard's projection (overdue / high / medium / low). The review triggers (idle 7+ days, due within 7
+        days) are kept as plain facts about what to look at; they are not a second definition of risk."""
         row = order.record
         idle = max(0, (now.date() - date.fromisoformat(row['last_activity_date'])).days)
         due_days = (date.fromisoformat(row['due_date']) - now.date()).days
@@ -106,10 +149,22 @@ class DataTools:
             reasons.append(f'No recorded activity for {idle} days (review threshold: 7 days).')
         if not complete and due_days <= 7:
             reasons.append(f'Due in {due_days} days (review window: 7 days).')
-        return {'order_id': row['order_id'], 'idle_days': idle, 'days_to_due': due_days,
-                'overdue': not complete and due_days < 0, 'completed_late': complete and int(row['days_late'] or 0) > 0,
-                'reasons': reasons, 'risk_flag': bool(reasons),
-                'limits': 'A risk flag is not confirmed late delivery. No per-order event history or recorded blockers exists in this dataset.'}
+        out = {'order_id': row['order_id'], 'idle_days': idle, 'days_to_due': due_days,
+               'overdue': not complete and due_days < 0, 'completed_late': complete and int(row['days_late'] or 0) > 0,
+               'review_triggers': reasons, 'review_flag': bool(reasons)}
+        if complete:
+            out['risk_level'] = 'complete'
+        else:
+            projection = (self.risk_levels(now) if levels is None else levels).get(row['order_id'])
+            if projection:
+                out.update(risk_level=projection['level'], risk_reason=projection['reason'], confidence=projection['confidence'],
+                           best_finish=projection['best_date'], expected_finish=projection['expected_date'], stalled=projection['stalled'])
+            else:
+                out.update(risk_level='unknown', risk_reason='Not enough production history to project the queue.')
+        out['risk_rule'] = discovery.RISK_RULE
+        out['limits'] = ('A risk level is a projection under stated assumptions, not confirmed late delivery. Review triggers say what to look '
+                         'at, not how likely it is to be late. No per-order event history or recorded blockers exists in this dataset.')
+        return out
 
     def prioritize(self, slots: Slots, now: datetime) -> tuple[dict[str, Any], list[Evidence]]:
         """场景 1.6：到期窗口包含逾期未完成订单，按截止日、旧更新、ID 排序。"""
@@ -118,8 +173,9 @@ class DataTools:
                 and date.fromisoformat(e.record['due_date']) <= end
                 and (not slots.customer or e.record['customer'].casefold() == slots.customer.casefold())]
         rows.sort(key=lambda e: (e.record['due_date'], e.record['last_activity_date'], e.record['order_id']))
+        levels = self.risk_levels(now)
         return {'window_end': end.isoformat(), 'rule': 'Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.',
-                'orders': [self.assess_risk(e, now) for e in rows]}, rows
+                'orders': [self.assess_risk(e, now, levels) for e in rows]}, rows
 
     def normality(self, slots: Slots, now: datetime) -> tuple[dict[str, Any], list[Evidence]]:
         """场景 2.1：使用前八个同 weekday 的原始行比较，单次低值不确诊。"""
@@ -138,12 +194,18 @@ class DataTools:
             return {'status': 'insufficient_baseline_or_observation', 'date': target.isoformat(),
                     'sample_count': len(baseline), 'note': 'Need at least 3 prior same-weekday working records and an observation.'}, baseline + observed
         values = [int(e.record['pieces_completed']) for e in baseline]
+        centre = mean(values)
+        spread = pstdev(values)
+        half = max(BAND_SD * spread, BAND_MIN_PCT * centre)   # the one definition of normal, shared with the morning briefing
+        low, high = centre - half, centre + half
         return {'stage': slots.stage, 'date': target.isoformat(), 'output': output,
                 'observation_source': provenance, 'user_observation': slots.observed_output,
                 'sample_count': len(values), 'baseline': 'previous eight same weekdays, excluding target and future dates',
-                'minimum': min(values), 'maximum': max(values), 'mean': round(mean(values), 2),
-                'status': 'below' if output < min(values) else 'above' if output > max(values) else 'within',
-                'limits': 'Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.'}, baseline + observed
+                'rule': 'normal band = mean +/- max(1.5 x standard deviation, 5% of the mean)',
+                'minimum': min(values), 'maximum': max(values), 'mean': round(centre, 2), 'standard_deviation': round(spread, 2),
+                'band_low': round(low, 1), 'band_high': round(high, 1),
+                'status': 'below' if output < low else 'above' if output > high else 'within',
+                'limits': 'Descriptive historical band, not a statistical control limit. One low observation alone is not proof of a sustained problem.'}, baseline + observed
 
     def deviation(self, slots: Slots, now: datetime) -> tuple[dict[str, Any], list[Evidence]]:
         """场景 2.2：展示当日上下游和同 weekday 对照，不把共现当因果。"""

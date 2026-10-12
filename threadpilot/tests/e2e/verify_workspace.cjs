@@ -36,7 +36,8 @@ const screenshots = process.env.WORKSPACE_SCREENSHOT_DIR || require('os').tmpdir
   try {
     await page.goto(`http://127.0.0.1:${server.address().port}/#/ai`);
     await page.locator('.copilot-workspace').waitFor();
-    assert.equal(await page.locator('.sidebar nav a').count(),4);
+    assert.equal(await page.locator('.sidebar nav a').count(),5);   // Dashboard, Morning Briefing, AI workspace, Activity Log, Settings
+    assert.equal(await page.locator('.sidebar nav a[href="briefing/index.html"]').count(),1);
     await page.getByRole('button',{name:'Generate daily report ↗'}).click();
     await page.getByText('Verified order result 1',{exact:true}).waitFor();
     await page.locator('[name=visible-question]').fill('Why this order?');
@@ -45,7 +46,10 @@ const screenshots = process.env.WORKSPACE_SCREENSHOT_DIR || require('os').tmpdir
     assert.equal(requests[1].session_id,'session-1');
     assert.equal(requests[1].confirmation_id,'confirmation-1');
     assert.equal(await page.locator('.turn-list li').count(),2);
-    assert.equal(await page.locator('.evidence-record').count(),2);
+    assert.equal(await page.locator('.copilot-evidence').count(),0);
+    assert.equal(await page.getByText('SOURCE RECORDS',{exact:true}).count(),0);
+    assert.equal(await page.getByRole('heading',{name:'Conversation record',exact:true}).count(),1);
+    assert.equal(await page.locator('.copilot-chat a[href$="/api/evidence/orders/20"]').count(),1);
     await page.locator('[data-action=jump-turn]').first().click();
     const downloadEvent=page.waitForEvent('download');
     await page.getByRole('button',{name:'Export conversation'}).click();
@@ -68,7 +72,7 @@ const screenshots = process.env.WORKSPACE_SCREENSHOT_DIR || require('os').tmpdir
     await page.locator('.sidebar a[href="#/ai"]').click();
     await page.setViewportSize({width:390,height:844});
     await page.waitForFunction(()=>document.querySelector('.sidebar').getBoundingClientRect().right<=0);
-    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile horizontal overflow');
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),'Mobile horizontal overflow');
     await page.screenshot({path:path.join(screenshots,'workspace-mobile.png'),fullPage:true});
     await page.locator('[data-action=new-chat]').click();
     await page.locator('[name=visible-question]').fill('Start again');

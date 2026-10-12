@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><title>Signing in to Microsoft…</title></head>
+<body style="font:16px system-ui,sans-serif;margin:32px;color:#233446;background:#fff">
+<p id="msg">Finishing Microsoft sign-in…</p>
+<!-- Microsoft sends the sign-in result to this page, which hands it to the ThreadPilot window that opened it and closes.
+     Served from this site on purpose (never a CDN): it handles the one-time sign-in code. MSAL v5 redirect bridge. -->
+<script src="vendor/msal-redirect-bridge.min.js"></script>
+<script>
+msalRedirectBridge.broadcastResponseToMainFrame().catch(function () {
+  document.getElementById('msg').textContent = 'Sign-in finished. You can close this window and return to ThreadPilot.';
+});
+</script>
+</body></html>

@@ -1,0 +1,205 @@
+{
+ "system": "dashboard chat (built-in tools, no language model)",
+ "summary": {
+  "passed": 18,
+  "total": 21,
+  "accuracy": 0.857,
+  "by_category": {
+   "fact": {
+    "passed": 6,
+    "total": 6
+   },
+   "multi_turn": {
+    "passed": 1,
+    "total": 1
+   },
+   "ambiguous": {
+    "passed": 4,
+    "total": 4
+   },
+   "unanswerable": {
+    "passed": 4,
+    "total": 4
+   },
+   "feasibility": {
+    "passed": 1,
+    "total": 3
+   },
+   "action": {
+    "passed": 2,
+    "total": 3
+   }
+  }
+ },
+ "results": [
+  {
+   "id": "H01",
+   "category": "fact",
+   "question": "How many jobs are active right now?",
+   "check": "contains_any",
+   "passed": true,
+   "answer": "34 orders are in progress: 8 late, 26 at risk, 0 on track."
+  },
+  {
+   "id": "H02",
+   "category": "fact",
+   "question": "Tell me the number of late orders.",
+   "check": "contains_any",
+   "passed": true,
+   "answer": "8 orders are late. Most urgent: ORD-107 (Northwind Apparel, 16d late), ORD-120 (TrendCart, 15d late), ORD-114 (Northwind Apparel, 9d late)."
+  },
+  {
+   "id": "H03",
+   "category": "fact",
+   "question": "What's ORD-029's due date?",
+   "check": "contains_any",
+   "passed": true,
+   "answer": "ORD-029 is due Wed, 1 Apr (today)."
+  },
+  {
+   "id": "H04",
+   "category": "fact",
+   "question": "Who is ORD-107 for?",
+   "check": "contains_any",
+   "passed": true,
+   "answer": "ORD-107 (Northwind Apparel, 2,000 cardigan) is late: 16 days past its Mon, 16 Mar due date, still at Packing. It moved yesterday; at Packing, due Mon, 16 Mar, projected finish Fri, 3 Apr."
+  },
+  {
+   "id": "H05",
+   "category": "fact",
+   "question": "How big is ORD-120?",
+   "check": "contains_any",
+   "passed": true,
+   "answer": "ORD-120 is 1,500 vest."
+  },
+  {
+   "id": "H06",
+   "category": "fact",
+   "question": "What did knitting produce yesterday?",
+   "check": "contains_any",
+   "passed": true,
+   "answer": "Knitting made 905 pieces on Tue, 31 Mar, within its usual range of 807 to 1,021. Usual is the average of the previous 8 same weekdays; Sundays are closed."
+  },
+  {
+   "id": "H07",
+   "category": "multi_turn",
+   "question": "Show me ORD-045 / What stage is it in?",
+   "check": "contains_any",
+   "passed": true,
+   "answer": "ORD-045 is at Washing, stage 3 of 4."
+  },
+  {
+   "id": "H08",
+   "category": "ambiguous",
+   "question": "Is the Cotton Club order late?",
+   "check": "ask",
+   "passed": true,
+   "answer": "Cotton Club has 4 orders in progress. Which one do you mean?"
+  },
+  {
+   "id": "H09",
+   "category": "ambiguous",
+   "question": "Status of the Northwind order?",
+   "check": "ask",
+   "passed": true,
+   "answer": "Northwind Apparel has 5 orders in progress. Which one do you mean?"
+  },
+  {
+   "id": "H10",
+   "category": "ambiguous",
+   "question": "Can you chase it?",
+   "check": "ask",
+   "passed": true,
+   "answer": "Which order should I chase?"
+  },
+  {
+   "id": "H11",
+   "category": "ambiguous",
+   "question": "How's that one going?",
+   "check": "ask",
+   "passed": true,
+   "answer": "Which order do you mean? Name one (for example ORD-120) or a customer."
+  },
+  {
+   "id": "H12",
+   "category": "unanswerable",
+   "question": "What's the margin on our hoodies?",
+   "check": "refuse",
+   "passed": true,
+   "answer": "This system holds no prices, revenue or profit. Orders have pieces, dates and stages only, so any figure would be invented. I would rather say so than give you a made-up number."
+  },
+  {
+   "id": "H13",
+   "category": "unanswerable",
+   "question": "Who is on shift tonight?",
+   "check": "refuse",
+   "passed": true,
+   "answer": "No worker names or staffing data are held. Output is recorded per stage per day, not per person. I would rather say so than give you a made-up number."
+  },
+  {
+   "id": "H14",
+   "category": "unanswerable",
+   "question": "Why did assembly slow down?",
+   "check": "refuse",
+   "passed": true,
+   "answer": "Assembly made 455 pieces on Tue, 31 Mar: 38.9% below its usual 745. The production log records output, not causes, so I cannot say why."
+  },
+  {
+   "id": "H15",
+   "category": "unanswerable",
+   "question": "Predict next month's order volume.",
+   "check": "refuse",
+   "passed": true,
+   "answer": "I forecast orders only for the next two weeks. There is no demand forecast beyond that, so I will not guess. I would rather say so than give you a made-up number."
+  },
+  {
+   "id": "H16",
+   "category": "feasibility",
+   "question": "Is it possible to deliver 600 cardigans by 18 April?",
+   "check": "estimate_not_promise",
+   "passed": false,
+   "answer": "Which order do you mean? Name one (for example ORD-120) or a customer."
+  },
+  {
+   "id": "H17",
+   "category": "feasibility",
+   "question": "We have a rush request for 1,200 polo shirts due 10 April, can we do it?",
+   "check": "estimate_not_promise",
+   "passed": true,
+   "answer": "Unlikely by Fri, 10 Apr: I estimate it finishes between Fri, 24 Apr and Wed, 6 May, with 9 working days available. Bottleneck: Packing, with 32,850 pieces already queued at a usual 1,131 a day. This is an estimate with assumptions, not a commitment."
+  },
+  {
+   "id": "H18",
+   "category": "feasibility",
+   "question": "Could we squeeze in 300 scarves?",
+   "check": "ask",
+   "passed": false,
+   "answer": "I can't answer that from this dashboard's data. I can answer questions about orders, customers, stage output, the morning briefing, feasibility of a new order, and I can draft chase-ups, notes and watches."
+  },
+  {
+   "id": "H19",
+   "category": "action",
+   "question": "Please nudge production about ORD-120",
+   "check": "confirm_first",
+   "passed": true,
+   "answer": "Here is a chase-up for ORD-120. Nothing is sent until you confirm."
+  },
+  {
+   "id": "H20",
+   "category": "action",
+   "question": "Make a note on ORD-045: customer called",
+   "check": "confirm_first",
+   "passed": true,
+   "answer": "Here is the note for ORD-045. It is saved only when you confirm."
+  },
+  {
+   "id": "H21",
+   "category": "action",
+   "question": "Cancel ORD-120",
+   "check": "refuse_action",
+   "passed": false,
+   "answer": "ORD-120 (TrendCart, 1,500 vest) is late: 15 days past its Tue, 17 Mar due date, still at Assembly. Last activity 1 working day ago; at Assembly, due Tue, 17 Mar, projected finish Thu, 9 Apr."
+  }
+ ],
+ "scorer_note": "First and only run of the held-out questions before any fix. Re-scoring with the corrected scorer gave the same result as the original."
+}

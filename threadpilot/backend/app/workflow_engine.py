@@ -2,14 +2,15 @@
 import asyncio
 import json
 import re
+from contextlib import nullcontext
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any, Literal, Protocol
 
 from .schemas import (ChatRequest, ChatResponse, Classification, DialogState, Evidence,
                       Intent, PendingAction, PendingClarification, Slots, ToolCall)
 from .workflow_store import Sender, WorkflowStore
-from .workflow_tools import DataTools, resolve_date, resolve_datetime
+from .workflow_tools import DataTools, explain_no_data, resolve_date, resolve_datetime
 
 
 class Classifier(Protocol):
@@ -27,23 +28,27 @@ class WorkflowEngine:
     async def chat(self, request: ChatRequest, classifier: Classifier) -> ChatResponse:
         """场景 1.1–3.3：原子处理一个本地会话轮次，客户端不能提交状态或工具。"""
         async with self.lock:
-            state = self.store.load(request.session_id) if request.session_id else DialogState()
-            now = self.clock()
-            if request.selected_order_id and not state.active_order and not state.comparison_orders:
-                state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
-            confirmed = self.confirmation_word(request.message)
-            if confirmed:
-                response = await self.confirm(request, state, now)
-            else:
-                # Any new turn revokes the old preview, including revisions and topic changes.
-                state.pending_action = None
-                classification = await classifier.classify(request.message, state, now)
-                response = self.route(request.message, classification, state, now)
-            state.revision += 1
-            state.history = (state.history + [{'role': 'user', 'content': request.message},
-                                             {'role': 'assistant', 'content': response.answer}])[-16:]
-            self.store.save(state)
-            return response.model_copy(update={'state': state.model_copy(deep=True)})
+            with self.store.turn_lock('chat:' + request.session_id) if request.session_id and hasattr(self.store, 'turn_lock') else nullcontext():
+                return await self._chat(request, classifier)
+
+    async def _chat(self, request: ChatRequest, classifier: Classifier) -> ChatResponse:
+        state = self.store.load(request.session_id) if request.session_id else DialogState()
+        now = self.clock()
+        if request.selected_order_id and not state.active_order and not state.comparison_orders:
+            state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
+        confirmed = self.confirmation_word(request.message)
+        if confirmed:
+            response = await self.confirm(request, state, now)
+        else:
+            # Any new turn revokes the old preview, including revisions and topic changes.
+            state.pending_action = None
+            classification = await classifier.classify(request.message, state, now)
+            response = self.route(request.message, classification, state, now)
+        state.revision += 1
+        state.history = (state.history + [{'role': 'user', 'content': request.message},
+                                         {'role': 'assistant', 'content': response.answer}])[-16:]
+        self.store.save(state)
+        return response.model_copy(update={'state': state.model_copy(deep=True)})
 
     @staticmethod
     def confirmation_word(message: str) -> bool:
@@ -102,6 +107,12 @@ class WorkflowEngine:
         state.pending_clarification = None
         calls: list[ToolCall] = []
         evidence: list[Evidence] = []
+        if result.confidence >= 0.65 and intent == Intent.DATA_UNAVAILABLE:
+            return self.refuse(message, result, state, now, calls, evidence)
+        if result.confidence >= 0.65 and intent == Intent.BRIEFING_TODAY:
+            return self.briefing(result, state, now, calls, evidence)
+        if result.confidence >= 0.65 and intent == Intent.DISCOVERY_FINDINGS:
+            return self.discover(result, state, now, calls, evidence)
         if state.comparison_orders and not explicit_ids and intent not in (Intent.ORDER_COMPARE, Intent.ORDER_COMMITMENT, Intent.ORDER_PRIORITIZE, Intent.OPERATIONS_NORMALITY, Intent.OPERATIONS_DEVIATION):
             return self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, result, now, calls, evidence)
         if result.confidence < 0.65 or intent == Intent.UNKNOWN:
@@ -207,11 +218,78 @@ class WorkflowEngine:
             elif intent == Intent.ORDER_RISK:
                 risk = self.tools.assess_risk(order, now)
                 calls.append(ToolCall(name='assess_order_risk', arguments={'order_id': order_id}, result=risk))
-                answer = self.order_facts(order) + '\nFacts and risk interpretation:\n' + json.dumps(risk, indent=2)
+                level = risk['risk_level']
+                lead = (f"Risk level: {level.upper()} (the same queue projection the dashboard uses). {risk['risk_reason']}."
+                        if 'risk_reason' in risk else 'This order is complete, so it has no risk level.')
+                answer = lead + '\n' + self.order_facts(order) + '\nFacts and risk interpretation:\n' + json.dumps(risk, indent=2)
                 answer += '\nA risk pattern does not establish that it will be late. Request a status update if needed.'
             else:
                 return self.execution(message, result, state, now, calls, evidence, order, previous_slots)
         return self.response(state, result, now, answer, calls, evidence)
+
+    def refuse(self, message: str, result: Classification, state: DialogState, now: datetime,
+               calls: list[ToolCall], evidence: list[Evidence]) -> ChatResponse:
+        """Tool explain_no_data: say what the data does not hold. The wording comes from the user's own words, not from the model."""
+        refusal = explain_no_data(message)
+        calls.append(ToolCall(name='explain_no_data', arguments={'topic': refusal['topic']}, result=refusal))
+        return self.response(state, result, now, refusal['reason'], calls, evidence)
+
+    def briefing(self, result: Classification, state: DialogState, now: datetime,
+                 calls: list[ToolCall], evidence: list[Evidence]) -> ChatResponse:
+        """Tool get_briefing (discovery): the saved 07:00 briefing, three lines first. Nothing here is computed by the model."""
+        saved = self.tools.briefing()
+        calls.append(ToolCall(name='get_briefing', arguments={}, result=saved or {'status': 'none_saved'}))
+        if saved is None:
+            return self.response(state, result, now, 'No morning briefing has been saved yet. One is saved automatically each morning at 07:00; '
+                                 'until then, ask about a specific order or stage.', calls, evidence)
+        lines = [f"Morning briefing for {saved['business_date']} (saved {saved['generated_at'][:16].replace('T', ' ')}):",
+                 f"Yesterday: {saved['yesterday']}", f"Top issue: {saved['top_issue']}", f"Decide today: {saved['decide']}"]
+        if saved.get('production_note'):
+            lines.append(f"Production: {saved['production_note']}")
+        found = saved.get('findings') or []
+        if found:
+            lines.append('Found without being asked: ' + ' '.join(f"{i}. {f['title']}." for i, f in enumerate(found[:3], 1)))
+        health = saved.get('health') or {}
+        if health:
+            lines.append('Orders in progress: ' + ', '.join(f'{health[k]} {k.replace("_", " ")}' for k in ('late', 'at_risk', 'on_track') if k in health) + '.')
+        evidence.extend(e for e in self.tools.rows('production_log.csv')
+                        if e.record['date'] == (date.fromisoformat(saved['business_date']) - timedelta(days=1)).isoformat())
+        match = re.search(r'\bORD-\d{3}\b', saved.get('top_issue') or '')
+        if match:   # so that "why is that flagged?" next has an order to talk about
+            try:
+                self.select(match[0], state, calls, evidence)
+            except ValueError:
+                pass
+        return self.response(state, result, now, '\n'.join(lines), calls, evidence)
+
+    def discover(self, result: Classification, state: DialogState, now: datetime,
+                 calls: list[ToolCall], evidence: list[Evidence]) -> ChatResponse:
+        """Tool list_findings (discovery): what is unusual right now, found without being asked, ranked by a stated score.
+
+        The findings, their scores and their wording come from the morning-briefing engine, run now on the current rows. The model
+        only chose this intent. Every finding brings the rows it was computed from."""
+        found = self.tools.findings(now)
+        rows = found.pop('_evidence')
+        evidence.extend(rows)
+        calls.append(ToolCall(name='list_findings', arguments={'business_date': found['business_date']}, result=found))
+        top = found['findings']
+        if not top:
+            return self.response(state, result, now, f"Nothing crosses an alert threshold as of {found['business_date']}. "
+                                 f"Data runs to {found['data_through']}.", calls, evidence)
+        lines = [f"What stands out on {found['business_date']} (found without being asked, data up to {found['data_through']}):"]
+        for i, f in enumerate(top, 1):
+            lines.append(f"{i}. {f['title']}. {f['detail']} Next step: {f['next_step']}.")
+        if found['more_findings']:
+            lines.append(f"{found['more_findings']} smaller findings are not shown; only the top {len(top)} make the list.")
+        lines.append('Ranking: each finding has a stated score (shown with it in the tool result); this is a pattern in the data, not a confirmed cause.')
+        ids = list(dict.fromkeys(i for f in top for i in f['order_ids']))
+        if len(top[0]['order_ids']) == 1:   # so that "why?" or "chase it" next has an order to talk about
+            try:
+                self.select(top[0]['order_ids'][0], state, calls, evidence)
+            except ValueError:
+                pass
+        state.last_order_ids = ids[:10] or state.last_order_ids
+        return self.response(state, result, now, '\n'.join(lines), calls, evidence)
 
     def select(self, order_id: str, state: DialogState, calls: list[ToolCall], evidence: list[Evidence]) -> Evidence:
         """场景 1.1/1.2：唯一识别后刷新字段，保存 active_order 和客户。"""

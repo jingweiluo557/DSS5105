@@ -1,5 +1,7 @@
 # 团队协作约定
 
+英文版（含提交前安全检查与 CI 说明）：[CONTRIBUTING.en.md](CONTRIBUTING.en.md)。
+
 ## 环境
 
 按 [README](README.md) 使用 uv sync --locked；从 backend/.env.example 创建本地 .env。提交 pyproject.toml、uv.lock，不提交 .env、.venv。忽略规则由根目录 .gitignore 定义；已跟踪文件须单独检查，忽略规则不会取消其跟踪。

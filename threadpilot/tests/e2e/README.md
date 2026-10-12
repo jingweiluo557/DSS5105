@@ -1,5 +1,12 @@
 # 前端浏览器测试
 
+## CloudBase 分离部署联调
+
+`node verify_cloud_frontend.cjs` 启动 8765 端口上的本地静态页面，所有 API 请求直接发送到真实 CloudBase 网关（不模拟响应）。
+它从被 Git 忽略的 `backend/.env.cloudfunction.json` 读取应用访问令牌，验证错误令牌、登录、两轮真实模型对话、证据、刷新恢复、通知读取、手机布局和退出。
+需要在后端和网关允许 `http://127.0.0.1:8765` 跨域；会产生两次模型查询及持久化聊天会话，不确认业务写入或发送消息。
+测试报告及截图写入被忽略的 `backend/runtime/cloud-frontend/`。默认后端为项目 CloudBase 域名，可用 `LIVE_API_ORIGIN` 覆盖。
+
 ## 环境与模拟测试
 
 以下两组测试自建本地 mock `/api/snapshot` 和 SSE 服务，不请求 OpenAI，也不要求后台启动。从项目根目录执行：
@@ -19,7 +26,7 @@ snapshot.fixture.json 是测试种子，不是生产数据缓存。此测试模�
 
 `verify_workspace.cjs` 额外覆盖精简导航、日报请求、连续对话的 session_id / confirmation_id、逐轮证据、会话导出、全部工具入口和移动端溢出检查。桌面与手机截图默认写入系统临时目录，可通过 `WORKSPACE_SCREENSHOT_DIR` 指定已有输出目录。两组测试使用模拟 API，不验证真实模型的回答质量。
 
-导航断言包括侧边栏四个入口、Activity Log / Settings 的独立选中状态，以及这两个页面不显示工作台工具栏。模拟测试的固定答案只用于验证交互，不能作为真实业务结论。
+导航断言包括侧边栏五个入口（含指向 briefing/index.html 的 Morning Briefing 静态页链接）、Activity Log / Settings 的独立选中状态，以及这两个页面不显示工作台工具栏。模拟测试的固定答案只用于验证交互，不能作为真实业务结论。
 
 ## 真实接口联调
 

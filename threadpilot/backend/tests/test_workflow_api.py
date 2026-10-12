@@ -71,3 +71,12 @@ def test_guessed_order_does_not_bypass_clarification(workflow_client: TestClient
     result = client.post('/chat', json={'message': 'Add a note that we escalated this today.', 'selected_order_id': 'ORD-005'}).json()
     assert result['needs_clarification'] and 'correct order' in result['answer']
     assert not result['confirmation_required']
+
+
+def test_evidence_by_number_returns_that_record_from_the_database(workflow_client: TestClient) -> None:
+    """GET /api/v1/evidence/{source}/{row} must return the record with that number, never its neighbour."""
+    rows = workflow_client.app.state.workflow.tools.rows('orders')
+    for e in rows[:3] + rows[-2:]:
+        got = workflow_client.get(f'/api/v1/evidence/orders/{e.row}').json()
+        assert got['row'] == e.row and got['record']['order_id'] == e.record['order_id']
+    assert workflow_client.get(f'/api/v1/evidence/orders/{max(e.row for e in rows) + 1}').status_code == 404

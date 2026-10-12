@@ -9,7 +9,7 @@ function paintLive(){document.querySelectorAll('[data-live-answer]').forEach(el=
 ask=async function(question){const q=question.trim();if(!q||aiBusy)return;if(q.length>1500){toast('Keep your question under 1500 characters.');return}
  state.chat=state.chat.filter(m=>m.role!=='error');const generation=aiGeneration;
  aiBusy=true;aiLiveText='';aiUserStopped=false;aiController=new AbortController();const controller=aiController;let timer,reader,complete=false;const resetTimeout=()=>{clearTimeout(timer);timer=setTimeout(()=>controller.abort(),90000)};resetTimeout();state.chat.push({role:'user',text:q});persistAI();if(!drawerOpen&&route!=='ai')go('ai');redrawAI();requestAnimationFrame(()=>document.querySelector('[data-live-answer]')?.scrollIntoView({block:'end'}));
- try{const response=await fetch(API_BASE+'/api/v1/workflow/chat/stream',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({message:q,session_id:workflowSession,confirmation_id:workflowConfirmation,selected_order_id:workflowSession?null:state.selected})});
+ try{const response=await window.threadpilotFetch(API_BASE+'/api/v1/workflow/chat/stream',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({message:q,session_id:workflowSession,confirmation_id:workflowConfirmation,selected_order_id:workflowSession?null:state.selected})});
  if(!response.ok){const data=await response.json();throw Object.assign(new Error(data.error?.message||'Request rejected. Check the backend or start a new conversation.'),{requestId:data.error?.request_id})}
  if(!response.headers.get('content-type')?.includes('text/event-stream')||!response.body)throw new Error('The backend is not serving a stream. Restart the updated backend.');
  reader=response.body.getReader();const decoder=new TextDecoder();let buffer='';
@@ -23,5 +23,5 @@ ask=async function(question){const q=question.trim();if(!q||aiBusy)return;if(q.l
 };
 document.addEventListener('click',e=>{if(e.target.closest('[data-action]')?.dataset.action==='stop-ai'){aiUserStopped=true;aiController?.abort()}},true);
 const seenWorkflowNotifications=new Set();
-setInterval(async()=>{if(!workflowSession||document.hidden)return;try{const session=workflowSession;const response=await fetch(API_BASE+'/api/v1/workflow/notifications/'+session);if(!response.ok||session!==workflowSession)return;for(const item of await response.json()){if(!seenWorkflowNotifications.has(item.id)){seenWorkflowNotifications.add(item.id);toast(item.order_id+': '+item.message)}}}catch{}},30000);
+setInterval(async()=>{if(!workflowSession||document.hidden)return;try{const session=workflowSession;const response=await window.threadpilotFetch(API_BASE+'/api/v1/workflow/notifications/'+session);if(!response.ok||session!==workflowSession)return;for(const item of await response.json()){if(!seenWorkflowNotifications.has(item.id)){seenWorkflowNotifications.add(item.id);toast(item.order_id+': '+item.message)}}}catch{}},30000);
 render();

@@ -1,0 +1,12 @@
+# Shell scripts must keep Unix line endings, or they fail on macOS, Linux and in Docker
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+# Generated demo files are compared byte for byte in CI
+threadpilot/demo/**       text eol=lf
+threadpilot/briefings/**  text eol=lf
+threadpilot/frontend/briefing/**  text eol=lf
+# Binary files
+*.png  binary
+*.xlsx binary
+*.pptx binary
+*.pkl  binary

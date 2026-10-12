@@ -1,0 +1,8 @@
+{
+  "note": "Copy to team_questions.json and add at least 10 questions each, written by a teammate who has NOT read the code. Same fields as questions.json. checks: contains_any (give expect_any), ask, refuse (optional forbid regexes), confirm_first, refuse_action, ask_or_confirm, estimate_not_promise, not_promised, past_date.",
+  "business_date": "2026-04-01",
+  "questions": [
+    {"id": "T01", "category": "fact", "turns": ["Which customer has the most overdue orders?"], "check": "contains_any", "expect_any": ["fill in the truth from the CSV"]},
+    {"id": "T02", "category": "unanswerable", "turns": ["Which workshop has the best quality?"], "check": "refuse"}
+  ]
+}

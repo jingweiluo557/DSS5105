@@ -10,6 +10,8 @@ __pycache__/
 node_modules/
 test-results/
 playwright-report/
+dist/
+.build/
 *.log
 .DS_Store
 Thumbs.db
@@ -22,3 +24,9 @@ data/snapshots/*
 !data/snapshots/.gitkeep
 backend/runtime/*
 !backend/runtime/.gitkeep
+
+# Simulator output, local databases and keys, notebook checkpoints
+data/live/
+*.sqlite3
+*.pem
+.ipynb_checkpoints/

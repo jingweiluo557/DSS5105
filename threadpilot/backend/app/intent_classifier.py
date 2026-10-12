@@ -19,6 +19,15 @@ operations.normality (2.1 output vs same-weekday baseline, evidence and worry fo
 operations.deviation (2.2 why lower output, co-occurrence, raw evidence, next checks),
 execution.chase (3.1 draft/revise/send external follow-up),
 execution.note (3.2 INTERNAL decision note), execution.reminder (3.3 conditional monitoring).
+briefing.today (4.1 the saved morning briefing: "did anything go wrong yesterday", "what happened", "what needs a decision today"),
+data.unavailable (4.2 asks for something this system does not hold: prices, revenue, profit, margins, worker or staff data,
+demand forecasts, or to cancel/delete/change an order).
+discovery.findings (4.3 find what nobody asked about, recomputed now: "anything unusual?", "what problems do you see?", "what am I
+missing?", "what's wrong in the factory right now?", "any patterns I should know about?": stages, customers or groups of orders).
+Boundaries: "which orders should I look at first / what needs attention" stays order.prioritize (an ordered list of orders); a question
+about ONE named stage's output is operations.*; briefing.today is only the whole-factory morning summary as saved at 07:00;
+discovery.findings is the ranked list of unusual patterns found now, with no order, stage or customer named. Asking to cancel, delete or
+change an order is data.unavailable, never execution.*. Never classify a question about money or people as an order.* intent.
 Keep short followups in last_intent unless they clearly switch topics. Pending clarification
 answers fill missing slots for that intent. Extract ONLY newly supplied slot values; the server
 merges them. Missing optional values are null or empty lists. Never fabricate an order ID.

@@ -1,5 +1,7 @@
 # ThreadPilot
 
+English overview, quick start, evaluation and tool specification: [repository README](../README.md).
+
 基于 FastAPI、MySQL 和 OpenAI 兼容模型接口的工厂订单与运营助手，通过意图工作流与只读 SQL Agent 提供可追溯的业务问答。
 
 快速导航：[环境准备](#6-环境准备) · [操作步骤](#7-详细操作步骤) · [实现与接口](#8-功能实现说明) · [配置](#10-配置项参考) · [测试](#11-测试方法) · [排错](#12-常见问题与排错)

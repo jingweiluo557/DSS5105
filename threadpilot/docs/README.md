@@ -18,6 +18,7 @@
 | 质量验收 | [验证报告](live_model_verification.md)、[机器可读证据摘要](reports/live_model_verification.json) |
 | 工作台真实链路验收 | [工作台联调报告](reports/workspace_live_integration.md)、[浏览器测试复现](../tests/e2e/README.md) |
 | 维护与测试 | [贡献指南](../CONTRIBUTING.md)、[浏览器测试](../tests/e2e/README.md) |
+| 英文文档：工具规格、评测（57 道问题）、预测方法与局限、对话工具、晨报演示 | [tool_spec.md](tool_spec.md)、[evaluation.md](evaluation.md)、[prediction_validation.md](prediction_validation.md)、[chat_tools.md](chat_tools.md)、[FEATURE_STATUS.md](FEATURE_STATUS.md)、[CODE_REVIEW.md](CODE_REVIEW.md)、[DASHBOARD_REVIEW.md](DASHBOARD_REVIEW.md) |
 
 ## 文档维护规则
 

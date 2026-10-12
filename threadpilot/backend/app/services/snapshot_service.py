@@ -14,6 +14,10 @@ class DatabaseDataTools(DataTools):
         """场景 1.1–3.3：保留原业务算法，仅替换存储适配器。"""
         self.database = database
 
+    def briefing(self) -> dict | None:
+        """The newest saved morning briefing, read from the same database as the dashboard."""
+        return _newest_briefing(self.database)
+
     def rows(self, source: str) -> list[Evidence]:
         """场景 1.2：每次打开新事务读取已提交数据，证据使用稳定记录 ID。"""
         name = source.removesuffix('.csv')
@@ -24,6 +28,18 @@ class DatabaseDataTools(DataTools):
             return [Evidence(source=name, row=r.id, url=f'/api/evidence/{name}/{r.id}',
                              record={k: '' if v is None else str(v) for k, v in fields(name, r).items()}, record_id=r.id, version=r.version, updated_at=r.updated_at.isoformat() + 'Z', original_source=r.source)
                     for r in session.scalars(select(model).order_by(model.id))]
+
+
+def _newest_briefing(database: Database) -> dict | None:
+    """The newest row of dashboard_briefings (one per day, saved at 07:00), or None when none has been saved yet."""
+    import json
+    import sqlalchemy as sa
+    from ..dashboard_store import briefings
+    if not sa.inspect(database.engine).has_table(briefings.name):
+        return None
+    with database.engine.connect() as db:
+        row = db.execute(sa.select(briefings).order_by(briefings.c.day.desc()).limit(1)).mappings().first()
+    return None if row is None else {'day': row['day'], 'business_date': row['business_date'], 'generated_at': row['generated_at'], **json.loads(row['payload'])}
 
 
 def snapshot(database: Database, today: str) -> dict:

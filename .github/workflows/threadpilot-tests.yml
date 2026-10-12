@@ -1,0 +1,67 @@
+name: ThreadPilot tests
+
+on:
+  push:
+    paths: ["threadpilot/**", ".github/workflows/threadpilot-tests.yml"]
+  pull_request:
+    paths: ["threadpilot/**", ".github/workflows/threadpilot-tests.yml"]
+
+env:
+  PROJECT_DIR: threadpilot   # folder that holds the project inside this repository
+
+jobs:
+  safety-check:
+    name: Secrets and repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check for secrets, forbidden files, large files, line endings
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: python scripts/check_repo.py
+
+  backend:
+    name: Backend tests (no MySQL, no API key)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install uv
+      - name: Install the locked dependencies
+        working-directory: ${{ env.PROJECT_DIR }}/backend
+        run: uv sync --locked --group dev
+      - name: Run tests (the MySQL integration test skips without TEST_MYSQL_URL)
+        working-directory: ${{ env.PROJECT_DIR }}/backend
+        run: uv run --locked pytest -q
+
+  simulation-and-chat:
+    name: Simulator, briefing and dashboard chat
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the pinned test tools
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: python -m pip install -r requirements-dev.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Install the accessibility checker (axe-core, pinned)
+        run: npm install --prefix "$RUNNER_TEMP/axe" axe-core@4.14.0
+      - name: Evaluation question files are up to date
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: python -m evaluation.build_questions --check
+      - name: Run tests (simulator, predictions, chat, panels, team screens, evaluation, accessibility)
+        working-directory: ${{ env.PROJECT_DIR }}
+        env:
+          AXE_CORE_PATH: ${{ runner.temp }}/axe/node_modules/axe-core/axe.min.js
+        run: python -m pytest -q tests/
+      - name: Committed demo matches a fresh rebuild
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          python -m simulation.render_demo --days 14
+          git diff --exit-code -- demo briefings frontend/briefing

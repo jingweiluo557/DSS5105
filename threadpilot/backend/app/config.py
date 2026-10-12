@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     openai_model: str = 'gpt-4.1'
     intent_api_style: Literal['responses', 'chat_completions'] = 'responses'
     openai_timeout_seconds: float = 60
+    openai_max_retries: int = Field(default=2, ge=0, le=5)      # bounded retries on rate limits, 5xx and dropped connections
+    chat_requests_per_minute: int = Field(default=40, ge=0)     # per client, on endpoints that call the model; 0 turns it off
     data_api_token: SecretStr = SecretStr('')
     sync_enabled: bool = False
     sync_interval_minutes: int = Field(default=5, ge=1)
@@ -26,4 +28,12 @@ class Settings(BaseSettings):
     sql_timeout_ms: int = Field(default=5000, ge=100, le=60000)
     sql_agent_steps: int = Field(default=16, ge=4, le=50)
     workflow_db: Path = ROOT / 'backend/runtime/workflow.sqlite3'
+    cors_origins: list[str] = ['http://127.0.0.1:8765', 'http://localhost:8765', 'http://127.0.0.1:8000', 'http://localhost:8000']
     business_now: str = 'live'
+    workflow_storage: Literal['sqlite', 'database'] = 'sqlite'
+    background_tasks_enabled: bool = True
+    serve_frontend: bool = True
+    api_access_token: SecretStr = SecretStr('')
+    scheduler_token: SecretStr = SecretStr('')
+    morning_scheduler_enabled: bool = False
+    briefing_email_to: str = ''                                 # comma-separated default recipients for the morning email

@@ -61,7 +61,8 @@ def test_actual_sdk_workflow_contract(client: TestClient) -> None:
     assert data['request_id'] == response.headers['x-request-id']
 
 
-@pytest.mark.parametrize('status,expected,code', [(401,502,'MODEL_API_ERROR'), (429,429,'MODEL_RATE_LIMITED'), (500,502,'MODEL_API_ERROR')])
+# A rejected key (401/403) and an unavailable model (404) are named, so the person running it knows what to fix; upstream text stays hidden.
+@pytest.mark.parametrize('status,expected,code', [(401,503,'MODEL_KEY_REJECTED'), (403,503,'MODEL_KEY_REJECTED'), (404,503,'MODEL_NOT_AVAILABLE'), (429,429,'MODEL_RATE_LIMITED'), (500,502,'MODEL_API_ERROR')])
 def test_upstream_errors_redacted(client: TestClient, status: int, expected: int, code: str) -> None:
     """场景 1.1–3.3：隐藏上游错误原文。"""
     provider(client, lambda _: httpx.Response(status, json={'error': {'message': 'SECRET_PROVIDER_DETAIL', 'type': 'test'}}))

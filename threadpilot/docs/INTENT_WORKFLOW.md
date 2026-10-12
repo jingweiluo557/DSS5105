@@ -71,7 +71,8 @@
 |---|---|---|---|---|
 | search_orders | ID/客户/产品/数量/日期筛选 | 正式候选记录与行引用 | 只读；源变化则结果变化 | 否 |
 | refresh_order | order_id | 当前数据库完整记录 | 只读 | 否 |
-| assess_order_risk | order_id，业务时钟 | idle_days、days_to_due、overdue、completed_late、原因、局限 | 确定性 | 否 |
+| assess_order_risk | order_id，业务时钟 | 风险等级（overdue/high/medium/low，与看板及晨报同一排队推演，`app/discovery.py`）、原因、预计完工、置信度；另附 idle_days、days_to_due、overdue、completed_late、复核触发条件、局限 | 确定性 | 否 |
+| list_findings | 业务时钟（意图 discovery.findings） | 晨报引擎的前 5 项发现（八类）、分数及计分规则、下一步、涉及订单、数据截止日期和逐行证据 | 确定性、只读 | 否 |
 | compare_orders | 两 ID、字段 | 并排原始字段 | 只读 | 否 |
 | rank_comparison | criterion | 活动订单的透明顺序 | 确定性 | 否 |
 | prioritize_orders | window_days/customer | 实际排序、规则、证据 | 确定性 | 否 |

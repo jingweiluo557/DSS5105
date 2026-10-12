@@ -10,7 +10,8 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from openai import APIConnectionError, APIStatusError, APITimeoutError, RateLimitError
+from openai import (APIConnectionError, APIStatusError, APITimeoutError, AuthenticationError, NotFoundError,
+                    PermissionDeniedError, RateLimitError)
 from pydantic import AwareDatetime, BaseModel, Field
 
 from .intent_classifier import IntentClassifier
@@ -18,6 +19,7 @@ from .schemas import ChatRequest, ChatResponse, Evidence
 from .streaming import event
 from .workflow_engine import WorkflowEngine
 from .workflow_store import WebhookSender, WorkflowStore
+from .sql_workflow_store import SQLWorkflowStore, WorkflowBusy
 from .services.snapshot_service import DatabaseDataTools
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -37,7 +39,9 @@ def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
     """场景 1.1–3.3：复用现有客户端，业务数据和私有 SQLite 分离。"""
     sender_url = os.getenv('CHASE_WEBHOOK_URL', '')
     sender = WebhookSender(sender_url, os.getenv('CHASE_WEBHOOK_TOKEN', '')) if sender_url else None
-    app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), WorkflowStore(app.state.settings.workflow_db), business_now, sender)
+    store = (SQLWorkflowStore(app.state.database.engine) if app.state.settings.workflow_storage == 'database'
+             else WorkflowStore(app.state.settings.workflow_db))
+    app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), store, business_now, sender)
 
 
 async def monitor_loop(app: FastAPI) -> None:
@@ -47,7 +51,7 @@ async def monitor_loop(app: FastAPI) -> None:
             engine = app.state.workflow
             async with engine.lock:
                 engine.store.evaluate_reminders(engine.clock(), engine.tools)
-        except (OSError, ValueError, sqlite3.Error, SQLAlchemyError):
+        except (OSError, ValueError, sqlite3.Error, SQLAlchemyError, WorkflowBusy):
             logging.getLogger(__name__).warning('Reminder source unavailable; pending checks retained')
         await asyncio.sleep(30)
 
@@ -72,12 +76,19 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
         try:
             result = await app.state.workflow.chat(body, classifier)
             return result.model_copy(update={'request_id': request.state.request_id, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1')})
+        except WorkflowBusy:
+            raise HTTPException(409, {'code': 'SESSION_BUSY', 'message': 'This conversation is processing another request. Retry shortly.'})
         except KeyError:
             raise HTTPException(404, {'code': 'UNKNOWN_SESSION', 'message': 'Start a new conversation.'})
         except APITimeoutError:
             raise HTTPException(504, {'code': 'MODEL_TIMEOUT', 'message': 'Classification timed out.'})
         except RateLimitError:
             raise HTTPException(429, {'code': 'MODEL_RATE_LIMITED', 'message': 'Provider quota or rate limit reached.'})
+        except (AuthenticationError, PermissionDeniedError):
+            # Said plainly: a rejected key used to come back as "provider unavailable", which sent people looking at the network.
+            raise HTTPException(503, {'code': 'MODEL_KEY_REJECTED', 'message': 'The model provider rejected the API key. Check OPENAI_API_KEY (no spaces or quotes) and that the key is active.'})
+        except NotFoundError:
+            raise HTTPException(503, {'code': 'MODEL_NOT_AVAILABLE', 'message': 'The configured model is not available to this API key. Check OPENAI_MODEL.'})
         except (APIConnectionError, APIStatusError):
             raise HTTPException(502, {'code': 'MODEL_API_ERROR', 'message': 'Classification provider unavailable.'})
         except (OSError, SQLAlchemyError):
@@ -90,6 +101,18 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
     async def workflow_chat(body: ChatRequest, request: Request) -> ChatResponse:
         """场景 1.1–3.3：JSON 工作流入口，传回 session_id 延续上下文。"""
         return await run(body, request)
+
+    @app.post('/api/internal/reminders/run', tags=['Internal'])
+    def evaluate_scheduled_reminders(request: Request) -> dict[str, str]:
+        token = request.app.state.settings.scheduler_token.get_secret_value()
+        if not token or not secrets.compare_digest(request.headers.get('authorization', '').encode(), ('Bearer ' + token).encode()):
+            raise HTTPException(401, {'code': 'UNAUTHORIZED', 'message': 'Scheduler authentication required.'})
+        engine = app.state.workflow
+        try:
+            engine.store.evaluate_reminders(engine.clock(), engine.tools)
+        except WorkflowBusy:
+            return {'status': 'already_running'}
+        return {'status': 'completed'}
 
     @app.post('/api/v1/workflow/chat/stream', tags=['Workflow'], response_class=StreamingResponse,
               responses={200: {'description': 'Validated workflow SSE: start, delta, done',
@@ -109,10 +132,12 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
     async def evidence_row(source: str, row: int) -> Evidence:
         """场景 1.3/2.1/2.2：白名单访问原始记录，展示引用对应数据。"""
         try:
-            rows = app.state.workflow.tools.rows(source)
-            if row < 2 or row > len(rows) + 1:
+            # Look the row up by its own number: a CSV line number for files, the record ID in the database. (Indexing by
+            # position assumed CSV line numbers, so on the database it returned the record before the one asked for.)
+            match = next((e for e in app.state.workflow.tools.rows(source) if e.row == row), None)
+            if match is None:
                 raise ValueError('No row')
-            return rows[row - 2]
+            return match
         except (ValueError, OSError):
             raise HTTPException(404, {'code': 'UNKNOWN_SOURCE_ROW', 'message': 'Evidence row not found.'})
 
