@@ -10,6 +10,7 @@ from .. import briefing_email
 from sqlalchemy.exc import SQLAlchemyError
 from ..services.dashboard_service import DashboardService, LOCAL
 from ..services.snapshot_service import snapshot
+from ..services.scheduling_service import current_snapshot
 from ..sql_workflow_store import WorkflowBusy
 from ..workflow_api import business_now
 from ..forecast_store import load_forecasts
@@ -118,9 +119,9 @@ def prediction_source(order_id: str, request: Request):
 @router.get('/dashboard/sources/{kind}')
 def diagnosis_source(kind: str, request: Request):
     if kind not in ('priority','production','capacity'): raise HTTPException(404,'Source not found.')
-    data=current(request);asset=load_forecasts(request.app.state.database);result=analyze(data,asset)
+    data=current_snapshot(request.app.state.database, business_now().date().isoformat());asset=load_forecasts(request.app.state.database);result=analyze(data,asset)
     if kind=='priority':
-        return {'business_date':data['today'],'calculation':'Late: active and due_date < business date. At risk: not late and imported probability >= 0.6; rule score >= 60 only when forecast is unavailable.',
+        return {'business_date':data['today'],'calculation':'Current-order queue projection: overdue separately; high = at least 5 working days late, medium = 1–4 days late or suspected stalled. Same approved schedule and capacity as expedite analysis.',
                 'forecast':result['forecast'],'batch_id':asset.get('batch_id'),'health':result['health'],
                 'orders':result['orders']}
     if kind=='production':

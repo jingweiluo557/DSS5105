@@ -10,6 +10,7 @@ const screenshots = process.env.WORKSPACE_SCREENSHOT_DIR || require('os').tmpdir
   const requests = [];
   const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'application/json');
+    if(req.url==='/api/scheduling/risk'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify(require('./queue.fixture.cjs')));}
     if (req.url === '/api/snapshot') return res.end(fs.readFileSync(path.join(__dirname, 'snapshot.fixture.json')));
     if (req.url === '/api/v1/health') return res.end(JSON.stringify({configured:true, model:'fixture'}));
     if (req.url.startsWith('/api/evidence/')) return res.end(JSON.stringify({record_id:20}));

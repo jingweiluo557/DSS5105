@@ -3,7 +3,8 @@ const {chromium}=require('playwright');
 const project=path.resolve(__dirname,'../..');
 async function serve(root){
  const server=http.createServer((req,res)=>{
-  if(req.url==='/api/snapshot'){res.setHeader('Content-Type','application/json');return res.end(fs.readFileSync(path.join(__dirname,'snapshot.fixture.json')));}
+  if(req.url==='/api/scheduling/risk'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify(require('./queue.fixture.cjs')));}
+    if(req.url==='/api/snapshot'){res.setHeader('Content-Type','application/json');return res.end(fs.readFileSync(path.join(__dirname,'snapshot.fixture.json')));}
   if(req.url.startsWith('/api/')){res.setHeader('Content-Type','application/json');return res.end('{"configured":true}');}
   const file=path.join(root,req.url==='/'?'index.html':req.url.split('?')[0]);
   if(!file.startsWith(root)||!fs.existsSync(file)){res.writeHead(404);return res.end();}

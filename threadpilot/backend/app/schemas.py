@@ -15,6 +15,7 @@ class Intent(StrEnum):
     ORDER_LOOKUP = 'order.lookup'
     ORDER_REFRESH = 'order.refresh'
     ORDER_RISK = 'order.risk'
+    ORDER_EXPEDITE = 'order.expedite'
     ORDER_COMPARE = 'order.compare'
     ORDER_COMMITMENT = 'order.commitment'
     ORDER_PRIORITIZE = 'order.prioritize'

@@ -209,6 +209,19 @@ class WorkflowEngine:
                 answer += ('\nThe last recorded activity date is today; author and time are not available.'
                            if order.record['last_activity_date'] == now.date().isoformat()
                            else f'\nNo update dated {now.date().isoformat()} is recorded.')
+            elif intent == Intent.ORDER_EXPEDITE:
+                data, rows = self.tools.expedite(order_id, now)
+                evidence.extend(rows)
+                calls.append(ToolCall(name='assess_expedite', arguments={'order_id': order_id}, result=data))
+                answer = f"{order_id}: {data['recommendation']}. {data['reason']}"
+                if data['gain'] is not None:
+                    answer += (f"\nFinish: {data['finish_before']} → {data['finish_after']}. "
+                               f"Lateness saved: {data['gain']} working days; added elsewhere: {data['cost']}; net: {data['net']}.")
+                    answer += '\nAffected orders: ' + ('; '.join(
+                        f"{o['order_id']}: {o['extra_days']:+} working days, added lateness {o['added_lateness']:+}" +
+                        (' (newly late)' if o['newly_late'] else '') for o in data['affected']) or 'None.')
+                answer += ('\nCurrent orders only, same capacity before and after. No schedule was changed. '
+                           'Open Risk → Analyze expedite impact for manager review, or ask to draft a chase-up, save a note, or set a reminder.')
             elif intent == Intent.ORDER_RISK:
                 risk = self.tools.assess_risk(order, now)
                 calls.append(ToolCall(name='assess_order_risk', arguments={'order_id': order_id}, result=risk))

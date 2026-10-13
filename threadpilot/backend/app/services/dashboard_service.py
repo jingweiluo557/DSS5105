@@ -9,6 +9,7 @@ import math
 import sqlalchemy as sa
 from ..dashboard_store import tasks, briefings, metrics
 from ..forecast_store import load_forecasts
+from .scheduling_service import QueueAnalysis, current_snapshot
 from ..sql_workflow_store import SQLWorkflowStore
 
 LOCAL = timezone(timedelta(hours=8))
@@ -43,30 +44,32 @@ def analyze(data, asset=None):
     today = date.fromisoformat(data['today'])
     active = [r for r in data['orders'] if r['status'] == 'IN_PROGRESS']
     customers = Counter(r['customer'] for r in active)
+    queue = QueueAnalysis(data)
     valid_forecast = forecast_matches(data, asset)
     forecasts = asset['forecasts'] if valid_forecast else {}
     evaluated = []
     for r in active:
         due = (date.fromisoformat(r['due_date']) - today).days
         idle = max(0, (today - date.fromisoformat(r['last_activity_date'])).days)
-        score = (min(35, idle * 5) + (35 if due < 0 else 28 if due <= 3 else 20 if due <= 7 else 10 if due <= 14 else 0)
-                 + (4 - STAGES.index(r['current_stage'])) * 5 + math.floor(customers[r['customer']] / len(active) * 10 + .5))
         prediction = forecasts.get(r['order_id'], {}).get('prediction')
-        high = prediction['delay_probability'] >= .6 if prediction else score >= 60
+        queue_risk = queue.risk(r)
+        high = queue_risk['level'] in ('high', 'medium')
+        score = {'overdue': 4, 'high': 3, 'medium': 2, 'unknown': 1, 'low': 0}.get(queue_risk['level'], 0)
         reasons = []
         if due < 0: reasons.append('Overdue')
         elif due <= 7: reasons.append('Due within 7 days')
-        if high or score >= 60: reasons.append('High risk')
+        if high: reasons.append(queue_risk['level'].title() + ' queue risk')
         if idle >= 5: reasons.append('No activity for 5+ days')
         evaluated.append({**r, 'score': score, 'idle': idle, 'due_days': due, 'high': high,
-                          'prediction': prediction, 'reasons': reasons})
+                          'prediction': prediction, 'risk': queue_risk, 'reasons': reasons})
     counts = {'in_progress': len(active), 'overdue': sum(r['due_days'] < 0 for r in evaluated),
               'due_today': sum(r['due_days'] == 0 for r in evaluated), 'idle': sum(r['idle'] >= 5 for r in evaluated),
-              'priority': sum(r['score'] >= 60 for r in evaluated)}
+              'priority': sum(r['risk']['level'] in ('overdue', 'high', 'medium') for r in evaluated)}
     late = counts['overdue']
     risk = sum(r['due_days'] >= 0 and r['high'] for r in evaluated)
-    health = {'late': late, 'at_risk': risk, 'on_track': len(active) - late - risk,
-              'basis': 'Imported delay model ≥60%' if valid_forecast else 'Priority score ≥60 (forecast unavailable)'}
+    health = {'late': late, 'at_risk': risk, 'on_track': sum(r['risk']['level'] == 'low' for r in evaluated),
+              'unknown': sum(r['risk']['level'] == 'unknown' for r in evaluated),
+              'basis': 'Current-order queue projection; shared with expedite analysis'}
     def delivery(start, end):
         rows = [r for r in data['orders'] if r['status'] == 'COMPLETE' and r.get('completed_date')
                 and start <= date.fromisoformat(r['completed_date']) < end]
@@ -88,11 +91,11 @@ def analyze(data, asset=None):
     if late:
         selected = sorted([r for r in evaluated if r['due_days'] < 0], key=lambda r: r['due_days'])[:3]
         advice.append({'title': 'Confirm revised delivery dates', 'text': f'{late} orders are already overdue. Confirm remaining work and a revised date before making new promises.', 'orders': [r['order_id'] for r in selected]})
-    if valid_forecast:
-        selected = sorted([r for r in evaluated if r['due_days'] >= 0 and r['high']], key=lambda r: -r['prediction']['delay_probability'])[:3]
+    if queue.available:
+        selected = sorted([r for r in evaluated if r['due_days'] >= 0 and r['high']], key=lambda r: r['due_days'])[:3]
         if selected:
-            advice.append({'title': 'Review predicted delivery risk', 'text': 'These orders are not overdue yet but have elevated model risk. Verify progress and capacity with production.',
-                           'orders': [r['order_id'] for r in selected], 'probabilities': {r['order_id']: r['prediction']['delay_probability'] for r in selected}})
+            advice.append({'title': 'Review predicted delivery risk', 'text': 'These orders are not overdue yet but have elevated queue risk. Verify progress and capacity with production.',
+                           'orders': [r['order_id'] for r in selected], 'basis': 'Queue projection'})
     if weakest and weakest['change'] < 0:
         advice.append({'title': f"Check {weakest['stage'].title()} capacity", 'text': f"Latest output is {abs(weakest['change']):.1f}% below the previous {min(20, len(data['production_log']))} working-day baseline. Check staffing, WIP and upstream supply before reallocating work.", 'orders': []})
     # Compare queue + pickup + full-order production, never allocate multiple orders to the same capacity.
@@ -127,7 +130,7 @@ def analyze(data, asset=None):
             'text': f"{external['orders'][0]}: {option['name']}, approximately {option['days']} calendar days. Confirm remaining work and available capacity.",
             'orders': external['orders'], 'options': external['options'], 'source': 'capacity'})
     advice = concise[:3]
-    return {'counts': counts, 'health': health, 'orders': evaluated, 'production': production, 'advice': advice,
+    return {'queue': queue.context(), 'counts': counts, 'health': health, 'orders': evaluated, 'production': production, 'advice': advice,
             'forecast': {'available': valid_forecast, 'business_date': asset['business_date'],
                          'type': 'Order delay risk, not sales demand', 'training_samples': 86,
                          'reason': None if valid_forecast else 'Forecast source data or business date has changed. Refresh the forecast to use model risk.'},
@@ -181,7 +184,8 @@ class DashboardService:
             return changed.rowcount == 1
 
     def get(self, data):
-        result = analyze(data, load_forecasts(self.database))
+        data = current_snapshot(self.database, data['today'])
+        result = analyze(data)
         self.sync(data, result, datetime.now(LOCAL))
         with self.database.engine.connect() as db:
             history = db.execute(sa.select(metrics).where(metrics.c.business_date <= data['today']).order_by(metrics.c.business_date.desc()).limit(14)).mappings().all()
@@ -199,7 +203,8 @@ class DashboardService:
             with self.database.engine.connect() as db:
                 if db.execute(sa.select(briefings.c.day).where(briefings.c.day == day)).first():
                     return {'status': 'already_saved', 'day': day}
-            result = analyze(data, load_forecasts(self.database))
+            data = current_snapshot(self.database, data['today'])
+            result = analyze(data)
             # Separate lock from report lock: tasks and observed metrics share the same business snapshot.
             self.sync(data, result, now)
             payload = self.compose_briefing(data, result, now)

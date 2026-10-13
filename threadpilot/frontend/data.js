@@ -12,8 +12,11 @@ const frontendAssetQuery = new URL(document.currentScript.src).search;
     if (!['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING'].every(stage => data.production_log.some(row => row.stage === stage && new Date(row.date + 'T12:00:00Z').getUTCDay() !== 0)))
       throw new Error('Dashboard needs a working-day production record for each stage. Data APIs remain available.');
     window.TRACK1_DATA = data;
+    const riskResponse = await window.threadpilotFetch(window.THREADPILOT_API_BASE + '/api/scheduling/risk', {cache:'no-store'});
+    if (!riskResponse.ok) throw new Error('Queue risk unavailable. Run database migrations and retry.');
+    window.QUEUE_DATA = await riskResponse.json();
     app.style.visibility = 'hidden';
-    for (const file of ['app.js', 'data-views.js', 'ai-api.js', 'ai-stream.js', 'workspace.js', 'dashboard.js', 'predictions.js']) {
+    for (const file of ['app.js', 'data-views.js', 'ai-api.js', 'ai-stream.js', 'workspace.js', 'dashboard.js', 'predictions.js', 'scheduling.js']) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = file + frontendAssetQuery; script.onload = resolve; script.onerror = reject;

@@ -95,21 +95,37 @@ class DataTools:
             raise ValueError('Unknown or duplicate order ID')
         return matches[0]
 
+    def queue_snapshot(self, now):
+        data = {'today': now.date().isoformat(), 'schedule': {'version': 0, 'priority': []}}
+        evidence = []
+        for name in ('orders', 'production_log', 'workshops'):
+            rows = self.rows(name + '.csv')
+            evidence.extend(rows)
+            data[name] = [e.record for e in rows]
+        return data, evidence
+
     def assess_risk(self, order: Evidence, now: datetime) -> dict[str, Any]:
-        """场景 1.3：把已完成迟交、当前逾期和风险判断分别计算。"""
-        row = order.record
-        idle = max(0, (now.date() - date.fromisoformat(row['last_activity_date'])).days)
-        due_days = (date.fromisoformat(row['due_date']) - now.date()).days
-        complete = row['status'] == 'COMPLETE'
-        reasons = []
-        if not complete and idle >= 7:
-            reasons.append(f'No recorded activity for {idle} days (review threshold: 7 days).')
-        if not complete and due_days <= 7:
-            reasons.append(f'Due in {due_days} days (review window: 7 days).')
-        return {'order_id': row['order_id'], 'idle_days': idle, 'days_to_due': due_days,
-                'overdue': not complete and due_days < 0, 'completed_late': complete and int(row['days_late'] or 0) > 0,
-                'reasons': reasons, 'risk_flag': bool(reasons),
-                'limits': 'A risk flag is not confirmed late delivery. No per-order event history or recorded blockers exists in this dataset.'}
+        from .services.scheduling_service import QueueAnalysis
+        data, _ = self.queue_snapshot(now)
+        current = next((o for o in data['orders'] if o['order_id'] == order.record['order_id']), None)
+        if current is None:
+            raise ValueError('Order no longer exists. Refresh the conversation.')
+        engine = QueueAnalysis(data)
+        risk = engine.risk(current)
+        return {'order_id': current['order_id'], 'risk_level': risk['level'], **risk,
+                'risk_flag': risk['level'] in ('high', 'medium', 'overdue'),
+                'overdue': risk['level'] == 'overdue',
+                'completed_late': current['status'] == 'COMPLETE' and int(current.get('days_late') or 0) > 0,
+                'idle_days': max(0, (now.date() - date.fromisoformat(current['last_activity_date'])).days),
+                'days_to_due': (date.fromisoformat(current['due_date']) - now.date()).days,
+                'activity_observation': f"Last recorded activity was {max(0, (now.date() - date.fromisoformat(current['last_activity_date'])).days)} days before the business date; calendar gap, not proof of a stoppage.",
+                'reasons': [risk['reason']], 'assumptions': engine.context()['assumptions'],
+                'limits': 'A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.'}
+
+    def expedite(self, order_id, now):
+        from .services.scheduling_service import QueueAnalysis
+        data, evidence = self.queue_snapshot(now)
+        return QueueAnalysis(data).expedite(order_id), evidence
 
     def prioritize(self, slots: Slots, now: datetime) -> tuple[dict[str, Any], list[Evidence]]:
         """场景 1.6：到期窗口包含逾期未完成订单，按截止日、旧更新、ID 排序。"""

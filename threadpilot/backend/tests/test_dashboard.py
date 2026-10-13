@@ -26,7 +26,8 @@ def test_prediction_matching_and_exclusive_health(business_database):
     _,data=setup(business_database)
     assert forecast_matches(data)
     result=analyze(data)
-    assert result['counts']=={'in_progress':34,'overdue':8,'due_today':1,'idle':2,'priority':2}
+    assert result['counts']=={'in_progress':34,'overdue':8,'due_today':1,'idle':2,'priority':34}
+    assert result['health']['basis']=='Current-order queue projection; shared with expedite analysis'
     health=result['health']
     assert sum(health[k] for k in ['late','at_risk','on_track'])==34
     assert health['late']==8

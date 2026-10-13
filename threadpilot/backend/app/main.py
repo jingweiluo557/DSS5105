@@ -117,8 +117,8 @@ def create_app() -> FastAPI:
         return {'status': 'ok', 'configured': app.state.client is not None, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1'), 'streaming': True}
 
     install_workflow_routes(app, DATA)
-    from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api
-    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router, dashboard_api.router):
+    from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api, scheduling_api
+    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router, dashboard_api.router, scheduling_api.router):
         app.include_router(router)
     if Settings().serve_frontend:
         app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')

@@ -1252,6 +1252,155 @@
           }
         }
       }
+    },
+    "/api/scheduling/risk": {
+      "get": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Risk",
+        "operationId": "risk_api_scheduling_risk_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/orders/{order_id}/preview": {
+      "post": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Preview",
+        "operationId": "preview_api_scheduling_orders__order_id__preview_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/reviews/{review_id}/decision": {
+      "post": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Decide",
+        "operationId": "decide_api_scheduling_reviews__review_id__decision_post",
+        "parameters": [
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Review Id"
+            }
+          },
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Decision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/history": {
+      "get": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "History",
+        "operationId": "history_api_scheduling_history_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1511,6 +1660,39 @@
         ],
         "title": "ChatResponse"
       },
+      "Decision": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "save",
+              "apply",
+              "reject"
+            ],
+            "title": "Decision"
+          },
+          "reviewed_by": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Reviewed By"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Note"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "decision",
+          "reviewed_by",
+          "note"
+        ],
+        "title": "Decision"
+      },
       "DialogState": {
         "properties": {
           "session_id": {
@@ -1743,6 +1925,7 @@
           "order.lookup",
           "order.refresh",
           "order.risk",
+          "order.expedite",
           "order.compare",
           "order.commitment",
           "order.prioritize",

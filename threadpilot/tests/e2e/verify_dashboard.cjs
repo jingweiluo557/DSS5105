@@ -12,7 +12,8 @@ const data={business_date:'2026-04-01',counts,health:{on_track:17,at_risk:9,late
  let failWrite=false;
  const server=http.createServer((req,res)=>{
   res.setHeader('Content-Type','application/json');
-  if(req.url==='/api/snapshot')return res.end(JSON.stringify(snapshot));
+  if(req.url==='/api/scheduling/risk'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify(require('./queue.fixture.cjs')));}
+    if(req.url==='/api/snapshot')return res.end(JSON.stringify(snapshot));
   if(req.url==='/api/dashboard')return res.end(JSON.stringify(data));
   if(req.url.startsWith('/api/dashboard/tasks')){
    let raw='';req.on('data',c=>raw+=c);req.on('end',()=>{
@@ -39,7 +40,8 @@ const data={business_date:'2026-04-01',counts,health:{on_track:17,at_risk:9,late
   await page.locator('[data-action=dash-filter][data-value=done]').click();assert(await page.locator('[data-task-id="auto:ORD-107"]').isChecked());
   await page.reload();await page.locator('.todo-item').first().waitFor();await page.locator('[data-action=dash-filter][data-value=done]').click();assert(await page.locator('[data-task-id="auto:ORD-107"]').isChecked());
   await page.locator('[data-task-id="auto:ORD-107"]').uncheck();await page.locator('[data-action=dash-filter][data-value=pending]').click();await page.locator('[data-task-id="auto:ORD-107"]').waitFor();
-  failWrite=true;await page.locator('[data-task-id="auto:ORD-107"]').check();await page.getByText('Unable to save or load dashboard data. Please retry.',{exact:true}).waitFor();assert(!await page.locator('[data-task-id="auto:ORD-107"]').isChecked());failWrite=false;
+  // A failed save deliberately rolls the checkbox back before Playwright's check() assertion.
+  failWrite=true;await page.locator('[data-task-id="auto:ORD-107"]').click();await page.getByText('Unable to save or load dashboard data. Please retry.',{exact:true}).waitFor();assert(!await page.locator('[data-task-id="auto:ORD-107"]').isChecked());failWrite=false;
   const out=path.resolve(__dirname,'../../backend/runtime/ui-review');fs.mkdirSync(out,{recursive:true});
   if(process.env.DASHBOARD_LIVE_URL){await page.goto(process.env.DASHBOARD_LIVE_URL);await page.locator('.todo-item').first().waitFor();await page.locator('.health-counts').waitFor();}
   await page.screenshot({path:path.join(out,'dashboard-desktop.png'),fullPage:true});

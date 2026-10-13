@@ -6,9 +6,9 @@ const stages=['KNITTING','ASSEMBLY','WASHING','PACKING'];
 const activeRaw=TRACK1_DATA.orders.filter(o=>o.status==='IN_PROGRESS');
 const orders=TRACK1_DATA.orders.map((r,index)=>{
  const active=r.status==='IN_PROGRESS',idle=active?Math.max(0,dayDiff(TODAY,r.last_activity_date)):0,daysToDue=dayDiff(r.due_date,TODAY);
- const share=activeRaw.filter(x=>x.customer===r.customer).length/activeRaw.length;
- const factors=active?[Math.min(35,idle*5),daysToDue<0?35:daysToDue<=3?28:daysToDue<=7?20:daysToDue<=14?10:0,(4-stages.indexOf(r.current_stage))*5,Math.round(share*10)]:[0,0,0,0];
- return {id:r.order_id,customer:r.customer,product:r.product,category:r.category,qty:Number(r.pieces),stage:r.current_stage,due:r.due_date,last:r.last_activity_date,idle,score:factors.reduce((a,b)=>a+b,0),factors,status:active?'In progress':'Complete',completed:r.completed_date,daysLate:r.days_late===''?null:Number(r.days_late),daysToDue,sourceRow:r._record_id||index+2,raw:r};
+ const queueRisk=window.QUEUE_DATA?.orders.find(o=>o.order_id===r.order_id)?.risk;
+ const factors=[0,0,0,0],queueScore={overdue:4,high:3,medium:2,unknown:1,low:0}[queueRisk?.level]||0;
+ return {id:r.order_id,customer:r.customer,product:r.product,category:r.category,qty:Number(r.pieces),stage:r.current_stage,due:r.due_date,last:r.last_activity_date,idle,score:queueScore,factors,status:active?'In progress':'Complete',completed:r.completed_date,daysLate:r.days_late===''?null:Number(r.days_late),daysToDue,sourceRow:r._record_id||index+2,raw:r};
 });
 const defaults={notes:[],watches:[],messages:[],audit:[],assessments:[],settings:{time:'07:00',idle:'3',voice:false,briefing:true},chat:[],chatIds:[],selected:'ORD-002'};
 let state;try{state={...JSON.parse(JSON.stringify(defaults)),...JSON.parse(localStorage.getItem('threadpilot-track1-v2')||'{}')}}catch{state=JSON.parse(JSON.stringify(defaults))}
@@ -18,8 +18,8 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const find=id=>orders.find(o=>o.id===id);
 const current=()=>find(params.get('id'))||find(state.selected)||orders[0];
 const date=d=>new Date(d+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric',timeZone:'UTC'});
-const level=o=>o.score>=80?'Severe':o.score>=60?'Warning':'Watch';
-const badge=o=>`<span class="badge ${level(o).toLowerCase()}">${level(o)} · ${o.score}</span>`;
+const level=o=>{const r=window.QUEUE_DATA?.orders.find(x=>x.order_id===o.id)?.risk.level;return ['overdue','high'].includes(r)?'Severe':r==='medium'?'Warning':r==='low'?'Watch':'Unknown'};
+const badge=o=>`<span class="badge ${level(o).toLowerCase()}">${esc(window.QUEUE_DATA?.orders.find(r=>r.order_id===o.id)?.risk.level||'unknown')}</span>`;
 const link=(r,label,id='',cls='button')=>`<a class="${cls}" href="#/${r}${id?'?id='+encodeURIComponent(id):''}">${label}</a>`;
 const btn=(action,label,cls='',extra='')=>`<button class="${cls}" data-action="${action}" ${extra}>${label}</button>`;
 const idAttr=o=>`data-id="${o.id}"`;
