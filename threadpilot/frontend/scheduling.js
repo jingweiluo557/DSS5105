@@ -1,4 +1,4 @@
-/* Risk → impact → explicit manager decision. Management credentials stay only in this form. */
+/* Risk → impact → explicit manager decision. */
 const queueRank={overdue:0,high:1,medium:2,unknown:3,low:4};
 async function scheduleRequest(path,options={}){
  const response=await window.threadpilotFetch(window.THREADPILOT_API_BASE+'/api/scheduling/'+path,
@@ -33,7 +33,6 @@ async function openExpedite(id,button){
    <h3>Affected orders (${p.affected.length})</h3><div class="table-wrap"><table><thead><tr><th>Order</th><th>Before → after</th><th>Extra days</th><th>Added lateness</th><th>Newly late?</th></tr></thead><tbody>${p.affected.map(r=>`<tr><td>${esc(r.order_id)}</td><td>${esc(r.finish_before)} → ${esc(r.finish_after)}</td><td>${r.extra_days}</td><td>${r.added_lateness}</td><td>${r.newly_late?'Yes':'No'}</td></tr>`).join('')||'<tr><td colspan="5">No affected orders identified.</td></tr>'}</tbody></table></div>
    <details><summary>Capacity and assumptions</summary><p>${esc(JSON.stringify(p.capacity))}</p><ul>${p.assumptions.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></details>
    <form><label>Manager name<input name="reviewer" required maxlength="100" autocomplete="name"></label><label>Decision reason / note<textarea name="note" required maxlength="2000"></textarea></label>
-   <label>Management access token<input name="token" type="password" required autocomplete="off"></label>
    <label><input name="reviewed" type="checkbox" required> I reviewed the affected orders and assumptions.</label>
    <p>Applying places this order before all existing priorities in each remaining stage, until completion or a later approved adjustment. It changes this application's dispatch plan.</p>
    <div class="actions"><button type="submit" value="save">Save advice</button><button type="submit" value="reject">Reject</button><button type="submit" value="apply" class="primary" ${p.can_apply?'':'disabled'}>Approve and adjust schedule</button></div><p role="status" data-status></p></form>
@@ -49,8 +48,8 @@ async function openExpedite(id,button){
    if(decision==='apply'&&!confirm(`Move ${id} ahead of all current priorities? ${p.affected.filter(r=>r.newly_late).length} order(s) become late in this scenario.`))return;
    busy=true;form.querySelectorAll('button').forEach(b=>b.disabled=true);status.textContent='Saving reviewed decision…';
    try{
-    const result=await scheduleRequest('reviews/'+p.review_id+'/decision',{method:'POST',headers:{Authorization:'Bearer '+form.elements.token.value,'X-Confirm-Write':'true'},body:JSON.stringify({decision,reviewed_by:form.elements.reviewer.value,note:form.elements.note.value})});
-    form.elements.token.value='';decided=true;status.textContent=`Decision ${result.status}. Saved to shared history.`;
+    const result=await scheduleRequest('reviews/'+p.review_id+'/decision',{method:'POST',headers:{'X-Confirm-Write':'true'},body:JSON.stringify({decision,reviewed_by:form.elements.reviewer.value,note:form.elements.note.value})});
+    decided=true;status.textContent=`Decision ${result.status}. Saved to shared history.`;
     window.QUEUE_DATA=await scheduleRequest('risk');await loadDashboard();render();
    }catch(error){status.textContent=error.message;}
    finally{busy=false;if(!decided)form.querySelectorAll('button').forEach(b=>b.disabled=b.value==='apply'&&!p.can_apply);}
@@ -67,7 +66,7 @@ async function openExpedite(id,button){
 }
 async function showScheduleHistory(){
  try{const rows=await scheduleRequest('history'),d=document.createElement('dialog');d.className='expedite-dialog';
- d.innerHTML=`<h2>Manager decision history</h2><p>Reviewer names are recorded declarations; authorization uses the management token.</p>${rows.map(r=>`<details><summary>${esc(r.order_id)} · ${esc(r.status)} · ${esc(r.decided_at)}</summary><p>${esc(r.reviewed_by)}: ${esc(r.note)}</p><p>Saved net benefit: ${r.payload.net??'Unavailable'} · ${esc(r.payload.business_date)}</p><pre>${esc(JSON.stringify(r.payload.affected,null,2))}</pre></details>`).join('')||'<p>No reviewed decisions yet.</p>'}<button>Close</button>`;
+ d.innerHTML=`<h2>Manager decision history</h2><p>Decisions record the reviewer name, reason and affected orders.</p>${rows.map(r=>`<details><summary>${esc(r.order_id)} · ${esc(r.status)} · ${esc(r.decided_at)}</summary><p>${esc(r.reviewed_by)}: ${esc(r.note)}</p><p>Saved net benefit: ${r.payload.net??'Unavailable'} · ${esc(r.payload.business_date)}</p><pre>${esc(JSON.stringify(r.payload.affected,null,2))}</pre></details>`).join('')||'<p>No reviewed decisions yet.</p>'}<button>Close</button>`;
  document.body.append(d);d.querySelector('button').onclick=()=>d.close();d.onclose=()=>d.remove();d.showModal();
  }catch(e){toast(e.message)}
 }

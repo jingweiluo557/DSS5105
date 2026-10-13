@@ -29,11 +29,11 @@ const {chromium}=require('playwright');
   await page.screenshot({path:path.join(out,'review-mobile.png'),fullPage:true});
   await dialog.locator('[name=reviewer]').fill('Test manager');
   await dialog.locator('[name=note]').fill('Reviewed affected orders in isolated test database.');
-  await dialog.locator('[name=token]').fill('queue-test-manager');
+  assert.equal(await dialog.locator('[name=token]').count(),0);
   await dialog.locator('[name=reviewed]').check();
   await dialog.getByRole('button',{name:'Approve and adjust schedule'}).click();
   await dialog.getByText('Decision applied. Saved to shared history.',{exact:true}).waitFor();
-  assert.equal(await dialog.locator('[name=token]').inputValue(),'');
+
   await dialog.getByRole('button',{name:'Close',exact:true}).click();
   await page.reload();
   await page.getByRole('heading',{name:'Risk and dispatch decisions'}).waitFor();

@@ -14,7 +14,7 @@ From `backend/`, install the existing locked dependencies and run `python -m ale
 
 The frontend now defaults to its own host (including LAN/mobile access); set `window.THREADPILOT_CONFIG.apiBase` explicitly before `config.js` for a separate backend. It no longer silently routes non-localhost visitors to a fixed cloud service.
 
-The front end needs access to `/api/scheduling/*`. Existing `API_ACCESS_TOKEN` protects workspace access when configured. Manager decisions additionally require `DATA_API_TOKEN` and `X-Confirm-Write: true`. The UI requests this credential for each review and never saves it to browser storage. The reviewer name is a declared audit label; this application still uses a shared management credential, not individual identity/role accounts.
+The front end needs access to `/api/scheduling/*`. Existing `API_ACCESS_TOKEN` protects workspace access when configured. Scheduling decisions require `X-Confirm-Write: true`, a reviewer name and a decision reason. No management token is required for this flow. Reviewer names are declared audit labels, not authenticated individual identities. Existing data-management APIs retain their separate access controls.
 
 ## Calculation
 
@@ -39,7 +39,7 @@ Saved/rejected/applied decisions are visible in Risk → Decision history. The m
 1. Migrate an empty database and an existing 0005 database; confirm old business rows survive.
 2. On the same business date, confirm dashboard, risk page and chat report identical risk for an order.
 3. Analyze an order and compare its finish dates, lateness benefit, affected orders and net benefit by hand.
-4. Save/reject without altering the queue. Approve with management credentials and verify the next projection reflects the new queue, including after restarting.
+4. Save/reject without altering the queue. Approve after reviewing the impact and verify the next projection reflects the new queue, including after restarting.
 5. Update an order or approve another queue adjustment between preview and decision: the old preview must return conflict.
 6. Retry an approved decision: queue version must not increment twice.
 7. Test missing capacity, a suspected stalled order, newly late orders, a negative-net proposal and the 200-day horizon.

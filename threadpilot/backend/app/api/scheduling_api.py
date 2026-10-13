@@ -1,12 +1,17 @@
 from typing import Literal
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from .security import confirm_write
 from ..services.scheduling_service import SchedulingService, QueueAnalysis, current_snapshot
 from ..workflow_api import business_now
 
 router = APIRouter(prefix='/api/scheduling', tags=['Scheduling'])
+
+
+def confirm_decision(x_confirm_write: str = Header(default='')) -> None:
+    if x_confirm_write.lower() != 'true':
+        raise HTTPException(409, {'code': 'CONFIRMATION_REQUIRED',
+                                 'message': 'Review the impact, then submit X-Confirm-Write: true.'})
 
 
 class Decision(BaseModel):
@@ -35,7 +40,7 @@ def preview(order_id: str, request: Request, response: Response):
     return SchedulingService(request.app.state.database).preview(order_id, business_now().date().isoformat())
 
 
-@router.post('/reviews/{review_id}/decision', dependencies=[Depends(confirm_write)])
+@router.post('/reviews/{review_id}/decision', dependencies=[Depends(confirm_decision)])
 def decide(review_id: UUID, body: Decision, request: Request):
     try:
         return SchedulingService(request.app.state.database).decide(str(review_id), body.decision, body.reviewed_by,

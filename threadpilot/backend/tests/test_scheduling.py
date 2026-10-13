@@ -158,8 +158,8 @@ def test_chat_followup_and_actions_do_not_apply_schedule(business_database,tmp_p
     assert not current_snapshot(business_database,'2026-04-01')['schedule']['priority']
 
 
-def test_manager_api_requires_both_credentials_and_confirmation(business_database,monkeypatch,tmp_path):
-    for key,value in {'OPENAI_API_KEY':'','API_ACCESS_TOKEN':'workspace','BACKGROUND_TASKS_ENABLED':'false',
+def test_manager_api_requires_workspace_access_and_confirmation_without_admin_token(business_database,monkeypatch,tmp_path):
+    for key,value in {'OPENAI_API_KEY':'','DATA_API_TOKEN':'','API_ACCESS_TOKEN':'workspace','BACKGROUND_TASKS_ENABLED':'false',
                       'BUSINESS_NOW':'2026-04-01T09:00:00+08:00','WORKFLOW_DB':str(tmp_path/'workflow.db')}.items():
         monkeypatch.setenv(key,value)
     with TestClient(create_app()) as client:
@@ -168,8 +168,6 @@ def test_manager_api_requires_both_credentials_and_confirmation(business_databas
         p=client.post('/api/scheduling/orders/ORD-005/preview',headers=headers).json()
         url='/api/scheduling/reviews/'+p['review_id']+'/decision'
         body={'decision':'save','reviewed_by':'Manager','note':'Review first'}
-        assert client.post(url,headers=headers,json=body).status_code==401
-        headers['Authorization']='Bearer test-management-token'
         assert client.post(url,headers=headers,json=body).status_code==409
         headers['X-Confirm-Write']='true'
         assert client.post(url,headers=headers,json=body).json()['status']=='saved'

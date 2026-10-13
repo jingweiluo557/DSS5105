@@ -1339,16 +1339,6 @@
               "default": "",
               "title": "X-Confirm-Write"
             }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "",
-              "title": "Authorization"
-            }
           }
         ],
         "requestBody": {
