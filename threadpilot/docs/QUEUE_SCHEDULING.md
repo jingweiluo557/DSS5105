@@ -52,3 +52,19 @@ No real email is sent and no production database is modified by unit tests. MySQ
 - Backend regression: 104 passed, 1 skipped (MySQL integration requires `TEST_MYSQL_URL`). This includes migration from an empty database and revision 0005, stale decisions, concurrent approvals, idempotency and shared risk/chat calculations.
 - Isolated SQLite backend and real browser: analysis, manager approval, persisted priority, recalculated finish dates, decision history and desktop/mobile layouts passed (`tests/e2e/verify_scheduling.cjs`).
 - Existing chat streaming/cancellation/retry and dashboard task persistence/failed-save rollback browser checks passed. Live-model classification and a production MySQL deployment still need environment-specific acceptance.
+
+## AI review reasons
+
+Revision `0007_drafts` adds a separate `dispatch_drafts` table. Existing reviews and business records remain intact. Run the normal migration before starting this version.
+
+Open **Analyze expedite impact** to create or resume the order's shared working draft. Select **Save advice / Reject / Apply**, enter a reviewer name, and click **AI 起草 / 修改**. Revisions such as “再短一点” use the previous candidate and the current form. The model only writes a qualitative rationale; order IDs and the numerical benefit/cost/net summary are appended by the server from the bound analysis. AI output containing raw digits is rejected rather than accepted as verified calculation. A failed model call leaves the form and saved candidate unchanged.
+
+Candidates never overwrite the form automatically. **采用到表单** requires confirmation when replacing existing text, and resets the reviewed checkbox. Manual form changes autosave to the server. A local recovery copy also survives refresh during an unfinished save; conflicting recovery text requires explicit adoption. Reopening the order resumes its shared draft. Version checks prevent a slow model response or another tab from overwriting newer edits.
+
+**在聊天中继续修改** carries the exact draft identity into the existing chat. The added `review.reason` intent supports drafting, revision and adoption. Users can also ask “为 ORD-114 起草不批准插队的审核理由”, then “再短一点”. A decision choice is requested when missing for a new drafting context. Adoption from chat only fills an empty form; if text already exists, the user is directed to the form to explicitly confirm replacement. The response includes an **打开审核表单** entry. Existing order, chase, note and reminder routes remain in place; this release does not add general-purpose conversation fallback.
+
+Selecting a new decision clears the old AI candidate but retains manual form text for review. Refreshing an expired analysis binds a new review, clears old candidates/history, and retains form text with a warning to recheck its numbers. Final submission requires the matching decision, reviewer, note, draft ID/version, explicit confirmation and a still-valid analysis. Submission and the final draft state are recorded in the same transaction; adoption or drafting alone cannot change the queue.
+
+Drafts are shared within the existing workspace, not private per-manager documents. Reviewer names are declarations. These features do not add identity accounts or management tokens.
+
+Validation includes model-fixture tests for continuous revision, concurrent edits, stale refresh, model failure, chat-to-form routing, exact-version submission, and browser checks for manual editing, reload recovery, mobile layout and final review. Real external-model generation is a separate environment acceptance check.

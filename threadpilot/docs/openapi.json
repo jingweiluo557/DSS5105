@@ -1391,6 +1391,201 @@
           }
         }
       }
+    },
+    "/api/scheduling/orders/{order_id}/draft": {
+      "post": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Open Draft",
+        "operationId": "open_draft_api_scheduling_orders__order_id__draft_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/drafts/{draft_id}": {
+      "get": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Get Draft",
+        "operationId": "get_draft_api_scheduling_drafts__draft_id__get",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Edit Draft",
+        "operationId": "edit_draft_api_scheduling_drafts__draft_id__patch",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftEdit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/drafts/{draft_id}/{action}": {
+      "post": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Draft Action",
+        "operationId": "draft_action_api_scheduling_drafts__draft_id___action__post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "generate",
+                "adopt",
+                "refresh"
+              ],
+              "type": "string",
+              "title": "Action"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftTurn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1487,6 +1682,18 @@
               }
             ],
             "title": "Session Id"
+          },
+          "review_draft_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9-]{36}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Draft Id"
           },
           "confirmation_id": {
             "anyOf": [
@@ -1672,6 +1879,30 @@
             "maxLength": 2000,
             "minLength": 1,
             "title": "Note"
+          },
+          "draft_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Id"
+          },
+          "draft_version": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Version"
           }
         },
         "additionalProperties": false,
@@ -1782,6 +2013,17 @@
             "type": "array",
             "title": "History"
           },
+          "review_draft_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Draft Id"
+          },
           "revision": {
             "type": "integer",
             "title": "Revision",
@@ -1791,6 +2033,83 @@
         "additionalProperties": false,
         "type": "object",
         "title": "DialogState"
+      },
+      "DraftEdit": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "reviewer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewer"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "save",
+                  "apply",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "title": "DraftEdit"
+      },
+      "DraftTurn": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "instruction": {
+            "type": "string",
+            "maxLength": 1500,
+            "minLength": 1,
+            "title": "Instruction",
+            "default": "请起草审核理由。"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "title": "DraftTurn"
       },
       "EmailUpdate": {
         "properties": {
@@ -1916,6 +2235,7 @@
           "order.refresh",
           "order.risk",
           "order.expedite",
+          "review.reason",
           "order.compare",
           "order.commitment",
           "order.prioritize",
@@ -2387,6 +2707,22 @@
             ],
             "title": "Packing Loss Days"
           },
+          "review_decision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "save",
+                  "apply",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Decision"
+          },
           "recipient": {
             "anyOf": [
               {
@@ -2460,7 +2796,8 @@
               "evidence",
               "recommend",
               "rank",
-              "confirm_target"
+              "confirm_target",
+              "adopt"
             ],
             "title": "Action",
             "default": "read"

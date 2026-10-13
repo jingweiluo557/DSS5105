@@ -14,6 +14,7 @@ from openai import APIConnectionError, APIStatusError, APITimeoutError, RateLimi
 from pydantic import AwareDatetime, BaseModel, Field
 
 from .intent_classifier import IntentClassifier
+from .services.review_drafts import DraftConflict
 from .schemas import ChatRequest, ChatResponse, Evidence
 from .streaming import event
 from .workflow_engine import WorkflowEngine
@@ -41,6 +42,8 @@ def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
     store = (SQLWorkflowStore(app.state.database.engine) if app.state.settings.workflow_storage == 'database'
              else WorkflowStore(app.state.settings.workflow_db))
     app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), store, business_now, sender)
+    from .services.review_chat import review_reason_handler
+    app.state.workflow.review_reason_handler = review_reason_handler(app)
 
 
 async def monitor_loop(app: FastAPI) -> None:
@@ -77,6 +80,8 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
             return result.model_copy(update={'request_id': request.state.request_id, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1')})
         except WorkflowBusy:
             raise HTTPException(409, {'code': 'SESSION_BUSY', 'message': 'This conversation is processing another request. Retry shortly.'})
+        except DraftConflict as error:
+            raise HTTPException(409, {'code': 'DRAFT_CHANGED', 'message': str(error)})
         except KeyError:
             raise HTTPException(404, {'code': 'UNKNOWN_SESSION', 'message': 'Start a new conversation.'})
         except APITimeoutError:

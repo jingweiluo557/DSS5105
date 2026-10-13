@@ -28,6 +28,7 @@ const {chromium}=require('playwright');
   assert(await dialog.evaluate(d=>d.getBoundingClientRect().width<=innerWidth),'Dialog overflows on mobile');
   await page.screenshot({path:path.join(out,'review-mobile.png'),fullPage:true});
   await dialog.locator('[name=reviewer]').fill('Test manager');
+  await dialog.locator('[name=decision]').selectOption('apply');
   await dialog.locator('[name=note]').fill('Reviewed affected orders in isolated test database.');
   assert.equal(await dialog.locator('[name=token]').count(),0);
   await dialog.locator('[name=reviewed]').check();

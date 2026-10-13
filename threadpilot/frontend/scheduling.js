@@ -20,10 +20,11 @@ riskPage=function(){
 const queueOriginalOrderDetail=orderDetail;
 orderDetail=function(){const o=current();return queueOriginalOrderDetail()+(o.status==='In progress'?`<section class="card spaced"><h2>Dispatch decision</h2><p>Compare the same queue before and after moving this order to the front.</p>${expediteEntry(o.id)}</section>`:'')};
 
-async function openExpedite(id,button){
+async function openExpedite(id,button,draftId=null){
  button.disabled=true;
  try{
-  const p=await scheduleRequest('orders/'+encodeURIComponent(id)+'/preview',{method:'POST'});
+  const draft=await scheduleRequest(draftId?'drafts/'+draftId:'orders/'+encodeURIComponent(id)+'/draft',draftId?{}:{method:'POST'});
+  id=draft.order_id;const p=draft.analysis;
   const d=document.createElement('dialog');d.className='expedite-dialog';d.setAttribute('aria-labelledby','expedite-title');
   const labels={now:'Recommend expedite',later:'Keep current order',trade_off:'Manager trade-off',investigate:'Investigate suspected stall',unavailable:'Cannot assess'};
   d.innerHTML=`<div class="section-heading"><h2 id="expedite-title">${esc(id)} · Expedite review</h2><button type="button" data-close>Close</button></div>
@@ -33,6 +34,11 @@ async function openExpedite(id,button){
    <h3>Affected orders (${p.affected.length})</h3><div class="table-wrap"><table><thead><tr><th>Order</th><th>Before → after</th><th>Extra days</th><th>Added lateness</th><th>Newly late?</th></tr></thead><tbody>${p.affected.map(r=>`<tr><td>${esc(r.order_id)}</td><td>${esc(r.finish_before)} → ${esc(r.finish_after)}</td><td>${r.extra_days}</td><td>${r.added_lateness}</td><td>${r.newly_late?'Yes':'No'}</td></tr>`).join('')||'<tr><td colspan="5">No affected orders identified.</td></tr>'}</tbody></table></div>
    <details><summary>Capacity and assumptions</summary><p>${esc(JSON.stringify(p.capacity))}</p><ul>${p.assumptions.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></details>
    <form><label>Manager name<input name="reviewer" required maxlength="100" autocomplete="name"></label><label>Decision reason / note<textarea name="note" required maxlength="2000"></textarea></label>
+   <label>Decision intention / 决策倾向<select name="decision"><option value="save">暂缓决定 / Save advice</option><option value="reject">不批准插队 / Reject</option><option value="apply">批准插队 / Apply</option></select></label>
+   <section class="review-draft-editor"><h3>AI 审核理由草稿</h3><p data-draft-status role="status"></p><button type="button" data-draft-refresh>重新分析（保留表单文字）</button><button type="button" data-draft-reload>加载服务器最新草稿</button><button type="button" data-draft-recover hidden>恢复本机未保存文字</button>
+   <label>起草或修改要求<textarea name="draft_instruction" maxlength="1500" placeholder="例如：先不插队，简短说明原因；或：再短一点，更正式一些"></textarea></label>
+   <div class="actions"><button type="button" data-draft-generate>AI 起草 / 修改</button><button type="button" data-draft-chat>在聊天中继续修改</button></div>
+   <p>AI 候选不会自动覆盖表单。采用后仍需你确认提交。</p><pre data-draft-candidate></pre><button type="button" data-draft-adopt>采用到表单（替换当前理由）</button></section>
    <label><input name="reviewed" type="checkbox" required> I reviewed the affected orders and assumptions.</label>
    <p>Applying places this order before all existing priorities in each remaining stage, until completion or a later approved adjustment. It changes this application's dispatch plan.</p>
    <div class="actions"><button type="submit" value="save">Save advice</button><button type="submit" value="reject">Reject</button><button type="submit" value="apply" class="primary" ${p.can_apply?'':'disabled'}>Approve and adjust schedule</button></div><p role="status" data-status></p></form>
@@ -42,14 +48,19 @@ async function openExpedite(id,button){
   d.addEventListener('cancel',e=>{if(busy)e.preventDefault()});
   d.addEventListener('close',()=>d.remove());
   const form=d.querySelector('form'),status=d.querySelector('[data-status]');
+  const editor=installReviewDraft(d,draft);
+  d.addEventListener('close',()=>editor.dispose());
   form.addEventListener('submit',async e=>{
    e.preventDefault();if(busy||decided||!form.reportValidity())return;
+   if(editor.busy)return;
    const decision=e.submitter.value;
+   if(form.elements.decision.value!==decision){status.textContent='请先选择对应的决策倾向，核对理由并重新勾选确认。';form.elements.reviewed.checked=false;return;}
    if(decision==='apply'&&!confirm(`Move ${id} ahead of all current priorities? ${p.affected.filter(r=>r.newly_late).length} order(s) become late in this scenario.`))return;
    busy=true;form.querySelectorAll('button').forEach(b=>b.disabled=true);status.textContent='Saving reviewed decision…';
    try{
-    const result=await scheduleRequest('reviews/'+p.review_id+'/decision',{method:'POST',headers:{'X-Confirm-Write':'true'},body:JSON.stringify({decision,reviewed_by:form.elements.reviewer.value,note:form.elements.note.value})});
-    decided=true;status.textContent=`Decision ${result.status}. Saved to shared history.`;
+    await editor.flush();const latest=editor.current();
+    const result=await scheduleRequest('reviews/'+latest.review_id+'/decision',{method:'POST',headers:{'X-Confirm-Write':'true'},body:JSON.stringify({decision,reviewed_by:form.elements.reviewer.value,note:form.elements.note.value,draft_id:latest.id,draft_version:latest.version})});
+    decided=true;editor.finish();status.textContent=`Decision ${result.status}. Saved to shared history.`;
     window.QUEUE_DATA=await scheduleRequest('risk');await loadDashboard();render();
    }catch(error){status.textContent=error.message;}
    finally{busy=false;if(!decided)form.querySelectorAll('button').forEach(b=>b.disabled=b.value==='apply'&&!p.can_apply);}
@@ -72,6 +83,7 @@ async function showScheduleHistory(){
 }
 document.addEventListener('click',e=>{
  const b=e.target.closest('[data-action]');if(!b)return;
+ if(b.dataset.action==='review-draft-open')openExpedite(b.dataset.id,b,b.dataset.draft);
  if(b.dataset.action==='expedite-preview')openExpedite(b.dataset.id,b);
  if(b.dataset.action==='queue-refresh')location.reload();
  if(b.dataset.action==='schedule-history')showScheduleHistory();

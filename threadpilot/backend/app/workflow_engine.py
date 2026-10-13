@@ -43,7 +43,10 @@ class WorkflowEngine:
             # Any new turn revokes the old preview, including revisions and topic changes.
             state.pending_action = None
             classification = await classifier.classify(request.message, state, now)
-            response = self.route(request.message, classification, state, now)
+            if classification.intent == Intent.REVIEW_REASON and hasattr(self, 'review_reason_handler'):
+                response = await self.review_reason_handler(request, classification, state, now)
+            else:
+                response = self.route(request.message, classification, state, now)
         state.revision += 1
         state.history = (state.history + [{'role': 'user', 'content': request.message},
                                          {'role': 'assistant', 'content': response.answer}])[-16:]

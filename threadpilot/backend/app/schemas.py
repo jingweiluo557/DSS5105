@@ -16,6 +16,7 @@ class Intent(StrEnum):
     ORDER_REFRESH = 'order.refresh'
     ORDER_RISK = 'order.risk'
     ORDER_EXPEDITE = 'order.expedite'
+    REVIEW_REASON = 'review.reason'
     ORDER_COMPARE = 'order.compare'
     ORDER_COMMITMENT = 'order.commitment'
     ORDER_PRIORITIZE = 'order.prioritize'
@@ -43,12 +44,13 @@ class Slots(StrictModel):
     delivery_point: Literal['factory', 'customer'] | None = None
     delivery_buffer_days: int | None = Field(default=None, ge=0, le=60)
     packing_loss_days: int | None = Field(default=None, ge=0, le=60)
+    review_decision: Literal['save', 'apply', 'reject'] | None = None
     recipient: str | None = None
     tone: str | None = None
     text: str | None = None
     deadline: str | None = None
     condition: Literal['no_reply', 'no_activity'] | None = None
-    action: Literal['read', 'draft', 'revise', 'send', 'save', 'create', 'update', 'explain', 'evidence', 'recommend', 'rank', 'confirm_target'] = 'read'
+    action: Literal['read', 'draft', 'revise', 'send', 'save', 'create', 'update', 'explain', 'evidence', 'recommend', 'rank', 'confirm_target', 'adopt'] = 'read'
     reference: Literal['explicit', 'active', 'ambiguous', 'none'] = 'none'
 
 
@@ -109,12 +111,14 @@ class DialogState(StrictModel):
     last_order_ids: list[str] = Field(default_factory=list)
     draft: dict[str, str] | None = None
     history: list[dict[str, str]] = Field(default_factory=list)
+    review_draft_id: str | None = None
     revision: int = 0
 
 
 class ChatRequest(StrictModel):
     message: str = Field(min_length=1, max_length=1500)
     session_id: str | None = Field(default=None, pattern=r'^[a-f0-9-]{36}$')
+    review_draft_id: str | None = Field(default=None, pattern=r'^[a-f0-9-]{36}$')
     confirmation_id: str | None = None
     selected_order_id: str | None = Field(default=None, pattern=r'^ORD-\d{3}$')
 

@@ -15,6 +15,12 @@ order.risk (1.3 risk, why flagged, already late, history, should I chase),
 order.expedite (assess moving an EXISTING order to the front of production queues; should we expedite,
 是否值得插队, 加急; follow-ups 'who would it affect?', '它会影响谁？', 'how many days saved?' stay in order.expedite;
 requests to apply the change also use this intent but only open analysis: manager approval happens outside chat),
+review.reason (draft/revise/adopt a manager scheduling decision reason, 审核理由, 审批理由;
+short followups like 再短一点, 更正式, 采用这一版 remain review.reason after a review draft.
+review_decision is apply for approving expedite, reject for not approving, save for deferring/saving advice.
+Only extract review_decision if newly specified by the user; requests for tone/length keep the existing decision.
+Adopting wording uses action=adopt and never executes scheduling. Internal execution.note is different.
+Switch to order.expedite for fresh impact/affected-order questions; ordinary non-review routes stay unchanged),
 order.compare (1.4 two orders, comparative risk and nearest deadline),
 order.commitment (1.5 NEW order capacity, assumptions, what-if, customer recommendation),
 order.prioritize (1.6 daily exceptions, time window, why an order was ranked),

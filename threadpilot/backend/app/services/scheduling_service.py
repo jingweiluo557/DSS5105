@@ -8,7 +8,7 @@ from uuid import uuid4
 import sqlalchemy as sa
 from ..crud.data_record import MODELS, fields, lock_writes
 from ..models.data_record import SyncLock
-from ..scheduling_store import schedule, reviews
+from ..scheduling_store import schedule, reviews, drafts
 from .queue_engine import project, assess_risk, STAGES
 from .queue_workdays import is_working, prev_working, working_days_between, working_days_inclusive, kth_working_day
 
@@ -156,7 +156,7 @@ class SchedulingService:
                             payload=json.dumps(result), created_at=stamp, status='preview'))
         return {**result, 'review_id': rid, 'created_at': stamp}
 
-    def decide(self, rid, decision, reviewer, note, today):
+    def decide(self, rid, decision, reviewer, note, today, draft_id=None, draft_version=None):
         with self.database.sessions.begin() as session:
             data = read_locked(session, today)
             row = session.execute(sa.select(reviews).where(reviews.c.id == rid)).mappings().first()
@@ -168,6 +168,17 @@ class SchedulingService:
                 return {'review_id': rid, 'status': row['status'], 'decision': decision, 'replayed': True}
             if fingerprint(data) != row['fingerprint'] or datetime.now(timezone.utc) - datetime.fromisoformat(row['created_at']) > timedelta(minutes=15):
                 raise ValueError('Data, date or schedule changed, or the preview expired. Generate and review a fresh analysis.')
+            linked = session.execute(sa.select(drafts.c.id).where(drafts.c.review_id == rid)).scalar()
+            if linked and not draft_id:
+                raise ValueError('Submit this review with its saved draft ID and version.')
+            if draft_id:
+                draft = session.execute(sa.select(drafts).where(drafts.c.id == draft_id)).mappings().first()
+                if not draft or draft['review_id'] != rid or draft['version'] != draft_version or draft['status'] != 'open':
+                    raise ValueError('Draft version changed. Reload and review before submitting.')
+                content = json.loads(draft['content'])
+                if content['text'].strip() != note or content['reviewer'].strip() != reviewer or content['decision'] != decision:
+                    raise ValueError('The submitted decision must match the saved form draft.')
+                session.execute(drafts.update().where(drafts.c.id == draft_id).values(status='submitted', version=draft_version+1))
             payload = json.loads(row['payload'])
             if decision == 'apply':
                 if not payload['can_apply']:

@@ -7,3 +7,5 @@
 .expedite-dialog pre{white-space:pre-wrap;overflow-wrap:anywhere}
 .expedite-dialog [role=status]{white-space:pre-wrap}
 @media(max-width:600px){.expedite-dialog{padding:12px}.expedite-dialog .grid.three{grid-template-columns:1fr}.expedite-dialog .actions{flex-wrap:wrap}}
+
+.review-draft-editor{border:1px solid var(--border,#ddd);padding:16px;margin:16px 0;border-radius:12px}.review-draft-editor pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto}.review-draft-editor button{margin:4px 4px 4px 0}
