@@ -190,7 +190,10 @@ class DashboardService:
         with self.database.engine.connect() as db:
             history = db.execute(sa.select(metrics).where(metrics.c.business_date <= data['today']).order_by(metrics.c.business_date.desc()).limit(14)).mappings().all()
             reports = db.execute(sa.select(briefings).order_by(briefings.c.day.desc()).limit(30)).mappings().all()
+        from .morning_service import MorningService
+        ai_reports=MorningService(self.database).list()
         return {**result, 'business_date': data['today'], 'tasks': self.list_tasks(),
+                'ai_briefing': ai_reports[0] if ai_reports else None,
                 'history': [{'date': r['business_date'], **json.loads(r['payload'])} for r in reversed(history)],
                 'briefing_preview': {'business_date': data['today'], **self.compose_briefing(data, result, datetime.now(LOCAL))},
                 'briefings': [{'day': r['day'], 'business_date': r['business_date'], 'generated_at': r['generated_at'], **json.loads(r['payload'])} for r in reports]}

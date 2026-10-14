@@ -44,6 +44,17 @@ def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
     app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), store, business_now, sender)
     from .services.review_chat import review_reason_handler
     app.state.workflow.review_reason_handler = review_reason_handler(app)
+    async def morning_handler(classification, state, now):
+        from .api.morning_api import generate_morning
+        from .schemas import ToolCall, Intent
+        report=(await generate_morning(app))['report']
+        state.last_intent=Intent.MORNING_BRIEFING
+        state.pending_clarification=None
+        answer='\n\n'.join(label+'：'+report[key] for label,key in [('生产回顾','yesterday'),('优先问题','top_issue'),('经理决策','decide'),('产能假设与限制（系统计算口径）','production_note')])
+        answer+='\n\n业务日期：'+report['business_date']+'；生成时间：'+report['generated_at']+'。可打开晨报页面查看各项数据库依据。'
+        return app.state.workflow.response(state,classification,now,answer,
+            [ToolCall(name='generate_morning_briefing',result={'report_id':report['id'],'model':report['model']})],[])
+    app.state.workflow.morning_handler=morning_handler
 
 
 async def monitor_loop(app: FastAPI) -> None:

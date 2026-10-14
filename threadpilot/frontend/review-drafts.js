@@ -2,7 +2,7 @@
 function installReviewDraft(dialog, initial){
  let draft=initial,timer,chain=Promise.resolve(),closed=false,finished=initial.status==='submitted',working=false,suppressSave=false;
  const form=dialog.querySelector('form'),message=dialog.querySelector('[data-draft-status]');
- const key='threadpilot-review-recovery:'+draft.id;
+ const key='threadpilot-review-recovery:'+window.THREADPILOT_API_BASE+':'+draft.id;
  const fields=()=>({text:form.elements.note.value,reviewer:form.elements.reviewer.value,decision:form.elements.decision.value});
  const dirty=()=>{const v=fields();return ['text','reviewer','decision'].some(k=>v[k]!==draft[k])};
  const remember=()=>{try{localStorage.setItem(key,JSON.stringify({...fields(),baseVersion:draft.version}))}catch{}};

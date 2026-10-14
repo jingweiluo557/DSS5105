@@ -1,5 +1,6 @@
 /* Shared authenticated transport. Only the configured backend receives the access key. */
 (() => {
+  if(window.THREADPILOT_CONFIG_ERROR)return;
   const base = new URL(window.THREADPILOT_API_BASE);
   const storageKey = 'threadpilot-access:' + base.origin;
   let token = '';
@@ -11,9 +12,12 @@
     return url;
   };
   function clearConversation() {
-    for (const key of ['threadpilot-workflow-session', 'threadpilot-llm-chat']) sessionStorage.removeItem(key);
+    for (const key of ['threadpilot-workflow-session', 'threadpilot-llm-chat', 'threadpilot-review-context']) sessionStorage.removeItem(key);
     localStorage.removeItem('threadpilot-track1-v2');
   }
+  const backendKey='threadpilot-backend-origin';
+  if(sessionStorage.getItem(backendKey)&&sessionStorage.getItem(backendKey)!==base.origin)clearConversation();
+  sessionStorage.setItem(backendKey,base.origin);
   function showAccess() {
     if (document.getElementById('access-dialog')) return;
     const dialog = document.createElement('dialog');

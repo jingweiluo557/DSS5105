@@ -36,10 +36,10 @@ const data={business_date:'2026-04-01',counts,health:{on_track:17,at_risk:9,late
   assert.equal(await page.getByText('Generated 2026-10-10 07:00 · Business date 2026-04-01',{exact:true}).count(),1);
   const input=page.locator('#new-dashboard-task');await input.fill('Review <forecast> & capacity');await page.locator('#dashboard-task-form button').click();
   await page.getByText('Review <forecast> & capacity',{exact:true}).waitFor();
-  await page.locator('[data-task-id="auto:ORD-107"]').check();await page.waitForFunction(()=>!document.querySelector('[data-task-id="auto:ORD-107"]'));
+  await page.locator('[data-task-id="auto:ORD-107"]').click();await page.waitForFunction(()=>!document.querySelector('[data-task-id="auto:ORD-107"]'));
   await page.locator('[data-action=dash-filter][data-value=done]').click();assert(await page.locator('[data-task-id="auto:ORD-107"]').isChecked());
   await page.reload();await page.locator('.todo-item').first().waitFor();await page.locator('[data-action=dash-filter][data-value=done]').click();assert(await page.locator('[data-task-id="auto:ORD-107"]').isChecked());
-  await page.locator('[data-task-id="auto:ORD-107"]').uncheck();await page.locator('[data-action=dash-filter][data-value=pending]').click();await page.locator('[data-task-id="auto:ORD-107"]').waitFor();
+  await page.locator('[data-task-id="auto:ORD-107"]').click();await page.locator('[data-action=dash-filter][data-value=pending]').click();await page.locator('[data-task-id="auto:ORD-107"]').waitFor();
   // A failed save deliberately rolls the checkbox back before Playwright's check() assertion.
   failWrite=true;await page.locator('[data-task-id="auto:ORD-107"]').click();await page.getByText('Unable to save or load dashboard data. Please retry.',{exact:true}).waitFor();assert(!await page.locator('[data-task-id="auto:ORD-107"]').isChecked());failWrite=false;
   const out=path.resolve(__dirname,'../../backend/runtime/ui-review');fs.mkdirSync(out,{recursive:true});

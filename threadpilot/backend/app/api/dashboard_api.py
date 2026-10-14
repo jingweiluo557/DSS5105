@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field, field_validator
 from .. import briefing_email
 from sqlalchemy.exc import SQLAlchemyError
+from openai import OpenAIError
 from ..services.dashboard_service import DashboardService, LOCAL
 from ..services.snapshot_service import snapshot
 from ..services.scheduling_service import current_snapshot
@@ -77,19 +78,18 @@ def update_task(task_id: str, body: TaskUpdate, request: Request):
         raise HTTPException(409, 'Task changed on another device. Refresh and retry.')
     return {'status': 'saved'}
 
-def generate_morning(app):
-    data = snapshot(app.state.database, business_now().date().isoformat())
-    return DashboardService(app.state.database).generate_due(data, datetime.now(LOCAL))
-
 @router.post('/internal/briefings/run')
-def run_briefing(request: Request):
+async def run_briefing(request: Request):
     token = request.app.state.settings.scheduler_token.get_secret_value()
     if not token or not secrets.compare_digest(request.headers.get('authorization', '').encode(), ('Bearer ' + token).encode()):
         raise HTTPException(401, 'Scheduler authentication required.')
     try:
-        return generate_morning(request.app)
+        from .morning_api import generate_morning
+        return await generate_morning(request.app, scheduled=True)
     except WorkflowBusy:
         return {'status': 'already_running'}
+    except (ValueError, OpenAIError):
+        raise HTTPException(503, 'Model briefing unavailable; no simulated report saved.')
 
 @router.get('/predictions')
 def prediction_list(request: Request, response: Response):
@@ -133,7 +133,8 @@ def diagnosis_source(kind: str, request: Request):
 async def morning_loop(app):
     while True:
         try:
-            await asyncio.to_thread(generate_morning, app)
-        except (SQLAlchemyError, WorkflowBusy, ValueError, OSError):
+            from .morning_api import generate_morning
+            await generate_morning(app, scheduled=True)
+        except (SQLAlchemyError, WorkflowBusy, ValueError, OSError, OpenAIError):
             logging.getLogger(__name__).warning('Morning briefing pending; next check will retry')
-        await asyncio.sleep(30)
+        await asyncio.sleep(300)

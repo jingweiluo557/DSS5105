@@ -20,6 +20,7 @@ class Intent(StrEnum):
     ORDER_COMPARE = 'order.compare'
     ORDER_COMMITMENT = 'order.commitment'
     ORDER_PRIORITIZE = 'order.prioritize'
+    MORNING_BRIEFING = 'operations.briefing'
     OPERATIONS_NORMALITY = 'operations.normality'
     OPERATIONS_DEVIATION = 'operations.deviation'
     EXECUTION_CHASE = 'execution.chase'

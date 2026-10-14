@@ -1586,6 +1586,84 @@
           }
         }
       }
+    },
+    "/api/morning": {
+      "get": {
+        "tags": [
+          "Morning briefing"
+        ],
+        "summary": "Morning List",
+        "operationId": "morning_list_api_morning_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/morning/reports/{report_id}": {
+      "get": {
+        "tags": [
+          "Morning briefing"
+        ],
+        "summary": "Morning Report",
+        "operationId": "morning_report_api_morning_reports__report_id__get",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/morning/generate": {
+      "post": {
+        "tags": [
+          "Morning briefing"
+        ],
+        "summary": "Morning Generate",
+        "operationId": "morning_generate_api_morning_generate_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2239,6 +2317,7 @@
           "order.compare",
           "order.commitment",
           "order.prioritize",
+          "operations.briefing",
           "operations.normality",
           "operations.deviation",
           "execution.chase",

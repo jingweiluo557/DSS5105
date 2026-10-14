@@ -1,6 +1,6 @@
 from .data_record import Order, ProductionRecord, Workshop, SyncLock, Tombstone
 from .sync_log import SyncLog
 from .. import sql_workflow_store  # Register durable workflow tables in migration metadata.
-from .. import scheduling_store
+from .. import scheduling_store, morning_store
 
 __all__ = ['Order', 'ProductionRecord', 'Workshop', 'SyncLock', 'Tombstone', 'SyncLog']

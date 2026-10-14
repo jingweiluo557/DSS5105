@@ -24,6 +24,7 @@ Switch to order.expedite for fresh impact/affected-order questions; ordinary non
 order.compare (1.4 two orders, comparative risk and nearest deadline),
 order.commitment (1.5 NEW order capacity, assumptions, what-if, customer recommendation),
 order.prioritize (1.6 daily exceptions, time window, why an order was ranked),
+operations.briefing (generate a daily/morning factory briefing, 晨报, 每日报告, whole-factory summary of overdue orders and production),
 operations.normality (2.1 output vs same-weekday baseline, evidence and worry followups),
 operations.deviation (2.2 why lower output, co-occurrence, raw evidence, next checks),
 execution.chase (3.1 draft/revise/send external follow-up),

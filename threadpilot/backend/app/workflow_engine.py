@@ -43,7 +43,9 @@ class WorkflowEngine:
             # Any new turn revokes the old preview, including revisions and topic changes.
             state.pending_action = None
             classification = await classifier.classify(request.message, state, now)
-            if classification.intent == Intent.REVIEW_REASON and hasattr(self, 'review_reason_handler'):
+            if classification.intent == Intent.MORNING_BRIEFING and hasattr(self, 'morning_handler'):
+                response = await self.morning_handler(classification, state, now)
+            elif classification.intent == Intent.REVIEW_REASON and hasattr(self, 'review_reason_handler'):
                 response = await self.review_reason_handler(request, classification, state, now)
             else:
                 response = self.route(request.message, classification, state, now)

@@ -76,7 +76,7 @@ def test_dashboard_api_auth_and_shared_task_update(business_database,monkeypatch
         headers={'X-ThreadPilot-Token':'test-access'}
         assert client.get('/api/dashboard',headers=headers).status_code==200
         assert client.post('/api/internal/briefings/run',headers=headers).status_code==401
-        assert client.post('/api/internal/briefings/run',headers={'Authorization':'Bearer timer-secret'}).status_code==200
+        assert client.post('/api/internal/briefings/run',headers={'Authorization':'Bearer timer-secret'}).status_code==503
         task_id=str(uuid4())
         assert client.post('/api/dashboard/tasks',headers=headers,json={'id':task_id,'title':'  '}).status_code==422
         added=client.post('/api/dashboard/tasks',headers=headers,json={'id':task_id,'title':'Test task'})
