@@ -25,13 +25,13 @@ class WorkflowEngine:
         self.tools, self.store, self.clock, self.sender = tools, store, clock, sender
         self.lock = asyncio.Lock()
 
-    async def chat(self, request: ChatRequest, classifier: Classifier) -> ChatResponse:
+    async def chat(self, request: ChatRequest, classifier: Classifier, emit=None) -> ChatResponse:
         """场景 1.1–3.3：原子处理一个本地会话轮次，客户端不能提交状态或工具。"""
         async with self.lock:
             with self.store.turn_lock('chat:' + request.session_id) if request.session_id and hasattr(self.store, 'turn_lock') else nullcontext():
-                return await self._chat(request, classifier)
+                return await self._chat(request, classifier, emit)
 
-    async def _chat(self, request: ChatRequest, classifier: Classifier) -> ChatResponse:
+    async def _chat(self, request: ChatRequest, classifier: Classifier, emit=None) -> ChatResponse:
         state = self.store.load(request.session_id) if request.session_id else DialogState()
         now = self.clock()
         if request.selected_order_id and not state.active_order and not state.comparison_orders:
@@ -39,6 +39,10 @@ class WorkflowEngine:
         confirmed = self.confirmation_word(request.message)
         if confirmed:
             response = await self.confirm(request, state, now)
+            if emit:
+                await emit(response.answer)
+        elif hasattr(classifier, 'plan'):
+            response = await self.converse(request, classifier, state, now, emit)
         else:
             # Any new turn revokes the old preview, including revisions and topic changes.
             state.pending_action = None
@@ -54,6 +58,78 @@ class WorkflowEngine:
                                          {'role': 'assistant', 'content': response.answer}])[-16:]
         self.store.save(state)
         return response.model_copy(update={'state': state.model_copy(deep=True)})
+
+    async def converse(self, request, agent, state, now, emit):
+        from .conversation import summary_response
+        plan = await agent.plan(request.message, state, now)
+        single_order_intents = {Intent.ORDER_LOOKUP, Intent.ORDER_REFRESH, Intent.ORDER_RISK, Intent.ORDER_EXPEDITE}
+        expanded = []
+        human_ids = set(re.findall(r'\bORD-\d{3}\b', request.message.upper()))
+        for task in plan.tasks:
+            ids = [i for i in task.classification.slots.order_ids if i in human_ids]
+            if task.classification.intent in single_order_intents and len(ids) > 1:
+                for oid in ids:
+                    copy = task.model_copy(deep=True)
+                    copy.classification.slots.order_ids = [oid]
+                    expanded.append(copy)
+            else:
+                expanded.append(task)
+        if len(expanded) > 10:
+            return self.ask('请将请求缩减到十个以内的订单操作。',state,plan.tasks[0].classification,now,[],[])
+        responses = []
+        # Keep drafts/topic slots, but a new turn requires a fresh execution preview.
+        state.pending_action = None
+        if sum(t.classification.intent.value.startswith('execution.') for t in plan.tasks) > 1:
+            return self.ask('请一次准备一个执行动作，以便分别预览和确认。其他查询可以一起提出。',
+                state, plan.tasks[0].classification, now, [], [])
+        for task in expanded:
+            result = task.classification
+            if result.intent == Intent.GENERAL:
+                response = ChatResponse(answer='模型暂不可用，请稍后重试通用问题。', intent=Intent.GENERAL,
+                    slots=Slots(), confidence=result.confidence, state=state, business_date=now.date().isoformat())
+            elif result.intent in (Intent.ORDER_SUMMARY, Intent.RISK_OVERVIEW):
+                response = summary_response(self, result, state, now)
+            else:
+                if state.last_intent:
+                    state.topics[state.last_intent.value] = {
+                        'slots':state.slots.model_dump(mode='json'), 'active_order':state.active_order,
+                        'comparison_orders':state.comparison_orders[:], 'review_draft_id':state.review_draft_id}
+                saved = state.topics.get(result.intent.value)
+                if task.resume and saved and result.intent != state.last_intent:
+                    state.slots = Slots.model_validate(saved['slots'])
+                    state.active_order = saved['active_order']
+                    state.comparison_orders = saved['comparison_orders']
+                    state.review_draft_id = saved.get('review_draft_id')
+                    state.last_intent = result.intent
+                if result.slots.order_ids and result.intent != Intent.ORDER_COMPARE:
+                    state.comparison_orders = []
+                if result.intent.value.startswith('execution.'):
+                    state.pending_action = None
+                if result.intent == Intent.MORNING_BRIEFING and hasattr(self, 'morning_handler'):
+                    response = await self.morning_handler(result, state, now)
+                elif result.intent == Intent.REVIEW_REASON and hasattr(self, 'review_reason_handler'):
+                    response = await self.review_reason_handler(request, result, state, now)
+                else:
+                    # Entity selection is grounded in the original human message, never planner prose.
+                    explicit = set(re.findall(r'\bORD-\d{3}\b', request.message.upper()))
+                    if result.slots.order_ids:
+                        explicit &= set(result.slots.order_ids)
+                    route_message = re.sub(r'\bORD-\d{3}\b',
+                        lambda m:m[0] if m[0].upper() in explicit else '', task.message, flags=re.I)
+                    if result.intent.value.startswith('execution.'):
+                        route_message = request.message
+                    response = self.route(route_message, result, state, now)
+            responses.append(response)
+        answer = await agent.narrate(request.message, state, responses, emit)
+        last = responses[-1]
+        evidence = list({(e.source,e.row):e for r in responses for e in r.evidence}.values())
+        return last.model_copy(update={'answer':answer, 'tool_calls':[t for r in responses for t in r.tool_calls],
+            'evidence':evidence,'sources':list(dict.fromkeys(e.source for e in evidence)),
+            'order_ids':list(dict.fromkeys(i for r in responses for i in r.order_ids))[:10],
+            'needs_clarification':any(r.needs_clarification for r in responses),
+            'clarification_question':'\n'.join(r.clarification_question for r in responses if r.clarification_question) or None,
+            'confirmation_required':state.pending_action is not None,
+            'confirmation_id':state.pending_action.id if state.pending_action else None})
 
     @staticmethod
     def confirmation_word(message: str) -> bool:

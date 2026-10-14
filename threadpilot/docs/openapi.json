@@ -2106,6 +2106,14 @@
             "type": "integer",
             "title": "Revision",
             "default": 0
+          },
+          "topics": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Topics"
           }
         },
         "additionalProperties": false,
@@ -2309,6 +2317,9 @@
       "Intent": {
         "type": "string",
         "enum": [
+          "general.answer",
+          "order.summary",
+          "order.risk_overview",
           "order.lookup",
           "order.refresh",
           "order.risk",

@@ -44,6 +44,19 @@ def resolve_datetime(value: str, now: datetime, previous: datetime | None = None
 def resolve_date(value: str, now: datetime) -> date:
     """场景 1.5/2.1/2.2：以显式业务时钟解析日期，不偷偷滚动过期日期。"""
     lowered = value.strip().lower()
+    relative = re.fullmatch(r'(?:in\s+)?(\d+)\s*(working|business|calendar)?\s*days?', lowered)
+    chinese = re.fullmatch(r'(\d+)个?(工作日|天)(?:后|内)?', lowered)
+    if relative or chinese:
+        count = int((relative or chinese)[1])
+        if count > 730:
+            raise ValueError('Date window too large')
+        working = relative and relative[2] in ('working', 'business') or chinese and chinese[2] == '工作日'
+        day = now.date()
+        while count:
+            day += timedelta(days=1)
+            if not working or day.weekday() != 6:
+                count -= 1
+        return day
     if lowered in ('today', '今天'):
         return now.date()
     if lowered in ('yesterday', '昨天'):

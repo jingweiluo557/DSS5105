@@ -12,6 +12,9 @@ class StrictModel(BaseModel):
 
 
 class Intent(StrEnum):
+    GENERAL = 'general.answer'
+    ORDER_SUMMARY = 'order.summary'
+    RISK_OVERVIEW = 'order.risk_overview'
     ORDER_LOOKUP = 'order.lookup'
     ORDER_REFRESH = 'order.refresh'
     ORDER_RISK = 'order.risk'
@@ -114,6 +117,7 @@ class DialogState(StrictModel):
     history: list[dict[str, str]] = Field(default_factory=list)
     review_draft_id: str | None = None
     revision: int = 0
+    topics: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
 
 class ChatRequest(StrictModel):

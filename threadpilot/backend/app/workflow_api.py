@@ -14,6 +14,7 @@ from openai import APIConnectionError, APIStatusError, APITimeoutError, RateLimi
 from pydantic import AwareDatetime, BaseModel, Field
 
 from .intent_classifier import IntentClassifier
+from .conversation import ConversationAgent
 from .services.review_drafts import DraftConflict
 from .schemas import ChatRequest, ChatResponse, Evidence
 from .streaming import event
@@ -77,17 +78,15 @@ class ReplyEvent(BaseModel):
 
 def install_workflow_routes(app: FastAPI, data: Path) -> None:
     """场景 1.1–3.3：保留原接口并增加完整工作流、证据和通知入口。"""
-    async def run(body: ChatRequest, request: Request) -> ChatResponse:
+    async def run(body: ChatRequest, request: Request, emit=None) -> ChatResponse:
         """场景 1.1–3.3：映射模型与数据错误，不泄露上游异常文本。"""
         if not body.message.strip():
             raise HTTPException(422, {'code': 'EMPTY_MESSAGE', 'message': 'Message cannot be blank.'})
         classifier = getattr(app.state, 'intent_classifier', None)
         if classifier is None:
-            if app.state.client is None:
-                raise HTTPException(503, {'code': 'API_KEY_NOT_CONFIGURED', 'message': 'Configure OPENAI_API_KEY.'})
-            classifier = IntentClassifier(app.state.client, app.state.settings.openai_model, app.state.settings.intent_api_style)
+            classifier = ConversationAgent(app.state.client, app.state.settings.openai_model, app.state.settings.intent_api_style)
         try:
-            result = await app.state.workflow.chat(body, classifier)
+            result = await app.state.workflow.chat(body, classifier, emit=emit)
             return result.model_copy(update={'request_id': request.state.request_id, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1')})
         except WorkflowBusy:
             raise HTTPException(409, {'code': 'SESSION_BUSY', 'message': 'This conversation is processing another request. Retry shortly.'})
@@ -129,13 +128,40 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
                                'content': {'text/event-stream': {'schema': {'type': 'string'}}}}})
     async def workflow_stream(body: ChatRequest, request: Request) -> StreamingResponse:
         """场景 1.1–3.3：完成规则验证后发送 SSE，避免未验证文本抢先展示。"""
-        result = await run(body, request)
-
         async def frames() -> AsyncIterator[str]:
-            """场景 1.1–3.3：兼容现有前端 start/delta/done 事件协议。"""
-            yield event('start', {'request_id': result.request_id, 'model': result.model})
-            yield event('delta', {'text': result.answer})
-            yield event('done', result.model_dump(mode='json'))
+            queue = asyncio.Queue(maxsize=32)
+            emitted = False
+            async def emit(text):
+                nonlocal emitted
+                emitted = True
+                await queue.put(('delta', {'text':text}))
+            async def produce():
+                try:
+                    result = await run(body, request, emit)
+                    if not emitted:
+                        await emit(result.answer)
+                    await queue.put(('done', result.model_dump(mode='json')))
+                except HTTPException as error:
+                    detail = error.detail if isinstance(error.detail, dict) else {'message':str(error.detail)}
+                    await queue.put(('error', {**detail,'request_id':request.state.request_id}))
+                except Exception:
+                    logging.getLogger(__name__).exception('Conversation stream failed')
+                    await queue.put(('error', {'message':'生成中断，请重试。','request_id':request.state.request_id}))
+            worker = asyncio.create_task(produce())
+            try:
+                yield event('start', {'request_id':request.state.request_id})
+                while True:
+                    try:
+                        kind, payload = await asyncio.wait_for(queue.get(), timeout=15)
+                    except asyncio.TimeoutError:
+                        yield ': keep-alive\n\n'
+                        continue
+                    yield event(kind, payload)
+                    if kind in ('done','error'):
+                        break
+            finally:
+                worker.cancel()
+                await asyncio.gather(worker, return_exceptions=True)
         return StreamingResponse(frames(), media_type='text/event-stream', headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
     @app.get('/api/v1/evidence/{source}/{row}', response_model=Evidence, tags=['Evidence'])
