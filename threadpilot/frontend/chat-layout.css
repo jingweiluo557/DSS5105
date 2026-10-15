@@ -1,0 +1,109 @@
+/* Shared workspace navigation, including the original Order center. */
+.workspace-tools a,
+.refined-ui .workspace-tools a {
+  font: 400 14px/1.6 'Segoe UI', Arial, sans-serif;
+  letter-spacing: normal;
+  padding: 8px 14px;
+}
+
+/* Keep the conversation and composer in one stable panel. */
+.refined-ui .copilot-columns {
+  align-items: stretch;
+}
+@media(min-width:951px) {
+  .refined-ui .copilot-columns { height: max(580px, calc(100dvh - 280px)); }
+  .refined-ui .copilot-columns .copilot-chat { height: 100%; }
+  .refined-ui .copilot-context {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .refined-ui .copilot-context .workspace-panel { margin: 0; padding: 18px; flex-shrink: 0; }
+  .refined-ui .copilot-context .workspace-panel:nth-child(2) {
+    flex: 1 1 0;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+  }
+  .refined-ui .copilot-context .turn-list {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    margin: 8px 0 12px;
+  }
+  .refined-ui .copilot-context .turn-link {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    padding: 4px;
+  }
+  .refined-ui .copilot-context .section-heading { margin-bottom: 8px; }
+  .refined-ui .copilot-context .workspace-panel h2 { font-size: 16px; }
+  .refined-ui .copilot-context .workspace-panel p { font-size: 13px; margin-bottom: 10px; }
+  .refined-ui .copilot-context .brief-metrics { margin: 8px 0; }
+  .refined-ui .copilot-context .brief-metrics a { padding: 8px; }
+  .refined-ui .copilot-context .brief-metrics strong { font-size: 24px; }
+  .refined-ui .copilot-context .workspace-panel > .button { padding: 7px 10px; font-size: 13px; }
+  .refined-ui .copilot-context .follow-up-panel .actions { flex-direction: row; font-size: 13px; gap: 6px 14px; }
+  .refined-ui .copilot-context .follow-up-panel { padding: 12px 18px; }
+  .refined-ui .copilot-context .follow-up-panel h2 { margin-bottom: 6px; }
+  .refined-ui .copilot-context .follow-up-panel .button { border: 0; background: transparent; padding: 0; font-size: 12px; }
+}
+.refined-ui .copilot-chat {
+  display: flex;
+  flex-direction: column;
+  height: max(400px, calc(100dvh - 300px));
+  padding: 18px;
+  min-height: 0;
+}
+.refined-ui .copilot-chat .chat-heading {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+}
+.refined-ui .copilot-chat .conversation {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  overflow-anchor: none;
+}
+.refined-ui .copilot-chat .composer {
+  flex-shrink: 0;
+  margin-top: 8px;
+  padding: 8px 12px;
+}
+.refined-ui .copilot-chat .composer textarea {
+  display: block;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  margin: 0 0 4px;
+  padding: 4px 0;
+  line-height: 26px;
+  overflow-y: auto;
+  resize: none;
+}
+.refined-ui .copilot-chat .composer > .actions { gap: 6px; }
+.refined-ui .copilot-chat .composer small { font-size: 12px; line-height: 1.4; }
+.refined-ui .copilot-chat .composer small br { display: none; }
+.refined-ui .copilot-chat .composer .api-status::before { content: ' · '; }
+.refined-ui .copilot-chat .composer button { min-height: 36px; padding: 6px 12px; }
+.refined-ui .copilot-chat .workspace-suggestions {
+  flex-shrink: 0;
+  margin: 8px 0 0;
+}
+.copilot-chat:has(.bubble) .workspace-suggestions { display: none; }
+@media(max-width:600px) {
+  .refined-ui .copilot-chat { height: max(360px, calc(100dvh - 250px)); padding: 12px; }
+  .refined-ui .copilot-chat .chat-heading { margin-bottom: 8px; padding-bottom: 8px; }
+}

@@ -113,7 +113,7 @@ def test_http_chat_draft_revise_adopt_never_executes(business_database, monkeypa
         b = client.post('/chat',json={'message':'再短一点','session_id':a['state']['session_id']}).json()
         assert b['state']['review_draft_id']==did
         c = client.post('/chat',json={'message':'采用这一版','session_id':a['state']['session_id']}).json()
-        assert '尚未提交' in c['answer']
+        assert 'No review has been submitted' in c['answer']
         d = client.get('/api/scheduling/drafts/'+did).json()
         assert d['text'] and not d['candidate']
         assert not current_snapshot(business_database,TODAY)['schedule']['priority']

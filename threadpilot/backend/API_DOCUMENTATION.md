@@ -1,3 +1,5 @@
+> Historical API reference. For current request schemas, use the running `/docs` or `/openapi.json`, or [the exported schema](../docs/openapi.json). Current English behavior is documented in the [tool specification](../docs/TOOL_SPECIFICATION_SPRINT1.md), [streaming contract](STREAMING_API.md), and [deployment guide](../docs/CLOUD_DEPLOYMENT.md). Older language, streaming and scheduling descriptions below may no longer apply.
+
 # ThreadPilot API 文档
 
 本文描述 `backend/app/` 提供的接口，契约见 [OpenAPI 定义](../docs/openapi.json) 为准。应用元数据版本为 `2.0.0`；`/chat` 系列使用意图工作流；`/api/ai/ask` 使用独立的只读 SQL Agent 会话。Web 客户端使用 `POST /api/v1/workflow/chat/stream`。

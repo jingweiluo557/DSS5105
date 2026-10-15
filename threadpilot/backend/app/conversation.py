@@ -81,7 +81,7 @@ class ConversationAgent(IntentClassifier):
 
     async def narrate(self, message, state, responses, emit=None):
         fallback = '\n\n'.join(r.answer for r in responses)
-        unavailable = '模型暂不可用，以下是基础回答：\n\n' if re.search(r'[\u4e00-\u9fff]',message) else 'Model unavailable; basic answer:\n\n'
+        unavailable = 'Model unavailable; basic answer:\n\n'
         if self.client is None or getattr(self, 'degraded', False):
             fallback = unavailable + fallback
         # Exact drafts, confirmations and clarification wording remain server-owned.
@@ -91,14 +91,19 @@ class ConversationAgent(IntentClassifier):
             if emit:
                 await emit(fallback)
             return fallback
-        instructions = '''Answer the user's actual questions in their language, concisely.
+        instructions = '''Always answer in clear, concise English, even when the user writes in another language. Keep identifiers and quoted user content unchanged.
 Use supplied tool results as the only authority for current factory data. Never invent
 orders, counts, causes, dates or completed actions. General knowledge is allowed but
 distinguish it from factory facts. No browsing is available. Follow the user's requested
 level of detail; a stage question needs the stage, not every field. Address ALL requests.
-Preserve outstanding clarification questions and all material calculation assumptions.
-For risk/forecast answers explicitly state the business date and that queue estimates
-use current orders, shared historical capacity and no future arrivals; they are not probabilities.
+Lead with the answer. Normally use one to three short sentences; use a short list only
+for multiple requests. Avoid repeated caveats, technical explanations and closing offers.
+Do not append '(assuming ...)', '（假设……）', '假定', or generic calculation disclaimers.
+Preserve outstanding clarification questions. Use 'estimated' for forecasts,
+and distinguish recorded facts from predictions. If a condition materially changes the
+decision, state it briefly in plain language, e.g. 'Confirm the shipping time first' rather than a long
+parenthetical assumption. Explain calculation methods only when the user asks.
+Do not present a forecast as a guarantee or invent missing business facts.
 If no data/tool supports a business question, say what is missing.
 If a result asks for clarification, repeat that question; do not claim records were
 not found unless an actual lookup returned no records.

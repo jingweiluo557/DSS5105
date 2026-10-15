@@ -78,7 +78,7 @@ class DraftEdit(BaseModel):
 class DraftTurn(BaseModel):
     model_config = ConfigDict(extra='forbid')
     version: int = Field(ge=1)
-    instruction: str = Field(default='请起草审核理由。', min_length=1, max_length=1500)
+    instruction: str = Field(default='Draft a review reason.', min_length=1, max_length=1500)
 
 
 def draft_service(request):

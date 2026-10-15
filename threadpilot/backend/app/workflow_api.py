@@ -51,8 +51,8 @@ def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
         report=(await generate_morning(app))['report']
         state.last_intent=Intent.MORNING_BRIEFING
         state.pending_clarification=None
-        answer='\n\n'.join(label+'：'+report[key] for label,key in [('生产回顾','yesterday'),('优先问题','top_issue'),('经理决策','decide'),('产能假设与限制（系统计算口径）','production_note')])
-        answer+='\n\n业务日期：'+report['business_date']+'；生成时间：'+report['generated_at']+'。可打开晨报页面查看各项数据库依据。'
+        answer='\n\n'.join(label+': '+report[key] for label,key in [('Production review','yesterday'),('Priority issue','top_issue'),('Manager decisions','decide'),('Calculation basis','production_note')])
+        answer+='\n\nBusiness date: '+report['business_date']+'; Generated: '+report['generated_at']+'. Open the briefing page to view the supporting records.'
         return app.state.workflow.response(state,classification,now,answer,
             [ToolCall(name='generate_morning_briefing',result={'report_id':report['id'],'model':report['model']})],[])
     app.state.workflow.morning_handler=morning_handler
@@ -146,7 +146,7 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
                     await queue.put(('error', {**detail,'request_id':request.state.request_id}))
                 except Exception:
                     logging.getLogger(__name__).exception('Conversation stream failed')
-                    await queue.put(('error', {'message':'生成中断，请重试。','request_id':request.state.request_id}))
+                    await queue.put(('error', {'message':'Generation interrupted. Please retry.','request_id':request.state.request_id}))
             worker = asyncio.create_task(produce())
             try:
                 yield event('start', {'request_id':request.state.request_id})

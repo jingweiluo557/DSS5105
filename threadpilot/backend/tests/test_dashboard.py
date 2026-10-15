@@ -68,6 +68,13 @@ def test_schedule_timezone_idempotence_archive_and_business_clock(business_datab
 
 def test_dashboard_api_auth_and_shared_task_update(business_database,monkeypatch):
     setup(business_database)
+    # Scheduled reports use wall-clock time, independently of BUSINESS_NOW.
+    class MorningClock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            instant = datetime.fromisoformat('2026-10-15T08:00:00+08:00')
+            return instant.astimezone(tz) if tz else instant.replace(tzinfo=None)
+    monkeypatch.setattr('app.services.morning_service.datetime', MorningClock)
     for k,v in {'OPENAI_API_KEY':'','API_ACCESS_TOKEN':'test-access','SCHEDULER_TOKEN':'timer-secret',
                 'BUSINESS_NOW':'2026-04-01T12:00:00+08:00','BACKGROUND_TASKS_ENABLED':'false',
                 'MORNING_SCHEDULER_ENABLED':'false','SERVE_FRONTEND':'false'}.items():monkeypatch.setenv(k,v)

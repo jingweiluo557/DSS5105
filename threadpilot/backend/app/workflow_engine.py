@@ -75,17 +75,17 @@ class WorkflowEngine:
             else:
                 expanded.append(task)
         if len(expanded) > 10:
-            return self.ask('请将请求缩减到十个以内的订单操作。',state,plan.tasks[0].classification,now,[],[])
+            return self.ask('Please limit the request to ten order operations.',state,plan.tasks[0].classification,now,[],[])
         responses = []
         # Keep drafts/topic slots, but a new turn requires a fresh execution preview.
         state.pending_action = None
         if sum(t.classification.intent.value.startswith('execution.') for t in plan.tasks) > 1:
-            return self.ask('请一次准备一个执行动作，以便分别预览和确认。其他查询可以一起提出。',
+            return self.ask('Please prepare one action at a time for preview and confirmation. You can combine other queries.',
                 state, plan.tasks[0].classification, now, [], [])
         for task in expanded:
             result = task.classification
             if result.intent == Intent.GENERAL:
-                response = ChatResponse(answer='模型暂不可用，请稍后重试通用问题。', intent=Intent.GENERAL,
+                response = ChatResponse(answer='The model is unavailable. Please try your general question again later.', intent=Intent.GENERAL,
                     slots=Slots(), confidence=result.confidence, state=state, business_date=now.date().isoformat())
             elif result.intent in (Intent.ORDER_SUMMARY, Intent.RISK_OVERVIEW):
                 response = summary_response(self, result, state, now)

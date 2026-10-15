@@ -84,6 +84,10 @@ def create_app() -> FastAPI:
                 return JSONResponse(status_code=401, content={'error': {'code': 'UNAUTHORIZED', 'message': 'Application access token required.'}})
         response = await call_next(request)
         response.headers['X-Request-ID'] = request.state.request_id
+        # Revalidate application assets so a normal reload cannot mix old and new UI.
+        if request.method in ('GET', 'HEAD') and not request.url.path.startswith('/api/'):
+            if request.url.path == '/' or request.url.path.endswith(('.html', '.js', '.css')):
+                response.headers['Cache-Control'] = 'no-cache, must-revalidate'
         return response
 
     app.add_middleware(

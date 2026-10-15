@@ -2187,7 +2187,7 @@
             "maxLength": 1500,
             "minLength": 1,
             "title": "Instruction",
-            "default": "请起草审核理由。"
+            "default": "Draft a review reason."
           }
         },
         "additionalProperties": false,

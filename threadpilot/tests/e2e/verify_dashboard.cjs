@@ -33,7 +33,9 @@ const data={business_date:'2026-04-01',counts,health:{on_track:17,at_risk:9,late
   const page=await browser.newPage({viewport:{width:1600,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/#/dashboard`);
   await page.locator('.todo-item').first().waitFor();assert.equal(await page.locator('.metric-spark').count(),5);
-  assert.equal(await page.getByText('Generated 2026-10-10 07:00 · Business date 2026-04-01',{exact:true}).count(),1);
+  assert.equal(await page.locator('.briefing-stamp').filter({hasText:'Business date 2026-04-01'}).count(),1);
+  assert.equal(await page.getByRole('link',{name:'Full briefing',exact:true}).count(),1);
+  assert.equal(await page.locator('.summary-rows ul').count(),3);
   const input=page.locator('#new-dashboard-task');await input.fill('Review <forecast> & capacity');await page.locator('#dashboard-task-form button').click();
   await page.getByText('Review <forecast> & capacity',{exact:true}).waitFor();
   await page.locator('[data-task-id="auto:ORD-107"]').click();await page.waitForFunction(()=>!document.querySelector('[data-task-id="auto:ORD-107"]'));

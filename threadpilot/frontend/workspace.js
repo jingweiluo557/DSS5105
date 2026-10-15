@@ -25,7 +25,7 @@ aiPage = function() {
     <header class="workspace-heading"><div><div class="eyebrow">THREADPILOT / CO-PILOT</div><h1>AI workspace</h1></div>${btn('new-chat','New conversation')}</header>
     <div class="copilot-columns">
       <aside class="copilot-context" aria-label="Briefing and conversation history">
-        <section class="workspace-panel"><div class="section-heading"><h2>Morning briefing</h2><span class="badge">${esc(TODAY)}</span></div><div class="brief-metrics"><a href="#/orders?due=Overdue"><strong>${overdue.length}</strong>Overdue</a><a href="#/orders?idle=5"><strong>${idleOrders.length}</strong>Idle ≥5 days</a></div><p><strong>${esc(titleCase(worstStage.stage))}</strong> output: ${Number(worstStage.latest.pieces_completed).toLocaleString()} pieces on ${esc(worstStage.latest.date)}.</p><a href="briefing.html" class="button primary">打开 AI 晨报 ↗</a></section>
+        <section class="workspace-panel"><div class="section-heading"><h2>Morning briefing</h2><span class="badge">${esc(TODAY)}</span></div><div class="brief-metrics"><a href="#/orders?due=Overdue"><strong>${overdue.length}</strong>Overdue</a><a href="#/orders?idle=5"><strong>${idleOrders.length}</strong>Idle ≥5 days</a></div><p><strong>${esc(titleCase(worstStage.stage))}</strong> output: ${Number(worstStage.latest.pieces_completed).toLocaleString()} pieces on ${esc(worstStage.latest.date)}.</p><a href="briefing.html" class="button primary">Open AI briefing ↗</a></section>
         <section class="workspace-panel"><div class="section-heading"><h2>Conversation record</h2><span class="badge">${turns.length} turns</span></div><ol class="turn-list">${turns.map((m,i)=>`<li>${btn('jump-turn',esc(m.text),'turn-link',`data-turn="${i}"`)}</li>`).join('')||'<li class="muted">No conversations yet.</li>'}</ol>${btn('export-conversation','Export conversation','small-button',state.chat.length?'':'disabled')}</section>
         <section class="workspace-panel follow-up-panel"><h2>Follow up</h2><div class="actions">${link('messages','Watches & receipts')}${link('activity','Activity log')}${link('feasibility','Assess a new order')}</div></section>
       </aside>
@@ -35,6 +35,19 @@ aiPage = function() {
 };
 
 // All Ask AI entry points lead to the same conversation surface.
+const renderBeforeChatScroll = render;
+render = function() {
+  const previous = document.querySelector('.copilot-chat .conversation');
+  const position = previous?.scrollTop || 0;
+  const follow = !previous || previous.scrollHeight - position - previous.clientHeight < 120;
+  const pageY = window.scrollY;
+  renderBeforeChatScroll();
+  const current = document.querySelector('.copilot-chat .conversation');
+  if (current) {
+    current.scrollTop = follow ? current.scrollHeight : position;
+    if (previous) window.scrollTo(0, pageY);
+  }
+};
 openAIDrawer = function() { closeOverlay(); if(route!=='ai')go('ai'); else document.querySelector('[name="visible-question"]')?.focus(); };
 document.addEventListener('click', e=>{
   const button=e.target.closest('[data-action]');

@@ -9,8 +9,13 @@ const {chromium}=require('playwright'),assert=require('assert/strict');
  try{
   await page.goto(base+'/demo/briefing_demo.html');await page.locator('#report .brief-grid').waitFor();
   assert.equal(new URL(page.url()).pathname,'/briefing.html');
-  assert((await page.locator('#connection').innerText()).includes(base));
+  assert.equal(await page.locator('#connection, #report-select').count(),0);
+  assert.equal(await page.locator('#status').innerText(),'');
+  assert(!/Report ID:|Generated:/.test(await page.locator('#report').innerText()));
   assert((await page.locator('#report').innerText()).includes('gpt-4.1'));
+  assert.equal(await page.locator('.brief-points').count(),2);
+  assert(await page.locator('.brief-points li').count()>=4);
+  assert(!/[\u4e00-\u9fff]/.test(await page.locator('button, h1, h2, label').allTextContents().then(x=>x.join(' '))),'Non-English interface text');
   await page.locator('#report details').first().locator('summary').click();
   await page.screenshot({path:'.build/morning-desktop.png',fullPage:true});
   if(process.env.MORNING_LIVE_CHAT==='1'){

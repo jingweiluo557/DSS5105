@@ -1,12 +1,13 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ThreadPilot · AI 晨报</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ThreadPilot · AI Morning Briefing</title>
 <link rel="stylesheet" href="styles.css"><style>
-body{margin:0;background:#f5f7fb;color:#172335;font:16px/1.6 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:24px}header,.brief-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between}.brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.brief-card{background:white;padding:24px;border:1px solid #dde3ed;border-radius:16px;margin:16px 0}button,select,textarea{font:inherit;max-width:100%}button{padding:10px 16px;cursor:pointer}textarea{width:100%;min-height:90px;box-sizing:border-box}pre{white-space:pre-wrap;overflow-wrap:anywhere}small,.muted{color:#596779}#status{white-space:pre-wrap}#chat-log p{padding:14px;background:#f3f6fb;border-radius:10px;white-space:pre-wrap}details{margin-top:12px}select{width:100%}a{overflow-wrap:anywhere}@media(max-width:650px){main{padding:14px}.brief-grid{grid-template-columns:1fr}.brief-card{padding:16px}}
+body{margin:0;background:#f5f7fb;color:#172335;font:16px/1.6 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:24px}header,.brief-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between}.brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.brief-card{background:white;padding:24px;border:1px solid #dde3ed;border-radius:16px;margin:16px 0}button,select,textarea{font:inherit;max-width:100%}button{padding:10px 16px;cursor:pointer}textarea{width:100%;min-height:90px;box-sizing:border-box}pre{white-space:pre-wrap;overflow-wrap:anywhere}small,.muted{color:#596779}#status{white-space:pre-wrap}#status:empty{display:none}#chat-log p{padding:14px;background:#f3f6fb;border-radius:10px;white-space:pre-wrap}details{margin-top:12px}select{width:100%}a{overflow-wrap:anywhere}@media(max-width:650px){main{padding:14px}.brief-grid{grid-template-columns:1fr}.brief-card{padding:16px}}
+.brief-points{padding-left:22px;margin:0}.brief-points li{padding-left:4px;margin-bottom:14px}.brief-points li:last-child{margin-bottom:0}.brief-points li::marker{color:#365749}
 </style></head><body><main>
-<header><div><small>THREADPILOT / DATABASE + AI</small><h1>AI 晨报</h1></div><a href="/#/dashboard">返回工作台</a></header>
-<p id="connection" class="muted"></p><p>基于数据库快照生成。事实记录与模型分析分别展示；生成报告不会修改排程或发送消息。</p>
-<div class="brief-actions"><button id="generate">基于当前数据生成晨报</button><button id="reload">刷新报告列表</button></div>
-<p id="status" role="status">正在连接…</p><label>历史模型报告<select id="report-select" aria-label="历史模型报告"></select></label>
+<header><div><small>THREADPILOT / DATABASE + AI</small><h1>AI Morning Briefing</h1></div><a href="/#/dashboard">Back to workspace</a></header>
+
+<div class="brief-actions"><button id="generate">Generate briefing</button><button id="reload">Refresh reports</button></div>
+<p id="status" role="status"></p>
 <div id="report"></div>
-<section class="brief-card"><h2>继续询问订单</h2><p class="muted">沿用工作台的订单、风险、插队和审核理由工具。可输入“ORD-114 是否值得插队？”后继续追问“它会影响谁？”。</p><button id="new-chat">新对话</button><div id="chat-log"></div><form id="chat-form"><label for="question">问题</label><textarea id="question" maxlength="1500" required></textarea><button type="submit">发送</button></form></section>
-</main><script src="config.js"></script><script src="api-client.js"></script><script src="briefing.js"></script></body></html>
+<section class="brief-card"><h2>Ask about an order</h2><p class="muted">Ask “Is ORD-114 worth expediting?” and follow up with “Which orders would it affect?”</p><button id="new-chat">New conversation</button><div id="chat-log"></div><form id="chat-form"><label for="question">Your question</label><textarea id="question" maxlength="1500" required></textarea><button type="submit">Send</button></form></section>
+</main><script src="config.js"></script><script src="api-client.js"></script><script src="briefing.js?v=20261014-compact"></script></body></html>
