@@ -419,3 +419,31 @@ SQL Agent 使用独立 SELECT-only MySQL 账号，并检查 SQL AST、表/函数
 工作流接口的模型限流返回429 MODEL_RATE_LIMITED；SQL Agent 当前统一映射为502，不应把两者错误码混同。参数校验错误使用 FastAPI 的 detail 格式；业务错误通常使用 error.code/message。客户端应同时处理这两种结构。
 
 可复制的 PowerShell 请求见 [调用示例](../docs/request_examples.md)。真实模型测试结果、失败分类及验证范围见 [验证报告](../docs/live_model_verification.md)。
+
+### 2026-10-24: context and business-time guarantees
+
+New chase requests after an order switch follow the resolved active order. Changing
+a department rebuilds the recipient and requires a fresh confirmation; a missing
+address blocks review. Multi-order queries retain an ambiguous order set, so a
+subsequent singular reference requires clarification, even if the model guesses an ID.
+
+Priority tool results expose business_now, window_start and window_end separately.
+Date/window text and clarification responses are server-owned. Chase draft metadata
+includes business_now, clock_run_id and optional absolute reply_deadline. Pending
+email payloads include reply_deadline; send_at is resolved once when requested,
+not on every preview. Ambiguous times require clarification. Resetting the business
+clock invalidates prior drafts. Common cancellation phrases clear pending actions.
+Transport/OAuth expiry and real audit metadata retain real-clock semantics; these
+are not business deadlines. Provider delivery timestamps remain provider-controlled.
+# Cloud email scheduler
+
+`POST /api/internal/email/run` accepts only `Authorization: Bearer <SCHEDULER_TOKEN>`.
+Invoke every minute from an event function. It checks the shared business clock,
+claims due morning briefings and confirmed scheduled emails, and returns
+`{briefing: {...}, scheduled: {...} | null}`. It does not bypass review or retry
+unknown submissions. Workspace access tokens do not authorize this endpoint.
+
+With `WORKFLOW_STORAGE=database`, email preferences, encrypted OAuth state,
+delivery claims and business clock are stored in MySQL (migration
+`0009_cloud_mail`). OAuth cookies support separate HTTPS frontend/backend origins;
+`PUBLIC_FRONTEND_ORIGIN` controls the return destination after authorization.

@@ -59,8 +59,8 @@
     const url = allowed(input);
     const headers = new Headers(options.headers);
     if (token) headers.set('X-ThreadPilot-Token', token);
-    const response = await fetch(url.href, {...options, headers, redirect: 'error'});
-    if (response.status === 401) showAccess();
+    const response = await fetch(url.href, {...options, headers, credentials: 'include', redirect: 'error'});
+    if (response.status === 401 && !headers.has('Authorization')) showAccess();
     return response;
   };
   window.threadpilotSignOut = () => {

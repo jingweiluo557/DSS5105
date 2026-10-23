@@ -49,10 +49,14 @@ class Slots(StrictModel):
     delivery_buffer_days: int | None = Field(default=None, ge=0, le=60)
     packing_loss_days: int | None = Field(default=None, ge=0, le=60)
     review_decision: Literal['save', 'apply', 'reject'] | None = None
+    chase_mode: Literal['summary', 'separate'] | None = None
+    draft_number: int | None = Field(default=None, ge=1, le=10)
     recipient: str | None = None
+    department: Literal['KNITTING','ASSEMBLY','WASHING','PACKING'] | None = None
     tone: str | None = None
     text: str | None = None
     deadline: str | None = None
+    send_at: str | None = None
     condition: Literal['no_reply', 'no_activity'] | None = None
     action: Literal['read', 'draft', 'revise', 'send', 'save', 'create', 'update', 'explain', 'evidence', 'recommend', 'rank', 'confirm_target', 'adopt'] = 'read'
     reference: Literal['explicit', 'active', 'ambiguous', 'none'] = 'none'
@@ -101,6 +105,7 @@ class PendingAction(StrictModel):
     preview: str
     created_at: datetime
     source_snapshot: dict[str, str] = Field(default_factory=dict)
+    source_snapshots: dict[str, dict[str, str]] = Field(default_factory=dict)
 
 
 class DialogState(StrictModel):
@@ -114,6 +119,8 @@ class DialogState(StrictModel):
     comparison_orders: list[str] = Field(default_factory=list)
     last_order_ids: list[str] = Field(default_factory=list)
     draft: dict[str, str] | None = None
+    chase_context: dict[str, Any] = Field(default_factory=dict)
+    chase_drafts: list[dict[str, Any]] = Field(default_factory=list)
     history: list[dict[str, str]] = Field(default_factory=list)
     review_draft_id: str | None = None
     revision: int = 0
@@ -143,6 +150,7 @@ class ChatResponse(StrictModel):
     order_ids: list[str] = Field(default_factory=list)
     selected_order_id: str | None = None
     sources: list[str] = Field(default_factory=list)
+    source_details: str = ''
     request_id: str = ''
     model: str = 'gpt-4.1'
     business_date: str

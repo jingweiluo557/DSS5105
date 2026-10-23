@@ -1,16 +1,14 @@
 # ThreadPilot tool specification
 
-Version: 2.0 · Updated: 2026-10-15 · Status: implementation reference
-
-This English specification replaces the earlier Sprint 1 draft while retaining its filename. It describes implemented behavior, not a claim of production acceptance or measured model accuracy. Tool names refer to workflow audit records unless explicitly identified as a service or auxiliary SQL tool.
+Version: 1.0 · Updated: 2026-10-15 ·
 
 ## 1. Architecture and authority
 
 A bounded model planner translates requests into existing workflows. Deterministic tools retrieve current database facts, calculate risk and capacity, and prepare actions. The model explains returned facts in English; it does not calculate authoritative queue results or grant permission to execute a write. General questions may bypass business tools, but must not be presented as database-backed conclusions.
 
-The primary data tables are `orders`, `production_log` and `workshops`. Snapshot freshness depends on upstream imports and updates. Production logs measure stage output, not order-level events or unique finished garments. The database may be MySQL or an isolated SQLite acceptance database; CSV files are seed inputs.
+The primary data tables are `orders`, `production_log` and `workshops`. Snapshot freshness depends on upstream imports and updates. Production logs measure stage output, not order-level events or unique finished garments. The database is MySQ database; CSV files are seed inputs.
 
-Tool calls carry `name`, `arguments`, `result`, `idempotent`, `requires_confirmation` and `executed`. Evidence can include source, record identifier, version, timestamp, original source and a URL. An evidence URL reads the current record; it is not automatically an immutable historical view.
+Tool calls carry `name`, `arguments`, `result`, `idempotent`, `requires_confirmation` and `executed`. Evidence can include source, record identifier, version, timestamp, original source and a URL.
 
 ## 2. Retrieval, judgement and tracing tools
 
@@ -101,3 +99,29 @@ For model evaluation, keep a separate reviewed question set covering retrieval, 
 | Streaming | `backend/app/workflow_api.py`, `frontend/ai-stream.js` |
 
 Request schemas are available from the running `/docs` and `/openapi.json` endpoints. Dependencies are pinned in `backend/uv.lock` and exported requirements.
+
+
+## Chase drafting modes
+
+`execution.chase` supports a summary draft (`chase_mode=summary`) and separate
+order drafts (`chase_mode=separate`). Multiple explicit orders without a requested
+mode produce a clarification listing only the current candidates. Morning briefing
+chase-up defaults to a summary addressed to Me. `CHASE_SELF_RECIPIENT` can map Me to
+a delivery address; when blank, the app asks for an address before a send preview.
+A single-order draft asks for a recipient, not a tone. Separate drafts may be
+prepared before their recipients are set; each recipient must be set before preview.
+
+Drafts persist in the session JSON (`chase_context`, `chase_drafts`), requiring no
+new tables. `Send draft 2 to manager@example.com` previews only that draft. The
+existing expiring confirmation gate, source-record recheck and idempotency key
+apply independently to each send. No bulk confirmation is accepted. Revision or
+another request revokes an old preview. A sender webhook is still required for
+actual delivery; a generated draft is never a delivery receipt. Summary webhook
+payloads include `order_ids` as the full scope and `order_id` as the first order
+(or an empty string for an operational summary without orders).
+
+Model draft text is streamed as upstream deltas arrive, then saved only after a
+complete response. Interrupted generations leave the previously saved drafts
+intact. Deterministic clarification and confirmation messages are short single
+chunks. `source_details` and `evidence` are rendered in a collapsed Source details
+panel instead of appended to the answer body.

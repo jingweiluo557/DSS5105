@@ -164,7 +164,11 @@ def test_workbook_multiturn_scenario(scenario: str, tmp_path: Path, storage: str
             assert response.needs_clarification == clarification, (row, response.answer)
             names = [call.name for call in response.tool_calls]
             assert (tool in names) if tool else not names, (row, names)
-            assert phrase in response.answer, (row, response.answer)
+            if phrase.endswith('.csv'):
+                assert phrase in response.sources or phrase.removesuffix('.csv') in response.sources
+                assert 'Source evidence:' not in response.answer
+            else:
+                assert phrase in response.answer, (row, response.answer)
             writes = [c for c in response.tool_calls if c.requires_confirmation]
             assert not writes or engine.confirmation_word(text)
             if response.evidence:

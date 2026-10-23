@@ -1,4 +1,5 @@
 """场景 1.2/2.1：前端和原有意图工具使用同一数据库。"""
+from ..business_clock import BusinessClock
 from datetime import datetime, timezone
 from sqlalchemy import select
 from ..crud.data_record import MODELS, fields
@@ -38,7 +39,7 @@ class DatabaseDataTools(DataTools):
 
 def snapshot(database: Database, today: str) -> dict:
     """场景 1.2/2.1：请求时生成快照，文件导出仅供下载，不作问答缓存。"""
-    result: dict = {'today': today, 'generated_at': datetime.now(timezone.utc).isoformat()}
+    result: dict = {'today': today, 'generated_at': BusinessClock().now().isoformat()}
     with database.sessions() as session:
         for name, model in MODELS.items():
             ordering = (model.date, model.id) if name == 'production_log' else (model.id,)

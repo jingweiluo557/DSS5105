@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>ThreadPilot · Outlook</title>
+<style>body{font:16px/1.6 system-ui;background:#f4f5f7;color:#172534;margin:32px auto;max-width:760px;padding:0 20px}section{background:white;padding:24px;border-radius:14px;margin:20px 0}label{display:block;margin:14px 0}input,textarea{box-sizing:border-box;width:100%;padding:10px;border:1px solid #a9b3bf;border-radius:6px;font:inherit}button{padding:10px 16px;margin:6px 8px 6px 0;cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere}#notice{padding:12px;background:#e6eef8}small{color:#526170}dialog{max-width:650px;width:80%;border:1px solid #ccc;border-radius:14px}input[type=checkbox]{width:auto}</style>
+</head><body><a href="/">← 返回 ThreadPilot</a><h1>连接个人 Outlook</h1><p id="notice" role="status">先输入本机管理令牌，再检查连接。</p>
+<section><h2>账号连接</h2><p>输入 backend/.env 中的 DATA_API_TOKEN。令牌仅保留在当前页面内存中，刷新后需重新输入。</p>
+<label>管理令牌<input id="admin" type="password" autocomplete="off"></label><label>应用访问令牌（仅配置了 API_ACCESS_TOKEN 时填写）<input id="access" type="password" autocomplete="off"></label>
+<button id="status">检查连接</button><button id="connect">连接 Outlook</button><button id="disconnect">断开本机连接</button><small>断开会删除本机授权缓存；撤销 Microsoft 端授权需在 Microsoft 账号中操作。</small></section>
+<section><h2>发送邮件</h2><label>收件人（多个地址以逗号分隔）<input id="to" placeholder="name@outlook.com"></label><label>主题<input id="subject" maxlength="240"></label><label>正文<textarea id="body" rows="9" maxlength="12000"></textarea></label><button id="preview">预览邮件</button><p>先核对实际内容，再确认发送。平台接受请求不代表收件人已收到。</p></section>
+<section><h2>最近发送记录</h2><button id="history">刷新记录</button><pre id="history-output"></pre></section>
+<dialog id="review"><h2>确认发送这封邮件？</h2><pre id="review-content"></pre><button id="send">确认发送</button><button id="cancel">返回编辑</button></dialog>
+<script src="/outlook.js"></script></body></html>

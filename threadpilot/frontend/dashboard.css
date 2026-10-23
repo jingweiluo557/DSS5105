@@ -23,7 +23,7 @@
 .dashboard-refresh .briefing-points li:last-child{margin-bottom:0}
 .dashboard-refresh .briefing-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .dashboard-refresh .cleared-tasks{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-.dashboard-refresh .todo-tabs{display:flex;gap:8px;margin:20px 0 10px}
+.dashboard-refresh .todo-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 10px}
 .dashboard-refresh .todo-tabs [aria-pressed=true]{background:var(--sage);border-color:#b7cbbb}
 .dashboard-refresh .todo-scroll{position:relative;max-height:390px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:8px}
 .dashboard-refresh .todo-item{display:flex;gap:12px;padding:20px 0;border-bottom:1px solid var(--line)}

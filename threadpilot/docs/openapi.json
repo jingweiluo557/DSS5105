@@ -1664,6 +1664,530 @@
           }
         }
       }
+    },
+    "/api/outlook/status": {
+      "get": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Status",
+        "operationId": "status_api_outlook_status_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/connect": {
+      "post": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Connect",
+        "operationId": "connect_api_outlook_connect_post",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "settings",
+                "test"
+              ],
+              "type": "string",
+              "default": "test",
+              "title": "Source"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/callback": {
+      "get": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Callback",
+        "operationId": "callback_api_outlook_callback_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/disconnect": {
+      "post": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Disconnect",
+        "operationId": "disconnect_api_outlook_disconnect_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/send": {
+      "post": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Send",
+        "operationId": "send_api_outlook_send_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendEmail"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/messages": {
+      "get": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Messages",
+        "operationId": "messages_api_outlook_messages_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/settings": {
+      "get": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Settings",
+        "operationId": "settings_api_email_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Save",
+        "operationId": "save_api_email_settings_put",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailPreferences"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/clock": {
+      "get": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Clock Status",
+        "operationId": "clock_status_api_email_clock_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Set Clock",
+        "operationId": "set_clock_api_email_clock_put",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClockChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/activity": {
+      "get": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Activity",
+        "operationId": "activity_api_email_activity_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/connect": {
+      "post": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Connect",
+        "operationId": "connect_api_email_connect_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/disconnect": {
+      "post": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Disconnect",
+        "operationId": "disconnect_api_email_disconnect_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/email/run": {
+      "post": {
+        "tags": [
+          "Email scheduler"
+        ],
+        "summary": "Run Email",
+        "operationId": "run_email_api_internal_email_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1894,6 +2418,11 @@
             "type": "array",
             "title": "Sources"
           },
+          "source_details": {
+            "type": "string",
+            "title": "Source Details",
+            "default": ""
+          },
           "request_id": {
             "type": "string",
             "title": "Request Id",
@@ -1934,6 +2463,67 @@
           "business_date"
         ],
         "title": "ChatResponse"
+      },
+      "ClockChange": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "live",
+              "demo"
+            ],
+            "title": "Mode"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "version"
+        ],
+        "title": "ClockChange"
+      },
+      "CustomerContact": {
+        "properties": {
+          "customer": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Customer"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Name",
+            "default": ""
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer",
+          "email"
+        ],
+        "title": "CustomerContact"
       },
       "Decision": {
         "properties": {
@@ -2081,6 +2671,19 @@
             ],
             "title": "Draft"
           },
+          "chase_context": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Chase Context"
+          },
+          "chase_drafts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Chase Drafts"
+          },
           "history": {
             "items": {
               "additionalProperties": {
@@ -2196,6 +2799,58 @@
           "version"
         ],
         "title": "DraftTurn"
+      },
+      "EmailPreferences": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          },
+          "manager_email": {
+            "type": "string",
+            "title": "Manager Email"
+          },
+          "manager_name": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Manager Name",
+            "default": "Manager"
+          },
+          "briefing_enabled": {
+            "type": "boolean",
+            "title": "Briefing Enabled",
+            "default": false
+          },
+          "subject_prefix": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Subject Prefix",
+            "default": "ThreadPilot morning briefing"
+          },
+          "customers": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerContact"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Customers"
+          },
+          "departments": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Departments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "manager_email"
+        ],
+        "title": "EmailPreferences"
       },
       "EmailUpdate": {
         "properties": {
@@ -2398,6 +3053,16 @@
             },
             "type": "object",
             "title": "Source Snapshot"
+          },
+          "source_snapshots": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Source Snapshots"
           }
         },
         "additionalProperties": false,
@@ -2608,6 +3273,50 @@
         ],
         "title": "ReplyEvent"
       },
+      "SendEmail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "to": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "To"
+          },
+          "subject": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Subject"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 12000,
+            "minLength": 1,
+            "title": "Body"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "title": "Confirmed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "to",
+          "subject",
+          "body",
+          "confirmed"
+        ],
+        "title": "SendEmail"
+      },
       "Slots": {
         "properties": {
           "order_ids": {
@@ -2813,6 +3522,34 @@
             ],
             "title": "Review Decision"
           },
+          "chase_mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "summary",
+                  "separate"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chase Mode"
+          },
+          "draft_number": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Number"
+          },
           "recipient": {
             "anyOf": [
               {
@@ -2823,6 +3560,23 @@
               }
             ],
             "title": "Recipient"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "KNITTING",
+                  "ASSEMBLY",
+                  "WASHING",
+                  "PACKING"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
           },
           "tone": {
             "anyOf": [
@@ -2856,6 +3610,17 @@
               }
             ],
             "title": "Deadline"
+          },
+          "send_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Send At"
           },
           "condition": {
             "anyOf": [

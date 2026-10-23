@@ -1,4 +1,5 @@
 """One database snapshot, calendar and capacity model for risk and dispatch decisions."""
+from ..business_clock import BusinessClock
 import hashlib
 import json
 from datetime import date, datetime, timedelta, timezone
@@ -151,7 +152,7 @@ class SchedulingService:
         with self.database.sessions.begin() as session:
             data = read_locked(session, today)
             result = QueueAnalysis(data).expedite(oid)
-            rid, stamp = str(uuid4()), datetime.now(timezone.utc).isoformat()
+            rid, stamp = str(uuid4()), BusinessClock().now().isoformat()
             session.execute(reviews.insert().values(id=rid, order_id=oid, fingerprint=fingerprint(data),
                             payload=json.dumps(result), created_at=stamp, status='preview'))
         return {**result, 'review_id': rid, 'created_at': stamp}
@@ -166,7 +167,7 @@ class SchedulingService:
                 if row['decision'] != decision or row['reviewed_by'] != reviewer or row['note'] != note:
                     raise ValueError('This review already has a different decision.')
                 return {'review_id': rid, 'status': row['status'], 'decision': decision, 'replayed': True}
-            if fingerprint(data) != row['fingerprint'] or datetime.now(timezone.utc) - datetime.fromisoformat(row['created_at']) > timedelta(minutes=15):
+            if fingerprint(data) != row['fingerprint'] or not timedelta(0) <= BusinessClock().now() - datetime.fromisoformat(row['created_at']) <= timedelta(minutes=15):
                 raise ValueError('Data, date or schedule changed, or the preview expired. Generate and review a fresh analysis.')
             linked = session.execute(sa.select(drafts.c.id).where(drafts.c.review_id == rid)).scalar()
             if linked and not draft_id:
@@ -192,7 +193,7 @@ class SchedulingService:
                     session.execute(schedule.insert().values(id=1, **values))
             status = 'applied' if decision == 'apply' else 'saved' if decision == 'save' else 'rejected'
             session.execute(reviews.update().where(reviews.c.id == rid).values(status=status, decision=decision,
-                            reviewed_by=reviewer, note=note, decided_at=datetime.now(timezone.utc).isoformat()))
+                            reviewed_by=reviewer, note=note, decided_at=BusinessClock().now().isoformat()))
         return {'review_id': rid, 'status': status, 'decision': decision, 'replayed': False}
 
     def history(self):

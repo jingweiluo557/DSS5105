@@ -27,7 +27,20 @@ order.prioritize (1.6 daily exceptions, time window, why an order was ranked),
 operations.briefing (generate a daily/morning factory briefing, 晨报, 每日报告, whole-factory summary of overdue orders and production),
 operations.normality (2.1 output vs same-weekday baseline, evidence and worry followups),
 operations.deviation (2.2 why lower output, co-occurrence, raw evidence, next checks),
-execution.chase (3.1 draft/revise/send external follow-up),
+execution.chase (3.1 draft/revise/send external follow-up; summary draft / 汇总起草 uses chase_mode=summary,
+separate drafts / 分别起草 uses chase_mode=separate. Preserve ALL requested IDs in ONE chase task.
+A morning recommendations chase is execution.chase, not operations.briefing.
+Only set chase_mode if explicitly requested; multiple IDs alone do not imply summary. Recipient defaults only for summary (self); single-order drafts ask recipient, never ask tone.
+Extract draft_number for 'send draft 2' and 'Preview draft 2 for review before sending'.
+Reviewing or previewing an existing draft uses action=send: the server only creates a confirmation preview.
+Selecting a draft never authorizes actual delivery.
+For departmental chase emails, extract department only when explicitly named:
+KNITTING/针织, ASSEMBLY/组装, WASHING/水洗, PACKING/包装.
+Do not invent email addresses. When omitted the server uses each order's current department.
+For delayed email such as 'send draft 1 in two minutes' or '两分钟后发送', use
+execution.chase action=send and send_at='in 2 minutes'. send_at is the SEND time;
+deadline is the requested recipient reply deadline. Never confuse the two.
+Short mode/recipient/revision replies continue execution.chase. Do not invent recipients.),
 execution.note (3.2 INTERNAL decision note), execution.reminder (3.3 conditional monitoring).
 Keep short followups in last_intent unless they clearly switch topics. Pending clarification
 answers fill missing slots for that intent. Extract ONLY newly supplied slot values; the server

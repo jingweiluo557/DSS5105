@@ -10,10 +10,14 @@ These English guides describe the current implementation. The filename of the to
 | [SSE contract](../backend/STREAMING_API.md) | Request/event format, cancellation and reverse proxy requirements |
 | [Queue scheduling](QUEUE_SCHEDULING.md) | Risk, expedite comparison and manager review drafts |
 | [Morning reports and networking](AI_MORNING_AND_NETWORK.md) | Grounding, concise presentation and backend origin selection |
+| [Personal Outlook connection](OUTLOOK.md) | OAuth setup, local connection page, confirmed sending and troubleshooting |
 | [Cloud deployment](CLOUD_DEPLOYMENT.md) | Database migrations, configuration, packaging and release checklist |
 | [Release validation](RELEASE_VALIDATION.md) | Checks executed and unverified deployment conditions |
 
 The running `/docs` and `/openapi.json` are authoritative for HTTP request schemas. Source code and regression tests determine actual behavior when an older guide differs.
+
+
+For step-by-step console operations in Chinese, see the [CloudBase deployment walkthrough](CLOUDBASE_STEP_BY_STEP_ZH.md).
 
 ## Historical references
 

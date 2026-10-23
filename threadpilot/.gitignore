@@ -24,3 +24,8 @@ data/snapshots/*
 !data/snapshots/.gitkeep
 backend/runtime/*
 !backend/runtime/.gitkeep
+
+# Raw evaluation conversations stay local; publish reviewed summaries only.
+docs/reports/*/live-results.json
+docs/reports/*/source.tsv
+docs/reports/*/*.xml

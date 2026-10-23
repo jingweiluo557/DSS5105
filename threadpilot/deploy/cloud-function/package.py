@@ -1,10 +1,13 @@
 """Allowlist backend artifacts; credentials and local runtime files never enter ZIP."""
 from pathlib import Path
+import argparse
 from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 
 source = Path(__file__).resolve().parent
 root = source.parents[1]
-vendor = root / '.build/cloud-function-full'
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--vendor', type=Path, default=root / '.build/cloud-function-full')
+vendor = parser.parse_args().vendor.resolve()
 if not (vendor / 'fastapi/__init__.py').exists():
     raise SystemExit('Install Linux/Python 3.11 requirements into .build/cloud-function-full first.')
 output = root / 'dist/threadpilot-backend-python311.zip'
@@ -50,3 +53,7 @@ morning_output = output.with_name('threadpilot-morning-timer.zip')
 with ZipFile(morning_output, 'w', ZIP_DEFLATED) as archive:
     add(archive, source / 'morning_timer.py', 'index.py')
 print(f'Created {morning_output}')
+email_output = output.with_name('threadpilot-email-timer.zip')
+with ZipFile(email_output, 'w', ZIP_DEFLATED) as archive:
+    add(archive, source / 'email_timer.py', 'index.py')
+print(f'Created {email_output}')

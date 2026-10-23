@@ -14,11 +14,13 @@ def main():
             set_key(source, key, values[key])
     keys = ('DATABASE_URL', 'AI_DATABASE_URL', 'OPENAI_API_KEY', 'OPENAI_BASE_URL',
             'OPENAI_MODEL', 'INTENT_API_STYLE', 'DATA_API_TOKEN', 'API_ACCESS_TOKEN',
-            'SCHEDULER_TOKEN', 'BUSINESS_NOW', 'CORS_ORIGINS')
+            'SCHEDULER_TOKEN', 'BUSINESS_NOW', 'CORS_ORIGINS', 'PUBLIC_FRONTEND_ORIGIN',
+            'OUTLOOK_CLIENT_ID', 'OUTLOOK_CLIENT_SECRET', 'OUTLOOK_REDIRECT_URI', 'OUTLOOK_AUTHORITY', 'OUTLOOK_ENCRYPTION_KEY')
     config = {key: values[key] for key in keys if values.get(key)}
     config.update(PORT='9000', WORKFLOW_STORAGE='database', BACKGROUND_TASKS_ENABLED='false',
                   SYNC_ENABLED='false', SERVE_FRONTEND='false', RAW_DATA_DIR='/tmp/threadpilot/raw',
                   OPENAI_TIMEOUT_SECONDS='45', SQL_AGENT_STEPS='8')
+    config.update(EMAIL_SCHEDULER_ENABLED='false', MORNING_SCHEDULER_ENABLED='false')
     target = ROOT / 'backend/.env.cloudfunction.json'
     target.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     timer = {'BACKEND_ORIGIN': 'https://dss5105-track1-i7gxvcy5k7ef5ac9b-1500904749.ap-singapore.app.tcloudbase.com',

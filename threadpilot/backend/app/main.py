@@ -45,9 +45,21 @@ def create_app() -> FastAPI:
         monitor = asyncio.create_task(monitor_loop(app)) if app.state.settings.background_tasks_enabled else None
         from .api.dashboard_api import morning_loop
         morning = asyncio.create_task(morning_loop(app)) if app.state.settings.morning_scheduler_enabled else None
+        from .services.briefing_delivery import delivery_loop
+        delivery = asyncio.create_task(delivery_loop(app)) if app.state.settings.email_scheduler_enabled else None
+        from .services.scheduled_email import scheduled_email_loop
+        email_queue = asyncio.create_task(scheduled_email_loop(app)) if app.state.settings.email_scheduler_enabled else None
         try:
             yield
         finally:
+            if email_queue:
+                email_queue.cancel()
+                with suppress(asyncio.CancelledError):
+                    await email_queue
+            if delivery:
+                delivery.cancel()
+                with suppress(asyncio.CancelledError):
+                    await delivery
             if morning:
                 morning.cancel()
                 with suppress(asyncio.CancelledError):
@@ -77,7 +89,7 @@ def create_app() -> FastAPI:
         settings = getattr(app.state, 'settings', None)
         token = settings.api_access_token.get_secret_value() if settings else ''
         protected = request.url.path == '/chat' or request.url.path.startswith('/api/')
-        exempt = request.url.path in ('/api/v1/health', '/api/internal/reminders/run', '/api/internal/briefings/run', '/api/v1/workflow/replies')
+        exempt = request.url.path in ('/api/v1/health', '/api/internal/reminders/run', '/api/internal/briefings/run', '/api/internal/email/run', '/api/v1/workflow/replies', '/api/outlook/callback')
         if token and protected and not exempt and request.method != 'OPTIONS':
             supplied = request.headers.get('X-ThreadPilot-Token', '')
             if not secrets.compare_digest(supplied.encode(), token.encode()):
@@ -93,6 +105,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=Settings().cors_origins,
+        allow_credentials=True,
         allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allow_headers=['Content-Type', 'Authorization', 'X-Confirm-Write', 'X-ThreadPilot-Token'],
     )
 
@@ -121,8 +134,8 @@ def create_app() -> FastAPI:
         return {'status': 'ok', 'configured': app.state.client is not None, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1'), 'streaming': True}
 
     install_workflow_routes(app, DATA)
-    from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api, scheduling_api, morning_api
-    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router, dashboard_api.router, scheduling_api.router, morning_api.router):
+    from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api, scheduling_api, morning_api, outlook_api, email_api, email_scheduler_api
+    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router, dashboard_api.router, scheduling_api.router, morning_api.router, outlook_api.router, email_api.router, email_scheduler_api.router):
         app.include_router(router)
     if Settings().serve_frontend:
         app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')

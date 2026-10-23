@@ -45,6 +45,7 @@ render = function() {
   const current = document.querySelector('.copilot-chat .conversation');
   if (current) {
     current.scrollTop = follow ? current.scrollHeight : position;
+    if(follow)requestAnimationFrame(()=>{if(current.isConnected)current.scrollTop=current.scrollHeight});
     if (previous) window.scrollTo(0, pageY);
   }
 };

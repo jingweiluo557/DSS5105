@@ -1,5 +1,10 @@
 # ThreadPilot
 
+Cloud email release: see [deployment checklist](docs/CLOUDBASE_RELEASE_20261024.md).
+Settings now manages the advancing business clock, Outlook connection and email
+recipients. Reviewed chase-up emails and 07:00 briefings persist in shared MySQL
+when `WORKFLOW_STORAGE=database`; Activity Log displays submission results.
+
 A factory management workspace for order lookup, shared queue-risk analysis, expedite impact reviews, AI conversations, and grounded morning briefings. The application reads the current database snapshot; historical CSV files are seed inputs, not a live production feed.
 
 ## Current capabilities

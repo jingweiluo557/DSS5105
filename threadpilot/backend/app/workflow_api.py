@@ -27,13 +27,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 def business_now() -> datetime:
     """场景 1.2/3.3：默认复现数据日期；设 BUSINESS_NOW=live 后使用实际时钟。"""
-    value = os.getenv('BUSINESS_NOW', 'live')
-    if value == 'live':
-        return datetime.now(timezone(timedelta(hours=8)))
-    result = datetime.fromisoformat(value)
-    if result.tzinfo is None:
-        raise ValueError('BUSINESS_NOW must include timezone')
-    return result
+    from .business_clock import BusinessClock
+    return BusinessClock().now()
 
 
 def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
@@ -43,6 +38,8 @@ def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
     store = (SQLWorkflowStore(app.state.database.engine) if app.state.settings.workflow_storage == 'database'
              else WorkflowStore(app.state.settings.workflow_db))
     app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), store, business_now, sender)
+    from .services.scheduled_email import ScheduledEmail
+    app.state.workflow.email_scheduler = ScheduledEmail(app.state.settings)
     from .services.review_chat import review_reason_handler
     app.state.workflow.review_reason_handler = review_reason_handler(app)
     async def morning_handler(classification, state, now):

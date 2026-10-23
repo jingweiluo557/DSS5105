@@ -14,7 +14,19 @@ STAGES = ['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING']
 
 def resolve_datetime(value: str, now: datetime, previous: datetime | None = None) -> datetime | None:
     """场景 3.1/3.3：相对时间归一化；仅有 morning 等模糊时间时返回空。"""
-    value = value.strip().lower().replace('.', '')
+    raw = value.strip()
+    try:
+        result = datetime.fromisoformat(raw)
+        if 't' in raw.lower() or ' ' in raw:
+            return result.astimezone(now.tzinfo) if result.tzinfo else result.replace(tzinfo=now.tzinfo)
+    except ValueError:
+        pass
+    value = raw.lower().replace('.', '')
+    value = value.replace('两分钟','2分钟').replace('二分钟','2分钟').replace('一分钟','1分钟').replace('two minutes','2 minutes').replace('one minute','1 minute')
+    relative = re.fullmatch(r'(?:in\s+)?(\d+)\s*(minutes?|hours?|seconds?|分钟|小时|秒)(?:\s*(?:later|后))?',value)
+    if relative:
+        seconds=int(relative[1])*(3600 if relative[2] in ('hour','hours','小时') else 60 if relative[2] in ('minute','minutes','分钟') else 1)
+        return now+timedelta(seconds=seconds) if 0 < seconds <= 604800 else None
     try:
         result = datetime.fromisoformat(value)
         if 't' not in value and ' ' not in value:
@@ -147,7 +159,7 @@ class DataTools:
                 and date.fromisoformat(e.record['due_date']) <= end
                 and (not slots.customer or e.record['customer'].casefold() == slots.customer.casefold())]
         rows.sort(key=lambda e: (e.record['due_date'], e.record['last_activity_date'], e.record['order_id']))
-        return {'window_end': end.isoformat(), 'rule': 'Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.',
+        return {'business_now': now.isoformat(), 'window_start': now.date().isoformat(), 'window_end': end.isoformat(), 'rule': 'Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.',
                 'orders': [self.assess_risk(e, now) for e in rows]}, rows
 
     def normality(self, slots: Slots, now: datetime) -> tuple[dict[str, Any], list[Evidence]]:

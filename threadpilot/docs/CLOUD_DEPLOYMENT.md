@@ -4,6 +4,8 @@ This repository supports a persistent container service or an HTTP cloud functio
 
 ## Database and configuration
 
+The selected database provider for this deployment is **CloudBase SQL database (MySQL)**. Enable its direct-connection service and use SQLAlchemy/PyMySQL with the actual database name and port from the console (do not assume the database is named `threadpilot`). Configure the HTTP function's VPC access and use the internal endpoint at runtime; an external endpoint is for local migration/debugging only. The migration connection and runtime connection may have different hosts and ports. See the [CloudBase-specific walkthrough](CLOUDBASE_STEP_BY_STEP_ZH.md) and [official direct-connection documentation](https://docs.cloudbase.net/database/configuration/db/tdsql/direct-connection). Existing backend code uses the MySQL protocol; this choice does not require switching to the CloudBase document-database SDK.
+
 Use MySQL 8 with persistent storage. Back up the existing database before a schema upgrade. From `backend`, run `python -m alembic upgrade head` with a migration-capable `DATABASE_URL`; verify `python -m alembic current` reports `0008_ai_morning`. Runtime application credentials need SELECT/INSERT/UPDATE/DELETE, not schema administration. `scripts.provision_mysql` is for controlled account provisioning and resets the named users' grants/passwords; do not run it casually against an existing shared deployment.
 
 Use a separate read-only `AI_DATABASE_URL` restricted to orders, production_log and workshops. URL-encode connection credentials. Do not import seed data into an existing live database. Migrations are not automatically applied by `scripts.serve` or `scripts.cloud_serve`.

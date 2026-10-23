@@ -13,7 +13,7 @@ async def generate_morning(app, scheduled=False):
     if not hasattr(app.state,'morning_lock'): app.state.morning_lock=asyncio.Lock()
     async with app.state.morning_lock:
         return await MorningService(app.state.database).generate(business_now().date().isoformat(),
-                    app.state.client, app.state.settings, scheduled=scheduled)
+                    app.state.client, app.state.settings, now=business_now(), scheduled=scheduled)
 
 
 @router.get('/briefing', include_in_schema=False)

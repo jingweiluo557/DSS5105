@@ -1,4 +1,5 @@
 """Versioned, resumable drafts. Model output never executes or overwrites a form."""
+from ..business_clock import BusinessClock
 import json
 import re
 from datetime import datetime, timezone, timedelta
@@ -10,7 +11,7 @@ from .scheduling_service import read_locked, fingerprint, QueueAnalysis
 
 
 def stamp():
-    return datetime.now(timezone.utc).isoformat()
+    return BusinessClock().now().isoformat()
 
 
 class DraftConflict(ValueError):
@@ -34,7 +35,7 @@ class ReviewDraftService:
     def _result(self, session, row, data):
         review = session.execute(sa.select(reviews).where(reviews.c.id == row['review_id'])).mappings().one()
         stale = (review['fingerprint'] != fingerprint(data) or
-                 datetime.now(timezone.utc) - datetime.fromisoformat(review['created_at']) > timedelta(minutes=15))
+                 not timedelta(0) <= BusinessClock().now() - datetime.fromisoformat(review['created_at']) <= timedelta(minutes=15))
         return {**dict(row), **json.loads(row['content']), 'content': None, 'stale': stale,
                 'analysis': {**json.loads(review['payload']), 'review_id': review['id'], 'created_at': review['created_at']}}
 

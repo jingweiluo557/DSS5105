@@ -1,4 +1,5 @@
 """Persist editable email drafts grounded in an archived morning briefing."""
+from .business_clock import BusinessClock
 import json
 from datetime import datetime
 
@@ -42,7 +43,7 @@ def generate(database, day):
         if p.get('cleared'):
             lines += ['', 'Handled items'] + ['- ' + title for title in p['cleared']]
         lines += ['', 'Best regards,', 'ThreadPilot']
-        stamp = datetime.now(LOCAL).isoformat()
+        stamp = BusinessClock().now().isoformat()
         values = dict(briefing_day=day, subject=f'ThreadPilot morning summary | {day}',
                       body='\n'.join(lines), source_payload=json.dumps(source, ensure_ascii=False),
                       version=1, created_at=stamp, updated_at=stamp)
@@ -54,7 +55,7 @@ def save(database, day, subject, body, version):
     with database.engine.begin() as db:
         result = db.execute(drafts.update().where(drafts.c.briefing_day == day, drafts.c.version == version)
                             .values(subject=subject, body=body, version=version+1,
-                                    updated_at=datetime.now(LOCAL).isoformat()))
+                                    updated_at=BusinessClock().now().isoformat()))
         if result.rowcount != 1:
             return None
         return public(db.execute(sa.select(drafts).where(drafts.c.briefing_day == day)).mappings().one())

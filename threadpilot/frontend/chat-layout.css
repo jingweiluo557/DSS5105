@@ -11,7 +11,7 @@
   align-items: stretch;
 }
 @media(min-width:951px) {
-  .refined-ui .copilot-columns { height: max(580px, calc(100dvh - 280px)); }
+  .refined-ui .copilot-columns { height: max(720px, calc(100dvh - 200px)); }
   .refined-ui .copilot-columns .copilot-chat { height: 100%; }
   .refined-ui .copilot-context {
     display: flex;
@@ -57,7 +57,7 @@
 .refined-ui .copilot-chat {
   display: flex;
   flex-direction: column;
-  height: max(400px, calc(100dvh - 300px));
+  height: max(540px, calc(100dvh - 220px));
   padding: 18px;
   min-height: 0;
 }
@@ -107,3 +107,13 @@
   .refined-ui .copilot-chat { height: max(360px, calc(100dvh - 250px)); padding: 12px; }
   .refined-ui .copilot-chat .chat-heading { margin-bottom: 8px; padding-bottom: 8px; }
 }
+
+/* The follow-up drawer scrolls only its messages, keeping the composer visible. */
+.drawer[aria-label="Dashboard follow-up"] { display:flex; flex-direction:column; height:100dvh; overflow:hidden; width:min(820px, 94vw); }
+.drawer[aria-label="Dashboard follow-up"] .drawer-header { flex-shrink:0; }
+.drawer[aria-label="Dashboard follow-up"] .conversation { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding-right:6px; }
+.drawer[aria-label="Dashboard follow-up"] .composer { flex-shrink:0; margin-top:12px; padding:12px; }
+.drawer[aria-label="Dashboard follow-up"] textarea { height:60px; min-height:60px; max-height:100px; }
+.source-details { margin-top:14px; color:var(--muted); font-size:12px; }
+.source-details summary { cursor:pointer; }
+.source-details p { margin:8px 0; }

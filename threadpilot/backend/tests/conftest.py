@@ -14,6 +14,8 @@ def business_database(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv('DATABASE_URL', 'sqlite:///' + (tmp_path / 'business.sqlite3').as_posix())
     monkeypatch.setenv('AI_DATABASE_URL', '')
     monkeypatch.setenv('SYNC_ENABLED', 'false')
+    monkeypatch.setenv('EMAIL_SCHEDULER_ENABLED', 'false')
+    monkeypatch.setenv('BUSINESS_CLOCK_STORE', str(tmp_path/'business-clock.sqlite3'))
     monkeypatch.setenv('DATA_API_TOKEN', 'test-management-token')
     database = Database(Settings())
     Base.metadata.create_all(database.engine)

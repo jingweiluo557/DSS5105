@@ -37,7 +37,17 @@ class WorkflowEngine:
         if request.selected_order_id and not state.active_order and not state.comparison_orders:
             state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
         confirmed = self.confirmation_word(request.message)
-        if confirmed:
+        cancelled = request.message.strip().casefold().rstrip('.!。！') in {
+            'cancel', 'cancel, do not send', 'do not send', "don't send", '取消', '不要发送', '取消发送'}
+        if cancelled:
+            state.pending_action = None
+            state.pending_clarification = None
+            state.chase_context = {}
+            state.chase_drafts = []
+            response = self.response(state, Classification(intent=state.last_intent or Intent.UNKNOWN, confidence=1),
+                now, 'Cancelled. No pending action remains; nothing was sent.', [], [])
+            if emit: await emit(response.answer)
+        elif confirmed:
             response = await self.confirm(request, state, now)
             if emit:
                 await emit(response.answer)
@@ -79,9 +89,16 @@ class WorkflowEngine:
         responses = []
         # Keep drafts/topic slots, but a new turn requires a fresh execution preview.
         state.pending_action = None
-        if sum(t.classification.intent.value.startswith('execution.') for t in plan.tasks) > 1:
+        if sum(t.classification.intent.value.startswith('execution.') for t in plan.tasks) > 1 and not all(t.classification.intent == Intent.EXECUTION_CHASE for t in plan.tasks):
             return self.ask('Please prepare one action at a time for preview and confirmation. You can combine other queries.',
                 state, plan.tasks[0].classification, now, [], [])
+        if all(t.classification.intent == Intent.EXECUTION_CHASE for t in expanded):
+            if state.comparison_orders and not human_ids and not expanded[0].classification.slots.draft_number:
+                response = self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, expanded[0].classification, now, [], [], state.comparison_orders)
+                if emit: await emit(response.answer)
+                return response
+            from .services.chase_chat import chase_chat
+            return await chase_chat(self, request.message, expanded[0].classification, state, now, agent, emit)
         for task in expanded:
             result = task.classification
             if result.intent == Intent.GENERAL:
@@ -101,7 +118,7 @@ class WorkflowEngine:
                     state.comparison_orders = saved['comparison_orders']
                     state.review_draft_id = saved.get('review_draft_id')
                     state.last_intent = result.intent
-                if result.slots.order_ids and result.intent != Intent.ORDER_COMPARE:
+                if human_ids and result.slots.order_ids and result.intent != Intent.ORDER_COMPARE:
                     state.comparison_orders = []
                 if result.intent.value.startswith('execution.'):
                     state.pending_action = None
@@ -120,10 +137,16 @@ class WorkflowEngine:
                         route_message = request.message
                     response = self.route(route_message, result, state, now)
             responses.append(response)
+        queried = list(dict.fromkeys(i for r in responses if r.intent in single_order_intents for i in r.order_ids))
+        if len(queried) > 1:
+            state.comparison_orders = queried
+            state.active_order = None
+            state.last_order_ids = queried
+            state.slots.order_ids = []
         answer = await agent.narrate(request.message, state, responses, emit)
         last = responses[-1]
         evidence = list({(e.source,e.row):e for r in responses for e in r.evidence}.values())
-        return last.model_copy(update={'answer':answer, 'tool_calls':[t for r in responses for t in r.tool_calls],
+        return last.model_copy(update={'answer':answer, 'selected_order_id':state.active_order, 'tool_calls':[t for r in responses for t in r.tool_calls],
             'evidence':evidence,'sources':list(dict.fromkeys(e.source for e in evidence)),
             'order_ids':list(dict.fromkeys(i for r in responses for i in r.order_ids))[:10],
             'needs_clarification':any(r.needs_clarification for r in responses),
@@ -140,16 +163,12 @@ class WorkflowEngine:
                  calls: list[ToolCall], evidence: list[Evidence], question: str | None = None) -> ChatResponse:
         """场景 1.1–3.3：统一返回结构和逐行证据，不让模型覆盖已计算结论。"""
         evidence = list({(e.source, e.row): e for e in evidence}.values())
-        if evidence:
-            answer += '\n\nSource evidence: ' + '; '.join(f'[{e.source} {"record" if e.record_id is not None else "row"} {e.row}]({e.url})' + (f' (imported from {e.original_source})' if e.original_source else '') for e in evidence[:12])
-            if len(evidence) > 12:
-                answer += f'. All {len(evidence)} source rows are included in the evidence field.'
-        answer += f'\nAs of {now.isoformat()}; {getattr(self.tools, "freshness", "refreshed CSV test fixture")}.'
         return ChatResponse(answer=answer, intent=result.intent, slots=state.slots,
                             confidence=result.confidence, needs_clarification=bool(question), clarification_question=question,
                             confirmation_required=state.pending_action is not None,
                             confirmation_id=state.pending_action.id if state.pending_action else None,
                             state=state, tool_calls=calls, evidence=evidence,
+                            source_details=f'As of {now.isoformat()}; {getattr(self.tools, "freshness", "test fixture")}',
                             order_ids=state.last_order_ids[:10], selected_order_id=state.active_order,
                             sources=list(dict.fromkeys(e.source for e in evidence)), business_date=now.date().isoformat())
 
@@ -168,6 +187,8 @@ class WorkflowEngine:
         fresh = result.slots.model_dump(exclude_defaults=True)
         explicit_ids = list(dict.fromkeys(re.findall(r'\bORD-\d{3}\b', message.upper())))
         if explicit_ids:
+            state.last_order_ids = explicit_ids
+            state.active_order = explicit_ids[0] if len(explicit_ids) == 1 else None
             fresh['order_ids'] = explicit_ids
         elif 'order_ids' in fresh:
             # Model guesses are not entity resolution. Only the user's explicit IDs
@@ -244,7 +265,7 @@ class WorkflowEngine:
             evidence.extend(rows)
             calls.append(ToolCall(name='prioritize_orders', arguments={'window_days': slots.window_days, 'customer': slots.customer}, result=data))
             state.last_order_ids = [e.record['order_id'] for e in rows]
-            answer = data['rule'] + '\n' + '\n'.join(f"{i}. {e.record['order_id']}: due {e.record['due_date']}, last activity {e.record['last_activity_date']}." for i, e in enumerate(rows, 1))
+            answer = f"Business date: {now.date().isoformat()}. Review window: {data['window_start']} through {data['window_end']} (including overdue active orders).\n" + data['rule'] + '\n' + '\n'.join(f"{i}. {e.record['order_id']}: due {e.record['due_date']}, last activity {e.record['last_activity_date']}." for i, e in enumerate(rows, 1))
             if slots.order_ids:
                 requested = slots.order_ids[0]
                 position = state.last_order_ids.index(requested) + 1 if requested in state.last_order_ids else None
@@ -280,7 +301,7 @@ class WorkflowEngine:
         else:
             ids = slots.order_ids
             if len(ids) > 1:
-                return self.ask('Which single order should I use?', state, result, now, calls, evidence)
+                return self.ask('Which order should I use: ' + ', '.join(ids) + '?', state, result, now, calls, evidence, ids)
             order_id = ids[0] if ids else state.active_order
             if not order_id:
                 return self.ask('Which order should I use? Please give its ID or customer.', state, result, now, calls, evidence)
@@ -351,7 +372,7 @@ class WorkflowEngine:
                 return self.response(state, result, now, preview, calls, evidence)
             recipient = slots.recipient or (state.draft or {}).get('recipient')
             if not recipient:
-                return self.ask('Who should receive the draft, and what tone should I use?', state, result, now, calls, evidence)
+                return self.ask('Who should receive the draft?', state, result, now, calls, evidence)
             text = (state.draft or {}).get('text') if slots.action == 'revise' and (state.draft or {}).get('order_id') == order_id else None
             text = slots.text or text or f'Please provide an updated status, recovery plan and expected completion date for {order_id}. Please treat this as a priority. Thank you.'
             if slots.deadline:
@@ -406,7 +427,7 @@ class WorkflowEngine:
                 return self.response(state, result, now, f"Already recorded: {prior['kind']} {prior['status']}; no duplicate action.", calls, evidence)
         if not action or (request.confirmation_id and request.confirmation_id != action.id):
             return self.ask('No matching pending action. Request a new preview before confirming.', state, result, now, calls, evidence)
-        if now - action.created_at > timedelta(minutes=15):
+        if now < action.created_at or now - action.created_at > timedelta(minutes=15):
             state.pending_action = None
             return self.ask('The preview expired. Please request a fresh preview.', state, result, now, calls, evidence)
         command = request.message.casefold()
@@ -414,24 +435,55 @@ class WorkflowEngine:
             return self.ask('That confirmation does not match the previewed action.', state, result, now, calls, evidence)
         if request.selected_order_id and request.selected_order_id != action.order_id:
             return self.ask('The selected order changed. Request a new preview for the intended order.', state, result, now, calls, evidence)
-        refreshed = self.tools.refresh_order(action.order_id)
-        evidence.append(refreshed)
-        calls.append(ToolCall(name='refresh_order', arguments={'order_id': action.order_id}, result=refreshed.record))
+        for oid, snapshot in action.source_snapshots.items():
+            if self.tools.refresh_order(oid).record != snapshot:
+                state.pending_action = None
+                return self.ask('An order changed. Please review a fresh draft before sending.', state, result, now, calls, evidence)
+        refreshed = self.tools.refresh_order(action.order_id) if action.order_id else None
+        if refreshed:
+            evidence.append(refreshed)
+            calls.append(ToolCall(name='refresh_order', arguments={'order_id': action.order_id}, result=refreshed.record))
         if action.source_snapshot and refreshed.record != action.source_snapshot:
             state.pending_action = None
             return self.ask('The order record changed after the preview. Review the fresh record and request a new preview.', state, result, now, calls, evidence)
         if action.kind == 'reminder' and datetime.fromisoformat(action.payload['deadline']) <= now:
             state.pending_action = None
             return self.ask('The reminder deadline passed before confirmation. Please choose a future time.', state, result, now, calls, evidence)
-        outcome = await self.store.send(action, state.session_id, now, self.sender) if action.kind == 'send' else self.store.commit_local(action, state.session_id, now)
+        if action.kind == 'send' and (action.payload.get('send_at') or getattr(self,'email_scheduler',None)):
+            scheduler = getattr(self,'email_scheduler',None)
+            try:
+                if not scheduler:
+                    outcome = {'status':'not_sent','reason':'Email is not configured.'}
+                elif action.payload.get('send_at'):
+                    outcome = await asyncio.to_thread(scheduler.enqueue,action,now)
+                else:
+                    outcome = await scheduler.send_now(action,now)
+            except ValueError:
+                outcome = {'status':'not_sent','reason':'Provide a valid recipient email address before scheduling.'}
+        else:
+            outcome = await self.store.send(action, state.session_id, now, self.sender) if action.kind == 'send' else self.store.commit_local(action, state.session_id, now)
         calls.append(ToolCall(name={'send': 'send_chase', 'note': 'save_internal_note', 'reminder': 'upsert_reminder'}[action.kind],
                               arguments={'action_id': action.id, 'order_id': action.order_id, **action.payload},
                               result=outcome, requires_confirmation=True, executed=outcome['status'] != 'not_sent'))
-        if outcome['status'] in ('sent', 'saved'):
+        if outcome['status'] in ('sent', 'saved', 'scheduled', 'accepted'):
             answer = {'send': 'Message sent; recipient, final text, send time and receipt recorded.',
                       'note': f'Internal note saved to {action.order_id} with timestamp. It was not sent externally.',
                       'reminder': 'Reminder created or updated in place. It will notify only if the condition remains unmet.'}[action.kind]
+            if outcome['status'] == 'scheduled':
+                answer = 'Email scheduled for '+action.payload['send_at']+'. It has not been sent yet. View its status in Activity Log.'
+                state.chase_context.pop('send_at',None)
+            if outcome['status'] == 'accepted':
+                answer = 'Microsoft accepted the email to '+action.payload['recipient']+'. The reviewed message and result are recorded in Activity Log. Inbox delivery is not confirmed.'
+            for draft in state.chase_drafts:
+                if draft.get('text') == action.payload.get('text') and draft.get('recipient') == action.payload.get('recipient'):
+                    draft['sent'] = True
             state.pending_action = None
         else:
-            answer = outcome['reason']
+            answer = outcome.get('reason') or {'rejected':'Microsoft rejected this email. Check the details in Activity Log.',
+                'unknown':'Submission is uncertain. Check Sent Items and Activity Log before sending again.',
+                'sending':'This email is already being submitted. Check Activity Log.',
+                'submitting':'This email has already been submitted. Check Activity Log.'}.get(outcome['status'],'Check the email result in Activity Log.')
+            if getattr(self, 'email_scheduler', None) and outcome['status'] in ('rejected','unknown','sending','submitting'):
+                # A fresh send must start with a fresh review; never silently resubmit.
+                state.pending_action = None
         return self.response(state, result, now, answer, calls, evidence)

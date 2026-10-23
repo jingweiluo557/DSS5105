@@ -69,12 +69,12 @@ def dashboard(request: Request, response: Response):
 
 @router.post('/dashboard/tasks', status_code=201)
 def add_task(body: NewTask, request: Request):
-    task_id = DashboardService(request.app.state.database).create_task(body.title, business_now().date().isoformat(), datetime.now(LOCAL), body.id)
+    task_id = DashboardService(request.app.state.database).create_task(body.title, business_now().date().isoformat(), business_now(), body.id)
     return {'id': task_id}
 
 @router.put('/dashboard/tasks/{task_id}')
 def update_task(task_id: str, body: TaskUpdate, request: Request):
-    if not DashboardService(request.app.state.database).complete_task(task_id, body.done, body.version, datetime.now(LOCAL)):
+    if not DashboardService(request.app.state.database).complete_task(task_id, body.done, body.version, business_now()):
         raise HTTPException(409, 'Task changed on another device. Refresh and retry.')
     return {'status': 'saved'}
 
@@ -85,11 +85,22 @@ async def run_briefing(request: Request):
         raise HTTPException(401, 'Scheduler authentication required.')
     try:
         from .morning_api import generate_morning
-        return await generate_morning(request.app, scheduled=True)
+        from ..services.briefing_delivery import BriefingDelivery
+        generated = []
+        async def prepare():
+            report = await generate_morning(request.app, scheduled=True)
+            generated.append(report)
+            return report
+        delivery = await BriefingDelivery(request.app.state.settings).run(request.app, generate=prepare)
+        if delivery['status'] == 'generation_failed':
+            return {'status': 'generation_failed', 'delivery': delivery}
+        report = generated[0] if generated else await prepare()
+        return {**report, 'delivery': delivery}
     except WorkflowBusy:
         return {'status': 'already_running'}
     except (ValueError, OpenAIError):
         raise HTTPException(503, 'Model briefing unavailable; no simulated report saved.')
+
 
 @router.get('/predictions')
 def prediction_list(request: Request, response: Response):

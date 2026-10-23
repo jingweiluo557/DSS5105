@@ -1,0 +1,104 @@
+<!doctype html><meta charset="utf-8"><title>P1修复验收</title><style>body{font:16px/1.7 system-ui;margin:40px auto;max-width:1100px;color:#243d37}section,details{padding:18px;background:#f2f6f4;margin:14px 0;border-radius:10px}pre{white-space:pre-wrap;font:15px/1.6 system-ui}</style><h1>四项P1与业务时钟修复验收 · 2026-10-24</h1><section><p>四项P1的针对性断言均通过。相关完整回归87项通过；业务时间专项7项通过（包含6项重叠和新增的时钟重设测试）。真实模型5组14轮均完成，无降级、无真实邮件发送。</p><ul><li>订单切换：新草稿正确绑定ORD-055。</li><li>部门修改：新的预览收件人正确变成assembly@example.com；无配置则阻断。</li><li>多订单代词：追问具体订单，不默认最后一单。</li><li>业务日期：2026-04-01；七天窗口截止2026-04-08，分开呈现。</li><li>回复期限：明天中午固化2026-04-02T12:00:00+08:00。</li><li>重复预览不会顺延发送时间；重设业务时钟后旧草稿需要重新生成。</li><li>顺带修复取消指令和澄清文本被改写丢失的问题。</li></ul><p>范围：真实模型+种子数据+隔离状态。未发送真实邮件，未做生产数据库端到端验收。原报告中的联系人姓名解析和原始证据展示问题不属于本次修复范围。</p><p>业务判断、回复期限和发送计划使用业务时钟；OAuth有效期、传输超时和真实审计时间保留真实时间语义。</p></section><details><summary>1.6 / 1 · What needs attention today?</summary><pre>Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-01 (including overdue active orders).
+Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.
+1. ORD-107: due 2026-03-16, last activity 2026-04-01.
+2. ORD-120: due 2026-03-17, last activity 2026-03-30.
+3. ORD-083: due 2026-03-23, last activity 2026-03-30.
+4. ORD-114: due 2026-03-23, last activity 2026-03-30.
+5. ORD-002: due 2026-03-29, last activity 2026-03-23.
+6. ORD-093: due 2026-03-29, last activity 2026-04-01.
+7. ORD-020: due 2026-03-31, last activity 2026-03-30.
+8. ORD-055: due 2026-03-31, last activity 2026-04-01.
+9. ORD-029: due 2026-04-01, last activity 2026-04-01.
+Ranking indicates review urgency, not a prediction of failure. Select an order ID to drill down.
+
+Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-08 (including overdue active orders).
+Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.
+1. ORD-107: due 2026-03-16, last activity 2026-04-01.
+2. ORD-120: due 2026-03-17, last activity 2026-03-30.
+3. ORD-083: due 2026-03-23, last activity 2026-03-30.
+4. ORD-114: due 2026-03-23, last activity 2026-03-30.
+5. ORD-002: due 2026-03-29, last activity 2026-03-23.
+6. ORD-093: due 2026-03-29, last activity 2026-04-01.
+7. ORD-020: due 2026-03-31, last activity 2026-03-30.
+8. ORD-055: due 2026-03-31, last activity 2026-04-01.
+9. ORD-029: due 2026-04-01, last activity 2026-04-01.
+10. ORD-108: due 2026-04-03, last activity 2026-03-31.
+11. ORD-103: due 2026-04-04, last activity 2026-03-30.
+12. ORD-061: due 2026-04-05, last activity 2026-03-30.
+13. ORD-099: due 2026-04-05, last activity 2026-03-31.
+14. ORD-062: due 2026-04-08, last activity 2026-03-31.
+Ranking indicates review urgency, not a prediction of failure. Select an order ID to drill down.</pre></details><details><summary>E4-multi / 1 · Tell me the stage of ORD-005 and ORD-055.</summary><pre>ORD-005 is in **KNITTING**. ORD-055 is in **ASSEMBLY**.</pre></details><details><summary>1.6 / 2 · Include the next seven days.</summary><pre>Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-08 (including overdue active orders).
+Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.
+1. ORD-107: due 2026-03-16, last activity 2026-04-01.
+2. ORD-120: due 2026-03-17, last activity 2026-03-30.
+3. ORD-083: due 2026-03-23, last activity 2026-03-30.
+4. ORD-114: due 2026-03-23, last activity 2026-03-30.
+5. ORD-002: due 2026-03-29, last activity 2026-03-23.
+6. ORD-093: due 2026-03-29, last activity 2026-04-01.
+7. ORD-020: due 2026-03-31, last activity 2026-03-30.
+8. ORD-055: due 2026-03-31, last activity 2026-04-01.
+9. ORD-029: due 2026-04-01, last activity 2026-04-01.
+10. ORD-108: due 2026-04-03, last activity 2026-03-31.
+11. ORD-103: due 2026-04-04, last activity 2026-03-30.
+12. ORD-061: due 2026-04-05, last activity 2026-03-30.
+13. ORD-099: due 2026-04-05, last activity 2026-03-31.
+14. ORD-062: due 2026-04-08, last activity 2026-03-31.
+Ranking indicates review urgency, not a prediction of failure. Select an order ID to drill down.</pre></details><details><summary>1.6 / 3 · Why is ORD-014 first?</summary><pre>Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-08 (including overdue active orders).
+Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.
+1. ORD-107: due 2026-03-16, last activity 2026-04-01.
+2. ORD-120: due 2026-03-17, last activity 2026-03-30.
+3. ORD-083: due 2026-03-23, last activity 2026-03-30.
+4. ORD-114: due 2026-03-23, last activity 2026-03-30.
+5. ORD-002: due 2026-03-29, last activity 2026-03-23.
+6. ORD-093: due 2026-03-29, last activity 2026-04-01.
+7. ORD-020: due 2026-03-31, last activity 2026-03-30.
+8. ORD-055: due 2026-03-31, last activity 2026-04-01.
+9. ORD-029: due 2026-04-01, last activity 2026-04-01.
+10. ORD-108: due 2026-04-03, last activity 2026-03-31.
+11. ORD-103: due 2026-04-04, last activity 2026-03-30.
+12. ORD-061: due 2026-04-05, last activity 2026-03-30.
+13. ORD-099: due 2026-04-05, last activity 2026-03-31.
+14. ORD-062: due 2026-04-08, last activity 2026-03-31.
+ORD-014 is not in this exception list. ORD-014 — TrendCart, 2000 Vest; status COMPLETE, stage COMPLETE, due 2026-02-28, last recorded activity 2026-03-23. Completed 2026-03-23; recorded days late: 23.
+Ranking indicates review urgency, not a prediction of failure. Select an order ID to drill down.</pre></details><details><summary>E4-multi / 2 · Is it late?</summary><pre>Which order do you mean: ORD-005, ORD-055?</pre></details><details><summary>1.6 / 4 · Open ORD-014.</summary><pre>ORD-014 — TrendCart, 2,000 Vests. It is **complete**; recorded completion was 2026-03-23, 23 days after its 2026-02-28 due date.</pre></details><details><summary>E7-reply-time / 1 · Draft a chase-up for ORD-005.</summary><pre>Draft 1 · To: knitting@example.com
+Department: KNITTING
+Subject: ThreadPilot chase-up | ORD-005
+Hi, could you please confirm the knitting progress for TrendCart’s order ORD-005 (500 scarves) and advise the expected completion date? Our latest update was March 24, and the order is due April 20. Thanks.
+
+Draft only; nothing sent. Ask to send a draft by number to review and confirm it.</pre></details><details><summary>E8-active-switch / 1 · Draft a chase-up for ORD-005.</summary><pre>Draft 1 · To: knitting@example.com
+Department: KNITTING
+Subject: ThreadPilot chase-up | ORD-005
+Please share the latest progress update for TrendCart’s ORD-005 scarf order (500 pieces), currently in knitting. Confirm whether it remains on track for the 20 April due date and flag any blockers.
+
+Draft only; nothing sent. Ask to send a draft by number to review and confirm it.</pre></details><details><summary>E7-reply-time / 2 · Ask for an answer by tomorrow noon.</summary><pre>Draft 1 · To: knitting@example.com
+Department: KNITTING
+Subject: ThreadPilot chase-up | ORD-005
+Hi, could you please confirm the knitting progress for TrendCart’s order ORD-005 (500 scarves) and advise the expected completion date? Our latest update was March 24, and the order is due April 20. Thanks.
+
+Please reply by 2026-04-02T12:00:00+08:00 (business time).
+
+Draft only; nothing sent. Ask to send a draft by number to review and confirm it.</pre></details><details><summary>E7-reply-time / 3 · Preview draft 1</summary><pre>To: knitting@example.com
+Department: KNITTING
+Subject: ThreadPilot chase-up | ORD-005
+
+Hi, could you please confirm the knitting progress for TrendCart’s order ORD-005 (500 scarves) and advise the expected completion date? Our latest update was March 24, and the order is due April 20. Thanks.
+
+Please reply by 2026-04-02T12:00:00+08:00 (business time).
+
+Review the recipient and text, then confirm to send this email.</pre></details><details><summary>E8-active-switch / 2 · Open ORD-055</summary><pre>ORD-055 is Cotton Club’s 800-piece crewneck sweater order. It is **in progress at the assembly stage**, with a due date of 31 March 2026 and last recorded activity on 1 April 2026.</pre></details><details><summary>E9-department-switch / 1 · Draft a chase-up for ORD-005.</summary><pre>Draft 1 · To: knitting@example.com
+Department: KNITTING
+Subject: ThreadPilot chase-up | ORD-005
+Could you please share an update on ORD-005 (500 scarves), currently in knitting? The last recorded activity was March 24. Please confirm the current progress and whether it remains on track for the April 20 due date.
+
+Draft only; nothing sent. Ask to send a draft by number to review and confirm it.</pre></details><details><summary>E8-active-switch / 3 · Draft a chase-up for this order.</summary><pre>Draft 1 · To: assembly@example.com
+Department: ASSEMBLY
+Subject: ThreadPilot chase-up | ORD-055
+Hi, could you please confirm the current status of Cotton Club order ORD-055 for 800 crewneck sweaters? It was due March 31 and was last reported in assembly on April 1. Please share the expected completion date and advise if anything is holding it up.
+
+Draft only; nothing sent. Ask to send a draft by number to review and confirm it.</pre></details><details><summary>E9-department-switch / 2 · Preview draft 1 for Assembly instead.</summary><pre>To: assembly@example.com
+Department: ASSEMBLY
+Subject: ThreadPilot chase-up | ORD-005
+
+Could you please share an update on ORD-005 (500 scarves), currently in knitting? The last recorded activity was March 24. Please confirm the current progress and whether it remains on track for the April 20 due date.
+
+Review the recipient and text, then confirm to send this email.</pre></details>

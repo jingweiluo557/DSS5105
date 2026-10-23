@@ -1,4 +1,5 @@
 """Dashboard calculations use business dates; scheduling uses the UTC+8 wall clock."""
+from ..business_clock import BusinessClock
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
@@ -186,7 +187,7 @@ class DashboardService:
     def get(self, data):
         data = current_snapshot(self.database, data['today'])
         result = analyze(data)
-        self.sync(data, result, datetime.now(LOCAL))
+        self.sync(data, result, BusinessClock().now())
         with self.database.engine.connect() as db:
             history = db.execute(sa.select(metrics).where(metrics.c.business_date <= data['today']).order_by(metrics.c.business_date.desc()).limit(14)).mappings().all()
             reports = db.execute(sa.select(briefings).order_by(briefings.c.day.desc()).limit(30)).mappings().all()
@@ -195,7 +196,7 @@ class DashboardService:
         return {**result, 'business_date': data['today'], 'tasks': self.list_tasks(),
                 'ai_briefing': ai_reports[0] if ai_reports else None,
                 'history': [{'date': r['business_date'], **json.loads(r['payload'])} for r in reversed(history)],
-                'briefing_preview': {'business_date': data['today'], **self.compose_briefing(data, result, datetime.now(LOCAL))},
+                'briefing_preview': {'business_date': data['today'], **self.compose_briefing(data, result, BusinessClock().now())},
                 'briefings': [{'day': r['day'], 'business_date': r['business_date'], 'generated_at': r['generated_at'], **json.loads(r['payload'])} for r in reports]}
 
     def generate_due(self, data, now):
