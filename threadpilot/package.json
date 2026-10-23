@@ -1,0 +1,11 @@
+{
+  "name": "threadpilot-deployment",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node deploy/build_frontend.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
