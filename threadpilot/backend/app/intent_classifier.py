@@ -41,7 +41,14 @@ For delayed email such as 'send draft 1 in two minutes' or '两分钟后发送',
 execution.chase action=send and send_at='in 2 minutes'. send_at is the SEND time;
 deadline is the requested recipient reply deadline. Never confuse the two.
 Short mode/recipient/revision replies continue execution.chase. Do not invent recipients.),
-execution.note (3.2 INTERNAL decision note), execution.reminder (3.3 conditional monitoring).
+execution.note (3.2 INTERNAL decision note), execution.reminder (3.3 conditional monitoring),
+operations.output (recorded stage output on a date, stage + target_date, no comparison),
+order.rank (rank active orders: criterion idle_days | due_date, optional customer, window_days = list length),
+data.workshops (outside workshops able to take a product/category or batch: product, quantity),
+order.forecast (lead-time model delay probability / expected completion for ONE existing order),
+general.unanswerable (reason money|people|cause|delete|cancel|external|other: prices, revenue, costs,
+margins, workers, who was responsible, root causes, deleting or cancelling orders, contacting customers;
+the server states what the data does not hold).
 Keep short followups in last_intent unless they clearly switch topics. Pending clarification
 answers fill missing slots for that intent. Extract ONLY newly supplied slot values; the server
 merges them. Missing optional values are null or empty lists. Never fabricate an order ID.
@@ -52,8 +59,9 @@ criterion=null until chosen. 'Due date and recent updates': comparison_fields du
 Attention today: do NOT assume window_days=0; ask today-only vs next seven days.
 New orders: quantity/product/due_date/delivery_point; delivered to customer is delivery_point=customer.
 Do not infer shipping buffer. One lost packing day: packing_loss_days=1.
-Normality: extract observed_output, stage; 'yes use same weekday' confirms baseline=same_weekday
-and target_date=today if previously offered. Deviation yesterday sets target_date=yesterday.
+Normality: extract observed_output, stage and target_date ('yesterday' stays 'yesterday'); the server
+defaults baseline=same_weekday, never ask for it. 'What was X output on <date>' is operations.output.
+Deviation yesterday sets target_date=yesterday. Weekday names ('this Saturday') are valid due_date values.
 Drafting and revising are NOT sending. 'Send it' action=send. Internal note text must reflect
 only the user's words, no invented supplier contact or recovery plan. 'Yes ORD-005' for a note
 means action=confirm_target, not permission to save. Reminder no reply means condition=no_reply.

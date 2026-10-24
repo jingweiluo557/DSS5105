@@ -26,6 +26,11 @@ class Intent(StrEnum):
     MORNING_BRIEFING = 'operations.briefing'
     OPERATIONS_NORMALITY = 'operations.normality'
     OPERATIONS_DEVIATION = 'operations.deviation'
+    OPERATIONS_OUTPUT = 'operations.output'          # Sprint 2: recorded stage output on a date (no judgement)
+    ORDER_RANK = 'order.rank'                        # Sprint 2: rank active orders by idle days / due date
+    ORDER_FORECAST = 'order.forecast'                # Sprint 2: AFT delay probability + completion range
+    WORKSHOPS = 'data.workshops'                     # Sprint 2: outside workshops able to take a batch
+    UNANSWERABLE = 'general.unanswerable'            # Sprint 2: explicit refusal with the stated non-goal
     EXECUTION_CHASE = 'execution.chase'
     EXECUTION_NOTE = 'execution.note'
     EXECUTION_REMINDER = 'execution.reminder'
@@ -43,7 +48,7 @@ class Slots(StrictModel):
     observed_output: int | None = Field(default=None, ge=0)
     baseline: Literal['same_weekday'] | None = None
     comparison_fields: list[Literal['due_date', 'last_activity_date', 'current_stage', 'status']] = Field(default_factory=list)
-    criterion: Literal['due_date', 'last_activity_date'] | None = None
+    criterion: Literal['due_date', 'last_activity_date', 'idle_days'] | None = None
     window_days: int | None = Field(default=None, ge=0, le=365)
     delivery_point: Literal['factory', 'customer'] | None = None
     delivery_buffer_days: int | None = Field(default=None, ge=0, le=60)
@@ -55,6 +60,7 @@ class Slots(StrictModel):
     department: Literal['KNITTING','ASSEMBLY','WASHING','PACKING'] | None = None
     tone: str | None = None
     text: str | None = None
+    reason: Literal['money', 'people', 'cause', 'delete', 'cancel', 'external', 'future', 'other'] | None = None
     deadline: str | None = None
     send_at: str | None = None
     condition: Literal['no_reply', 'no_activity'] | None = None
