@@ -189,7 +189,7 @@
         },
         "responses": {
           "200": {
-            "description": "Validated workflow SSE: start, delta, done",
+            "description": "Validated workflow SSE: start, facts, delta, done",
             "content": {
               "text/event-stream": {
                 "schema": {
@@ -1045,6 +1045,26 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/home": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Dashboard Home",
+        "description": "The GM home screen: status line, the decisions only the manager can make, order health, production pulse.\nSame snapshot and detectors as the chat tools and the alert policy; nothing is stored or sent.",
+        "operationId": "dashboard_home_api_dashboard_home_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
