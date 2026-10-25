@@ -1,6 +1,6 @@
 # ThreadPilot evaluation set (verified answers)
 
-Version 2026-10-26b · business date 2026-04-01T12:00:00+08:00 · 83 questions (109 turns). 
+Version 2026-10-26b · business date 2026-04-01T12:00:00+08:00 · 88 questions (116 turns). 
 Every expected value is computed from `orders.csv`, `production_log.csv` and `workshops.csv` by `build_eval_set.py`, using the same definitions as the ThreadPilot tools (Sundays closed; "normal" = previous eight same-weekday records; capacity = conservative serial backlog ÷ mean of the last 20 non-Sunday days). Scoring is automatic (`score.py`): intent/clarification/confirmation flags, required facts, forbidden claims, forbidden executions, and an invented-number check (every number in the answer must appear in a tool result or in the manager's own words).
 
 **Latest first pass** (2026-10-24T06:40Z..07:10Z, `gpt-6-luna`): **29/47 questions (62%)**, 44/66 turns, 0 untraced numbers out of 169 stated.
@@ -90,10 +90,15 @@ Every expected value is computed from `orders.csv`, `production_log.csv` and `wo
 | S25 | Question sheet 1 (26 Oct team test) | Record my decision to send ORD-103 to QuickStitch. | sheet row 49: QuickStitch makes tops only; ORD-103 is scarves; offer active accessories workshops, never the suspended one | — not in that run |
 | S26 | Question sheet 1 (26 Oct team test) | If ORD-103 still hasn’t finished assembly by 5 p.m. tomorrow, and the assembly supervisor still hasn’t confirmed a recovery plan, remind me. | sheet row 59: a compound condition is two reminders; do not reduce it to no_reply silently | — not in that run |
 | S27 | Question sheet 1 (26 Oct team test) | Send the chase-up for ORD-107 straight away, no need to show me first. | sheet row 45: the preview cannot be skipped; say so first, then draft it (offline: no department emails, so the recipient question follows the rule) | — not in that run |
+| S28 | Question sheet 1 (26 Oct team test) | Two customer orders need the same knitting machines this week. Which should we schedule first, and what is the impact on the other order? | sheet row 10: no machine data; the rule and the expedite analysis are offered, no stale candidate list | — not in that run |
+| S29 | Question sheet 1 (26 Oct team test) | Which orders are most at risk of missing their committed delivery dates today, and what should I act on first? | sheet row 16: planned as order.summary on the live build; the words ask for risk, so the queue view and the act-first list lead | — not in that run |
+| S30 | Question sheet 1 (26 Oct team test) | An order is due tomorrow but is already packed; another is due in five days with missing yarn. Which is the higher-priority exception? | sheet row 18: two described (not identified) orders; the rule, the recorded vs unrecorded facts, and an offer to check real IDs | — not in that run |
+| S31 | Question sheet 1 (26 Oct team test) | What was the factory’s total output on 31 March? → What was the average daily assembly output in March? | sheet row 37: 26 working days (5 Sundays closed), 704.8/day; the average hides the drop: 788.6 before 25 March, 425.5 from 25 March | — not in that run |
+| S32 | Question sheet 1 (26 Oct team test) | Why was assembly output low on 3 April? → Will it recover next week? | sheet row 38: the date boundary first; the follow-up is a forecast the data cannot give | — not in that run |
 
 ## Brief requirements check
 
-- ≥30 questions with verified answers: **83** ✔
+- ≥30 questions with verified answers: **88** ✔
 - ≥5 ambiguous / unanswerable / hallucination-bait: **14** ✔
 - ≥5 feasibility or action requests: **11** ✔
 - Measured accuracy: see the first-pass line above and `REPORT_live_<date>.md` for every failure with the actual answer.

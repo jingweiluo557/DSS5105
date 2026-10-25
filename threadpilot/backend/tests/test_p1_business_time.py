@@ -73,8 +73,9 @@ def test_priority_clock_and_window_cannot_be_renarrated(tmp_path):
         # Any accidental call to the provider here would fail.
         agent.client=object()
         r=await engine.chat(ChatRequest(message='What needs attention in seven days?'),agent)
-        assert 'Business date: 2026-04-01' in r.answer
-        assert '2026-04-01 through 2026-04-08' in r.answer
+        # the business date and the window are stated verbatim in the server's own words (26 Oct wording)
+        assert 'business date 2026-04-01' in r.answer
+        assert 'for 2026-04-01 to 2026-04-08' in r.answer
         tool=next(t for t in r.tool_calls if t.name=='prioritize_orders')
         assert tool.result['business_now']==now.isoformat()
     asyncio.run(run())

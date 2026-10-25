@@ -256,7 +256,7 @@ Do not dump raw JSON or source lists. Evidence is displayed separately in the UI
                 await stream.close()
 
 
-def summary_response(engine, classification, state, now):
+def summary_response(engine, classification, state, now, message: str = ''):
     rows = engine.tools.rows('orders.csv')
     slots = classification.slots
     rows = [r for r in rows if (not slots.stage or r.record['current_stage'] == slots.stage)
@@ -292,7 +292,10 @@ def summary_response(engine, classification, state, now):
               'business_date': today.isoformat(),
               'scope':'All recorded orders including completed orders unless stage-filtered',
               'filters':slots.model_dump(exclude_defaults=True)}
-    if classification.intent == Intent.RISK_OVERVIEW and hasattr(engine.tools, 'queue_snapshot'):
+    # "Which orders are most at risk … what should I act on first?" (sheet row 16) is often planned as order.summary:
+    # the question's words decide whether the queue view is attached, not only the intent label.
+    asks_risk = bool(re.search(r'\brisk|act on first|act first|miss(ing)? their|likely to be late|behind schedule|most urgent|what should i (do|act)', (message or '').casefold()))
+    if (classification.intent == Intent.RISK_OVERVIEW or asks_risk) and hasattr(engine.tools, 'queue_snapshot'):
         from .services.queue_engine import QueueAnalysis
         data, queue_evidence = engine.tools.queue_snapshot(now)
         analysis = QueueAnalysis(data)

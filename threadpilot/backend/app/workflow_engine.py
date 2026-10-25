@@ -234,7 +234,7 @@ class WorkflowEngine:
                 response = ChatResponse(answer='The model is unavailable. Please try your general question again later.', intent=Intent.GENERAL,
                     slots=Slots(), confidence=result.confidence, state=state, business_date=now.date().isoformat())
             elif result.intent in (Intent.ORDER_SUMMARY, Intent.RISK_OVERVIEW):
-                response = summary_response(self, result, state, now)
+                response = summary_response(self, result, state, now, request.message)
             else:
                 if state.last_intent:
                     state.topics[state.last_intent.value] = {
@@ -900,7 +900,13 @@ class WorkflowEngine:
         head = f"Production {s['label']}" + (' (capped at the latest record)' if s['capped_to_latest_record'] else '') + ':\n'
         cols = [stage] if stage else STAGE_ORDER
         lines = ['| Date | ' + ' | '.join(c.title() for c in cols) + ' |', '| --- | ' + ' | '.join('---' for _ in cols) + ' |']
-        for r in data['rows']:
+        rows = data['rows']
+        wants_rows = re.search(r'record|rows?\b|behind|show|table|list|each day|every day|day by day', lowered)
+        if len(rows) > 14 and not wants_rows:
+            # a month is too long to tabulate unasked: keep the days outside their range, say what was left out
+            rows = [r for r in rows if not r.get('closed') and any((r.get(c) or {}).get('status') in ('below', 'above') for c in cols)]
+            head += f"({len(data['rows'])} days; the table keeps the {len(rows)} working days outside their range; ask for the records to see every day.)\n"
+        for r in rows:
             if r.get('closed'):
                 lines.append(f"| {r['date']} {r['weekday']} | " + ' | '.join('closed (Sunday)' for _ in cols) + ' |')
                 continue
@@ -915,11 +921,18 @@ class WorkflowEngine:
                 continue
             if agg['days_below_band']:
                 run = (f"{agg['stage'].title()}: below its same-weekday range on {agg['days_below_band']} of {agg['working_days']} working days"
-                       + (f" (every day since {agg['first_below']})" if agg['every_working_day_below'] else f" ({agg['first_below']} to {agg['last_below']})")
+                       + (f" (every day since {agg['first_below']})" if agg['every_working_day_below'] else f" ({agg['first_below']} to {agg['last_below']}"
+                          + (f", consecutively since {agg['run_start']}" if agg.get('run_start') and agg['run_start'] != agg['first_below'] else '') + ')')
                        + f"; {agg['total_pieces']:,} pieces in total, about {agg['shortfall_vs_same_weekday_mean']:,} short of the same-weekday means"
                        + (f" and about {agg['shortfall_vs_prior_working_day_mean']:,} short of its {agg['prior_working_day_mean']}/day average over the {agg['prior_working_days']} working days before" if agg['prior_working_day_mean'] else '') + '.')
             else:
                 run = f"{agg['stage'].title()}: inside its range every working day ({agg['total_pieces']:,} pieces; range before the period {agg['range_before'][0]}\u2013{agg['range_before'][1]})." if agg['range_before'] else f"{agg['stage'].title()}: inside its range."
+            if re.search(r'average|mean|per day|a day|daily', lowered) and agg.get('mean_per_working_day') is not None:
+                run += (f" Average {agg['mean_per_working_day']} pieces per working day over {agg['working_days']} working days"
+                        + (f" ({agg['sundays_closed']} Sundays closed)" if agg.get('sundays_closed') else '') + '.')
+                if agg.get('mean_before_run') is not None:
+                    run += (f" That average hides the drop: {agg['mean_before_run']}/day before {agg['run_start']}, "
+                            f"{agg['mean_from_run']}/day from {agg['run_start']} on ({agg['run_days']} consecutive working days below range).")
             summary.append(run)
         answer = head + '\n'.join(lines) + '\n' + ' '.join(summary)
         if re.search(r'why|cause|reason|responsible|team', lowered):

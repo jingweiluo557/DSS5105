@@ -1,15 +1,15 @@
 # ThreadPilot evaluation — first-pass results
 
-- Run: 2026-10-25T23:33:26.477219+00:00 against `in-process WorkflowEngine (CSV)` · model `annotated-planner` · business date 2026-04-01T12:00:00+08:00
-- Eval set version 2026-10-26b: 83 questions/scenarios, 109 turns scored. Scored automatically; nothing fixed between run and score.
+- Run: 2026-10-25T23:40:28.574074+00:00 against `in-process WorkflowEngine (CSV)` · model `annotated-planner` · business date 2026-04-01T12:00:00+08:00
+- Eval set version 2026-10-26b: 88 questions/scenarios, 116 turns scored. Scored automatically; nothing fixed between run and score.
 
 ## Headline
 
 | Metric | Result |
 |---|---|
-| Scenarios passed (all turns correct) | **83 / 83 (100%)** |
-| Turns passed | 109 / 109 (100%) |
-| Numbers stated in answers | 1782 |
+| Scenarios passed (all turns correct) | **88 / 88 (100%)** |
+| Turns passed | 116 / 116 (100%) |
+| Numbers stated in answers | 2117 |
 | Numbers not traceable to a tool result or the user's words | **0** |
 
 ## By category
@@ -24,7 +24,7 @@
 | feasibility | 5/5 | 8/8 |
 | judgement | 4/4 | 5/5 |
 | multi_turn | 6/6 | 19/19 |
-| sheet1 | 27/27 | 30/30 |
+| sheet1 | 32/32 | 37/37 |
 | tracing | 2/2 | 3/3 |
 | unanswerable | 8/8 | 8/8 |
 
@@ -119,3 +119,8 @@ None.
 - S25 (sheet1): QuickStitch (W1) makes TOPS only; ORD-103 is ACCESSORIES (scarf). Record the note anyway, or choose another workshop? Active workshops that 
 - S26 (sheet1): I can watch one condition per reminder: no new activity recorded for the order, or no reply to the chase-up. Which should this reminder chec
 - S27 (sheet1): I cannot send without showing you the draft first: every send needs a preview and your confirmation. Who should receive the draft for ORD-10
+- S28 (sheet1): The data does not record machines, gauges, standard minutes or yarn, so I cannot pick a sequence from machine compatibility. What it can do:
+- S29 (sheet1): As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 
+- S30 (sheet1): Deadline alone does not decide this. Recorded in this system: each order’s stage (an order at packing is one stage from done), due date, las
+- S31 (sheet1): Recorded output on 2026-03-31 (Tuesday) by stage: knitting 905; assembly 455; washing 732; packing 657 pieces. Stage outputs are not added t | Production March (2026-03-01 to 2026-03-31): (31 days; the table keeps the 8 working days outside their range; ask for the records to see ev
+- S32 (sheet1): No record can exist for 2026-04-03: the business date is 2026-04-01 and the log ends 2026-03-31. The question’s premise cannot be checked ye | That is not something this system can answer from its data: it holds orders, daily stage output and workshop profiles only. Ask about an ord

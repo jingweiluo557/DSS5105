@@ -1,6 +1,6 @@
 {
   "meta": {
-    "run_at": "2026-10-25T23:33:26.477219+00:00",
+    "run_at": "2026-10-25T23:40:28.574074+00:00",
     "target": "in-process WorkflowEngine (CSV)",
     "model": "annotated-planner",
     "first_pass": false,
@@ -10,14 +10,14 @@
   "eval_version": "2026-10-26b",
   "business_now": "2026-04-01T12:00:00+08:00",
   "summary": {
-    "scenarios": 83,
-    "scenarios_passed": 83,
+    "scenarios": 88,
+    "scenarios_passed": 88,
     "scenario_accuracy": 1.0,
     "not_run": [],
-    "turns": 109,
-    "turns_passed": 109,
+    "turns": 116,
+    "turns_passed": 116,
     "turn_accuracy": 1.0,
-    "numbers_stated": 1782,
+    "numbers_stated": 2117,
     "numbers_untraced": 0,
     "by_category": {
       "facts": {
@@ -81,10 +81,10 @@
         "turns_passed": 2
       },
       "sheet1": {
-        "scenarios": 27,
-        "passed": 27,
-        "turns": 30,
-        "turns_passed": 30
+        "scenarios": 32,
+        "passed": 32,
+        "turns": 37,
+        "turns_passed": 37
       }
     }
   },
@@ -3639,6 +3639,238 @@
           "selected_order_id": "ORD-107",
           "tools": [],
           "answer": "I cannot send without showing you the draft first: every send needs a preview and your confirmation. Who should receive the draft for ORD-107?",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S28",
+      "category": "sheet1",
+      "note": "sheet row 10: no machine data; the rule and the expedite analysis are offered, no stale candidate list",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Two customer orders need the same knitting machines this week. Which should we schedule first, and what is the impact on the other order?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[does not record machines]": true,
+            "contains[expedite]": true,
+            "absent[Which order do you mean]": true,
+            "no_order_selected": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.compare",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "explain_no_data",
+              false
+            ]
+          ],
+          "answer": "The data does not record machines, gauges, standard minutes or yarn, so I cannot pick a sequence from machine compatibility. What it can do: compare the two orders’ due dates, stages and idle days, and run the expedite analysis, which shows how many working days the first order gains and how late the other becomes if one goes ahead in each stage queue. Give me the two order IDs and I will run it.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S29",
+      "category": "sheet1",
+      "note": "sheet row 16: planned as order.summary on the live build; the words ask for risk, so the queue view and the act-first list lead",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Which orders are most at risk of missing their committed delivery dates today, and what should I act on first?",
+          "passed": true,
+          "checks": {
+            "contains[Act first on]": true,
+            "contains[ORD-107]": true,
+            "contains[ORD-120]": true,
+            "contains[ORD-083]": true,
+            "contains[Queue view]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.summary",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "summarize_orders",
+              true
+            ]
+          ],
+          "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%). Queue view: 8 overdue; 23 high and 3 medium risk. Act first on: ORD-107 (Northwind Apparel, overdue, due 2026-03-16, best case 2026-04-03); ORD-120 (TrendCart, overdue, due 2026-03-17, best case 2026-04-09); ORD-083 (Maple & Co, overdue, due 2026-03-23, best case 2026-04-04); ORD-029 (Northwind Apparel, high, due 2026-04-01, best case 2026-04-13); ORD-108 (Harbor Knits, high, due 2026-04-03, best case 2026-04-15); ORD-103 (Bright Basics, high, due 2026-04-04, best case 2026-04-16).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}, \"queue_risks\": {\"overdue\": [{\"order_id\": \"ORD-107\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-03-16\", \"stage\": \"PACKING\", \"level\": \"overdue\", \"best_date\": \"2026-04-03\", \"late_days_best\": 16, \"stalled\": false, \"reason\": \"16 days past the 16 Mar due date; finishes Fri 3 Apr at best, 16 working days after the due date\"}, {\"order_id\": \"ORD-120\", \"customer\": \"TrendCart\", \"due_date\": \"2026-03-17\", \"stage\": \"ASSEMBLY\", \"level\": \"overdue\", \"best_date\": \"2026-04-09\", \"late_days_best\": 20, \"stalled\": false, \"reason\": \"15 days past the 17 Mar due date; finishes Thu 9 Apr at best, 20 working days after the due date\"}, {\"order_id\": \"ORD-083\", \"customer\": \"Maple & Co\", \"due_date\": \"2026-03-23\", \"stage\": \"WASHING\", \"level\": \"overdue\", \"best_date\": \"2026-04-04\", \"late_days_best\": 11, \"stalled\": false, \"reason\": \"9 days past the 23 Mar due date; finishes Sat 4 Apr at best, 11 working days after the due date\"}, {\"order_id\": \"ORD-114\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-03-23\", \"stage\": \"PACKING\", \"level\": \"overdue\", \"best_date\": \"2026-04-06\", \"late_days_best\": 12, \"stalled\": false, \"reason\": \"9 days past the 23 Mar due date; finishes Mon 6 Apr at best, 12 working days after the due date\"}, {\"order_id\": \"ORD-002\", \"customer\": \"Cotton Club\", \"due_date\": \"2026-03-29\", \"stage\": \"WASHING\", \"level\": \"overdue\", \"best_date\": \"2026-04-07\", \"late_days_best\": 8, \"stalled\": true, \"reason\": \"3 days past the 29 Mar due date; finishes Tue 7 Apr at best, 8 working days after the due date\"}, {\"order_id\": \"ORD-093\", \"customer\": \"Maple & Co\", \"due_date\": \"2026-03-29\", \"stage\": \"WASHING\", \"level\": \"overdue\", \"best_date\": \"2026-04-07\", \"late_days_best\": 8, \"stalled\": false, \"reason\": \"3 days past the 29 Mar due date; finishes Tue 7 Apr at best, 8 working days after the due date\"}, {\"order_id\": \"ORD-020\", \"customer\": \"TrendCart\", \"due_date\": \"2026-03-31\", \"stage\": \"WASHING\", \"level\": \"overdue\", \"best_date\": \"2026-04-10\", \"late_days_best\": 9, \"stalled\": false, \"reason\": \"1 day past the 31 Mar due date; finishes Fri 10 Apr at best, 9 working days after the due date\"}, {\"order_id\": \"ORD-055\", \"customer\": \"Cotton Club\", \"due_date\": \"2026-03-31\", \"stage\": \"ASSEMBLY\", \"level\": \"overdue\", \"best_date\": \"2026-04-10\", \"late_days_best\": 9, \"stalled\": false, \"reason\": \"1 day past the 31 Mar due date; finishes Fri 10 Apr at best, 9 working days after the due date\"}], \"due_today\": [{\"order_id\": \"ORD-029\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-04-01\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-13\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Mon 13 Apr, 10 working days after the 1 Apr due date\"}], \"next_seven_calendar_days\": [{\"order_id\": \"ORD-108\", \"customer\": \"Harbor Knits\", \"due_date\": \"2026-04-03\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-15\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Wed 15 Apr, 10 working days after the 3 Apr due date\"}, {\"order_id\": \"ORD-103\", \"customer\": \"Bright Basics\", \"due_date\": \"2026-04-04\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-16\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Thu 16 Apr, 10 working days after the 4 Apr due date\"}, {\"order_id\": \"ORD-061\", \"customer\": \"Harbor Knits\", \"due_date\": \"2026-04-05\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-17\", \"late_days_best\": 11, \"stalled\": false, \"reason\": \"Even in the best case it finishes Fri 17 Apr, 11 working days after the 5 Apr due date\"}, {\"order_id\": \"ORD-099\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-04-05\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-20\", \"late_days_best\": 13, \"stalled\": false, \"reason\": \"Even in the best case it finishes Mon 20 Apr, 13 working days after the 5 Apr due date\"}, {\"order_id\": \"ORD-062\", \"customer\": \"Bright Basics\", \"due_date\": \"2026-04-08\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-04-21\", \"late_days_best\": 11, \"stalled\": false, \"reason\": \"Even in the best case it finishes Tue 21 Apr, 11 working days after the 8 Apr due date\"}], \"all_current_orders\": [{\"order_id\": \"ORD-107\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-03-16\", \"stage\": \"PACKING\", \"level\": \"overdue\", \"best_date\": \"2026-04-03\", \"late_days_best\": 16, \"stalled\": false, \"reason\": \"16 days past the 16 Mar due date; finishes Fri 3 Apr at best, 16 working days after the due date\"}, {\"order_id\": \"ORD-120\", \"customer\": \"TrendCart\", \"due_date\": \"2026-03-17\", \"stage\": \"ASSEMBLY\", \"level\": \"overdue\", \"best_date\": \"2026-04-09\", \"late_days_best\": 20, \"stalled\": false, \"reason\": \"15 days past the 17 Mar due date; finishes Thu 9 Apr at best, 20 working days after the due date\"}, {\"order_id\": \"ORD-083\", \"customer\": \"Maple & Co\", \"due_date\": \"2026-03-23\", \"stage\": \"WASHING\", \"level\": \"overdue\", \"best_date\": \"2026-04-04\", \"late_days_best\": 11, \"stalled\": false, \"reason\": \"9 days past the 23 Mar due date; finishes Sat 4 Apr at best, 11 working days after the due date\"}, {\"order_id\": \"ORD-114\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-03-23\", \"stage\": \"PACKING\", \"level\": \"overdue\", \"best_date\": \"2026-04-06\", \"late_days_best\": 12, \"stalled\": false, \"reason\": \"9 days past the 23 Mar due date; finishes Mon 6 Apr at best, 12 working days after the due date\"}, {\"order_id\": \"ORD-002\", \"customer\": \"Cotton Club\", \"due_date\": \"2026-03-29\", \"stage\": \"WASHING\", \"level\": \"overdue\", \"best_date\": \"2026-04-07\", \"late_days_best\": 8, \"stalled\": true, \"reason\": \"3 days past the 29 Mar due date; finishes Tue 7 Apr at best, 8 working days after the due date\"}, {\"order_id\": \"ORD-093\", \"customer\": \"Maple & Co\", \"due_date\": \"2026-03-29\", \"stage\": \"WASHING\", \"level\": \"overdue\", \"best_date\": \"2026-04-07\", \"late_days_best\": 8, \"stalled\": false, \"reason\": \"3 days past the 29 Mar due date; finishes Tue 7 Apr at best, 8 working days after the due date\"}, {\"order_id\": \"ORD-020\", \"customer\": \"TrendCart\", \"due_date\": \"2026-03-31\", \"stage\": \"WASHING\", \"level\": \"overdue\", \"best_date\": \"2026-04-10\", \"late_days_best\": 9, \"stalled\": false, \"reason\": \"1 day past the 31 Mar due date; finishes Fri 10 Apr at best, 9 working days after the due date\"}, {\"order_id\": \"ORD-055\", \"customer\": \"Cotton Club\", \"due_date\": \"2026-03-31\", \"stage\": \"ASSEMBLY\", \"level\": \"overdue\", \"best_date\": \"2026-04-10\", \"late_days_best\": 9, \"stalled\": false, \"reason\": \"1 day past the 31 Mar due date; finishes Fri 10 Apr at best, 9 working days after the due date\"}, {\"order_id\": \"ORD-029\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-04-01\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-13\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Mon 13 Apr, 10 working days after the 1 Apr due date\"}, {\"order_id\": \"ORD-108\", \"customer\": \"Harbor Knits\", \"due_date\": \"2026-04-03\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-15\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Wed 15 Apr, 10 working days after the 3 Apr due date\"}, {\"order_id\": \"ORD-103\", \"customer\": \"Bright Basics\", \"due_date\": \"2026-04-04\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-16\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Thu 16 Apr, 10 working days after the 4 Apr due date\"}, {\"order_id\": \"ORD-061\", \"customer\": \"Harbor Knits\", \"due_date\": \"2026-04-05\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-17\", \"late_days_best\": 11, \"stalled\": false, \"reason\": \"Even in the best case it finishes Fri 17 Apr, 11 working days after the 5 Apr due date\"}, {\"order_id\": \"ORD-099\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-04-05\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-20\", \"late_days_best\": 13, \"stalled\": false, \"reason\": \"Even in the best case it finishes Mon 20 Apr, 13 working days after the 5 Apr due date\"}, {\"order_id\": \"ORD-062\", \"customer\": \"Bright Basics\", \"due_date\": \"2026-04-08\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-04-21\", \"late_days_best\": 11, \"stalled\": false, \"reason\": \"Even in the best case it finishes Tue 21 Apr, 11 working days after the 8 Apr due date\"}, {\"order_id\": \"ORD-008\", \"customer\": \"Loom & Leaf\", \"due_date\": \"2026-04-09\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-04-21\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Tue 21 Apr, 10 working days after the 9 Apr due date\"}, {\"order_id\": \"ORD-045\", \"customer\": \"Cotton Club\", \"due_date\": \"2026-04-09\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-21\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Tue 21 Apr, 10 working days after the 9 Apr due date\"}, {\"order_id\": \"ORD-017\", \"customer\": \"TrendCart\", \"due_date\": \"2026-04-10\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-04-22\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Wed 22 Apr, 10 working days after the 10 Apr due date\"}, {\"order_id\": \"ORD-053\", \"customer\": \"UrbanThread\", \"due_date\": \"2026-04-10\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-23\", \"late_days_best\": 11, \"stalled\": false, \"reason\": \"Even in the best case it finishes Thu 23 Apr, 11 working days after the 10 Apr due date\"}, {\"order_id\": \"ORD-081\", \"customer\": \"Harbor Knits\", \"due_date\": \"2026-04-13\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-25\", \"late_days_best\": 11, \"stalled\": false, \"reason\": \"Even in the best case it finishes Sat 25 Apr, 11 working days after the 13 Apr due date\"}, {\"order_id\": \"ORD-109\", \"customer\": \"Harbor Knits\", \"due_date\": \"2026-04-13\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-24\", \"late_days_best\": 10, \"stalled\": false, \"reason\": \"Even in the best case it finishes Fri 24 Apr, 10 working days after the 13 Apr due date\"}, {\"order_id\": \"ORD-024\", \"customer\": \"Loom & Leaf\", \"due_date\": \"2026-04-15\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-25\", \"late_days_best\": 9, \"stalled\": false, \"reason\": \"Even in the best case it finishes Sat 25 Apr, 9 working days after the 15 Apr due date\"}, {\"order_id\": \"ORD-015\", \"customer\": \"UrbanThread\", \"due_date\": \"2026-04-16\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-25\", \"late_days_best\": 8, \"stalled\": false, \"reason\": \"Even in the best case it finishes Sat 25 Apr, 8 working days after the 16 Apr due date\"}, {\"order_id\": \"ORD-096\", \"customer\": \"TrendCart\", \"due_date\": \"2026-04-17\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-04-27\", \"late_days_best\": 8, \"stalled\": false, \"reason\": \"Even in the best case it finishes Mon 27 Apr, 8 working days after the 17 Apr due date\"}, {\"order_id\": \"ORD-005\", \"customer\": \"TrendCart\", \"due_date\": \"2026-04-20\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-04-27\", \"late_days_best\": 6, \"stalled\": true, \"reason\": \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\"}, {\"order_id\": \"ORD-073\", \"customer\": \"Loom & Leaf\", \"due_date\": \"2026-04-20\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-04-28\", \"late_days_best\": 7, \"stalled\": false, \"reason\": \"Even in the best case it finishes Tue 28 Apr, 7 working days after the 20 Apr due date\"}, {\"order_id\": \"ORD-040\", \"customer\": \"Loom & Leaf\", \"due_date\": \"2026-04-21\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-04-29\", \"late_days_best\": 7, \"stalled\": false, \"reason\": \"Even in the best case it finishes Wed 29 Apr, 7 working days after the 21 Apr due date\"}, {\"order_id\": \"ORD-041\", \"customer\": \"Harbor Knits\", \"due_date\": \"2026-04-21\", \"stage\": \"WASHING\", \"level\": \"high\", \"best_date\": \"2026-04-29\", \"late_days_best\": 7, \"stalled\": false, \"reason\": \"Even in the best case it finishes Wed 29 Apr, 7 working days after the 21 Apr due date\"}, {\"order_id\": \"ORD-010\", \"customer\": \"Cotton Club\", \"due_date\": \"2026-04-25\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-05-01\", \"late_days_best\": 5, \"stalled\": false, \"reason\": \"Even in the best case it finishes Fri 1 May, 5 working days after the 25 Apr due date\"}, {\"order_id\": \"ORD-036\", \"customer\": \"UrbanThread\", \"due_date\": \"2026-04-26\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-05-01\", \"late_days_best\": 5, \"stalled\": false, \"reason\": \"Even in the best case it finishes Fri 1 May, 5 working days after the 26 Apr due date\"}, {\"order_id\": \"ORD-066\", \"customer\": \"Northwind Apparel\", \"due_date\": \"2026-04-26\", \"stage\": \"ASSEMBLY\", \"level\": \"high\", \"best_date\": \"2026-05-02\", \"late_days_best\": 6, \"stalled\": false, \"reason\": \"Even in the best case it finishes Sat 2 May, 6 working days after the 26 Apr due date\"}, {\"order_id\": \"ORD-095\", \"customer\": \"Bright Basics\", \"due_date\": \"2026-04-26\", \"stage\": \"KNITTING\", \"level\": \"high\", \"best_date\": \"2026-05-04\", \"late_days_best\": 7, \"stalled\": false, \"reason\": \"Even in the best case it finishes Mon 4 May, 7 working days after the 26 Apr due date\"}, {\"order_id\": \"ORD-035\", \"customer\": \"Loom & Leaf\", \"due_date\": \"2026-04-29\", \"stage\": \"KNITTING\", \"level\": \"medium\", \"best_date\": \"2026-05-04\", \"late_days_best\": 4, \"stalled\": false, \"reason\": \"Even in the best case it finishes Mon 4 May, 4 working days after the 29 Apr due date\"}, {\"order_id\": \"ORD-063\", \"customer\": \"Loom & Leaf\", \"due_date\": \"2026-04-29\", \"stage\": \"KNITTING\", \"level\": \"medium\", \"best_date\": \"2026-05-04\", \"late_days_best\": 4, \"stalled\": false, \"reason\": \"Even in the best case it finishes Mon 4 May, 4 working days after the 29 Apr due date\"}, {\"order_id\": \"ORD-082\", \"customer\": \"TrendCart\", \"due_date\": \"2026-05-01\", \"stage\": \"KNITTING\", \"level\": \"medium\", \"best_date\": \"2026-05-05\", \"late_days_best\": 3, \"stalled\": false, \"reason\": \"Even in the best case it finishes Tue 5 May, 3 working days after the 1 May due date\"}], \"assumptions\": {\"algorithm\": \"queue-v1\", \"business_date\": \"2026-04-01\", \"fingerprint\": \"87f417928ef83c946d308fcf90a703e117a8f66eb4afaaaef5473713f5f45037\", \"capacity\": {\"KNITTING\": 1547.1903750000001, \"ASSEMBLY\": 1261.7082500000001, \"WASHING\": 1199.91375, \"PACKING\": 1130.5007500000002}, \"capacity_factor\": 1.693, \"available\": true, \"schedule\": {\"version\": 0, \"priority\": []}, \"assumptions\": [\"Current orders only; identical capacity and arrivals (none) before and after an expedite.\", \"Monday–Saturday; current stage starts with full order quantity because partial progress is unavailable.\", \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\", \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\", \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1–3.\", \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\", \"An approved queue changes this application’s dispatch plan, not an external factory system.\"]}, \"vocabulary\": \"overdue = past the due date; high/medium = the queue cannot finish it by the due date in the best or expected case; late_days_best = working days the best-case finish lands after the due date\"}}",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S30",
+      "category": "sheet1",
+      "note": "sheet row 18: two described (not identified) orders; the rule, the recorded vs unrecorded facts, and an offer to check real IDs",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "An order is due tomorrow but is already packed; another is due in five days with missing yarn. Which is the higher-priority exception?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[deadline alone does not decide]": true,
+            "contains[yarn|missing input]": true,
+            "contains[dispatch]": true,
+            "absent[\\b1\\. ORD-]": true,
+            "no_order_selected": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.prioritize",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "explain_no_data",
+              false
+            ]
+          ],
+          "answer": "Deadline alone does not decide this. Recorded in this system: each order’s stage (an order at packing is one stage from done), due date, last activity and the queue’s best-case finish. Not recorded: dispatch booking, yarn or material status. The rule: an order already packed with dispatch secured is low risk even if due tomorrow; an order five days out with a missing input is the one to escalate, because the procurement lead time sits on its critical path. Give me the two order IDs and I will check their stages, dates and queue finish.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S31",
+      "category": "sheet1",
+      "note": "sheet row 37: 26 working days (5 Sundays closed), 704.8/day; the average hides the drop: 788.6 before 25 March, 425.5 from 25 March",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "What was the factory’s total output on 31 March?",
+          "passed": true,
+          "checks": {
+            "contains[905]": true,
+            "contains[455]": true,
+            "contains[732]": true,
+            "contains[657]": true,
+            "contains[not added together]": true,
+            "absent[\\b2,?749\\b]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.output",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "stage_comparison",
+              true
+            ]
+          ],
+          "answer": "Recorded output on 2026-03-31 (Tuesday) by stage: knitting 905; assembly 455; washing 732; packing 657 pieces. Stage outputs are not added together: the same piece passes every stage, so packing (657) is the closest thing to finished output. Against each stage’s own previous eight same weekdays: knitting 905 (within 797–1018); assembly 455 (below 687–807, -39%, 6 working days below); washing 732 (within 617–774); packing 657 (within 562–734). Each stage is compared with its own previous eight same weekdays.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        },
+        {
+          "turn": 1,
+          "message": "What was the average daily assembly output in March?",
+          "passed": true,
+          "checks": {
+            "contains[704.8]": true,
+            "contains[26 working days]": true,
+            "contains[788.6]": true,
+            "contains[425.5]": true,
+            "contains[2026-03-25]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.output",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "production_window",
+              true
+            ]
+          ],
+          "answer": "Production March (2026-03-01 to 2026-03-31):\n(31 days; the table keeps the 8 working days outside their range; ask for the records to see every day.)\n| Date | Assembly |\n| --- | --- |\n| 2026-03-03 Tue | 687 (below 696–881) |\n| 2026-03-04 Wed | 901 (above 702–890) |\n| 2026-03-25 Wed | 394 (below 702–901) |\n| 2026-03-26 Thu | 464 (below 703–868) |\n| 2026-03-27 Fri | 399 (below 702–895) |\n| 2026-03-28 Sat | 445 (below 687–918) |\n| 2026-03-30 Mon | 396 (below 720–875) |\n| 2026-03-31 Tue | 455 (below 687–807) |\nAssembly: below its same-weekday range on 7 of 26 working days (2026-03-03 to 2026-03-31, consecutively since 2026-03-25); 18,326 pieces in total, about 1,732 short of the same-weekday means and about 1,681 short of its 769.5/day average over the 51 working days before. Average 704.8 pieces per working day over 26 working days (5 Sundays closed). That average hides the drop: 788.6/day before 2026-03-25, 425.5/day from 2026-03-25 on (6 consecutive working days below range). Stage outputs are not additive; packing is the closest thing to finished output. The log has no cause, downtime, staffing or team fields.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S32",
+      "category": "sheet1",
+      "note": "sheet row 38: the date boundary first; the follow-up is a forecast the data cannot give",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Why was assembly output low on 3 April?",
+          "passed": true,
+          "checks": {
+            "contains[no record can exist for 2026-04-03|no record]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.deviation",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "stage_comparison",
+              true
+            ]
+          ],
+          "answer": "No record can exist for 2026-04-03: the business date is 2026-04-01 and the log ends 2026-03-31. The question’s premise cannot be checked yet. As of 2026-03-31: Assembly is the stage to worry about on 2026-03-31: knitting 905 (within 797–1018); assembly 455 (below 687–807, -39%, 6 working days below); washing 732 (within 617–774); packing 657 (within 562–734). Each stage is compared with its own previous eight same weekdays.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        },
+        {
+          "turn": 1,
+          "message": "Will it recover next week?",
+          "passed": true,
+          "checks": {
+            "contains[cannot|not something this system can]": true,
+            "absent[will recover]": true,
+            "absent[should recover]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "general.unanswerable",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "explain_no_data",
+              false
+            ]
+          ],
+          "answer": "That is not something this system can answer from its data: it holds orders, daily stage output and workshop profiles only. Ask about an order, a customer, a stage or a new-order estimate.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""

@@ -411,11 +411,33 @@ class DataTools:
                     agg['shortfall_vs_prior_working_day_mean'] = round(agg['shortfall_vs_prior_working_day_mean'] + (agg['prior_working_day_mean'] - output), 1)
                 row[st] = cell
             table.append(row)
-        for agg in per_stage.values():
+        for st, agg in per_stage.items():
             agg['every_working_day_below'] = agg['working_days'] > 0 and agg['days_below_band'] == agg['working_days']
             agg['shortfall_vs_same_weekday_mean'] = round(agg['shortfall_vs_same_weekday_mean'])
             if agg['shortfall_vs_prior_working_day_mean'] is not None:
                 agg['shortfall_vs_prior_working_day_mean'] = round(agg['shortfall_vs_prior_working_day_mean'])
+            # averages per working day ("what was the average daily assembly output in March?"), and the split around the
+            # first day below range so a period average cannot hide a drop inside it
+            values = [(r['date'], r[st]['pieces']) for r in table if not r.get('closed') and r.get(st)]
+            agg['sundays_closed'] = sum(1 for r in table if r.get('closed'))
+            agg['mean_per_working_day'] = round(mean(v for _, v in values), 1) if values else None
+            # the longest run of consecutive working days below range (latest wins a tie): where a sustained drop starts
+            best, cur = [], []
+            for d, _ in values:
+                cell = next(r[st] for r in table if r['date'] == d)
+                if cell.get('status') == 'below':
+                    cur.append(d)
+                    if len(cur) >= len(best):
+                        best = list(cur)
+                else:
+                    cur = []
+            agg['run_start'], agg['run_days'] = (best[0], len(best)) if len(best) >= 2 else (None, 0)
+            split = agg['run_start']
+            if split and any(d < split for d, _ in values):
+                agg['mean_before_run'] = round(mean(v for d, v in values if d < split), 1)
+                agg['mean_from_run'] = round(mean(v for d, v in values if d >= split), 1)
+            else:
+                agg['mean_before_run'] = agg['mean_from_run'] = None
         return {'period': {'start': start.isoformat(), 'end': end.isoformat(), 'label': period.get('label', ''), 'capped_to_latest_record': period.get('capped', False)},
                 'latest_record': (self.latest_log_date() or end).isoformat(), 'rows': table, 'summary': list(per_stage.values()),
                 'baselines': {'same_weekday': 'previous eight same weekdays before each day (the normality rule)',

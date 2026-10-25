@@ -106,6 +106,27 @@ def test_row37_total_output_lists_stages_and_never_sums(tmp_path: Path):
     assert 'not added together' in r.answer and '2749' not in r.answer and '2,749' not in r.answer
 
 
+def test_row37_followup_period_average_and_the_split_around_the_run(tmp_path: Path):
+    r = chat(make_engine(tmp_path), FixedClassifier('operations.output', stage='ASSEMBLY'), 'What was the average daily assembly output in March?')
+    agg = r.tool_calls[0].result['summary'][0]
+    assert (agg['working_days'], agg['sundays_closed'], agg['mean_per_working_day']) == (26, 5, 704.8)
+    assert (agg['run_start'], agg['run_days'], agg['mean_before_run'], agg['mean_from_run']) == ('2026-03-25', 6, 788.6, 425.5)
+    assert 'Average 704.8 pieces per working day over 26 working days (5 Sundays closed)' in r.answer and '788.6/day before 2026-03-25, 425.5/day from 2026-03-25 on' in r.answer
+    assert 'the table keeps the 8 working days outside their range' in r.answer   # a month is not tabulated unasked
+
+
+def test_row16_risk_words_attach_the_queue_view_to_a_summary(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('order.summary', {})), 'Which orders are most at risk of missing their committed delivery dates today, and what should I act on first?')
+    assert 'Queue view: 8 overdue' in r.answer and 'Act first on: ORD-107' in r.answer
+
+
+def test_rows10_18_described_orders_get_the_rule_not_a_candidate_list(tmp_path: Path):
+    r = chat(make_engine(tmp_path), FixedClassifier('order.compare', reference='ambiguous'), 'Two customer orders need the same knitting machines this week. Which should we schedule first, and what is the impact on the other order?')
+    assert not r.needs_clarification and 'does not record machines' in r.answer and 'expedite' in r.answer
+    r = chat(make_engine(tmp_path), FixedClassifier('order.prioritize', window_days=0), 'An order is due tomorrow but is already packed; another is due in five days with missing yarn. Which is the higher-priority exception?')
+    assert not r.needs_clarification and r.answer.startswith('Deadline alone does not decide this') and '1. ORD-' not in r.answer
+
+
 def test_row38_future_date_is_answered_with_the_date_boundary(tmp_path: Path):
     r = chat(make_engine(tmp_path), FixedClassifier('operations.deviation', stage='ASSEMBLY', target_date='2026-04-03'), 'Why was assembly output low on 3 April?')
     assert r.answer.startswith('No record can exist for 2026-04-03: the business date is 2026-04-01 and the log ends 2026-03-31.')

@@ -21,7 +21,7 @@ The model is therefore never *asked* for a number, and when it writes one it has
 |---|---|---|
 | Live first pass, 24 Oct (gpt-6-luna, 47 questions) | 169 | **0** |
 | Offline annotated run, 26 Oct (56 questions / 79 turns, raw server answers) | 1144 | **0** |
-| Offline annotated run, 26 Oct, after the question-sheet fixes (83 questions / 109 turns, raw server answers) | 1782 | **0** |
+| Offline annotated run, 26 Oct, after the question-sheet fixes (88 questions / 116 turns, raw server answers) | 2117 | **0** |
 
 The Sprint 1 slide quoted "3 of 163 untraced, 1 a real error" for the rule-based chat; the live model run has none. List-item numbers ("1.", "2.") are excluded; single digits are too ambiguous to trace and are ignored.
 

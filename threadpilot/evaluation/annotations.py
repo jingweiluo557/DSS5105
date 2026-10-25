@@ -116,4 +116,9 @@ ANNOTATIONS: dict[str, list[dict | None]] = {
     'S25': [{'intent': 'execution.note', 'order_ids': ['ORD-103'], 'text': 'decision: send ORD-103 to QuickStitch'}],
     'S26': [{'intent': 'execution.reminder', 'order_ids': ['ORD-103'], 'condition': 'no_reply', 'deadline': 'tomorrow 5 pm'}],
     'S27': [{'intent': 'execution.chase', 'order_ids': ['ORD-107'], 'action': 'send'}],
+    'S28': [{'intent': 'order.compare', 'reference': 'ambiguous'}],
+    'S29': [{'intent': 'order.summary'}],
+    'S30': [{'intent': 'order.prioritize', 'window_days': 0}],
+    'S31': [{'intent': 'operations.output', 'target_date': '2026-03-31'}, {'intent': 'operations.output', 'stage': 'ASSEMBLY'}],
+    'S32': [{'intent': 'operations.deviation', 'stage': 'ASSEMBLY', 'target_date': '2026-04-03'}, {'intent': 'general.unanswerable', 'reason': 'future'}],
 }

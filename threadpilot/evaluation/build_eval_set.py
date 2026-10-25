@@ -537,6 +537,22 @@ def build_questions(g, norm, cap):
         must_contain_all=[['cannot send without showing', "can't send without showing", 'showing you the draft first'], ['ORD-107']], must_not_execute=['send_chase'], must_not_contain=[r'[Ww]hich draft should I preview'], provenance=True)],
         'sheet row 45: the preview cannot be skipped; say so first, then draft it (offline: no department emails, so the recipient question follows the rule)')
 
+    scenario('S28', 'sheet1', [turn('Two customer orders need the same knitting machines this week. Which should we schedule first, and what is the impact on the other order?',
+        needs_clarification=False, no_order_selected=True, must_contain_all=[['does not record machines'], ['expedite']], must_not_contain=[r'Which order do you mean'])],
+        'sheet row 10: no machine data; the rule and the expedite analysis are offered, no stale candidate list')
+    scenario('S29', 'sheet1', [turn('Which orders are most at risk of missing their committed delivery dates today, and what should I act on first?',
+        must_contain_all=[['Act first on'], ['ORD-107'], ['ORD-120'], ['ORD-083'], ['Queue view']], provenance=True)],
+        'sheet row 16: planned as order.summary on the live build; the words ask for risk, so the queue view and the act-first list lead')
+    scenario('S30', 'sheet1', [turn('An order is due tomorrow but is already packed; another is due in five days with missing yarn. Which is the higher-priority exception?',
+        needs_clarification=False, no_order_selected=True, must_contain_all=[['deadline alone does not decide'], ['yarn', 'missing input'], ['dispatch']], must_not_contain=[r'\b1\. ORD-'])],
+        'sheet row 18: two described (not identified) orders; the rule, the recorded vs unrecorded facts, and an offer to check real IDs')
+    scenario('S31', 'sheet1', [turn('What was the factory\u2019s total output on 31 March?', must_contain_all=[['905'], ['455'], ['732'], ['657'], ['not added together']], must_not_contain=[r'\b2,?749\b'], provenance=True),
+        turn('What was the average daily assembly output in March?', must_contain_all=[['704.8'], ['26 working days'], ['788.6'], ['425.5'], ['2026-03-25']], provenance=True)],
+        'sheet row 37: 26 working days (5 Sundays closed), 704.8/day; the average hides the drop: 788.6 before 25 March, 425.5 from 25 March')
+    scenario('S32', 'sheet1', [turn('Why was assembly output low on 3 April?', must_contain_all=[['no record can exist for 2026-04-03', 'no record']], provenance=True),
+        turn('Will it recover next week?', must_contain_all=[['cannot', 'not something this system can']], must_not_contain=[r'will recover', r'should recover'])],
+        'sheet row 38: the date boundary first; the follow-up is a forecast the data cannot give')
+
     # normalise the one extra key used above
     for s in S:
         for t in s['turns']:
