@@ -23,8 +23,8 @@ Why: the first live evaluation of the CloudBase deployment (47 questions, `evalu
 
 ## Measured
 - Live first pass before the fixes: 29/47 questions (62%), 44/66 turns, 0/169 untraced numbers, 11/11 tool results verified.
-- Offline annotated-planner run after the fixes: 47/47, 66/66, 0/879 untraced. The team's 45-turn workbook regression: 45/45 on the CSV path.
-- Still to do: deploy, re-run the 47 questions live and report it as a second pass (the planner must now emit the new intents).
+- Offline annotated-planner run after the fixes: 47/47 on the original questions; on the current 56-question set 56/56 scenarios, 79/79 turns, 0/1144 numbers untraced (`evaluation/REPORT_annotated.md`, re-run by CI on every push). The team's 45-turn workbook regression: 45/45 on the CSV path.
+- Still to do: deploy, re-run the 56 questions live and report it as a second pass (the planner must now emit the new intents).
 
 ## Not changed
 - Frontend. The Feasibility page still uses its own local estimate; a follow-up should call `estimate_capacity`.
@@ -34,9 +34,9 @@ Why: the first live evaluation of the CloudBase deployment (47 questions, `evalu
 
 - **Alert policy** (`services/alert_policy.py`, `alert_delivery.py`, `api/alerts_api.py`, `docs/ALERT_POLICY.md`): three tiers (P1 email now / P2 digest / P3 briefing), dedupe keys with cooldowns, escalation only when worse, no re-emailing of unresolved items, 3-a-day cap, quiet hours, shelving, usefulness KPIs. Dry run by default (`ALERT_EMAILS_ENABLED=false`); runs on the existing minute timer. On the seed data: 1 P1 email (assembly 3 days below range + two near-due misses), everything else in the digest; second tick 0 emails.
 - **Feasibility capacity picture** (`api/feasibility_api.py`, `frontend/feasibility-chart.js`): the Feasibility result page now calls the same `estimate_capacity` tool as the chat and draws one stacked bar per stage (queued pieces + the new order) against the pieces the stage can complete before the due date, with the queue-projection finish date, the AFT on-time chance and the bottleneck stage. Scrolls horizontally on phones.
-- **Evaluation set v2026-10-26**: 54 questions / 77 turns — adds 5 arithmetic-bait questions (`fail_on_untraced`) and two multi-turn scenarios (correction; topic switch and resume). Offline 54/54; the 24 Oct live first pass stays 29/47 on the questions it covered (the 7 new ones are marked "not in that run").
+- **Evaluation set v2026-10-26**: 56 questions / 79 turns — adds 5 arithmetic-bait questions (`fail_on_untraced`), two multi-turn scenarios (correction; topic switch and resume) and two discovery questions. Offline 56/56 with 0 of 1,144 numbers untraced; the 24 Oct live first pass stays 29/47 on the questions it covered (the 9 new ones are marked "not in that run").
 - `compare_orders` accepts pieces / product / customer fields.
-- Docs: `TOOL_SPECIFICATION.md` (one table, 25 tools, with non-goals and failure modes), `VAGUE_QUESTIONS_AND_DIALOGUES.md`, `NO_ARITHMETIC_PROOF.md`.
+- Docs: `TOOL_SPECIFICATION.md` (one table, 28 tools and services, with non-goals and failure modes), `VAGUE_QUESTIONS_AND_DIALOGUES.md`, `NO_ARITHMETIC_PROOF.md`.
 
 ## 26 Oct, second batch — closing the gaps (same branch)
 
