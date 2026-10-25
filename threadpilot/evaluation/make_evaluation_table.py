@@ -30,7 +30,7 @@ for sc in ev['scenarios']:
     q = ' → '.join(t['message'] for t in sc['turns']).replace('|', '\\|')
     gold = sc['note'].replace('gold: ', '', 1).replace('gold (tool algorithm): ', '', 1).replace('|', '\\|')
     v = verdict.get(sc['id'])
-    mark = '—' if v is None else ('✅ pass' if v['passed'] else '❌ fail (turn ' + ', '.join(str(t['turn'] + 1) for t in v['turns'] if not t['passed']) + ')')
+    mark = '— not in that run' if v is None else ('✅ pass' if v['passed'] else '❌ fail (turn ' + ', '.join(str(t['turn'] + 1) for t in v['turns'] if not t['passed']) + ')')
     L.append(f"| {sc['id']} | {cat_names.get(sc['category'], sc['category'])} | {q} | {gold} | {mark} |")
 L += ['', '## Brief requirements check', '',
       f"- ≥30 questions with verified answers: **{ev['counts']['scenarios']}** ✔",

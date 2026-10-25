@@ -305,7 +305,7 @@ class WorkflowEngine:
             state.active_order = None
             state.last_order_ids = ids
             if not slots.comparison_fields:
-                return self.ask('Which aspect matters: due date, stage, latest activity or status?', state, result, now, calls, evidence)
+                return self.ask('Which aspect matters: due date, stage, latest activity, status or pieces?', state, result, now, calls, evidence)
             rows = [self.tools.refresh_order(i) for i in ids]
             evidence.extend(rows)
             calls.append(ToolCall(name='compare_orders', arguments={'order_ids': ids, 'fields': slots.comparison_fields}, result={'records': [e.record for e in rows]}))

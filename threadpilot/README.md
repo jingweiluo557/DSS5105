@@ -9,7 +9,7 @@ A factory management workspace for order lookup, shared queue-risk analysis, exp
 
 ## Evaluation (Sprint 2)
 
-`evaluation/` holds the Track 1 deliverable: 47 questions with answers computed from the CSVs by code, an automatic scorer with an invented-number check, the 24 Oct 2026 live first pass (29/47, 0 untraced numbers) and the failure analysis that drove the Sprint 2 fixes. `python evaluation/run_annotated_eval.py` replays all 47 questions through the server offline in seconds. See [evaluation/README.md](evaluation/README.md), [docs/PREDICTION_MODEL.md](docs/PREDICTION_MODEL.md) and section 10 of [docs/TOOL_SPECIFICATION_SPRINT1.md](docs/TOOL_SPECIFICATION_SPRINT1.md).
+`evaluation/` holds the Track 1 deliverable: 47 questions with answers computed from the CSVs by code, an automatic scorer with an invented-number check, the 24 Oct 2026 live first pass (29/47, 0 untraced numbers) and the failure analysis that drove the Sprint 2 fixes. `python evaluation/run_annotated_eval.py` replays all 47 questions through the server offline in seconds. See [evaluation/README.md](evaluation/README.md), the one-table [docs/TOOL_SPECIFICATION.md](docs/TOOL_SPECIFICATION.md), [docs/PREDICTION_MODEL.md](docs/PREDICTION_MODEL.md), [docs/ALERT_POLICY.md](docs/ALERT_POLICY.md), [docs/VAGUE_QUESTIONS_AND_DIALOGUES.md](docs/VAGUE_QUESTIONS_AND_DIALOGUES.md) and [docs/NO_ARITHMETIC_PROOF.md](docs/NO_ARITHMETIC_PROOF.md).
 
 ## Current capabilities
 

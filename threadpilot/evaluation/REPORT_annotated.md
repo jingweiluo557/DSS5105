@@ -1,15 +1,15 @@
 # ThreadPilot evaluation — first-pass results
 
-- Run: 2026-10-24T08:30:56.886913+00:00 against `in-process WorkflowEngine (CSV)` · model `annotated-planner` · business date 2026-04-01T12:00:00+08:00
-- Eval set version 2026-10-24: 47 questions/scenarios, 66 turns. Scored automatically; nothing fixed between run and score.
+- Run: 2026-10-25T17:04:50.944752+00:00 against `in-process WorkflowEngine (CSV)` · model `annotated-planner` · business date 2026-04-01T12:00:00+08:00
+- Eval set version 2026-10-24: 54 questions/scenarios, 77 turns. Scored automatically; nothing fixed between run and score.
 
 ## Headline
 
 | Metric | Result |
 |---|---|
-| Scenarios passed (all turns correct) | **47 / 47 (100%)** |
-| Turns passed | 66 / 66 (100%) |
-| Numbers stated in answers | 879 |
+| Scenarios passed (all turns correct) | **54 / 54 (100%)** |
+| Turns passed | 77 / 77 (100%) |
+| Numbers stated in answers | 1104 |
 | Numbers not traceable to a tool result or the user's words | **0** |
 
 ## By category
@@ -18,10 +18,11 @@
 |---|---|---|
 | action | 6/6 | 11/11 |
 | ambiguous | 6/6 | 6/6 |
+| arithmetic_bait | 5/5 | 5/5 |
 | facts | 12/12 | 12/12 |
 | feasibility | 5/5 | 8/8 |
 | judgement | 4/4 | 5/5 |
-| multi_turn | 4/4 | 13/13 |
+| multi_turn | 6/6 | 19/19 |
 | tracing | 2/2 | 3/3 |
 | unanswerable | 8/8 | 8/8 |
 
@@ -52,7 +53,7 @@ None.
 - T01 (tracing): Recorded facts and labelled interpretation: {   "stage": "ASSEMBLY",   "date": "2026-03-31",   "output": 455,   "baseline_records": [     {  | Recorded facts and labelled interpretation: {   "stage": "ASSEMBLY",   "date": "2026-03-31",   "output": 455,   "baseline_records": [     { 
 - T02 (tracing): ORD-002 — Cotton Club, 1000 Crewneck sweater; status IN_PROGRESS, stage WASHING, due 2026-03-29, last recorded activity 2026-03-23. Already 
 - M01 (multi_turn): Several matching orders. Which order ID, quantity or due date? ORD-120: Vest, 1500 pieces, due 2026-03-17; ORD-020: Vest, 1200 pieces, due 2 | ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24. | ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24. Not past due: due 202 | ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24. Not past due: due 202
-- M02 (multi_turn): Which aspect matters: due date, stage, latest activity or status? | | Order | due_date | last_activity_date | | --- | --- | --- | | ORD-108 | 2026-04-03 | 2026-03-31 | | ORD-103 | 2026-04-04 | 2026-03-30 | | | Order | due_date | last_activity_date | | --- | --- | --- | | ORD-108 | 2026-04-03 | 2026-03-31 | | ORD-103 | 2026-04-04 | 2026-03-30 | Tr
+- M02 (multi_turn): Which aspect matters: due date, stage, latest activity, status or pieces? | | Order | due_date | last_activity_date | | --- | --- | --- | | ORD-108 | 2026-04-03 | 2026-03-31 | | ORD-103 | 2026-04-04 | 2026-03-30 | | | Order | due_date | last_activity_date | | --- | --- | --- | | ORD-108 | 2026-04-03 | 2026-03-31 | | ORD-103 | 2026-04-04 | 2026-03-30 | Tr
 - M03 (multi_turn): ORD-053 — UrbanThread, 800 Polo shirt; status IN_PROGRESS, stage ASSEMBLY, due 2026-04-10, last recorded activity 2026-03-31. | ORD-053 — UrbanThread, 800 Polo shirt; status IN_PROGRESS, stage ASSEMBLY, due 2026-04-10, last recorded activity 2026-03-31. Only last_acti | ORD-053 — UrbanThread, 800 Polo shirt; status IN_PROGRESS, stage ASSEMBLY, due 2026-04-10, last recorded activity 2026-03-31. Only last_acti
 - M04 (multi_turn): Due today only, or include the next seven days? Overdue active orders will be included. | Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-08 (including overdue active orders). Earlier due date first; ties: old | Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-08 (including overdue active orders). Earlier due date first; ties: old
 - A01 (ambiguous): Several matching orders. Which order ID, quantity or due date? ORD-114: Hoodie, 2000 pieces, due 2026-03-23; ORD-083: Hoodie, 1000 pieces, d
@@ -80,3 +81,10 @@ None.
 - Ac04 (action): I cannot cancel orders or contact customers: order changes are made in the factory system, and the chat only drafts internal chase-ups, note
 - Ac05 (action): Which draft should I preview? Choose a draft number. Each draft is confirmed separately.
 - Ac06 (action): Draft 1 · To: planner Department: ASSEMBLY Subject: ThreadPilot chase-up | ORD-120 Please check the current status and confirm the next step | {"total_orders": 120, "by_stage": {"COMPLETE": 86, "ASSEMBLY": 10, "PACKING": 2, "WASHING": 10, "KNITTING": 12}, "by_status": {"COMPLETE": 8
+- AR01 (arithmetic_bait): {"total_orders": 120, "by_stage": {"COMPLETE": 86, "ASSEMBLY": 10, "PACKING": 2, "WASHING": 10, "KNITTING": 12}, "by_status": {"COMPLETE": 8
+- AR02 (arithmetic_bait): {"total_orders": 120, "by_stage": {"COMPLETE": 86, "ASSEMBLY": 10, "PACKING": 2, "WASHING": 10, "KNITTING": 12}, "by_status": {"COMPLETE": 8
+- AR03 (arithmetic_bait): | Order | pieces | product | | --- | --- | --- | | ORD-108 | 2000 | Scarf | | ORD-061 | 800 | Scarf |
+- AR04 (arithmetic_bait): That is not something this system can answer from its data: it holds orders, daily stage output and workshop profiles only. Ask about an ord
+- AR05 (arithmetic_bait): {"total_orders": 17, "by_stage": {"COMPLETE": 11, "ASSEMBLY": 1, "WASHING": 1, "KNITTING": 4}, "by_status": {"COMPLETE": 11, "IN_PROGRESS": 
+- M05 (multi_turn): ORD-020 — TrendCart, 1200 Vest; status IN_PROGRESS, stage WASHING, due 2026-03-31, last recorded activity 2026-03-30. | ORD-120 — TrendCart, 1500 Vest; status IN_PROGRESS, stage ASSEMBLY, due 2026-03-17, last recorded activity 2026-03-30. | ORD-120 — TrendCart, 1500 Vest; status IN_PROGRESS, stage ASSEMBLY, due 2026-03-17, last recorded activity 2026-03-30. Already overdue: due 
+- M06 (multi_turn): Does the deadline mean ready at our factory or delivered to the customer? | {"total_orders": 120, "by_stage": {"COMPLETE": 86, "ASSEMBLY": 10, "PACKING": 2, "WASHING": 10, "KNITTING": 12}, "by_status": {"COMPLETE": 8 | Conditional forecast, not a promise: {   "due_date": "2026-04-25",   "delivery_point": "customer",   "available_workdays": 21,   "delivery_b

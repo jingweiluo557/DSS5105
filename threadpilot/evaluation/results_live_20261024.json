@@ -7,12 +7,21 @@
     "runner": "browser (page-context fetch via window.threadpilotFetch)",
     "note": "Ac01/Ac02/Ac03/Ac05 were run twice: first up to the preview step, then in full once the manager approved the confirmations; the full run is stored."
   },
-  "eval_version": "2026-10-24",
+  "eval_version": "2026-10-26",
   "business_now": "2026-04-01T12:00:00+08:00",
   "summary": {
     "scenarios": 47,
     "scenarios_passed": 29,
     "scenario_accuracy": 0.617,
+    "not_run": [
+      "AR01",
+      "AR02",
+      "AR03",
+      "AR04",
+      "AR05",
+      "M05",
+      "M06"
+    ],
     "turns": 66,
     "turns_passed": 44,
     "turn_accuracy": 0.667,

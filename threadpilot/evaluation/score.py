@@ -79,6 +79,8 @@ def check_turn(expect: dict, resp: dict, messages_so_far: list[str]) -> tuple[di
                 continue  # single digits ("2 days") are too ambiguous to trace
             if clean not in hay_digits and n not in hay_digits:
                 untraced.append(n)
+    if expect.get('fail_on_untraced'):
+        checks['no_untraced_numbers'] = not untraced
     return checks, untraced
 
 
@@ -93,8 +95,11 @@ def main():
     tr = json.loads(args.transcript.read_text(encoding='utf-8'))
     by_key = {(r['scenario'], r['turn']): r for r in tr['results']}
 
-    scenario_results = []
+    scenario_results, not_run = [], []
     for s in ev['scenarios']:
+        if not any((s['id'], i) in by_key for i in range(len(s['turns']))):
+            not_run.append(s['id'])      # the transcript predates this question: excluded from the denominators
+            continue
         turns_out, msgs = [], []
         for i, t in enumerate(s['turns']):
             r = by_key.get((s['id'], i))
@@ -130,7 +135,7 @@ def main():
     n_sp = sum(s['passed'] for s in scenario_results)
     n_t = sum(len(s['turns']) for s in scenario_results)
     n_tp = sum(t['passed'] for s in scenario_results for t in s['turns'])
-    summary = {'scenarios': n_s, 'scenarios_passed': n_sp, 'scenario_accuracy': round(n_sp / n_s, 3),
+    summary = {'scenarios': n_s, 'scenarios_passed': n_sp, 'scenario_accuracy': round(n_sp / n_s, 3), 'not_run': not_run,
                'turns': n_t, 'turns_passed': n_tp, 'turn_accuracy': round(n_tp / n_t, 3),
                'numbers_stated': total_numbers, 'numbers_untraced': untraced_total, 'by_category': dict(cats)}
     out = {'meta': tr.get('meta', {}), 'eval_version': ev.get('version'), 'business_now': ev.get('business_now'), 'summary': summary, 'scenarios': scenario_results}
@@ -140,7 +145,7 @@ def main():
     meta = tr.get('meta', {})
     lines = [f"# ThreadPilot evaluation — first-pass results", '',
              f"- Run: {meta.get('run_at', '?')} against `{meta.get('target', '?')}` · model `{meta.get('model', '?')}` · business date {ev.get('business_now')}",
-             f"- Eval set version {ev.get('version')}: {n_s} questions/scenarios, {n_t} turns. Scored automatically; nothing fixed between run and score.", '',
+             f"- Eval set version {ev.get('version')}: {n_s} questions/scenarios, {n_t} turns scored" + (f" ({len(not_run)} questions added after this run are not counted: {', '.join(not_run)})" if not_run else '') + ". Scored automatically; nothing fixed between run and score.", '',
              f"## Headline", '',
              f"| Metric | Result |", f"|---|---|",
              f"| Scenarios passed (all turns correct) | **{n_sp} / {n_s} ({summary['scenario_accuracy']:.0%})** |",

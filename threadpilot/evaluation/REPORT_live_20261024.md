@@ -1,7 +1,7 @@
 # ThreadPilot evaluation — first-pass results
 
 - Run: 2026-10-24T06:40Z..07:10Z against `https://dss5105-track1-i7gxvcy5k7ef5ac9b-1500904749.ap-singapore.app.tcloudbase.com` · model `gpt-6-luna` · business date 2026-04-01T12:00:00+08:00
-- Eval set version 2026-10-24: 47 questions/scenarios, 66 turns. Scored automatically; nothing fixed between run and score.
+- Eval set version 2026-10-26: 47 questions/scenarios, 66 turns scored (7 questions added after this run are not counted: AR01, AR02, AR03, AR04, AR05, M05, M06). Scored automatically; nothing fixed between run and score.
 
 ## Headline
 

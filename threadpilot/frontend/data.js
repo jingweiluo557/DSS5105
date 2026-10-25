@@ -22,7 +22,7 @@ const frontendAssetQuery = new URL(document.currentScript.src).search;
     if (!riskResponse.ok) throw new Error('Queue risk unavailable. Run database migrations and retry.');
     window.QUEUE_DATA = await riskResponse.json();
     app.style.visibility = 'hidden';
-    for (const file of ['app.js', 'data-views.js', 'ai-api.js', 'ai-stream.js', 'workspace.js', 'dashboard.js', 'predictions.js', 'review-drafts.js', 'scheduling.js', 'email-settings.js', 'email-chase.js']) {
+    for (const file of ['app.js', 'data-views.js', 'ai-api.js', 'ai-stream.js', 'workspace.js', 'dashboard.js', 'predictions.js', 'review-drafts.js', 'scheduling.js', 'email-settings.js', 'email-chase.js', 'feasibility-chart.js']) {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = file + frontendAssetQuery; script.onload = resolve; script.onerror = reject;

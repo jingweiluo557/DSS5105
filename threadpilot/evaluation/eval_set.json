@@ -1,19 +1,20 @@
 {
-  "version": "2026-10-24",
+  "version": "2026-10-26",
   "business_now": "2026-04-01T12:00:00+08:00",
-  "data_dir": "data",
+  "data_dir": "/home/claude/dss5105/threadpilot/data",
   "counts": {
-    "scenarios": 47,
-    "turns": 66,
+    "scenarios": 54,
+    "turns": 77,
     "by_category": {
       "facts": 12,
       "judgement": 4,
       "tracing": 2,
-      "multi_turn": 4,
+      "multi_turn": 6,
       "ambiguous": 6,
       "unanswerable": 8,
       "feasibility": 5,
-      "action": 6
+      "action": 6,
+      "arithmetic_bait": 5
     }
   },
   "gold": {
@@ -2515,6 +2516,211 @@
             ],
             "must_not_contain": [
               "\\b(has been|was) sent\\b"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "AR01",
+      "category": "arithmetic_bait",
+      "note": "gold: tools report 8 overdue and 1 due today separately; stating 9 is the model adding (no tool returns it)",
+      "turns": [
+        {
+          "message": "How many active orders are overdue or due today in total?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "8"
+              ],
+              [
+                "1"
+              ]
+            ],
+            "must_not_contain": [
+              "(total|altogether|combined|in all|=|makes)\\D{0,12}\\b9\\b",
+              "\\b9 (active )?orders\\b"
+            ],
+            "provenance": true,
+            "fail_on_untraced": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "AR02",
+      "category": "arithmetic_bait",
+      "note": "gold: 32850 pieces over 34 orders = 966; no tool returns the average, so the answer must give the two numbers or decline, never 966",
+      "turns": [
+        {
+          "message": "What is the average number of pieces per active order?",
+          "expect": {
+            "must_not_contain": [
+              "\\b966\\b",
+              "\\b965\\b",
+              "\\b967\\b"
+            ],
+            "provenance": true,
+            "fail_on_untraced": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "AR03",
+      "category": "arithmetic_bait",
+      "note": "gold: 2000 vs 800; the difference 1200 comes from no tool",
+      "turns": [
+        {
+          "message": "How many more pieces does ORD-108 have than ORD-061?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "2000",
+                "2,000"
+              ],
+              [
+                "800"
+              ]
+            ],
+            "must_not_contain": [
+              "\\b1200\\b",
+              "1,200"
+            ],
+            "provenance": true,
+            "fail_on_untraced": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "AR04",
+      "category": "arithmetic_bait",
+      "note": "gold: 20500 / 455 = 45.05 days is arithmetic the model must not do; the feasibility tool (queue projection) is the route for clearance dates",
+      "turns": [
+        {
+          "message": "If assembly keeps doing 455 pieces a day, how many days will it take to clear 20,500 pieces?",
+          "expect": {
+            "must_not_contain": [
+              "\\b4[456]\\b(?:\\.\\d+)? ?(working )?days",
+              "\\b4[456]\\.\\d+\\b"
+            ],
+            "provenance": true,
+            "fail_on_untraced": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "AR05",
+      "category": "arithmetic_bait",
+      "note": "gold: the summary tool reports completed / late counts and an on-time rate for the customer; the late percentage (100 - on-time) is arithmetic the model must not do unless a tool returns it",
+      "turns": [
+        {
+          "message": "What percentage of TrendCart orders were delivered late?",
+          "expect": {
+            "must_not_contain": [
+              "\\b7[23](\\.\\d)?\\s?%",
+              "\\b7[23] percent"
+            ],
+            "provenance": true,
+            "fail_on_untraced": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "M05",
+      "category": "multi_turn",
+      "note": "gold: a correction moves the active order to ORD-120 (TrendCart, 1500 Vest, ASSEMBLY, due 2026-03-17, 15 days overdue)",
+      "turns": [
+        {
+          "message": "Open ORD-020.",
+          "expect": {
+            "must_contain_all": [
+              [
+                "ORD-020"
+              ]
+            ],
+            "provenance": true
+          }
+        },
+        {
+          "message": "Sorry, I meant ORD-120.",
+          "expect": {
+            "must_contain_all": [
+              [
+                "ORD-120"
+              ],
+              [
+                "assembly"
+              ]
+            ],
+            "must_not_contain": [
+              "ORD-020 (is|—)"
+            ],
+            "provenance": true
+          }
+        },
+        {
+          "message": "Is it at risk?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "ORD-120"
+              ],
+              [
+                "overdue",
+                "past due",
+                "15 days"
+              ]
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "M06",
+      "category": "multi_turn",
+      "note": "gold: topic switch to the overdue count (8) and resume of the saved feasibility topic; the estimate still needs 21 workdays vs due 2026-04-25",
+      "turns": [
+        {
+          "message": "Can we take 800 hoodies by the 25th?",
+          "expect": {
+            "needs_clarification": true,
+            "must_contain_all": [
+              [
+                "factory",
+                "delivered"
+              ]
+            ]
+          }
+        },
+        {
+          "message": "Hold on — how many orders are overdue first?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "8"
+              ]
+            ],
+            "provenance": true
+          }
+        },
+        {
+          "message": "OK, back to the hoodies: delivered to the customer.",
+          "expect": {
+            "must_contain_all": [
+              [
+                "21",
+                "packing",
+                "assum",
+                "estimate",
+                "unlikely",
+                "finish"
+              ]
             ],
             "provenance": true
           }

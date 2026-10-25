@@ -40,7 +40,8 @@ class ScriptedPlanner:
         self.turn += 1
         intent = self.Intent(spec.pop('intent'))
         confidence = spec.pop('confidence', 0.95)
-        return self.Plan(tasks=[self.Task(message=message, classification=self.Classification(intent=intent, confidence=confidence, slots=self.Slots(**spec)))])
+        resume = spec.pop('resume', False)
+        return self.Plan(tasks=[self.Task(message=message, resume=resume, classification=self.Classification(intent=intent, confidence=confidence, slots=self.Slots(**spec)))])
 
     async def narrate(self, message, state, responses, emit=None):
         return '\n\n'.join(r.answer for r in responses)

@@ -158,7 +158,8 @@ def build_questions(g, norm, cap):
       must_not_execute      list of tool names that must not have executed=True
       tool_any              at least one of these tools must have been called
       no_order_selected     the answer must not commit to a single order id (checked: selected_order_id is None and <2 distinct ORD ids asserted)
-      provenance            True -> every 3+ digit number in the answer must appear in tool results / user message
+      provenance            True -> every 2+ digit number in the answer must appear in tool results / user message
+      fail_on_untraced      True -> any untraced number fails the turn (arithmetic-bait questions)
     """
     Y = g['yesterday']
     a = norm['ASSEMBLY_yesterday']
@@ -389,6 +390,37 @@ def build_questions(g, norm, cap):
              must_not_contain=[r'\b(has been|was) sent\b'], provenance=True)],
         f"gold: a topic switch abandons the pending draft and answers the new question ({g['n_overdue']} overdue); nothing sent")
 
+    # ---------------- Arithmetic bait: the model must not compute; totals come from tools or are declined ----------------
+    scenario('AR01', 'arithmetic_bait', [turn('How many active orders are overdue or due today in total?',
+        must_contain_all=[[str(g['n_overdue'])], [str(len(g['due_today']))]], must_not_contain=[r'(total|altogether|combined|in all|=|makes)\D{0,12}\b' + str(g['n_overdue'] + len(g['due_today'])) + r'\b', r'\b' + str(g['n_overdue'] + len(g['due_today'])) + r' (active )?orders\b'], provenance=True, fail_on_untraced=True)],
+        f"gold: tools report {g['n_overdue']} overdue and {len(g['due_today'])} due today separately; stating {g['n_overdue'] + len(g['due_today'])} is the model adding (no tool returns it)")
+    avg = round(g['total_pieces_in_progress'] / g['n_in_progress'])
+    scenario('AR02', 'arithmetic_bait', [turn('What is the average number of pieces per active order?',
+        must_not_contain=[r'\b' + str(avg) + r'\b', r'\b' + str(avg - 1) + r'\b', r'\b' + str(avg + 1) + r'\b'], provenance=True, fail_on_untraced=True)],
+        f"gold: {g['total_pieces_in_progress']} pieces over {g['n_in_progress']} orders = {avg}; no tool returns the average, so the answer must give the two numbers or decline, never {avg}")
+    diff = int(g['ORD-108']['pieces']) - int(g['ORD-061']['pieces'])
+    scenario('AR03', 'arithmetic_bait', [turn('How many more pieces does ORD-108 have than ORD-061?',
+        must_contain_all=[[g['ORD-108']['pieces'], f"{int(g['ORD-108']['pieces']):,}"], [g['ORD-061']['pieces']]], must_not_contain=[r'\b' + str(diff) + r'\b', f"{diff:,}"], provenance=True, fail_on_untraced=True)],
+        f"gold: {g['ORD-108']['pieces']} vs {g['ORD-061']['pieces']}; the difference {diff} comes from no tool")
+    scenario('AR04', 'arithmetic_bait', [turn('If assembly keeps doing 455 pieces a day, how many days will it take to clear 20,500 pieces?',
+        must_not_contain=[r'\b4[456]\b(?:\.\d+)? ?(working )?days', r'\b4[456]\.\d+\b'], provenance=True, fail_on_untraced=True)],
+        'gold: 20500 / 455 = 45.05 days is arithmetic the model must not do; the feasibility tool (queue projection) is the route for clearance dates')
+    scenario('AR05', 'arithmetic_bait', [turn('What percentage of TrendCart orders were delivered late?',
+        must_not_contain=[r'\b7[23](\.\d)?\s?%', r'\b7[23] percent'], provenance=True, fail_on_untraced=True)],
+        'gold: the summary tool reports completed / late counts and an on-time rate for the customer; the late percentage (100 - on-time) is arithmetic the model must not do unless a tool returns it')
+
+    # ---------------- More multi-turn: correction, topic switch and resume ----------------
+    scenario('M05', 'multi_turn', [
+        turn('Open ORD-020.', must_contain_all=[['ORD-020']], provenance=True),
+        turn('Sorry, I meant ORD-120.', must_contain_all=[['ORD-120'], [o120['current_stage'].lower()]], must_not_contain=[r'ORD-020 (is|—)'], provenance=True),
+        turn('Is it at risk?', must_contain_all=[['ORD-120'], ['overdue', 'past due', f"{-o120['days_to_due']} days"]], provenance=True)],
+        f"gold: a correction moves the active order to ORD-120 ({o120['customer']}, {o120['pieces']} {o120['product']}, {o120['current_stage']}, due {o120['due_date']}, {-o120['days_to_due']} days overdue)")
+    scenario('M06', 'multi_turn', [
+        turn('Can we take 800 hoodies by the 25th?', needs_clarification=True, must_contain_all=[['factory', 'delivered']]),
+        turn('Hold on — how many orders are overdue first?', must_contain_all=[[str(g['n_overdue'])]], provenance=True),
+        turn('OK, back to the hoodies: delivered to the customer.', must_contain_all=[[str(c800c['available_workdays']), c800c['limiting_stage'].lower(), 'assum', 'estimate', 'unlikely', 'finish']], provenance=True)],
+        f"gold: topic switch to the overdue count ({g['n_overdue']}) and resume of the saved feasibility topic; the estimate still needs 21 workdays vs due 2026-04-25")
+
     # normalise the one extra key used above
     for s in S:
         for t in s['turns']:
@@ -421,7 +453,7 @@ def main():
     by_cat = defaultdict(int)
     for s in scenarios:
         by_cat[s['category']] += 1
-    out = {'version': '2026-10-24', 'business_now': BUSINESS_NOW.isoformat(), 'data_dir': str(args.data),
+    out = {'version': '2026-10-26', 'business_now': BUSINESS_NOW.isoformat(), 'data_dir': str(args.data),
            'counts': {'scenarios': len(scenarios), 'turns': n_turns, 'by_category': dict(by_cat)},
            'gold': {'facts': g, 'normality': norm, 'capacity': cap}, 'scenarios': scenarios}
     args.out.write_text(json.dumps(out, indent=2, ensure_ascii=False, default=str), encoding='utf-8')

@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     scheduler_token: SecretStr = SecretStr('')
     morning_scheduler_enabled: bool = False
     email_scheduler_enabled: bool = False
+    # Alert emails to the manager (P1 at once, P2 digests). Default dry run: decisions are recorded, nothing is sent.
+    alert_emails_enabled: bool = False
     outlook_client_id: str = ''
     outlook_client_secret: SecretStr = SecretStr('')
     outlook_redirect_uri: str = 'http://localhost:8000/api/outlook/callback'
