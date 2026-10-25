@@ -3822,7 +3822,8 @@
                 "enum": [
                   "due_date",
                   "last_activity_date",
-                  "idle_days"
+                  "idle_days",
+                  "risk"
                 ]
               },
               {
