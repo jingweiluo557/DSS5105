@@ -6,6 +6,7 @@ const frontendAssetQuery = new URL(document.currentScript.src).search;
   try {
     if(window.THREADPILOT_CONFIG_ERROR)throw new Error(window.THREADPILOT_CONFIG_ERROR);
     const response = await window.threadpilotFetch(window.THREADPILOT_API_BASE + '/api/snapshot', {cache: 'no-store'});
+    if (response.status === 401) throw new Error('Enter the workspace access key to load the current records.');
     if (!response.ok) throw new Error('Database unavailable. Check migrations and connection settings.');
     const data = await response.json();
     if (!data.orders?.length || !data.production_log?.length || !data.workshops?.length)
