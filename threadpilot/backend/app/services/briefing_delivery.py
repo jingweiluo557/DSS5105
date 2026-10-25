@@ -94,6 +94,16 @@ class BriefingDelivery:
             self.put(db, job)
             return True
 
+    def alert_line(self, now):
+        """One line on the alert budget so the manager sees how often the system interrupted them (docs/ALERT_POLICY.md)."""
+        try:
+            from .alert_delivery import AlertLedger
+            k = AlertLedger(self.outlook.settings.workflow_db.with_name('alerts.sqlite3')).kpis(now)
+            useful = f", {k['rated_useful_pct']}% rated useful" if k.get('rated_useful_pct') is not None else ''
+            return f"Alerts\n{k['p1_emails_last_7_days']} immediate email(s) in the last 7 days, {k['digests_last_7_days']} digest(s){useful}. Mute or rate alerts in Settings."
+        except Exception:
+            return 'Alerts\nAlert statistics unavailable.'
+
     async def run(self, app, now=None, generate=None, manual_day=None):
         if manual_day is not None and generate is None:
             raise ValueError('Manual delivery requires an explicitly dated report generator.')
@@ -115,7 +125,7 @@ class BriefingDelivery:
             body = '\n\n'.join([f"Hello {job['manager_name'] or 'Manager'},",
                 f"Morning briefing — {job['day']}\nBusiness date: {report['business_date']}",
                 'Production\n' + report['yesterday'], 'Priorities\n' + report['top_issue'],
-                'Next steps\n' + report['decide'], 'Best regards,\nThreadPilot'])
+                'Next steps\n' + report['decide'], self.alert_line(now), 'Best regards,\nThreadPilot'])
         except Exception:
             await asyncio.to_thread(self.update, job, status='generation_failed',
                 retry_at=now.timestamp() + 300,

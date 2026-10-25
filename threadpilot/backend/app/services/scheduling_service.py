@@ -32,6 +32,24 @@ def current_snapshot(database, today):
         return read_locked(session, today)
 
 
+def dispatch_notice(data, order_id, payload, reviewer, note, today):
+    """Sprint 2: an applied expedite changes the dispatch order inside ThreadPilot; the floor is told only through a
+    reviewed chase-up. This returns the suggested notice (department, text and the chat command that drafts it), never
+    sends anything, and never touches an external factory system."""
+    order = next((o for o in data['orders'] if o['order_id'] == order_id), None)
+    if not order:
+        return None
+    pushed = [a['order_id'] for a in payload.get('affected', []) if a.get('added_lateness', 0) > 0][:6]
+    department = order['current_stage'] if order['current_stage'] in STAGES else 'KNITTING'
+    text = (f"Dispatch change approved on {today} by {reviewer}: {order_id} ({order['customer']}, {order['pieces']} {order['product']}) "
+            f"moves to the front of the {department.lower()} queue. Reason: {note.strip()} "
+            + (f"Orders that move back: {', '.join(pushed)}. " if pushed else '') +
+            "Please re-sequence today's work and confirm the new start.")
+    return {'department': department, 'order_id': order_id, 'text': text,
+            'suggested_chat': f"Draft a chase-up for {order_id} to {department}: {text}",
+            'note': 'A suggestion only. Drafting, previewing and sending happen in the chat with the usual confirmation; nothing has been sent.'}
+
+
 class SchedulingService:
     def __init__(self, database):
         self.database = database
@@ -82,7 +100,8 @@ class SchedulingService:
             status = 'applied' if decision == 'apply' else 'saved' if decision == 'save' else 'rejected'
             session.execute(reviews.update().where(reviews.c.id == rid).values(status=status, decision=decision,
                             reviewed_by=reviewer, note=note, decided_at=BusinessClock().now().isoformat()))
-        return {'review_id': rid, 'status': status, 'decision': decision, 'replayed': False}
+            notice = dispatch_notice(data, row['order_id'], payload, reviewer, note, today) if decision == 'apply' else None
+        return {'review_id': rid, 'status': status, 'decision': decision, 'replayed': False, 'dispatch_notice': notice}
 
     def history(self):
         with self.database.sessions() as session:

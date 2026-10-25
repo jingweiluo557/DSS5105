@@ -31,6 +31,7 @@ class Intent(StrEnum):
     ORDER_FORECAST = 'order.forecast'                # Sprint 2: AFT delay probability + completion range
     WORKSHOPS = 'data.workshops'                     # Sprint 2: outside workshops able to take a batch
     UNANSWERABLE = 'general.unanswerable'            # Sprint 2: explicit refusal with the stated non-goal
+    OPERATIONS_DISCOVERY = 'operations.discovery'    # Sprint 2: ranked anomalies ("did anything go wrong yesterday?")
     EXECUTION_CHASE = 'execution.chase'
     EXECUTION_NOTE = 'execution.note'
     EXECUTION_REMINDER = 'execution.reminder'
@@ -63,7 +64,7 @@ class Slots(StrictModel):
     reason: Literal['money', 'people', 'cause', 'delete', 'cancel', 'external', 'future', 'other'] | None = None
     deadline: str | None = None
     send_at: str | None = None
-    condition: Literal['no_reply', 'no_activity'] | None = None
+    condition: Literal['no_reply', 'no_activity', 'stage_below_range'] | None = None
     action: Literal['read', 'draft', 'revise', 'send', 'save', 'create', 'update', 'explain', 'evidence', 'recommend', 'rank', 'confirm_target', 'adopt'] = 'read'
     reference: Literal['explicit', 'active', 'ambiguous', 'none'] = 'none'
 

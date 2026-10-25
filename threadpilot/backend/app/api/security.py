@@ -14,3 +14,24 @@ def confirm_write(x_confirm_write: str = Header(default=''), admin: None = Depen
     """场景 3.2：身份验证后还需显式确认本次写入。"""
     if x_confirm_write.lower() != 'true':
         raise HTTPException(409, {'code': 'CONFIRMATION_REQUIRED', 'message': 'Review the write, then submit X-Confirm-Write: true.'})
+
+
+def resolve_role(supplied: str, settings) -> str | None:
+    """Sprint 2: two workspace keys. Returns 'manager', 'planner' or None (rejected).
+    With no manager key configured everyone with the workspace key is a manager (previous behaviour)."""
+    token = settings.api_access_token.get_secret_value()
+    manager = getattr(settings, 'manager_access_token', None)
+    manager = manager.get_secret_value() if manager else ''
+    if manager and secrets.compare_digest(supplied.encode(), manager.encode()):
+        return 'manager'
+    if token and secrets.compare_digest(supplied.encode(), token.encode()):
+        return 'manager' if not manager else 'planner'
+    if not token and not manager:
+        return 'manager'
+    return None
+
+
+def require_manager(request: Request) -> None:
+    """A confirmation or a settings change needs the manager key when one is configured."""
+    if getattr(request.state, 'role', 'manager') != 'manager':
+        raise HTTPException(403, {'code': 'MANAGER_REQUIRED', 'message': 'A manager key is required to confirm this. The preview stays open.'})

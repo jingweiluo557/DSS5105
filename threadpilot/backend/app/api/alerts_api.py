@@ -74,6 +74,8 @@ class Shelve(BaseModel):
 
 @router.put('/api/alerts/shelve')
 def shelve(body: Shelve, request: Request, x_confirm_write: str = Header(default='')):
+    from .security import require_manager
+    require_manager(request)
     if x_confirm_write.lower() != 'true':
         raise HTTPException(409, 'Confirm the mute before saving.')
     now = business_now()

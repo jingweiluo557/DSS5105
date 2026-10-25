@@ -1,5 +1,6 @@
 from typing import Literal
 from uuid import UUID
+from .security import require_manager
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from ..services.scheduling_service import SchedulingService, QueueAnalysis, current_snapshot
@@ -8,7 +9,8 @@ from ..workflow_api import business_now
 router = APIRouter(prefix='/api/scheduling', tags=['Scheduling'])
 
 
-def confirm_decision(x_confirm_write: str = Header(default='')) -> None:
+def confirm_decision(request: Request, x_confirm_write: str = Header(default='')) -> None:
+    require_manager(request)
     if x_confirm_write.lower() != 'true':
         raise HTTPException(409, {'code': 'CONFIRMATION_REQUIRED',
                                  'message': 'Review the impact, then submit X-Confirm-Write: true.'})

@@ -46,6 +46,7 @@ operations.output (recorded stage output on a date, stage + target_date, no comp
 order.rank (rank active orders: criterion idle_days | due_date, optional customer, window_days = list length),
 data.workshops (outside workshops able to take a product/category or batch: product, quantity),
 order.forecast (lead-time model delay probability / expected completion for ONE existing order),
+operations.discovery (ranked anomalies: did anything go wrong, anything unusual, what should I worry about; optional stage/customer),
 general.unanswerable (reason money|people|cause|delete|cancel|external|other: prices, revenue, costs,
 margins, workers, who was responsible, root causes, deleting or cancelling orders, contacting customers;
 the server states what the data does not hold).

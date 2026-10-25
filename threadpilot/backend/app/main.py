@@ -90,10 +90,14 @@ def create_app() -> FastAPI:
         token = settings.api_access_token.get_secret_value() if settings else ''
         protected = request.url.path == '/chat' or request.url.path.startswith('/api/')
         exempt = request.url.path in ('/api/v1/health', '/api/internal/reminders/run', '/api/internal/briefings/run', '/api/internal/email/run', '/api/v1/workflow/replies', '/api/outlook/callback')
-        if token and protected and not exempt and request.method != 'OPTIONS':
-            supplied = request.headers.get('X-ThreadPilot-Token', '')
-            if not secrets.compare_digest(supplied.encode(), token.encode()):
+        request.state.role = 'manager'
+        manager_token = settings.manager_access_token.get_secret_value() if settings and hasattr(settings, 'manager_access_token') else ''
+        if (token or manager_token) and protected and not exempt and request.method != 'OPTIONS':
+            from .api.security import resolve_role
+            role = resolve_role(request.headers.get('X-ThreadPilot-Token', ''), settings)
+            if role is None:
                 return JSONResponse(status_code=401, content={'error': {'code': 'UNAUTHORIZED', 'message': 'Application access token required.'}})
+            request.state.role = role
         response = await call_next(request)
         response.headers['X-Request-ID'] = request.state.request_id
         # Revalidate application assets so a normal reload cannot mix old and new UI.
@@ -132,6 +136,11 @@ def create_app() -> FastAPI:
     async def health() -> dict[str, Any]:
         """场景 1.1–3.3：查询客户端配置状态，不调用模型。"""
         return {'status': 'ok', 'configured': app.state.client is not None, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1'), 'streaming': True}
+
+    @app.get('/api/v1/whoami', tags=['Health'])
+    async def whoami(request: Request) -> dict[str, Any]:
+        """Which role the supplied workspace key carries ('manager' unless a separate manager key is configured)."""
+        return {'role': getattr(request.state, 'role', 'manager'), 'manager_key_configured': bool(app.state.settings.manager_access_token.get_secret_value())}
 
     install_workflow_routes(app, DATA)
     from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api, scheduling_api, morning_api, outlook_api, email_api, email_scheduler_api, alerts_api, feasibility_api

@@ -76,6 +76,7 @@ case 'confirm-reset':localStorage.removeItem('threadpilot-track1-v2');state=JSON
 case 'export-order':download(id+'-demo-source.json',find(id));break;
 case 'export-audit':download('threadpilot-local-audit.json',state.audit);break;
 case 'voice':modal('Voice input · demo',`<p>Live speech recognition is not connected. Edit the example transcript below to try the voice-to-question flow.</p><label>Transcript<textarea id="voice-transcript">Which orders are most at risk?</textarea></label>`,'confirm-voice','Use transcript');break;
+case 'dispatch-notice':{const n=window.__dispatchNotice;closeOverlay();if(n&&typeof ask==='function'){go('ai');ask(n.suggested_chat);}break}
 case 'confirm-voice':{const q=$('#voice-transcript').value.trim();if(!q){toast('Enter a transcript.');break}closeOverlay();ask(q);break}
 }});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay();if(e.key==='Tab'&&$('#overlay .overlay')){const list=$$('#overlay button, #overlay a, #overlay input, #overlay select, #overlay textarea').filter(x=>!x.disabled&&x.offsetParent!==null);const first=list[0],last=list.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}});

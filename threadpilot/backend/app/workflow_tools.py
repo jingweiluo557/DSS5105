@@ -277,6 +277,26 @@ class DataTools:
         return {'criterion': criterion, 'rule': rule, 'business_date': now.date().isoformat(), 'count_active': len(items),
                 'orders': items[:limit], 'truncated': len(items) > limit}, rows
 
+    def find_anomalies(self, slots: Slots, now: datetime) -> tuple[dict[str, Any], list[Evidence]]:
+        """Discovery: the ranked list of what is unusual right now, from the same detectors as the alert policy
+        (sustained stage drops, stalled customers, near-due misses, overdue, high risk, single low days, idle orders).
+        The top five make the answer; the rest are counted. No causes: the data holds none."""
+        from .services.alert_policy import detect
+        data, evidence = self.queue_snapshot(now)
+        alerts = detect(data, now)
+        if slots.customer:
+            alerts = [a for a in alerts if slots.customer.casefold() in (a.entity + ' ' + a.title).casefold()]
+        if slots.stage:
+            alerts = [a for a in alerts if a.entity == slots.stage or slots.stage.lower() in a.title.lower()]
+        limit = min(max(slots.window_days or 5, 1), 20)
+        top = [a.as_dict() for a in alerts[:limit]]
+        by_kind: dict[str, int] = {}
+        for a in alerts:
+            by_kind[a.kind] = by_kind.get(a.kind, 0) + 1
+        return {'business_date': now.date().isoformat(), 'findings': top, 'shown': len(top), 'total': len(alerts), 'by_kind': by_kind,
+                'rule': 'Ranked by tier (P1 act now, P2 decide today, P3 watch) then score; the same detectors feed the alert policy and the briefing.',
+                'limits': 'Findings are patterns in recorded output, dates and queue projections; the log holds no downtime, staffing or cause fields.'}, evidence
+
     def new_order_queue(self, slots: Slots, now: datetime, due: date) -> dict[str, Any] | None:
         """Feasibility v2: insert the hypothetical order into the shared queue simulation (same calendar, capacity and
         priorities as assess_order_risk / assess_expedite) and read off when it would finish."""

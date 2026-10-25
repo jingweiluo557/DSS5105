@@ -38,6 +38,9 @@ model's delay probability / expected completion date for one existing order ("ho
 be late", "when will it realistically finish"); general.unanswerable with reason in
 money|people|cause|delete|cancel|external|other for revenue/prices/costs/margins, workers or
 who was responsible, root causes or breakdowns, deleting/cancelling orders, contacting customers.
+operations.discovery = "did anything go wrong yesterday", "anything unusual", "what should I worry about",
+"what's wrong with assembly" (optional stage or customer filter, window_days = how many findings to list);
+it is NOT order.prioritize (that is a due-date list) and NOT operations.briefing (that is the full report).
 Normality: 'is X output normal / within range' is operations.normality with stage and target_date
 (yesterday when the user says yesterday); the server defaults the baseline, do not ask for it.
 Attention/what needs attention without a window: order.prioritize with window_days omitted;

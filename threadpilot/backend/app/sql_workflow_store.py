@@ -160,19 +160,22 @@ class SQLWorkflowStore:
                 deadline = datetime.fromisoformat(row['deadline'])
                 if deadline > now:
                     continue
-                order = tools.refresh_order(row['order_id']).record
                 since = datetime.fromisoformat(row['since'])
-                if row['condition'] == 'no_reply':
+                message = f"{row['condition']} condition unmet at {row['deadline']}; based on recorded data only."
+                if row['condition'] == 'stage_below_range':
+                    from .workflow_store import stage_watch_status
+                    satisfied, message = stage_watch_status(row['order_id'], deadline, now, tools)
+                elif row['condition'] == 'no_reply':
                     times = db.execute(sa.select(replies.c.received_at).where(replies.c.order_id == row['order_id'])).scalars()
                     satisfied = any(since <= datetime.fromisoformat(value) <= deadline for value in times)
                 else:
+                    order = tools.refresh_order(row['order_id']).record
                     activity_date = datetime.fromisoformat(order['last_activity_date']).date()
                     satisfied = since.date() < activity_date <= deadline.date()
                 if not satisfied:
                     self.upsert(db, notifications, dict(id=f"{row['id']}:{row['deadline']}",
                         session_id=row['session_id'], order_id=row['order_id'],
-                        message=f"{row['condition']} condition unmet at {row['deadline']}; based on recorded data only.",
-                        created_at=now.isoformat()))
+                        message=message, created_at=now.isoformat()))
                 db.execute(reminders.update().where(reminders.c.id == row['id']).values(evaluated=1))
 
     def notifications(self, session_id):

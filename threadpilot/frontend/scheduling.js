@@ -62,6 +62,7 @@ async function openExpedite(id,button,draftId=null){
     const result=await scheduleRequest('reviews/'+latest.review_id+'/decision',{method:'POST',headers:{'X-Confirm-Write':'true'},body:JSON.stringify({decision,reviewed_by:form.elements.reviewer.value,note:form.elements.note.value,draft_id:latest.id,draft_version:latest.version})});
     decided=true;editor.finish();status.textContent=`Decision ${result.status}. Saved to shared history.`;
     window.QUEUE_DATA=await scheduleRequest('risk');await loadDashboard();render();
+    if(result.dispatch_notice){const n=result.dispatch_notice;window.__dispatchNotice=n;modal('Tell the floor about this change?',`<p>${esc(n.text)}</p><p class="muted">${esc(n.note)}</p>`,'dispatch-notice',`Draft to ${esc(n.department.toLowerCase())} in chat`);}
    }catch(error){status.textContent=error.message;}
    finally{busy=false;if(!decided)form.querySelectorAll('button').forEach(b=>b.disabled=b.value==='apply'&&!p.can_apply);}
   });

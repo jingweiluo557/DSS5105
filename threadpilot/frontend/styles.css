@@ -30,3 +30,4 @@
 .access-dialog,.record-dialog{border:1px solid var(--line);border-radius:18px;padding:28px;color:var(--ink);max-width:min(580px,calc(100vw - 32px));width:100%;box-sizing:border-box}.access-dialog::backdrop,.record-dialog::backdrop{background:#17232eb3}.access-dialog input{width:100%;box-sizing:border-box}.access-dialog [role=alert]{color:#a33}.record-dialog{max-width:min(960px,calc(100vw - 32px))}.record-dialog pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:65vh;overflow:auto}.record-dialog form{text-align:right}
 
 .capacity-chart{width:100%;height:auto;display:block}.chart-wrap{overflow-x:auto}@media(max-width:700px){.capacity-chart{min-width:640px}}
+.read-aloud{margin:8px 0 4px}[data-action=voice].listening{background:#f3e5e3;border-color:#a15c54;color:#a15c54}

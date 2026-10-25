@@ -4,7 +4,7 @@ import json
 import re
 from contextlib import nullcontext
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from typing import Any, Literal, Protocol
 
 from .schemas import (ChatRequest, ChatResponse, Classification, DialogState, Evidence,
@@ -58,18 +58,27 @@ class WorkflowEngine:
         self.tools, self.store, self.clock, self.sender = tools, store, clock, sender
         self.lock = asyncio.Lock()
 
-    async def chat(self, request: ChatRequest, classifier: Classifier, emit=None) -> ChatResponse:
+    async def chat(self, request: ChatRequest, classifier: Classifier, emit=None, role: str = 'manager') -> ChatResponse:
         """场景 1.1–3.3：原子处理一个本地会话轮次，客户端不能提交状态或工具。"""
         async with self.lock:
             with self.store.turn_lock('chat:' + request.session_id) if request.session_id and hasattr(self.store, 'turn_lock') else nullcontext():
-                return await self._chat(request, classifier, emit)
+                return await self._chat(request, classifier, emit, role)
 
-    async def _chat(self, request: ChatRequest, classifier: Classifier, emit=None) -> ChatResponse:
+    async def _chat(self, request: ChatRequest, classifier: Classifier, emit=None, role: str = 'manager') -> ChatResponse:
         state = self.store.load(request.session_id) if request.session_id else DialogState()
         now = self.clock()
         if request.selected_order_id and not state.active_order and not state.comparison_orders:
             state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
         confirmed = self.confirmation_word(request.message)
+        if confirmed and role != 'manager':
+            # Sprint 2: a planner key can read, draft and preview; only the manager key confirms a write.
+            response = self.response(state, Classification(intent=state.last_intent or Intent.UNKNOWN, confidence=1), now,
+                                     'A manager key is required to confirm this action. The preview stays open for a manager to confirm.', [], [])
+            if emit: await emit(response.answer)
+            state.revision += 1
+            state.history = (state.history + [{'role': 'user', 'content': request.message}, {'role': 'assistant', 'content': response.answer}])[-16:]
+            self.store.save(state)
+            return response.model_copy(update={'state': state.model_copy(deep=True)})
         cancelled = request.message.strip().casefold().rstrip('.!。！') in {
             'cancel', 'cancel, do not send', 'do not send', "don't send", '取消', '不要发送', '取消发送'}
         if cancelled:
@@ -270,7 +279,7 @@ class WorkflowEngine:
                 slots.order_ids = list(candidates)  # restrict the search to the listed candidates
                 state.slots = slots
         entity_free = (Intent.ORDER_COMPARE, Intent.ORDER_COMMITMENT, Intent.ORDER_PRIORITIZE, Intent.OPERATIONS_NORMALITY, Intent.OPERATIONS_DEVIATION,
-                       Intent.OPERATIONS_OUTPUT, Intent.ORDER_RANK, Intent.WORKSHOPS)
+                       Intent.OPERATIONS_OUTPUT, Intent.ORDER_RANK, Intent.WORKSHOPS, Intent.OPERATIONS_DISCOVERY)
         if state.comparison_orders and not explicit_ids and not narrowed and intent not in entity_free:
             return self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, result, now, calls, evidence)
         if result.confidence < 0.65 or intent == Intent.UNKNOWN:
@@ -383,6 +392,18 @@ class WorkflowEngine:
                 answer = f"No production record for {data['date']} ({data['weekday']}). {data['note']}"
             else:
                 answer = f"Recorded output on {data['date']} ({data['weekday']}): " + '; '.join(f"{r['stage'].lower()} {r['pieces_completed']} pieces" for r in data['records']) + '. ' + data['note']
+        elif intent == Intent.OPERATIONS_DISCOVERY:
+            data, rows = self.tools.find_anomalies(slots, now)
+            evidence.extend(rows)
+            calls.append(ToolCall(name='find_anomalies', arguments={'customer': slots.customer, 'stage': slots.stage, 'limit': data['shown']}, result=data))
+            state.last_order_ids = [f['entity'] for f in data['findings'] if f['entity'].startswith('ORD-')][:10]
+            state.active_order = None
+            if not data['findings']:
+                answer = f"Nothing unusual in the recorded data as of {data['business_date']}: no sustained stage drop, no stalled customer, no overdue or near-due miss, no idle order."
+            else:
+                answer = (f"{data['total']} finding{'s' if data['total'] != 1 else ''} as of {data['business_date']} ({', '.join(f'{v} {k.replace(chr(95), ' ')}' for k, v in data['by_kind'].items())}); top {data['shown']} by tier and score:\n" +
+                          '\n'.join(f"{i}. [{f['tier']}] {f['title']}. {f['action']} (rule: {f['rule']})" for i, f in enumerate(data['findings'], 1)) +
+                          '\n' + data['limits'])
         elif intent == Intent.ORDER_RANK:
             data, rows = self.tools.rank_active_orders(slots, now)
             evidence.extend(rows)
@@ -418,6 +439,30 @@ class WorkflowEngine:
                 answer = (self.order_facts(order) + f"\nLead-time model: delay probability {forecast['delay_probability']:.0%} ({forecast['risk_level']}); expected completion {forecast['expected_completion_date']} "
                           f"(80% range {forecast['completion_range_80pct'][0]} to {forecast['completion_range_80pct'][1]}); typical lead time for {forecast['pieces']} pieces {forecast['typical_lead_days_for_this_size']} days. "
                           'A ranking from order size and elapsed time, not a schedule; the queue risk tool gives the dispatch view.')
+        elif intent == Intent.EXECUTION_REMINDER and (slots.condition == 'stage_below_range' or (slots.stage and not slots.order_ids and not state.active_order)):
+            # Sprint 2: a watch on a stage, not an order ("remind me tomorrow if packing is still behind").
+            if not slots.stage:
+                return self.ask('Which stage should I watch: knitting, assembly, washing or packing?', state, result, now, calls, evidence)
+            slots.condition = 'stage_below_range'
+            watch_id = f'STAGE:{slots.stage}'
+            deadline = resolve_datetime(slots.deadline or '', now)
+            if deadline is None and slots.deadline:
+                try:
+                    deadline = datetime.combine(resolve_date(slots.deadline, now), time(7), tzinfo=now.tzinfo)  # a date alone means the 07:00 briefing
+                except ValueError:
+                    deadline = None
+            if deadline is None:
+                return self.ask('When should I check: tomorrow at 07:00, or another date and time?', state, result, now, calls, evidence)
+            if deadline <= now:
+                return self.ask('The check time must be in the future. What date and time?', state, result, now, calls, evidence)
+            slots.deadline = deadline.isoformat()
+            existing = self.store.get_reminder(state.session_id, watch_id, 'stage_below_range')
+            check_day = (deadline.date() - timedelta(days=1)).isoformat()
+            preview = (f"{'Update existing' if existing else 'Create'} watch on {slots.stage.lower()}: at {deadline.isoformat()} compare its output on {check_day} "
+                       f"with the previous eight same weekdays and notify you only if it is still below that range. Please confirm.")
+            self.propose('reminder', watch_id, {'condition': 'stage_below_range', 'stage': slots.stage, 'deadline': deadline.isoformat(),
+                                               'since': existing['since'] if existing else now.isoformat()}, preview, state, now)
+            answer = preview
         else:
             ids = slots.order_ids
             if len(ids) > 1:
@@ -530,8 +575,9 @@ class WorkflowEngine:
     def propose(self, kind: Literal['send', 'note', 'reminder'], order_id: str, payload: dict[str, Any], preview: str,
                 state: DialogState, now: datetime) -> None:
         """场景 3.1–3.3：每次预览生成新确认键，把动作、订单和最终内容绑定。"""
+        snapshot = {} if order_id.startswith('STAGE:') else self.tools.refresh_order(order_id).record
         state.pending_action = PendingAction(kind=kind, order_id=order_id, payload=payload, preview=preview,
-                                             created_at=now, source_snapshot=self.tools.refresh_order(order_id).record)
+                                             created_at=now, source_snapshot=snapshot)
 
     def execution(self, message: str, result: Classification, state: DialogState, now: datetime,
                   calls: list[ToolCall], evidence: list[Evidence], order: Evidence, previous_slots: Slots) -> ChatResponse:
@@ -613,7 +659,7 @@ class WorkflowEngine:
             if self.tools.refresh_order(oid).record != snapshot:
                 state.pending_action = None
                 return self.ask('An order changed. Please review a fresh draft before sending.', state, result, now, calls, evidence)
-        refreshed = self.tools.refresh_order(action.order_id) if action.order_id else None
+        refreshed = self.tools.refresh_order(action.order_id) if action.order_id and not action.order_id.startswith('STAGE:') else None
         if refreshed:
             evidence.append(refreshed)
             calls.append(ToolCall(name='refresh_order', arguments={'order_id': action.order_id}, result=refreshed.record))
@@ -644,6 +690,9 @@ class WorkflowEngine:
                 answer = 'Message sent; recipient, final text, send time and receipt recorded.'
             elif action.kind == 'note':
                 answer = f'Internal note saved to {action.order_id} with timestamp. It was not sent externally.'
+            elif action.payload.get('condition') == 'stage_below_range':
+                answer = (f"Watch {'updated' if 'Update' in action.preview else 'created'} on {action.payload['stage'].lower()}: at {action.payload['deadline']} you will be notified "
+                          f"only if its output is still below the same-weekday range. Nothing is sent outside the system.")
             else:
                 answer = (f"Reminder {'updated' if 'Update' in action.preview else 'created'} for {action.order_id}: at {action.payload['deadline']} you will be notified "
                           f"only if {action.payload['condition'].replace('_', ' ')} is still the case. Nothing is sent outside the system.")

@@ -1,6 +1,7 @@
 """Email settings protected by the application's workspace access middleware."""
 from fastapi import APIRouter, Depends, Request, Response, Header, HTTPException
 from ..services.email_settings import EmailSettings, EmailPreferences
+from .security import require_manager
 from ..services.briefing_delivery import BriefingDelivery
 from ..business_clock import BusinessClock
 from pydantic import BaseModel, AwareDatetime, Field, model_validator
@@ -9,7 +10,8 @@ from typing import Literal
 router = APIRouter(prefix='/api/email', tags=['Email settings'])
 
 
-def confirm_email_write(x_confirm_write: str = Header(default='')):
+def confirm_email_write(request: Request, x_confirm_write: str = Header(default='')):
+    require_manager(request)
     if x_confirm_write.lower() != 'true':
         raise HTTPException(409, 'Confirm the email settings change before saving.')
 
