@@ -24,16 +24,32 @@ PLANNING = SYSTEM_PROMPT + '''
 You plan up to six requests in their original order. Each task.message is the relevant
 user request, not an invented instruction. Use general.answer for general knowledge,
 greetings, explanations unrelated to database facts. Do not force these onto an order.
-Use order.summary for order counts, counts by stage/status, customer total quantities
-and largest customers. stage/customer/product optionally filter that summary.
+Use order.summary for order counts, counts by stage/status, customer total quantities,
+largest customers, how many are overdue / due today / idle, and the completed on-time rate.
+stage/customer/product optionally filter that summary; a question about ALL orders carries NO
+filters even when an order was discussed just before (an abandoned draft is not a filter).
 Global questions clear old order filters. A new explicit order is a topic switch.
+Sprint 2 intents: operations.output = recorded output of a stage on a date ("what was knitting
+output on 28 March", stage + target_date, no judgement); order.rank = rank active orders by one
+criterion (criterion=idle_days for "longest without activity / gone quiet", due_date for
+"due soonest", optional customer, window_days = how many to list); data.workshops = which outside
+workshops can take a product/category or batch (product, quantity); order.forecast = the lead-time
+model's delay probability / expected completion date for one existing order ("how likely is it to
+be late", "when will it realistically finish"); general.unanswerable with reason in
+money|people|cause|delete|cancel|external|other for revenue/prices/costs/margins, workers or
+who was responsible, root causes or breakdowns, deleting/cancelling orders, contacting customers.
+operations.discovery = "did anything go wrong yesterday", "anything unusual", "what should I worry about",
+"what's wrong with assembly" (optional stage or customer filter, window_days = how many findings to list);
+it is NOT order.prioritize (that is a due-date list) and NOT operations.briefing (that is the full report).
+Normality: 'is X output normal / within range' is operations.normality with stage and target_date
+(yesterday when the user says yesterday); the server defaults the baseline, do not ask for it.
+Attention/what needs attention without a window: order.prioritize with window_days omitted;
+the server asks "today only or the next seven days?" as the dialogue design requires.
 Use resume=true ONLY when returning to a saved topic or answering its clarification;
 otherwise false. Saved topics contain slots, active order and clarification context.
 Keep all NEW order product/quantity/date slots even when delivery_point is missing.
 Preserve 'in 10 working days' as due_date; the server resolves working days.
 For likely delayed orders use order.risk_overview (shared queue risk results).
-For attention without a window, use TWO order.prioritize tasks, window_days=0 and
-window_days=7. Do not ask the user to choose a window.
 Include every distinct request. Never invent permission to send/save/create/adopt.
 For 'tell me each order's stage' create one order.refresh task per order, with
 only its ID in that task.message and slots.order_ids; this is not an ambiguous comparison.
@@ -149,7 +165,7 @@ class ConversationAgent(IntentClassifier):
             fallback = unavailable + fallback
         # Exact drafts, confirmations and clarification wording remain server-owned.
         if self.client is None or getattr(self, 'degraded', False) or any(r.needs_clarification or r.confirmation_required or r.intent in (
-                Intent.ORDER_PRIORITIZE,
+                Intent.ORDER_PRIORITIZE, Intent.UNANSWERABLE,
                 Intent.REVIEW_REASON, Intent.EXECUTION_CHASE, Intent.EXECUTION_NOTE,
                 Intent.EXECUTION_REMINDER, Intent.MORNING_BRIEFING) for r in responses):
             if emit:
@@ -229,14 +245,33 @@ def summary_response(engine, classification, state, now):
     for row in rows:
         customers[row.record['customer']] += int(row.record['pieces'])
         customer_counts[row.record['customer']] += 1
+    # Sprint 2 (cause C): the aggregates a manager actually asks for, so the narrator never has to improvise them.
+    from datetime import date as _date
+    today = now.date()
+    active = [r.record for r in rows if r.record['status'] == 'IN_PROGRESS']
+    complete = [r.record for r in rows if r.record['status'] == 'COMPLETE']
+    overdue = sorted([r for r in active if r['due_date'] < today.isoformat()], key=lambda r: r['due_date'])
+    idle = sorted([(r['order_id'], (today - _date.fromisoformat(r['last_activity_date'])).days) for r in active], key=lambda p: (-p[1], p[0]))
+    late_complete = [r for r in complete if r['days_late'] not in ('', None) and int(r['days_late']) > 0]
     result = {'total_orders':len(rows), 'by_stage':dict(Counter(r.record['current_stage'] for r in rows)),
               'by_status':dict(Counter(r.record['status'] for r in rows)),
               'customer_quantities':dict(sorted(customers.items(), key=lambda p:(-p[1],p[0]))),
               'customer_order_counts':dict(sorted(customer_counts.items(), key=lambda p:(-p[1],p[0]))),
+              'active_pieces': sum(int(r['pieces']) for r in active),
+              'overdue_active': {'count': len(overdue), 'order_ids': [r['order_id'] for r in overdue],
+                                 'rule': f'IN_PROGRESS and due_date before the business date {today.isoformat()}'},
+              'due_today_active': [r['order_id'] for r in active if r['due_date'] == today.isoformat()],
+              'idle_days_active': {'rule': 'calendar days since last_activity_date; a gap is not proof of a stoppage',
+                                   'top': [{'order_id': o, 'idle_days': d} for o, d in idle[:5]],
+                                   'idle_5_days_or_more': [o for o, d in idle if d >= 5]},
+              'completed_delivery': {'completed': len(complete), 'late': len(late_complete), 'on_time': len(complete) - len(late_complete),
+                                     'on_time_rate_pct': round(100 * (len(complete) - len(late_complete)) / len(complete), 1) if complete else None,
+                                     'rule': 'late = recorded days_late > 0 on COMPLETE orders', 'late_order_ids': [r['order_id'] for r in late_complete]},
+              'business_date': today.isoformat(),
               'scope':'All recorded orders including completed orders unless stage-filtered',
               'filters':slots.model_dump(exclude_defaults=True)}
     if classification.intent == Intent.RISK_OVERVIEW and hasattr(engine.tools, 'queue_snapshot'):
-        from .services.scheduling_service import QueueAnalysis
+        from .services.queue_engine import QueueAnalysis
         data, queue_evidence = engine.tools.queue_snapshot(now)
         analysis = QueueAnalysis(data)
         risks = [{'order_id':o['order_id'],'due_date':o['due_date'],'risk':analysis.risk(o)} for o in analysis.active]
@@ -248,6 +283,12 @@ def summary_response(engine, classification, state, now):
             'next_seven_calendar_days':[r for r in risks if now.date().isoformat() < r['due_date'] <= (now.date()+timedelta(days=7)).isoformat()],
             'all_current_orders':risks, 'assumptions':analysis.context()}
         rows = list({(e.source,e.row):e for e in rows+queue_evidence}.values())
-    response = engine.response(state, classification, now, json.dumps(result, ensure_ascii=False),
+    answer = json.dumps(result, ensure_ascii=False)
+    if not rows and (slots.customer or slots.product):
+        known = sorted({r.record['customer'] for r in engine.tools.rows('orders.csv')}) if slots.customer else sorted({r.record['product'] for r in engine.tools.rows('orders.csv')})
+        result['note'] = (f"No orders recorded for {'customer' if slots.customer else 'product'} '{slots.customer or slots.product}'. "
+                          f"{'Customers' if slots.customer else 'Products'} on file: {', '.join(known)}.")
+        answer = result['note'] + '\n' + answer
+    response = engine.response(state, classification, now, answer,
         [ToolCall(name='summarize_orders', arguments=result['filters'], result=result)], rows)
     return response.model_copy(update={'order_ids':[], 'selected_order_id':None,'slots':slots})

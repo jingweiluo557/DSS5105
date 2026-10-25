@@ -36,6 +36,30 @@
         }
       }
     },
+    "/api/v1/whoami": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Whoami",
+        "description": "Which role the supplied workspace key carries ('manager' unless a separate manager key is configured).",
+        "operationId": "whoami_api_v1_whoami_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Whoami Api V1 Whoami Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workflow/chat": {
       "post": {
         "tags": [
@@ -2188,6 +2212,211 @@
           }
         }
       }
+    },
+    "/api/alerts/preview": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Preview",
+        "operationId": "preview_api_alerts_preview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/policy": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Policy",
+        "operationId": "policy_api_alerts_policy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/kpis": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Kpis",
+        "operationId": "kpis_api_alerts_kpis_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/shelve": {
+      "put": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Shelve",
+        "operationId": "shelve_api_alerts_shelve_put",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Shelve"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/feedback": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Feedback",
+        "operationId": "feedback_api_alerts_feedback_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Feedback"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/alerts/run": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Run",
+        "operationId": "run_api_internal_alerts_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feasibility/estimate": {
+      "post": {
+        "tags": [
+          "Feasibility"
+        ],
+        "summary": "Estimate",
+        "operationId": "estimate_api_feasibility_estimate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstimateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2880,6 +3109,71 @@
         ],
         "title": "EmailUpdate"
       },
+      "EstimateRequest": {
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Quantity"
+          },
+          "product": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Product"
+          },
+          "due_date": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 3,
+            "title": "Due Date",
+            "description": "ISO date, \"the 25th\", \"this Saturday\", \"in 10 working days\""
+          },
+          "delivery_point": {
+            "type": "string",
+            "enum": [
+              "factory",
+              "customer"
+            ],
+            "title": "Delivery Point",
+            "default": "factory"
+          },
+          "packing_loss_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 60.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Packing Loss Days"
+          },
+          "delivery_buffer_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 60.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Buffer Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quantity",
+          "product",
+          "due_date"
+        ],
+        "title": "EstimateRequest"
+      },
       "Evidence": {
         "properties": {
           "source": {
@@ -2956,6 +3250,32 @@
         ],
         "title": "Evidence"
       },
+      "Feedback": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Key"
+          },
+          "useful": {
+            "type": "boolean",
+            "title": "Useful"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "useful"
+        ],
+        "title": "Feedback"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -2986,6 +3306,12 @@
           "operations.briefing",
           "operations.normality",
           "operations.deviation",
+          "operations.output",
+          "order.rank",
+          "order.forecast",
+          "data.workshops",
+          "general.unanswerable",
+          "operations.discovery",
           "execution.chase",
           "execution.note",
           "execution.reminder",
@@ -3317,6 +3643,35 @@
         ],
         "title": "SendEmail"
       },
+      "Shelve": {
+        "properties": {
+          "target": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Target",
+            "description": "an alert key (kind:entity) or a kind"
+          },
+          "days": {
+            "type": "integer",
+            "maximum": 90.0,
+            "minimum": 1.0,
+            "title": "Days"
+          },
+          "set_by": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Set By",
+            "default": "manager"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target",
+          "days"
+        ],
+        "title": "Shelve"
+      },
       "Slots": {
         "properties": {
           "order_ids": {
@@ -3431,7 +3786,10 @@
                 "due_date",
                 "last_activity_date",
                 "current_stage",
-                "status"
+                "status",
+                "pieces",
+                "product",
+                "customer"
               ]
             },
             "type": "array",
@@ -3443,7 +3801,8 @@
                 "type": "string",
                 "enum": [
                   "due_date",
-                  "last_activity_date"
+                  "last_activity_date",
+                  "idle_days"
                 ]
               },
               {
@@ -3600,6 +3959,27 @@
             ],
             "title": "Text"
           },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "money",
+                  "people",
+                  "cause",
+                  "delete",
+                  "cancel",
+                  "external",
+                  "future",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
           "deadline": {
             "anyOf": [
               {
@@ -3628,7 +4008,8 @@
                 "type": "string",
                 "enum": [
                   "no_reply",
-                  "no_activity"
+                  "no_activity",
+                  "stage_below_range"
                 ]
               },
               {

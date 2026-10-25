@@ -7,6 +7,10 @@ when `WORKFLOW_STORAGE=database`; Activity Log displays submission results.
 
 A factory management workspace for order lookup, shared queue-risk analysis, expedite impact reviews, AI conversations, and grounded morning briefings. The application reads the current database snapshot; historical CSV files are seed inputs, not a live production feed.
 
+## Evaluation (Sprint 2)
+
+`evaluation/` holds the Track 1 deliverable: 47 questions with answers computed from the CSVs by code, an automatic scorer with an invented-number check, the 24 Oct 2026 live first pass (29/47, 0 untraced numbers) and the failure analysis that drove the Sprint 2 fixes. `python evaluation/run_annotated_eval.py` replays all 47 questions through the server offline in seconds. See [evaluation/README.md](evaluation/README.md), the one-table [docs/TOOL_SPECIFICATION.md](docs/TOOL_SPECIFICATION.md), [docs/PREDICTION_MODEL.md](docs/PREDICTION_MODEL.md), [docs/ALERT_POLICY.md](docs/ALERT_POLICY.md), [docs/VAGUE_QUESTIONS_AND_DIALOGUES.md](docs/VAGUE_QUESTIONS_AND_DIALOGUES.md) [docs/NO_ARITHMETIC_PROOF.md](docs/NO_ARITHMETIC_PROOF.md), [docs/BUSINESS_CASE.md](docs/BUSINESS_CASE.md) and [docs/SPRINT1_EVIDENCE.md](docs/SPRINT1_EVIDENCE.md). CI runs the test suite and the offline evaluation on every push.
+
 ## Current capabilities
 
 - English AI answers, bounded multi-request planning, topic switching and resumption, and live text streaming.

@@ -35,6 +35,22 @@ class WebhookSender:
             return str(result['receipt'])
 
 
+def stage_watch_status(watch_id: str, deadline: datetime, now: datetime, tools: DataTools) -> tuple[bool, str]:
+    """Stage watch ("remind me if packing is still behind"): compare the stage's output on the day before the deadline
+    with its previous eight same weekdays. Satisfied (no notification) only when the record exists and is not below."""
+    from datetime import timedelta
+    from .schemas import Slots
+    stage = watch_id.split(':', 1)[1]
+    day = (deadline.date() - timedelta(days=1)).isoformat()
+    data, _ = tools.normality(Slots(stage=stage, target_date=day), now)
+    if data.get('status') == 'below':
+        return False, (f"{stage} output on {day} was {data['output']}, still below its same-weekday range {data['minimum']}-{data['maximum']} "
+                       f"(mean {data['mean']}); one low day is not proof of a sustained problem.")
+    if data.get('status') in ('within', 'above'):
+        return True, ''
+    return False, f"No production record for {stage} on {day} yet; the watch could not be evaluated."
+
+
 class WorkflowStore:
     def __init__(self, path: Path) -> None:
         """场景 1.2/3.1–3.3：保存状态和审计到非静态目录。"""
@@ -147,19 +163,21 @@ class WorkflowStore:
                 deadline = datetime.fromisoformat(row['deadline'])
                 if deadline > now:
                     continue
-                order = tools.refresh_order(row['order_id']).record
                 since = datetime.fromisoformat(row['since'])
-                if row['condition'] == 'no_reply':
+                message = f"{row['condition']} condition unmet at {row['deadline']}; based on recorded data only."
+                if row['condition'] == 'stage_below_range':
+                    satisfied, message = stage_watch_status(row['order_id'], deadline, now, tools)
+                elif row['condition'] == 'no_reply':
                     replies = db.execute('SELECT received_at FROM replies WHERE order_id=?', (row['order_id'],)).fetchall()
                     satisfied = any(since <= datetime.fromisoformat(r['received_at']) <= deadline for r in replies)
                 else:
+                    order = tools.refresh_order(row['order_id']).record
                     activity_date = datetime.fromisoformat(order['last_activity_date']).date()
                     satisfied = since.date() < activity_date <= deadline.date()
                 if not satisfied:
                     notification_id = f"{row['id']}:{row['deadline']}"
                     db.execute('INSERT OR IGNORE INTO notifications VALUES (?,?,?,?,?)',
-                               (notification_id, row['session_id'], row['order_id'],
-                                f"{row['condition']} condition unmet at {row['deadline']}; based on recorded data only.", now.isoformat()))
+                               (notification_id, row['session_id'], row['order_id'], message, now.isoformat()))
                 db.execute('UPDATE reminders SET evaluated=1 WHERE id=?', (row['id'],))
 
     def notifications(self, session_id: str) -> list[dict[str, Any]]:

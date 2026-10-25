@@ -4,7 +4,7 @@ import json
 import re
 from contextlib import nullcontext
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from typing import Any, Literal, Protocol
 
 from .schemas import (ChatRequest, ChatResponse, Classification, DialogState, Evidence,
@@ -19,24 +19,66 @@ class Classifier(Protocol):
         ...
 
 
+# Sprint 2: explicit refusals. The brief scores "this system holds no price data" above a non-answer, so an
+# unknown or low-confidence request is matched against the dataset's stated non-goals before we ask a question.
+NON_GOALS: dict[str, tuple[tuple[str, ...], str]] = {
+    'money': (('revenue', 'price', 'pricing', 'cost', 'margin', 'profit', 'invoice', 'penalty', 'sales value', 'turnover', 'budget', '收入', '价格', '成本', '利润'),
+              'This system holds no prices, costs, revenue or margins: orders.csv records who ordered what, how many pieces and when. '
+              'I can report counts, pieces, due dates, stages and delays for any customer or order instead.'),
+    'people': (('worker', 'operator', 'employee', 'staff member', 'who was responsible', 'who is responsible', 'whose fault', 'shift leader', 'technician', '工人', '员工', '谁负责'),
+               'The data has no worker, operator or shift records: production_log.csv holds factory-wide pieces per stage per day only. '
+               'I can show the stage output and compare it with the same weekday, but not who was on the line.'),
+    'cause': (('root cause', 'why did the machine', 'machine break', 'breakdown', 'downtime', 'what caused'),
+              'The production log records output, not downtime, blockers or causes. I can show how far a day fell outside its same-weekday range '
+              'and which records co-occurred, but any cause has to come from the floor.'),
+    'delete': (('delete', 'remove the order', 'erase', 'drop the order', 'wipe', '删除'),
+               'I cannot delete or modify orders: the chat reads the order records and can only draft a chase-up, save an internal note or set a reminder, '
+               'each after your confirmation. Nothing was changed.'),
+    'cancel': (('cancel the order', 'cancel order', 'cancel ord', 'void the order', 'terminate the order', '取消订单'),
+               'I cannot cancel orders or contact customers: order changes are made in the factory system, and the chat only drafts internal '
+               'chase-ups, notes and reminders after confirmation. Nothing was changed or sent.'),
+    'external': (('email the customer', 'call the customer', 'tell the customer', 'notify the customer', 'message the customer', 'whatsapp'),
+                 'Customer-facing messages are outside this co-pilot: it drafts internal chase-ups to the planner or a department, and sends only after you confirm. '
+                 'I can draft the internal message or the facts you would tell the customer.'),
+}
+
+
+def refusal(message: str) -> tuple[str, str] | None:
+    """Return (reason, answer) when the request asks for something the dataset or the tool set deliberately does not hold."""
+    lowered = message.casefold()
+    for reason, (keywords, answer) in NON_GOALS.items():
+        if any(k in lowered for k in keywords):
+            return reason, answer
+    return None
+
+
 class WorkflowEngine:
     def __init__(self, tools: DataTools, store: WorkflowStore, clock: Callable[[], datetime], sender: Sender | None = None) -> None:
         """场景 1.1–3.3：共享工具、持久化和显式业务时钟；串行保护本地状态。"""
         self.tools, self.store, self.clock, self.sender = tools, store, clock, sender
         self.lock = asyncio.Lock()
 
-    async def chat(self, request: ChatRequest, classifier: Classifier, emit=None) -> ChatResponse:
+    async def chat(self, request: ChatRequest, classifier: Classifier, emit=None, role: str = 'manager') -> ChatResponse:
         """场景 1.1–3.3：原子处理一个本地会话轮次，客户端不能提交状态或工具。"""
         async with self.lock:
             with self.store.turn_lock('chat:' + request.session_id) if request.session_id and hasattr(self.store, 'turn_lock') else nullcontext():
-                return await self._chat(request, classifier, emit)
+                return await self._chat(request, classifier, emit, role)
 
-    async def _chat(self, request: ChatRequest, classifier: Classifier, emit=None) -> ChatResponse:
+    async def _chat(self, request: ChatRequest, classifier: Classifier, emit=None, role: str = 'manager') -> ChatResponse:
         state = self.store.load(request.session_id) if request.session_id else DialogState()
         now = self.clock()
         if request.selected_order_id and not state.active_order and not state.comparison_orders:
             state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
         confirmed = self.confirmation_word(request.message)
+        if confirmed and role != 'manager':
+            # Sprint 2: a planner key can read, draft and preview; only the manager key confirms a write.
+            response = self.response(state, Classification(intent=state.last_intent or Intent.UNKNOWN, confidence=1), now,
+                                     'A manager key is required to confirm this action. The preview stays open for a manager to confirm.', [], [])
+            if emit: await emit(response.answer)
+            state.revision += 1
+            state.history = (state.history + [{'role': 'user', 'content': request.message}, {'role': 'assistant', 'content': response.answer}])[-16:]
+            self.store.save(state)
+            return response.model_copy(update={'state': state.model_copy(deep=True)})
         cancelled = request.message.strip().casefold().rstrip('.!。！') in {
             'cancel', 'cancel, do not send', 'do not send', "don't send", '取消', '不要发送', '取消发送'}
         if cancelled:
@@ -72,7 +114,7 @@ class WorkflowEngine:
     async def converse(self, request, agent, state, now, emit):
         from .conversation import summary_response
         plan = await agent.plan(request.message, state, now)
-        single_order_intents = {Intent.ORDER_LOOKUP, Intent.ORDER_REFRESH, Intent.ORDER_RISK, Intent.ORDER_EXPEDITE}
+        single_order_intents = {Intent.ORDER_LOOKUP, Intent.ORDER_REFRESH, Intent.ORDER_RISK, Intent.ORDER_EXPEDITE, Intent.ORDER_FORECAST}
         expanded = []
         human_ids = set(re.findall(r'\bORD-\d{3}\b', request.message.upper()))
         for task in plan.tasks:
@@ -183,6 +225,7 @@ class WorkflowEngine:
         """场景 1.1–3.3：合并同意图槽位，再执行服务器约束。"""
         intent = result.intent
         previous_slots = state.slots
+        previous_clarification = state.pending_clarification
         base = state.slots.model_dump() if state.last_intent == intent else Slots().model_dump()
         fresh = result.slots.model_dump(exclude_defaults=True)
         explicit_ids = list(dict.fromkeys(re.findall(r'\bORD-\d{3}\b', message.upper())))
@@ -209,7 +252,35 @@ class WorkflowEngine:
         state.pending_clarification = None
         calls: list[ToolCall] = []
         evidence: list[Evidence] = []
-        if state.comparison_orders and not explicit_ids and intent not in (Intent.ORDER_COMPARE, Intent.ORDER_COMMITMENT, Intent.ORDER_PRIORITIZE, Intent.OPERATIONS_NORMALITY, Intent.OPERATIONS_DEVIATION):
+        # Sprint 2: refusals come before clarifications. A request for money, people, causes, deletions, cancellations or
+        # customer contact gets the stated non-goal, never "which order?".
+        declined = refusal(message) if intent in (Intent.UNKNOWN, Intent.UNANSWERABLE, Intent.GENERAL) or result.confidence < 0.65 else None
+        if intent == Intent.UNANSWERABLE and not declined:
+            declined = (slots.reason or 'other', 'That is not something this system can answer from its data: it holds orders, daily stage output and workshop profiles only. '
+                        'Ask about an order, a customer, a stage or a new-order estimate.')
+        if declined:
+            reason, answer = declined
+            state.pending_clarification = None
+            result = result.model_copy(update={'intent': Intent.UNANSWERABLE})
+            state.last_intent = Intent.UNANSWERABLE
+            calls.append(ToolCall(name='explain_no_data', arguments={'reason': reason}, result={'declined': True, 'reason': reason, 'answer': answer}, executed=False))
+            return self.response(state, result, now, answer, calls, evidence)
+        # Sprint 2 (cause B): after a candidate list, narrow deterministically on the words the manager used
+        # ("the scarf order", "the 500-piece one", "due 20 April") instead of depending on the planner's slots.
+        candidates = previous_clarification.candidates if previous_clarification and previous_clarification.intent == Intent.ORDER_LOOKUP else []
+        narrowed = False
+        if intent == Intent.ORDER_LOOKUP and candidates and not explicit_ids:
+            inferred = self.infer_lookup_slots(message, candidates, now)
+            for key, value in inferred.items():
+                if getattr(slots, key) in (None, [], ''):
+                    setattr(slots, key, value)
+            if inferred:
+                narrowed = True
+                slots.order_ids = list(candidates)  # restrict the search to the listed candidates
+                state.slots = slots
+        entity_free = (Intent.ORDER_COMPARE, Intent.ORDER_COMMITMENT, Intent.ORDER_PRIORITIZE, Intent.OPERATIONS_NORMALITY, Intent.OPERATIONS_DEVIATION,
+                       Intent.OPERATIONS_OUTPUT, Intent.ORDER_RANK, Intent.WORKSHOPS, Intent.OPERATIONS_DISCOVERY)
+        if state.comparison_orders and not explicit_ids and not narrowed and intent not in entity_free:
             return self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, result, now, calls, evidence)
         if result.confidence < 0.65 or intent == Intent.UNKNOWN:
             return self.ask(result.clarification_question or 'Which order or operation would you like to check?', state, result, now, calls, evidence)
@@ -243,7 +314,7 @@ class WorkflowEngine:
             state.active_order = None
             state.last_order_ids = ids
             if not slots.comparison_fields:
-                return self.ask('Which aspect matters: due date, stage, latest activity or status?', state, result, now, calls, evidence)
+                return self.ask('Which aspect matters: due date, stage, latest activity, status or pieces?', state, result, now, calls, evidence)
             rows = [self.tools.refresh_order(i) for i in ids]
             evidence.extend(rows)
             calls.append(ToolCall(name='compare_orders', arguments={'order_ids': ids, 'fields': slots.comparison_fields}, result={'records': [e.record for e in rows]}))
@@ -287,17 +358,111 @@ class WorkflowEngine:
             calls.append(ToolCall(name='estimate_capacity', arguments=slots.model_dump(), result=data))
             answer = 'Conditional forecast, not a promise:\n' + json.dumps(data, ensure_ascii=False, indent=2)
         elif intent in (Intent.OPERATIONS_NORMALITY, Intent.OPERATIONS_DEVIATION):
-            if not slots.stage or not slots.target_date or (intent == Intent.OPERATIONS_NORMALITY and not slots.baseline):
-                return self.ask('Which stage and date? Do you mean today, compared with the same weekday in recent working weeks?', state, result, now, calls, evidence)
+            # Sprint 2 (cause A): ask only for what is missing; the baseline is a stated default, not a question.
+            if not slots.stage:
+                return self.ask('Which stage: knitting, assembly, washing or packing? (and which date, if not yesterday)', state, result, now, calls, evidence)
+            if not slots.target_date:
+                if slots.observed_output is not None:
+                    return self.ask(f'Which date is the {slots.observed_output}-piece {slots.stage.lower()} figure for: today, yesterday or a specific date? I will compare it with the same weekday in recent working weeks.', state, result, now, calls, evidence)
+                slots.target_date = 'yesterday'
             try:
                 slots.target_date = resolve_date(slots.target_date, now).isoformat()
             except ValueError:
                 return self.ask('What is the explicit observation date?', state, result, now, calls, evidence)
+            baseline_defaulted = intent == Intent.OPERATIONS_NORMALITY and not slots.baseline
+            slots.baseline = 'same_weekday'
             function = self.tools.normality if intent == Intent.OPERATIONS_NORMALITY else self.tools.deviation
             data, rows = function(slots, now)
+            if baseline_defaulted:
+                data['baseline_note'] = 'Compared with the previous eight same weekdays by default (Sundays closed); say "compare with last week" for another baseline.'
             evidence.extend(rows)
             calls.append(ToolCall(name='check_normality' if intent == Intent.OPERATIONS_NORMALITY else 'explain_deviation', arguments=slots.model_dump(), result=data))
             answer = 'Recorded facts and labelled interpretation:\n' + json.dumps(data, ensure_ascii=False, indent=2)
+        elif intent == Intent.OPERATIONS_OUTPUT:
+            if not slots.target_date:
+                return self.ask('Which date: yesterday, today or a specific date?', state, result, now, calls, evidence)
+            try:
+                slots.target_date = resolve_date(slots.target_date, now).isoformat()
+            except ValueError:
+                return self.ask('What is the explicit date (YYYY-MM-DD)?', state, result, now, calls, evidence)
+            data, rows = self.tools.production_output(slots, now)
+            evidence.extend(rows)
+            calls.append(ToolCall(name='get_production_output', arguments={'stage': slots.stage, 'date': slots.target_date}, result=data))
+            if data['status'] != 'ok':
+                answer = f"No production record for {data['date']} ({data['weekday']}). {data['note']}"
+            else:
+                answer = f"Recorded output on {data['date']} ({data['weekday']}): " + '; '.join(f"{r['stage'].lower()} {r['pieces_completed']} pieces" for r in data['records']) + '. ' + data['note']
+        elif intent == Intent.OPERATIONS_DISCOVERY:
+            data, rows = self.tools.find_anomalies(slots, now)
+            evidence.extend(rows)
+            calls.append(ToolCall(name='find_anomalies', arguments={'customer': slots.customer, 'stage': slots.stage, 'limit': data['shown']}, result=data))
+            state.last_order_ids = [f['entity'] for f in data['findings'] if f['entity'].startswith('ORD-')][:10]
+            state.active_order = None
+            if not data['findings']:
+                answer = f"Nothing unusual in the recorded data as of {data['business_date']}: no sustained stage drop, no stalled customer, no overdue or near-due miss, no idle order."
+            else:
+                answer = (f"{data['total']} finding{'s' if data['total'] != 1 else ''} as of {data['business_date']} ({', '.join(f'{v} {k.replace(chr(95), ' ')}' for k, v in data['by_kind'].items())}); top {data['shown']} by tier and score:\n" +
+                          '\n'.join(f"{i}. [{f['tier']}] {f['title']}. {f['action']} (rule: {f['rule']})" for i, f in enumerate(data['findings'], 1)) +
+                          '\n' + data['limits'])
+        elif intent == Intent.ORDER_RANK:
+            data, rows = self.tools.rank_active_orders(slots, now)
+            evidence.extend(rows)
+            calls.append(ToolCall(name='rank_active_orders', arguments={'criterion': data['criterion'], 'customer': slots.customer, 'limit': len(data['orders'])}, result=data))
+            state.last_order_ids = [o['order_id'] for o in data['orders']]
+            state.active_order = None
+            answer = (f"Active orders ranked by {data['criterion'].replace('_', ' ')} (business date {data['business_date']}). {data['rule']}\n" +
+                      '\n'.join(f"{i}. {o['order_id']} ({o['customer']}, {o['pieces']} {o['product']}): last activity {o['last_activity_date']} ({o['idle_days']} days ago), due {o['due_date']}, stage {o['current_stage']}." for i, o in enumerate(data['orders'], 1)))
+        elif intent == Intent.WORKSHOPS:
+            data, rows = self.tools.list_workshops(slots)
+            evidence.extend(rows)
+            calls.append(ToolCall(name='list_workshops', arguments={'category': data['category'], 'quantity': slots.quantity}, result=data))
+            answer = ('Eligible outside workshops' + (f" for {data['category'].lower()}" if data['category'] else '') + (f", {slots.quantity}-piece batch" if slots.quantity else '') + ': ' +
+                      ('; '.join(f"{w['workshop_id']} {w['name']} ({w['capacity_pieces_per_day']}/day, queue {w['current_queue_days']} d, pickup {w['pickup_lead_days']} d, defect batch risk {w['defect_batch_probability']:.0%}" + (f", about {w['estimated_batch_days']} days" if 'estimated_batch_days' in w else '') + ')' for w in data['eligible']) or 'none') +
+                      '. Excluded: ' + ('; '.join(f"{w['workshop_id']} {w['name']} ({', '.join(w['excluded_because'])})" for w in data['excluded']) or 'none') + '. ' + data['limits'])
+        elif intent == Intent.ORDER_FORECAST:
+            ids = slots.order_ids
+            if len(ids) > 1:
+                return self.ask('Which order should I forecast: ' + ', '.join(ids) + '?', state, result, now, calls, evidence, ids)
+            order_id = ids[0] if ids else state.active_order
+            if not order_id:
+                return self.ask('Which order should I forecast? Please give its ID.', state, result, now, calls, evidence)
+            try:
+                order = self.select(order_id, state, calls, evidence)
+            except ValueError:
+                return self.not_found(order_id, state, result, now, calls, evidence)
+            if order.record['status'] != 'IN_PROGRESS':
+                answer = self.order_facts(order) + '\nThe lead-time forecast applies to orders still in progress; this one is complete.'
+            else:
+                from .prediction.aft import LeadTimeModel
+                forecast = LeadTimeModel().forecast_order(order.record, now.date())
+                calls.append(ToolCall(name='predict_order_delay', arguments={'order_id': order_id}, result=forecast))
+                answer = (self.order_facts(order) + f"\nLead-time model: delay probability {forecast['delay_probability']:.0%} ({forecast['risk_level']}); expected completion {forecast['expected_completion_date']} "
+                          f"(80% range {forecast['completion_range_80pct'][0]} to {forecast['completion_range_80pct'][1]}); typical lead time for {forecast['pieces']} pieces {forecast['typical_lead_days_for_this_size']} days. "
+                          'A ranking from order size and elapsed time, not a schedule; the queue risk tool gives the dispatch view.')
+        elif intent == Intent.EXECUTION_REMINDER and (slots.condition == 'stage_below_range' or (slots.stage and not slots.order_ids and not state.active_order)):
+            # Sprint 2: a watch on a stage, not an order ("remind me tomorrow if packing is still behind").
+            if not slots.stage:
+                return self.ask('Which stage should I watch: knitting, assembly, washing or packing?', state, result, now, calls, evidence)
+            slots.condition = 'stage_below_range'
+            watch_id = f'STAGE:{slots.stage}'
+            deadline = resolve_datetime(slots.deadline or '', now)
+            if deadline is None and slots.deadline:
+                try:
+                    deadline = datetime.combine(resolve_date(slots.deadline, now), time(7), tzinfo=now.tzinfo)  # a date alone means the 07:00 briefing
+                except ValueError:
+                    deadline = None
+            if deadline is None:
+                return self.ask('When should I check: tomorrow at 07:00, or another date and time?', state, result, now, calls, evidence)
+            if deadline <= now:
+                return self.ask('The check time must be in the future. What date and time?', state, result, now, calls, evidence)
+            slots.deadline = deadline.isoformat()
+            existing = self.store.get_reminder(state.session_id, watch_id, 'stage_below_range')
+            check_day = (deadline.date() - timedelta(days=1)).isoformat()
+            preview = (f"{'Update existing' if existing else 'Create'} watch on {slots.stage.lower()}: at {deadline.isoformat()} compare its output on {check_day} "
+                       f"with the previous eight same weekdays and notify you only if it is still below that range. Please confirm.")
+            self.propose('reminder', watch_id, {'condition': 'stage_below_range', 'stage': slots.stage, 'deadline': deadline.isoformat(),
+                                               'since': existing['since'] if existing else now.isoformat()}, preview, state, now)
+            answer = preview
         else:
             ids = slots.order_ids
             if len(ids) > 1:
@@ -305,7 +470,10 @@ class WorkflowEngine:
             order_id = ids[0] if ids else state.active_order
             if not order_id:
                 return self.ask('Which order should I use? Please give its ID or customer.', state, result, now, calls, evidence)
-            order = self.select(order_id, state, calls, evidence)
+            try:
+                order = self.select(order_id, state, calls, evidence)
+            except ValueError:
+                return self.not_found(order_id, state, result, now, calls, evidence)
             if intent == Intent.ORDER_REFRESH:
                 answer = self.order_facts(order) + '\nOnly last_activity_date is recorded; no event description is available. An unchanged record does not prove no work happened.'
                 answer += ('\nThe last recorded activity date is today; author and time are not available.'
@@ -327,11 +495,62 @@ class WorkflowEngine:
             elif intent == Intent.ORDER_RISK:
                 risk = self.tools.assess_risk(order, now)
                 calls.append(ToolCall(name='assess_order_risk', arguments={'order_id': order_id}, result=risk))
-                answer = self.order_facts(order) + '\nFacts and risk interpretation:\n' + json.dumps(risk, indent=2)
+                # Plain-language status first (Sprint 2): recorded lateness is a fact, projected risk is a judgement.
+                if order.record['status'] == 'COMPLETE':
+                    status_line = f"Completed on {order.record['completed_date']}; recorded days late: {order.record['days_late']}."
+                elif risk['days_to_due'] < 0:
+                    status_line = f"Already overdue: due {order.record['due_date']}, {-risk['days_to_due']} days ago, still at {order.record['current_stage']}."
+                else:
+                    status_line = (f"Not past due: due {order.record['due_date']}, {risk['days_to_due']} days away. "
+                                   f"Projected risk {risk['risk_level']}: {risk['reasons'][0]}")
+                status_line += f" Last recorded activity {order.record['last_activity_date']} ({risk['idle_days']} days before the business date); a gap is not proof of a stoppage."
+                answer = self.order_facts(order) + '\n' + status_line + '\nFacts and risk interpretation:\n' + json.dumps(risk, indent=2)
                 answer += '\nA risk pattern does not establish that it will be late. Request a status update if needed.'
             else:
                 return self.execution(message, result, state, now, calls, evidence, order, previous_slots)
         return self.response(state, result, now, answer, calls, evidence)
+
+    def not_found(self, order_id: str, state: DialogState, result: Classification, now: datetime,
+                  calls: list[ToolCall], evidence: list[Evidence]) -> ChatResponse:
+        """Sprint 2 (cause E): an unknown order ID is an answer, not an HTTP error."""
+        state.active_order = None
+        state.last_order_ids = []
+        calls.append(ToolCall(name='refresh_order', arguments={'order_id': order_id}, result={'status': 'not_found', 'order_id': order_id}, executed=True))
+        return self.response(state, result, now, f'There is no order {order_id} in the current records. Order IDs run ORD-001 to ORD-{len(self.tools.rows("orders.csv")):03d}; check the number or give the customer and product instead.', calls, evidence)
+
+    def infer_lookup_slots(self, message: str, candidates: list[str], now: datetime) -> dict[str, Any]:
+        """Sprint 2 (cause B): read product / quantity / due-date words from the manager's reply to a candidate list.
+        Only values that actually distinguish the listed candidates are used; nothing is guessed."""
+        lowered = message.casefold()
+        records = [e.record for e in self.tools.rows('orders.csv') if e.record['order_id'] in set(candidates)]
+        inferred: dict[str, Any] = {}
+        products = {r['product'] for r in records}
+        hit = [p for p in products if p.casefold() in lowered or p.casefold().rstrip('s') in lowered or (p.casefold().endswith('f') and p.casefold()[:-1] + 'ves' in lowered)]
+        if len(hit) == 1:
+            inferred['product'] = hit[0]
+        quantity = re.search(r'\b(\d{2,5})\s*(?:-\s*)?(?:piece|pieces|pcs|pc)\b', lowered)
+        if quantity and any(int(r['pieces']) == int(quantity[1]) for r in records):
+            inferred['quantity'] = int(quantity[1])
+        day = re.search(r'\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\b', lowered) \
+            or re.search(r'\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\s+(\d{1,2})(?:st|nd|rd|th)?\b', lowered)
+        if day:
+            parts = day.groups()
+            number, month = (parts[0], parts[1]) if parts[0].isdigit() else (parts[1], parts[0])
+            months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+            m = months.index(month[:3]) + 1
+            for r in records:
+                due = r['due_date']
+                if due.endswith(f'-{m:02d}-{int(number):02d}'):
+                    inferred['due_date'] = due
+                    break
+        iso = re.search(r'\b(\d{4}-\d{2}-\d{2})\b', lowered)
+        if iso and any(r['due_date'] == iso[1] for r in records):
+            inferred['due_date'] = iso[1]
+        customers = {r['customer'] for r in records}
+        hit = [c for c in customers if c.casefold() in lowered]
+        if len(hit) == 1 and len(customers) > 1:
+            inferred['customer'] = hit[0]
+        return inferred
 
     def select(self, order_id: str, state: DialogState, calls: list[ToolCall], evidence: list[Evidence]) -> Evidence:
         """场景 1.1/1.2：唯一识别后刷新字段，保存 active_order 和客户。"""
@@ -356,8 +575,9 @@ class WorkflowEngine:
     def propose(self, kind: Literal['send', 'note', 'reminder'], order_id: str, payload: dict[str, Any], preview: str,
                 state: DialogState, now: datetime) -> None:
         """场景 3.1–3.3：每次预览生成新确认键，把动作、订单和最终内容绑定。"""
+        snapshot = {} if order_id.startswith('STAGE:') else self.tools.refresh_order(order_id).record
         state.pending_action = PendingAction(kind=kind, order_id=order_id, payload=payload, preview=preview,
-                                             created_at=now, source_snapshot=self.tools.refresh_order(order_id).record)
+                                             created_at=now, source_snapshot=snapshot)
 
     def execution(self, message: str, result: Classification, state: DialogState, now: datetime,
                   calls: list[ToolCall], evidence: list[Evidence], order: Evidence, previous_slots: Slots) -> ChatResponse:
@@ -439,7 +659,7 @@ class WorkflowEngine:
             if self.tools.refresh_order(oid).record != snapshot:
                 state.pending_action = None
                 return self.ask('An order changed. Please review a fresh draft before sending.', state, result, now, calls, evidence)
-        refreshed = self.tools.refresh_order(action.order_id) if action.order_id else None
+        refreshed = self.tools.refresh_order(action.order_id) if action.order_id and not action.order_id.startswith('STAGE:') else None
         if refreshed:
             evidence.append(refreshed)
             calls.append(ToolCall(name='refresh_order', arguments={'order_id': action.order_id}, result=refreshed.record))
@@ -466,9 +686,16 @@ class WorkflowEngine:
                               arguments={'action_id': action.id, 'order_id': action.order_id, **action.payload},
                               result=outcome, requires_confirmation=True, executed=outcome['status'] != 'not_sent'))
         if outcome['status'] in ('sent', 'saved', 'scheduled', 'accepted'):
-            answer = {'send': 'Message sent; recipient, final text, send time and receipt recorded.',
-                      'note': f'Internal note saved to {action.order_id} with timestamp. It was not sent externally.',
-                      'reminder': 'Reminder created or updated in place. It will notify only if the condition remains unmet.'}[action.kind]
+            if action.kind == 'send':
+                answer = 'Message sent; recipient, final text, send time and receipt recorded.'
+            elif action.kind == 'note':
+                answer = f'Internal note saved to {action.order_id} with timestamp. It was not sent externally.'
+            elif action.payload.get('condition') == 'stage_below_range':
+                answer = (f"Watch {'updated' if 'Update' in action.preview else 'created'} on {action.payload['stage'].lower()}: at {action.payload['deadline']} you will be notified "
+                          f"only if its output is still below the same-weekday range. Nothing is sent outside the system.")
+            else:
+                answer = (f"Reminder {'updated' if 'Update' in action.preview else 'created'} for {action.order_id}: at {action.payload['deadline']} you will be notified "
+                          f"only if {action.payload['condition'].replace('_', ' ')} is still the case. Nothing is sent outside the system.")
             if outcome['status'] == 'scheduled':
                 answer = 'Email scheduled for '+action.payload['send_at']+'. It has not been sent yet. View its status in Activity Log.'
                 state.chase_context.pop('send_at',None)

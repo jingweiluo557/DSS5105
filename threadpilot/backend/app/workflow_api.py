@@ -83,7 +83,7 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
         if classifier is None:
             classifier = ConversationAgent(app.state.client, app.state.settings.openai_model, app.state.settings.intent_api_style)
         try:
-            result = await app.state.workflow.chat(body, classifier, emit=emit)
+            result = await app.state.workflow.chat(body, classifier, emit=emit, role=getattr(request.state, 'role', 'manager'))
             return result.model_copy(update={'request_id': request.state.request_id, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1')})
         except WorkflowBusy:
             raise HTTPException(409, {'code': 'SESSION_BUSY', 'message': 'This conversation is processing another request. Retry shortly.'})

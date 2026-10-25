@@ -34,9 +34,14 @@ class Settings(BaseSettings):
     serve_frontend: bool = True
     public_frontend_origin: str = ''
     api_access_token: SecretStr = SecretStr('')
+    # Optional second workspace key for the manager role. When set, confirmations of sends, notes, reminders,
+    # dispatch reviews, email settings and alert mutes require it; the API_ACCESS_TOKEN key becomes read-and-draft only.
+    manager_access_token: SecretStr = SecretStr('')
     scheduler_token: SecretStr = SecretStr('')
     morning_scheduler_enabled: bool = False
     email_scheduler_enabled: bool = False
+    # Alert emails to the manager (P1 at once, P2 digests). Default dry run: decisions are recorded, nothing is sent.
+    alert_emails_enabled: bool = False
     outlook_client_id: str = ''
     outlook_client_secret: SecretStr = SecretStr('')
     outlook_redirect_uri: str = 'http://localhost:8000/api/outlook/callback'

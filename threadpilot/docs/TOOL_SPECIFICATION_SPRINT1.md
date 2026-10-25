@@ -1,6 +1,6 @@
 # ThreadPilot tool specification
 
-Version: 1.0 · Updated: 2026-10-15 ·
+Version: 1.1 · Updated: 2026-10-24 (Sprint 2 additions in section 10) ·
 
 ## 1. Architecture and authority
 
@@ -125,3 +125,20 @@ complete response. Interrupted generations leave the previously saved drafts
 intact. Deterministic clarification and confirmation messages are short single
 chunks. `source_details` and `evidence` are rendered in a collapsed Source details
 panel instead of appended to the answer body.
+
+## 10. Sprint 2 additions (24 Oct 2026)
+
+Driven by the first live evaluation (`evaluation/FAILURE_ANALYSIS.md`): 18 of 47 questions failed, none on arithmetic, all on routing, slot filling, coverage or missing refusals.
+
+| Tool | Kind | Inputs | Outputs / purpose | Deliberately does not | Failure mode |
+|---|---|---|---|---|---|
+| `get_production_output` | Retrieval | stage (optional), date (ISO, yesterday/today, weekday name) | Recorded pieces per stage on that date from `production_log` | Compare or judge; that is `check_normality` | No record (Sunday or outside the log): says so, no number |
+| `rank_active_orders` | Retrieval | criterion `idle_days` or `due_date`, optional customer, list length | Active orders ordered by one explicit rule with the rule stated | Score, weight or predict; an idle gap is not a stoppage | Unknown criterion falls back to idle days and says so |
+| `list_workshops` | Retrieval | product/category, optional batch quantity | Eligible outside workshops (active, category match, batch cap) with queue, pickup, defect-batch probability and cost; excluded ones with the reason | Pick a workshop, reserve capacity, estimate the whole lead time | Category not inferable: lists all active with the rule |
+| `predict_order_delay` | Judgement | one in-progress order ID | AFT delay probability + level, expected completion date, 80% range, model weights and validation (`docs/PREDICTION_MODEL.md`) | Use the current stage or customer; forecast completed orders | Unknown or complete order: not found / "applies to orders in progress" |
+| `estimate_capacity` (v2) | Judgement | as before | Headline verdict from the shared queue simulation with the new order inserted (best case: no arrivals; expected: recent arrival rate), AFT on-time chance for the size, and the serial-backlog sum kept as a labelled worst case | Promise a date or reserve capacity | Queue needs a positive capacity baseline per stage; otherwise the worst case alone, labelled |
+| `explain_no_data` | Refusal | the request | States the non-goal in plain words (no prices/revenue, no workers, no causes, no delete/cancel, no customer contact) and what the system can do instead | Ask "which order?" for a question no order can answer | Keyword guard only on unknown/low-confidence intents; a planner-classified `general.unanswerable` carries the reason |
+
+Behaviour changes without a new tool: `check_normality` asks only for a missing stage and defaults the baseline to the previous eight same weekdays, stating the default; an unknown order ID is an answer ("There is no order ORD-999"), not an HTTP error; after a candidate list the server narrows on the product, quantity or due-date words in the next message itself; `summarize_orders` now carries overdue, due-today, idle-days and completed on-time aggregates so the narrator never improvises them; `resolve_date` understands weekday names; the planner no longer skips the attention-window question.
+
+Regression: `backend/tests/test_sprint2_fixes.py` (annotated classifications) and `evaluation/run_annotated_eval.py` (47 questions, offline). Accuracy claims come only from `evaluation/REPORT_live_<date>.md`.
