@@ -6,7 +6,39 @@ on:
   pull_request:
     paths: ["threadpilot/**", ".github/workflows/threadpilot-backend.yml"]
 
+permissions:
+  contents: write
+
 jobs:
+  openapi:
+    name: Keep docs/openapi.json in step with the code
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install uv
+      - name: Install the locked dependencies
+        working-directory: threadpilot/backend
+        run: uv sync --locked --group dev
+      - name: Export the runtime contract
+        working-directory: threadpilot/backend
+        run: uv run --locked python -m scripts.export_openapi
+      - name: Commit the export when it changed
+        shell: bash
+        run: |
+          if git diff --quiet -- threadpilot/docs/openapi.json; then echo "openapi.json unchanged"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add threadpilot/docs/openapi.json
+          git commit -m "Export docs/openapi.json from the running code [skip ci]"
+          git push
+          echo "::notice title=openapi::docs/openapi.json re-exported and committed; the test suite below ran against the previous export"
+
   tests:
     name: pytest (SQLite, no model key, no MySQL)
     runs-on: ubuntu-latest
