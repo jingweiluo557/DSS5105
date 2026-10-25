@@ -156,3 +156,47 @@ def test_reminder_confirmation_names_the_order(tmp_path: Path):
     assert r.confirmation_required and '2026-04-02T14:00:00+08:00' in r.answer
     r = chat(engine, FixedClassifier('execution.reminder'), 'Confirm.', r.state, r.confirmation_id)
     assert r.tool_calls[-1].name == 'upsert_reminder' and 'ORD-002' in r.answer and 'no activity' in r.answer
+
+
+# ---------------------------------------------------------------- 26 Oct: discovery, stage watches, manager key
+def test_find_anomalies_ranks_the_planted_assembly_drop_first(tmp_path: Path):
+    r = chat(make_engine(tmp_path), FixedClassifier('operations.discovery'), 'Did anything go wrong yesterday?')
+    data = r.tool_calls[0].result
+    assert r.tool_calls[0].name == 'find_anomalies' and data['findings'][0]['key'] == 'stage_drop:ASSEMBLY'
+    assert data['total'] >= 10 and 'Assembly has been below its normal range' in r.answer
+    r = chat(make_engine(tmp_path), FixedClassifier('operations.discovery', customer='TrendCart', window_days=3), 'Anything unusual with TrendCart?')
+    assert all('TrendCart' in f['title'] for f in r.tool_calls[0].result['findings'])
+
+
+def test_stage_watch_is_previewed_confirmed_and_evaluated(tmp_path: Path):
+    from datetime import timedelta
+    engine = make_engine(tmp_path)
+    state = DialogState()
+    r = chat(engine, FixedClassifier('execution.reminder', stage='PACKING', deadline='tomorrow'), 'Remind me tomorrow if packing is still behind.', state)
+    assert r.confirmation_required and 'watch on packing' in r.answer and '2026-04-02T07:00:00+08:00' in r.answer
+    r = chat(engine, FixedClassifier('execution.reminder'), 'Confirm.', r.state, r.confirmation_id)
+    assert r.tool_calls[-1].name == 'upsert_reminder' and 'Watch created on packing' in r.answer
+    engine.store.evaluate_reminders(NOW + timedelta(days=1), engine.tools)
+    notes = engine.store.notifications(state.session_id)
+    assert len(notes) == 1 and 'No production record for PACKING on 2026-04-01' in notes[0]['message']
+
+
+def test_planner_key_cannot_confirm_but_manager_key_can(tmp_path: Path):
+    engine = make_engine(tmp_path)
+    state = DialogState()
+    r = chat(engine, FixedClassifier('execution.note', order_ids=['ORD-002'], text='escalated today'), 'Add a note to ORD-002: escalated today', state)
+    assert r.confirmation_required
+    denied = asyncio.run(engine.chat(ChatRequest(message='Save it.', session_id=state.session_id, confirmation_id=r.confirmation_id), FixedClassifier('execution.note'), role='planner'))
+    assert 'manager key is required' in denied.answer and not denied.tool_calls and denied.state.pending_action is not None
+    saved = asyncio.run(engine.chat(ChatRequest(message='Save it.', session_id=state.session_id, confirmation_id=r.confirmation_id), FixedClassifier('execution.note'), role='manager'))
+    assert saved.tool_calls[-1].name == 'save_internal_note'
+
+
+def test_resolve_role_with_and_without_a_manager_key():
+    from types import SimpleNamespace
+    from pydantic import SecretStr
+    from app.api.security import resolve_role
+    both = SimpleNamespace(api_access_token=SecretStr('ws'), manager_access_token=SecretStr('mg'))
+    assert (resolve_role('ws', both), resolve_role('mg', both), resolve_role('x', both)) == ('planner', 'manager', None)
+    single = SimpleNamespace(api_access_token=SecretStr('ws'), manager_access_token=SecretStr(''))
+    assert (resolve_role('ws', single), resolve_role('x', single)) == ('manager', None)

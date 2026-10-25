@@ -78,6 +78,8 @@ ANNOTATIONS: dict[str, list[dict | None]] = {
     'AR03': [{'intent': 'order.compare', 'order_ids': ['ORD-108', 'ORD-061'], 'comparison_fields': ['pieces', 'product']}],
     'AR04': [{'intent': 'general.unanswerable', 'reason': 'other'}],
     'AR05': [{'intent': 'order.summary', 'customer': 'TrendCart'}],
+    'D01': [{'intent': 'operations.discovery'}],
+    'D02': [{'intent': 'operations.discovery', 'customer': 'TrendCart'}],
     # correction, and topic switch + resume
     'M05': [{'intent': 'order.lookup', 'order_ids': ['ORD-020']}, {'intent': 'order.lookup', 'order_ids': ['ORD-120']}, {'intent': 'order.risk', 'reference': 'active'}],
     'M06': [{'intent': 'order.commitment', 'quantity': 800, 'product': 'hoodies', 'due_date': '25th'},

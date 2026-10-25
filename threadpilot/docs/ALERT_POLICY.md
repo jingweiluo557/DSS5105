@@ -62,7 +62,7 @@ Three lines first, numbers and the rule underneath, the reason it was sent, and 
 
 ## Expedite action emails to the production team
 
-Already possible today through the chase flow: a chase-up can be addressed to a department (`KNITTING`/`ASSEMBLY`/`WASHING`/`PACKING` emails in Settings), previewed, confirmed and sent through Outlook, with the result in the Activity Log. What is **not** wired yet: an applied expedite review (`POST /api/scheduling/reviews/{id}` with `apply`) changes the dispatch priority silently. Proposed (Sprint 3): on `apply`, draft a "dispatch change notice" to the departments at or after the order's current stage — order, new position, the manager's reason, the affected orders from the analysis — and put it through the same preview → confirm → Outlook → Activity Log path. No automatic send: a wrong dispatch email to the floor is exactly the blast radius the confirmation gate exists for.
+Through the chase flow: a chase-up can be addressed to a department (`KNITTING`/`ASSEMBLY`/`WASHING`/`PACKING` emails in Settings), previewed, confirmed and sent through Outlook, with the result in the Activity Log. Since 26 Oct an applied expedite review (`POST /api/scheduling/reviews/{id}/decision` with `apply`) also returns a `dispatch_notice` — the order, its new position, the manager's reason and the orders it pushes back — and the UI offers to draft it to the order's current department through that same chat path (preview → confirm → Outlook → Activity Log). No automatic send: a wrong dispatch email to the floor is exactly the blast radius the confirmation gate exists for.
 
 ## Turning it on
 

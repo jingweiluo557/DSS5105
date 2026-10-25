@@ -37,3 +37,16 @@ Why: the first live evaluation of the CloudBase deployment (47 questions, `evalu
 - **Evaluation set v2026-10-26**: 54 questions / 77 turns — adds 5 arithmetic-bait questions (`fail_on_untraced`) and two multi-turn scenarios (correction; topic switch and resume). Offline 54/54; the 24 Oct live first pass stays 29/47 on the questions it covered (the 7 new ones are marked "not in that run").
 - `compare_orders` accepts pieces / product / customer fields.
 - Docs: `TOOL_SPECIFICATION.md` (one table, 25 tools, with non-goals and failure modes), `VAGUE_QUESTIONS_AND_DIALOGUES.md`, `NO_ARITHMETIC_PROOF.md`.
+
+## 26 Oct, second batch — closing the gaps (same branch)
+
+- **CI**: `.github/workflows/threadpilot-backend.yml` runs the backend pytest suite and the offline evaluation replay (strict) on every push; failures appear as check-run annotations; `docs/openapi.json` is re-exported and committed automatically when routes change.
+- **Discovery**: `find_anomalies` / intent `operations.discovery` — the brief's fourth tool kind as a chat tool, sharing detectors with the alert policy (questions D01, D02).
+- **Stage watches**: "remind me tomorrow if packing is still behind" is now a reminder condition (`stage_below_range`), evaluated with `check_normality` in both reminder stores.
+- **Roles**: optional `MANAGER_ACCESS_TOKEN`; with it set, the ordinary key cannot confirm writes, apply reviews, change email settings or mute alerts. `GET /api/v1/whoami`.
+- **Voice**: `frontend/voice.js` — speech-to-text into the composer, "Read aloud" on answers (browser-native, no audio stored).
+- **Dispatch notice** after an applied expedite review, drafted through the chat gate.
+- **Feasibility page** headline is the shared estimate once loaded; the local model is labelled as the pre-check.
+- **Briefing email** carries an alert-budget line.
+- **Docs**: `BUSINESS_CASE.md` (reconstructed from the Sprint 1 deck, labelled estimates), `SPRINT1_EVIDENCE.md` (every slide claim mapped to a file or marked superseded).
+- Evaluation v2026-10-26: 56 questions / 79 turns, offline 56/56.

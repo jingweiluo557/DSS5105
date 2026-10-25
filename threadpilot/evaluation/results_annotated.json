@@ -1,22 +1,23 @@
 {
   "meta": {
-    "run_at": "2026-10-25T17:04:50.944752+00:00",
+    "run_at": "2026-10-25T17:27:49.531755+00:00",
     "target": "in-process WorkflowEngine (CSV)",
     "model": "annotated-planner",
     "first_pass": false,
     "runner": "run_annotated_eval.py",
     "sent_externally": []
   },
-  "eval_version": "2026-10-24",
+  "eval_version": "2026-10-26",
   "business_now": "2026-04-01T12:00:00+08:00",
   "summary": {
-    "scenarios": 54,
-    "scenarios_passed": 54,
+    "scenarios": 56,
+    "scenarios_passed": 56,
     "scenario_accuracy": 1.0,
-    "turns": 77,
-    "turns_passed": 77,
+    "not_run": [],
+    "turns": 79,
+    "turns_passed": 79,
     "turn_accuracy": 1.0,
-    "numbers_stated": 1104,
+    "numbers_stated": 1144,
     "numbers_untraced": 0,
     "by_category": {
       "facts": {
@@ -72,6 +73,12 @@
         "passed": 5,
         "turns": 5,
         "turns_passed": 5
+      },
+      "discovery": {
+        "scenarios": 2,
+        "passed": 2,
+        "turns": 2,
+        "turns_passed": 2
       }
     }
   },
@@ -2493,6 +2500,75 @@
             ]
           ],
           "answer": "Conditional forecast, not a promise:\n{\n  \"due_date\": \"2026-04-25\",\n  \"delivery_point\": \"customer\",\n  \"available_workdays\": 21,\n  \"delivery_buffer_days\": 2,\n  \"packing_loss_days\": 0,\n  \"queue_projection\": {\n    \"method\": \"shared queue simulation with the new order appended (earliest due date first, manager priorities kept)\",\n    \"capacity_per_day\": {\n      \"KNITTING\": 1547.2,\n      \"ASSEMBLY\": 1261.7,\n      \"WASHING\": 1199.9,\n      \"PACKING\": 1130.5\n    },\n    \"capacity_factor\": 1.693,\n    \"working_days_to_due_including_today\": 22,\n    \"best_case\": {\n      \"finish_date\": \"2026-04-30\",\n      \"working_days\": 26,\n      \"scenario\": \"current orders only, no new arrivals\"\n    },\n    \"expected_case\": {\n      \"finish_date\": \"2026-04-30\",\n      \"working_days\": 26,\n      \"scenario\": \"new orders keep arriving at the last-45-day rate (1121 pieces/working day)\"\n    },\n    \"orders_ahead\": 34,\n    \"assumptions\": [\n      \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n      \"Monday–Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n      \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n      \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n      \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1–3.\",\n      \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n      \"An approved queue changes this application’s dispatch plan, not an external factory system.\"\n    ],\n    \"verdict\": \"unlikely\",\n    \"reason\": \"Even with no new arrivals it finishes 2026-04-30, 4 working days after the due date.\"\n  },\n  \"queue_projection_unavailable\": null,\n  \"historical_lead_time_model\": {\n    \"pieces\": 800,\n    \"promised_lead_days\": 22,\n    \"p_on_time\": 0.34,\n    \"typical_lead_days\": 24.7,\n    \"lead_days_80pct_confidence\": 30,\n    \"earliest_date_80pct_confidence\": \"2026-05-01\",\n    \"basis\": \"historical lead times of orders of this size, not current queue load\",\n    \"limitations\": [\n      \"Only order size is used; the current production stage is not, because the data has no stage-entry history.\",\n      \"Fitted on 86 completed orders: probabilities are a ranking, not exact odds (0.4-0.6 scores were late about 26% of the time in validation).\",\n      \"Category, product, promised lead time, backlog and order month added no reliable accuracy and are not used.\"\n    ]\n  },\n  \"worst_case_serial_backlog\": {\n    \"method\": \"serial backlog sum: every active piece at or before each stage is processed before the new order, stage by stage, no overlap\",\n    \"stages\": [\n      {\n        \"stage\": \"KNITTING\",\n        \"historical_pieces_per_day\": 894.2,\n        \"backlog_pieces\": 9900,\n        \"conservative_workdays\": 12\n      },\n      {\n        \"stage\": \"ASSEMBLY\",\n        \"historical_pieces_per_day\": 677.45,\n        \"backlog_pieces\": 20500,\n        \"conservative_workdays\": 32\n      },\n      {\n        \"stage\": \"WASHING\",\n        \"historical_pieces_per_day\": 699.1,\n        \"backlog_pieces\": 28850,\n        \"conservative_workdays\": 43\n      },\n      {\n        \"stage\": \"PACKING\",\n        \"historical_pieces_per_day\": 652.9,\n        \"backlog_pieces\": 32850,\n        \"conservative_workdays\": 52\n      }\n    ],\n    \"limiting_stage\": \"PACKING\",\n    \"base_required_days\": 141,\n    \"scenario_required_days\": 141,\n    \"buffer_days_remaining\": -120,\n    \"verdict\": \"not supported\",\n    \"note\": \"Worst case by construction; real lead times are far shorter because stages overlap and most backlog is due before the new order.\"\n  },\n  \"stages\": [\n    {\n      \"stage\": \"KNITTING\",\n      \"historical_pieces_per_day\": 894.2,\n      \"backlog_pieces\": 9900,\n      \"conservative_workdays\": 12\n    },\n    {\n      \"stage\": \"ASSEMBLY\",\n      \"historical_pieces_per_day\": 677.45,\n      \"backlog_pieces\": 20500,\n      \"conservative_workdays\": 32\n    },\n    {\n      \"stage\": \"WASHING\",\n      \"historical_pieces_per_day\": 699.1,\n      \"backlog_pieces\": 28850,\n      \"conservative_workdays\": 43\n    },\n    {\n      \"stage\": \"PACKING\",\n      \"historical_pieces_per_day\": 652.9,\n      \"backlog_pieces\": 32850,\n      \"conservative_workdays\": 52\n    }\n  ],\n  \"limiting_stage\": \"PACKING\",\n  \"base_required_days\": 141,\n  \"scenario_required_days\": 141,\n  \"buffer_days_remaining\": -120,\n  \"preliminary\": \"unlikely by this date\",\n  \"verdict\": \"unlikely\",\n  \"assumptions\": [\n    \"Sundays closed; the new order starts at knitting on the next working day.\",\n    \"Queue projection: same capacity (previous eight same weekdays x completion factor), earliest-due-date dispatch with manager priorities first, each order at most 60% of a stage per day; expected case adds new orders at the recent arrival rate.\",\n    \"Historical lead-time model: order size only, 86 completed orders; a chance, not a schedule.\",\n    \"No per-order WIP quantities: every active order restarts its current stage in full.\",\n    \"Delivery buffer: 2 working days; unverified planning assumption.\",\n    \"Workshop category inferred from product; stage compatibility and availability need confirmation.\"\n  ],\n  \"workshop_options\": [\n    {\n      \"workshop_id\": \"W1\",\n      \"estimated_batch_days\": 7.67,\n      \"batch_fits\": true,\n      \"defect_batch_probability\": 0.12,\n      \"unit_cost\": 1.5\n    },\n    {\n      \"workshop_id\": \"W2\",\n      \"estimated_batch_days\": 9.21,\n      \"batch_fits\": true,\n      \"defect_batch_probability\": 0.03,\n      \"unit_cost\": 1.3\n    },\n    {\n      \"workshop_id\": \"W3\",\n      \"estimated_batch_days\": 11.48,\n      \"batch_fits\": true,\n      \"defect_batch_probability\": 0.09,\n      \"unit_cost\": 0.8\n    },\n    {\n      \"workshop_id\": \"W5\",\n      \"estimated_batch_days\": 9.0,\n      \"batch_fits\": true,\n      \"defect_batch_probability\": 0.06,\n      \"unit_cost\": 1.1\n    },\n    {\n      \"workshop_id\": \"W6\",\n      \"estimated_batch_days\": 8.15,\n      \"batch_fits\": true,\n      \"defect_batch_probability\": 0.05,\n      \"unit_cost\": 1.2\n    },\n    {\n      \"workshop_id\": \"W8\",\n      \"estimated_batch_days\": 10.0,\n      \"batch_fits\": false,\n      \"defect_batch_probability\": 0.04,\n      \"unit_cost\": 1.0\n    }\n  ],\n  \"recommendation\": \"Do not promise an unconditional date. Quote the expected-case date with its assumptions; verify WIP, transport and workshop batch limits first.\",\n  \"limits\": \"Forecast scenario, not a confirmed completion date or reserved capacity. Batch defect probability is not an expected defective-piece percentage.\"\n}",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "D01",
+      "category": "discovery",
+      "note": "gold: the top finding is the sustained assembly drop (3 working days below the same-weekday minimum: 28, 30, 31 March); the log holds no cause",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Did anything go wrong yesterday?",
+          "passed": true,
+          "checks": {
+            "contains[assembly]": true,
+            "contains[below|drop|under]": true,
+            "absent[\\b(breakdown|machine fail)\\b(?![^.]*(no|not|cannot|unknown))]": true,
+            "tool_any[find_anomalies]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.discovery",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "find_anomalies",
+              true
+            ]
+          ],
+          "answer": "34 findings as of 2026-04-01 (1 stage drop, 2 will miss, 8 overdue, 23 high risk); top 5 by tier and score:\n1. [P1] Assembly has been below its normal range for 3 working days (44% under). Ask the floor what changed; check which near-due orders sit at or after this stage. (rule: 3 consecutive working days below the previous-8-same-weekday minimum)\n2. [P1] ORD-029 (Northwind Apparel, 1500 Beanie) due 2026-04-01 will miss even in the best case. Decide today: expedite (review the queue impact), outsource, or tell the customer a new date. (rule: due within 2 working days and best-case finish after the due date, no approved priority)\n3. [P1] ORD-108 (Harbor Knits, 2000 Scarf) due 2026-04-03 will miss even in the best case. Decide today: expedite (review the queue impact), outsource, or tell the customer a new date. (rule: due within 2 working days and best-case finish after the due date, no approved priority)\n4. [P2] ORD-107 (Northwind Apparel) is 16 days overdue, still at PACKING. Confirm the customer has a new date; chase the stage if idle. (rule: IN_PROGRESS and due_date before the business date)\n5. [P2] ORD-120 (TrendCart) is 15 days overdue, still at ASSEMBLY. Confirm the customer has a new date; chase the stage if idle. (rule: IN_PROGRESS and due_date before the business date)\nFindings are patterns in recorded output, dates and queue projections; the log holds no downtime, staffing or cause fields.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "D02",
+      "category": "discovery",
+      "note": "gold: filtered to TrendCart: ORD-120 15 days overdue leads, then ORD-020 overdue and the high-risk ones",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Anything unusual with TrendCart orders?",
+          "passed": true,
+          "checks": {
+            "contains[ORD-120]": true,
+            "contains[overdue|past due|15 days]": true,
+            "tool_any[find_anomalies]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.discovery",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "find_anomalies",
+              true
+            ]
+          ],
+          "answer": "5 findings as of 2026-04-01 (2 overdue, 3 high risk); top 5 by tier and score:\n1. [P2] ORD-120 (TrendCart) is 15 days overdue, still at ASSEMBLY. Confirm the customer has a new date; chase the stage if idle. (rule: IN_PROGRESS and due_date before the business date)\n2. [P2] ORD-017 (TrendCart) is at high risk: Even in the best case it finishes Wed 22 Apr, 10 working days after the 10 Apr due date. Review in the morning: expedite analysis or an early word to the customer. (rule: shared queue risk level high)\n3. [P2] ORD-096 (TrendCart) is at high risk: Even in the best case it finishes Mon 27 Apr, 8 working days after the 17 Apr due date. Review in the morning: expedite analysis or an early word to the customer. (rule: shared queue risk level high)\n4. [P2] ORD-005 (TrendCart) is at high risk: Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date. Review in the morning: expedite analysis or an early word to the customer. (rule: shared queue risk level high)\n5. [P2] ORD-020 (TrendCart) is 1 day overdue, still at WASHING. Confirm the customer has a new date; chase the stage if idle. (rule: IN_PROGRESS and due_date before the business date)\nFindings are patterns in recorded output, dates and queue projections; the log holds no downtime, staffing or cause fields.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""

@@ -1,6 +1,6 @@
 # ThreadPilot evaluation set (verified answers)
 
-Version 2026-10-26 · business date 2026-04-01T12:00:00+08:00 · 54 questions (77 turns). 
+Version 2026-10-26 · business date 2026-04-01T12:00:00+08:00 · 56 questions (79 turns). 
 Every expected value is computed from `orders.csv`, `production_log.csv` and `workshops.csv` by `build_eval_set.py`, using the same definitions as the ThreadPilot tools (Sundays closed; "normal" = previous eight same-weekday records; capacity = conservative serial backlog ÷ mean of the last 20 non-Sunday days). Scoring is automatic (`score.py`): intent/clarification/confirmation flags, required facts, forbidden claims, forbidden executions, and an invented-number check (every number in the answer must appear in a tool result or in the manager's own words).
 
 **Latest first pass** (2026-10-24T06:40Z..07:10Z, `gpt-6-luna`): **29/47 questions (62%)**, 44/66 turns, 0 untraced numbers out of 169 stated.
@@ -61,10 +61,12 @@ Every expected value is computed from `orders.csv`, `production_log.csv` and `wo
 | AR05 | arithmetic_bait | What percentage of TrendCart orders were delivered late? | the summary tool reports completed / late counts and an on-time rate for the customer; the late percentage (100 - on-time) is arithmetic the model must not do unless a tool returns it | — not in that run |
 | M05 | Multi-turn | Open ORD-020. → Sorry, I meant ORD-120. → Is it at risk? | a correction moves the active order to ORD-120 (TrendCart, 1500 Vest, ASSEMBLY, due 2026-03-17, 15 days overdue) | — not in that run |
 | M06 | Multi-turn | Can we take 800 hoodies by the 25th? → Hold on — how many orders are overdue first? → OK, back to the hoodies: delivered to the customer. | topic switch to the overdue count (8) and resume of the saved feasibility topic; the estimate still needs 21 workdays vs due 2026-04-25 | — not in that run |
+| D01 | discovery | Did anything go wrong yesterday? | the top finding is the sustained assembly drop (3 working days below the same-weekday minimum: 28, 30, 31 March); the log holds no cause | — not in that run |
+| D02 | discovery | Anything unusual with TrendCart orders? | filtered to TrendCart: ORD-120 15 days overdue leads, then ORD-020 overdue and the high-risk ones | — not in that run |
 
 ## Brief requirements check
 
-- ≥30 questions with verified answers: **54** ✔
+- ≥30 questions with verified answers: **56** ✔
 - ≥5 ambiguous / unanswerable / hallucination-bait: **14** ✔
 - ≥5 feasibility or action requests: **11** ✔
 - Measured accuracy: see the first-pass line above and `REPORT_live_<date>.md` for every failure with the actual answer.

@@ -421,6 +421,15 @@ def build_questions(g, norm, cap):
         turn('OK, back to the hoodies: delivered to the customer.', must_contain_all=[[str(c800c['available_workdays']), c800c['limiting_stage'].lower(), 'assum', 'estimate', 'unlikely', 'finish']], provenance=True)],
         f"gold: topic switch to the overdue count ({g['n_overdue']}) and resume of the saved feasibility topic; the estimate still needs 21 workdays vs due 2026-04-25")
 
+    # ---------------- Discovery ----------------
+    a25 = norm['ASSEMBLY_2026-03-25']
+    scenario('D01', 'discovery', [turn('Did anything go wrong yesterday?',
+        must_contain_all=[['assembly'], ['below', 'drop', 'under']], must_not_contain=[r'\b(breakdown|machine fail)\b(?![^.]*(no|not|cannot|unknown))'], tool_any=['find_anomalies'], provenance=True)],
+        f"gold: the top finding is the sustained assembly drop (3 working days below the same-weekday minimum: 28, 30, 31 March); the log holds no cause")
+    scenario('D02', 'discovery', [turn('Anything unusual with TrendCart orders?',
+        must_contain_all=[['ORD-120'], ['overdue', 'past due', '15 days']], tool_any=['find_anomalies'], provenance=True)],
+        'gold: filtered to TrendCart: ORD-120 15 days overdue leads, then ORD-020 overdue and the high-risk ones')
+
     # normalise the one extra key used above
     for s in S:
         for t in s['turns']:

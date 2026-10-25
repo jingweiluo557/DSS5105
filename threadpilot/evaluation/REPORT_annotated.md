@@ -1,15 +1,15 @@
 # ThreadPilot evaluation — first-pass results
 
-- Run: 2026-10-25T17:04:50.944752+00:00 against `in-process WorkflowEngine (CSV)` · model `annotated-planner` · business date 2026-04-01T12:00:00+08:00
-- Eval set version 2026-10-24: 54 questions/scenarios, 77 turns. Scored automatically; nothing fixed between run and score.
+- Run: 2026-10-25T17:27:49.531755+00:00 against `in-process WorkflowEngine (CSV)` · model `annotated-planner` · business date 2026-04-01T12:00:00+08:00
+- Eval set version 2026-10-26: 56 questions/scenarios, 79 turns scored. Scored automatically; nothing fixed between run and score.
 
 ## Headline
 
 | Metric | Result |
 |---|---|
-| Scenarios passed (all turns correct) | **54 / 54 (100%)** |
-| Turns passed | 77 / 77 (100%) |
-| Numbers stated in answers | 1104 |
+| Scenarios passed (all turns correct) | **56 / 56 (100%)** |
+| Turns passed | 79 / 79 (100%) |
+| Numbers stated in answers | 1144 |
 | Numbers not traceable to a tool result or the user's words | **0** |
 
 ## By category
@@ -19,6 +19,7 @@
 | action | 6/6 | 11/11 |
 | ambiguous | 6/6 | 6/6 |
 | arithmetic_bait | 5/5 | 5/5 |
+| discovery | 2/2 | 2/2 |
 | facts | 12/12 | 12/12 |
 | feasibility | 5/5 | 8/8 |
 | judgement | 4/4 | 5/5 |
@@ -88,3 +89,5 @@ None.
 - AR05 (arithmetic_bait): {"total_orders": 17, "by_stage": {"COMPLETE": 11, "ASSEMBLY": 1, "WASHING": 1, "KNITTING": 4}, "by_status": {"COMPLETE": 11, "IN_PROGRESS": 
 - M05 (multi_turn): ORD-020 — TrendCart, 1200 Vest; status IN_PROGRESS, stage WASHING, due 2026-03-31, last recorded activity 2026-03-30. | ORD-120 — TrendCart, 1500 Vest; status IN_PROGRESS, stage ASSEMBLY, due 2026-03-17, last recorded activity 2026-03-30. | ORD-120 — TrendCart, 1500 Vest; status IN_PROGRESS, stage ASSEMBLY, due 2026-03-17, last recorded activity 2026-03-30. Already overdue: due 
 - M06 (multi_turn): Does the deadline mean ready at our factory or delivered to the customer? | {"total_orders": 120, "by_stage": {"COMPLETE": 86, "ASSEMBLY": 10, "PACKING": 2, "WASHING": 10, "KNITTING": 12}, "by_status": {"COMPLETE": 8 | Conditional forecast, not a promise: {   "due_date": "2026-04-25",   "delivery_point": "customer",   "available_workdays": 21,   "delivery_b
+- D01 (discovery): 34 findings as of 2026-04-01 (1 stage drop, 2 will miss, 8 overdue, 23 high risk); top 5 by tier and score: 1. [P1] Assembly has been below 
+- D02 (discovery): 5 findings as of 2026-04-01 (2 overdue, 3 high risk); top 5 by tier and score: 1. [P2] ORD-120 (TrendCart) is 15 days overdue, still at ASSE

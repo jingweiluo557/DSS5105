@@ -3,8 +3,8 @@
   "business_now": "2026-04-01T12:00:00+08:00",
   "data_dir": "/home/claude/dss5105/threadpilot/data",
   "counts": {
-    "scenarios": 54,
-    "turns": 77,
+    "scenarios": 56,
+    "turns": 79,
     "by_category": {
       "facts": 12,
       "judgement": 4,
@@ -14,7 +14,8 @@
       "unanswerable": 8,
       "feasibility": 5,
       "action": 6,
-      "arithmetic_bait": 5
+      "arithmetic_bait": 5,
+      "discovery": 2
     }
   },
   "gold": {
@@ -2721,6 +2722,61 @@
                 "unlikely",
                 "finish"
               ]
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "D01",
+      "category": "discovery",
+      "note": "gold: the top finding is the sustained assembly drop (3 working days below the same-weekday minimum: 28, 30, 31 March); the log holds no cause",
+      "turns": [
+        {
+          "message": "Did anything go wrong yesterday?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "assembly"
+              ],
+              [
+                "below",
+                "drop",
+                "under"
+              ]
+            ],
+            "must_not_contain": [
+              "\\b(breakdown|machine fail)\\b(?![^.]*(no|not|cannot|unknown))"
+            ],
+            "tool_any": [
+              "find_anomalies"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "D02",
+      "category": "discovery",
+      "note": "gold: filtered to TrendCart: ORD-120 15 days overdue leads, then ORD-020 overdue and the high-risk ones",
+      "turns": [
+        {
+          "message": "Anything unusual with TrendCart orders?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "ORD-120"
+              ],
+              [
+                "overdue",
+                "past due",
+                "15 days"
+              ]
+            ],
+            "tool_any": [
+              "find_anomalies"
             ],
             "provenance": true
           }
