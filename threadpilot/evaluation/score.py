@@ -90,6 +90,7 @@ def main():
     ap.add_argument('--transcript', required=True, type=Path)
     ap.add_argument('--out', default='results.json', type=Path)
     ap.add_argument('--report', default='REPORT.md', type=Path)
+    ap.add_argument('--strict', action='store_true', help='exit 1 unless every scored scenario passed (CI)')
     args = ap.parse_args()
     ev = json.loads(args.eval.read_text(encoding='utf-8'))
     tr = json.loads(args.transcript.read_text(encoding='utf-8'))
@@ -183,6 +184,8 @@ def main():
             lines.append(f"- {s['id']} ({s['category']}): " + ' | '.join((t.get('answer') or '')[:140].replace('\n', ' ') for t in s['turns']))
     args.report.write_text('\n'.join(lines) + '\n', encoding='utf-8')
     print(json.dumps(summary, indent=1))
+    if args.strict and n_sp != n_s:
+        raise SystemExit(f'{n_s - n_sp} scenario(s) failed; see {args.report}')
 
 
 if __name__ == '__main__':

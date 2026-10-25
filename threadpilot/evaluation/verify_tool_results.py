@@ -43,3 +43,5 @@ ok = sum(1 for c in checks if c[1])
 for label, passed, got, want in checks:
     print(('OK   ' if passed else 'DIFF ') + label + ('' if passed else f'\n      got  {got}\n      want {want}'))
 print(f'\n{ok}/{len(checks)} deterministic tool results match the independent gold computation')
+if ok != len(checks):
+    raise SystemExit(1)
