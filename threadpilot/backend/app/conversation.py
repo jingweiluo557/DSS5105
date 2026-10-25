@@ -1,4 +1,5 @@
 """Bounded planning and grounded narration around the existing business routes."""
+import inspect
 import json
 import re
 from collections import Counter
@@ -171,13 +172,19 @@ class ConversationAgent(IntentClassifier):
             if emit:
                 await emit(fallback)
             return fallback
+        if emit and len(inspect.signature(emit).parameters) > 1:
+            await emit(fallback, 'facts')   # the deterministic answer first; narration follows
         instructions = '''Always answer in clear, concise English, even when the user writes in another language. Keep identifiers and quoted user content unchanged.
 Use supplied tool results as the only authority for current factory data. Never invent
 orders, counts, causes, dates or completed actions. General knowledge is allowed but
 distinguish it from factory facts. No browsing is available. Follow the user's requested
 level of detail; a stage question needs the stage, not every field. Address ALL requests.
 Lead with the answer. Normally use one to three short sentences; use a short list only
-for multiple requests. Avoid repeated caveats, technical explanations and closing offers.
+for multiple requests. When the question asks which orders, for a ranking, or for the most
+at-risk / most idle / soonest-due orders, answer as a numbered list, one order per line:
+**ORD-xxx** customer, then the one date or number that matters, then its status; then at most
+one sentence. Markdown allowed: **bold** for order IDs, numbered or dashed lists, nothing else.
+Avoid repeated caveats, technical explanations and closing offers.
 Do not append '(assuming ...)', '（假设……）', '假定', or generic calculation disclaimers.
 Preserve outstanding clarification questions. Use 'estimated' for forecasts,
 and distinguish recorded facts from predictions. If a condition materially changes the

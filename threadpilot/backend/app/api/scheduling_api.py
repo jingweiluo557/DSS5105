@@ -42,7 +42,34 @@ class Decision(BaseModel):
 @router.get('/risk')
 def risk(request: Request, response: Response):
     response.headers['Cache-Control'] = 'no-store'
-    return QueueAnalysis(current_snapshot(request.app.state.database, business_now().date().isoformat())).summary()
+    now = business_now()
+    summary = QueueAnalysis(current_snapshot(request.app.state.database, now.date().isoformat())).summary()
+    return with_forecasts(summary, now.date())
+
+
+_MODEL = None
+
+
+def _lead_time_model():
+    global _MODEL
+    if _MODEL is None:
+        from ..prediction.aft import LeadTimeModel
+        _MODEL = LeadTimeModel()
+    return _MODEL
+
+
+def with_forecasts(summary: dict, today) -> dict:
+    """Sprint 2: the AFT late-delivery chance for the order's size rides on each row as one supporting number
+    (`forecast`), so the UI shows one risk vocabulary (the queue level) with the model as a line inside the card."""
+    model = _lead_time_model()
+    for row in summary.get('orders', []):
+        try:
+            f = model.forecast_order(row, today)
+            row['forecast'] = {'delay_probability': f['delay_probability'], 'expected_completion_date': f['expected_completion_date'],
+                               'completion_range_80pct': f['completion_range_80pct'], 'typical_lead_days_for_this_size': f['typical_lead_days_for_this_size']}
+        except (KeyError, ValueError, TypeError):
+            row['forecast'] = None
+    return summary
 
 
 @router.post('/orders/{order_id}/preview')

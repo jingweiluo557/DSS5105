@@ -50,3 +50,13 @@ Why: the first live evaluation of the CloudBase deployment (47 questions, `evalu
 - **Briefing email** carries an alert-budget line.
 - **Docs**: `BUSINESS_CASE.md` (reconstructed from the Sprint 1 deck, labelled estimates), `SPRINT1_EVIDENCE.md` (every slide claim mapped to a file or marked superseded).
 - Evaluation v2026-10-26: 56 questions / 79 turns, offline 56/56.
+
+## 26 Oct, third batch — the CEO home screen (branch `feat/ceo-home-screen`)
+
+Driven by the ten-second test in `docs/CEO_INTERFACE_REVIEW.md`: no screen on the live build said what to decide today before showing counters and prose.
+
+- **Home screen**: status line (date · RED/AMBER/GREEN · three facts) from the alert tiers; at most three "Decide today" cards with one button each (ask the floor / review options / confirm a new date / call the customer), from the same detectors as the alert emails; order health as one stacked bar with the 30-day on-time rate; production pulse as four bars against the previous-eight-same-weekday band; the briefing reduced to its first sentence per section and never regenerated on load; to-dos limited to the manager's items and AI next steps that name an order or a stage; the chat box on the page. No nested scroll regions. Backend: `services/home_service.py` + `GET /api/dashboard/home` (pure Python over the snapshot), `tests/test_home_screen.py`, `tests/e2e/dashboard_ai_render.cjs`.
+- **Chat**: a `facts` SSE event sends the server's answer before the narration; answers render light markdown; ranking questions are answered as numbered lists; sources collapse to one line; order cards fold when more than two.
+- **One risk vocabulary**: late / at risk / on track / unassessed everywhere; the AFT chance (`forecast` on each `/api/scheduling/risk` row) is one line inside the order card; the 100-point rule score is retired; the model export tab leaves the manager navigation (linked from Settings).
+- **Expedite review**: verdict and consequence first, before/after finish bar, "already first in its queue" case named with the two options left; all labels English.
+- **Fixes**: `#/` lands on the dashboard; Orders opens with late / at-risk lists and the full table behind a click; activity gaps coloured at 5 and 10 days; watches banner corrected; Settings leads with the briefing state and moves the demo clock under "Demo"; the briefing prompt asks for at most three decisions of at most 20 words naming an order or a stage.

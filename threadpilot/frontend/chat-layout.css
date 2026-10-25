@@ -117,3 +117,13 @@
 .source-details { margin-top:14px; color:var(--muted); font-size:12px; }
 .source-details summary { cursor:pointer; }
 .source-details p { margin:8px 0; }
+
+/* Shaped answers: lists and bold order IDs instead of raw markdown. */
+.note.md { white-space: normal; }
+.note.md p { margin: 0 0 10px; }
+.note.md p:last-child { margin: 0; }
+.note.md ul, .note.md ol { margin: 4px 0 10px; padding-left: 22px; }
+.note.md li { margin: 0 0 6px; }
+.note.md code { font: 12px/1.5 Consolas, monospace; background: #eef2f5; padding: 1px 5px; border-radius: 5px; }
+.source-details.facts .md { color: var(--ink); font-size: 13px; margin-top: 8px; }
+.source-details a { white-space: nowrap; }
