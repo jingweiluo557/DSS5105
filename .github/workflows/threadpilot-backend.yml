@@ -78,7 +78,7 @@ jobs:
           path: threadpilot/backend/pytest-output.txt
 
   evaluation:
-    name: Offline evaluation replay (56 questions, annotated planner)
+    name: Offline evaluation replay (83 questions, annotated planner)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

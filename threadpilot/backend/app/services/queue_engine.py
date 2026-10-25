@@ -95,9 +95,14 @@ def assess_risk(x: dict, best_k: int | None, exp_k: int | None, business_date: d
            "stalled": stalled, **({"unfinished": True} if unfinished else {})}
     if due < business_date:
         late = (business_date - due).days
+        # late_days_* mean the same thing on every branch: working days the finish lands AFTER the due date
+        # (a 26 Oct review found the old value, working days from today, being read as "days after the due date").
+        after_best = working_days_between(due, best_date)
+        after_exp = working_days_between(due, exp_date) if exp_date else None
         return {**out, "level": "overdue", "confidence": "certain", "working_days_left": 0, "margin": 0,
-                "late_days_best": best_k, "late_days_expected": exp_k,
-                "reason": f"{late} day{'s' if late != 1 else ''} past the {dm(due)} due date"}
+                "days_past_due": late, "late_days_best": after_best, "late_days_expected": after_exp,
+                "reason": f"{late} day{'s' if late != 1 else ''} past the {dm(due)} due date; finishes {dow_dm(best_date)} at best, "
+                          f"{after_best} working day{'s' if after_best != 1 else ''} after the due date"}
     width = working_days_inclusive(business_date, due)
     late_best = max(0, best_k - width)
     if late_best >= HIGH_LATE_DAYS:

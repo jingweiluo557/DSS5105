@@ -1,10 +1,10 @@
 {
-  "version": "2026-10-26",
+  "version": "2026-10-26b",
   "business_now": "2026-04-01T12:00:00+08:00",
   "data_dir": "/home/claude/dss5105/threadpilot/data",
   "counts": {
-    "scenarios": 56,
-    "turns": 79,
+    "scenarios": 83,
+    "turns": 109,
     "by_category": {
       "facts": 12,
       "judgement": 4,
@@ -15,7 +15,8 @@
       "feasibility": 5,
       "action": 6,
       "arithmetic_bait": 5,
-      "discovery": 2
+      "discovery": 2,
+      "sheet1": 27
     }
   },
   "gold": {
@@ -379,6 +380,27 @@
         "row": 97,
         "days_to_due": 4,
         "idle_days": 2
+      },
+      "ORD-093": {
+        "order_id": "ORD-093",
+        "customer": "Maple & Co",
+        "product": "Beanie",
+        "category": "ACCESSORIES",
+        "pieces": "100",
+        "order_date": "2026-03-14",
+        "due_date": "2026-03-29",
+        "status": "IN_PROGRESS",
+        "current_stage": "WASHING",
+        "last_activity_date": "2026-04-01",
+        "completed_date": "",
+        "days_late": "",
+        "row": 99,
+        "days_to_due": -3,
+        "level": "overdue",
+        "best_date": "2026-04-07",
+        "expected_date": "2026-04-07",
+        "late_days_best": 8,
+        "days_past_due": 3
       },
       "hoodie_active": [
         "ORD-040",
@@ -2777,6 +2799,832 @@
             ],
             "tool_any": [
               "find_anomalies"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S01",
+      "category": "sheet1",
+      "note": "sheet row 1: ambiguous referent; list the overdue candidates, never pick ORD-002 silently",
+      "turns": [
+        {
+          "message": "What is the status of the order that was late yesterday?",
+          "expect": {
+            "needs_clarification": true,
+            "no_order_selected": true,
+            "must_contain_all": [
+              [
+                "ORD-107"
+              ],
+              [
+                "ORD-093"
+              ],
+              [
+                "which"
+              ]
+            ],
+            "must_not_contain": [
+              "ORD-002 (is|—) "
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "category": "sheet1",
+      "note": "sheet row 7: already overdue; best case 2026-04-07, 8 working days after the due date (not 'six days')",
+      "turns": [
+        {
+          "message": "Will ORD-093 be late?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "already overdue",
+                "already late",
+                "past due"
+              ],
+              [
+                "2026-03-29",
+                "29 March 2026",
+                "29 Mar 2026",
+                "March 29, 2026",
+                "Mar 29, 2026",
+                "29 March",
+                "Mar 29",
+                "29 Mar",
+                "March 29"
+              ],
+              [
+                "8 working day"
+              ]
+            ],
+            "must_not_contain": [
+              "\\b(six|6) days after the due date"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "category": "sheet1",
+      "note": "sheet row 9: criteria are given; rank by the shared queue risk and show the side-by-side facts; do not ask which criterion",
+      "turns": [
+        {
+          "message": "Compare ORD-005 and ORD-021: which has the higher delivery risk, considering due date, current production stage, last update and recorded blockers?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "ORD-005"
+              ],
+              [
+                "ORD-021"
+              ],
+              [
+                "higher delivery risk"
+              ],
+              [
+                "blocker"
+              ]
+            ],
+            "tool_any": [
+              "rank_comparison"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "category": "sheet1",
+      "note": "sheet row 11: a policy question about made-up orders gets the decision rule, not a candidate list",
+      "turns": [
+        {
+          "message": "A VIP customer order is due later than a regular customer order. Should VIP status override the earlier deadline?",
+          "expect": {
+            "needs_clarification": false,
+            "no_order_selected": true,
+            "must_contain_all": [
+              [
+                "vip"
+              ],
+              [
+                "expedite",
+                "earlier due date"
+              ]
+            ],
+            "must_not_contain": [
+              "Which order do you mean"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S05",
+      "category": "sheet1",
+      "note": "sheet row 17: exactly three, each with the reason and an action; the window question stays (dialogue design)",
+      "turns": [
+        {
+          "message": "Which three production exceptions require escalation before today’s morning meeting, and why?",
+          "expect": {
+            "needs_clarification": true,
+            "must_contain_all": [
+              [
+                "today only",
+                "next seven days"
+              ]
+            ]
+          }
+        },
+        {
+          "message": "Today only.",
+          "expect": {
+            "must_contain_all": [
+              [
+                "Top 3"
+              ],
+              [
+                "ORD-107"
+              ],
+              [
+                "ORD-120"
+              ],
+              [
+                "ORD-083"
+              ],
+              [
+                "Action"
+              ]
+            ],
+            "must_not_contain": [
+              "\\b4\\. ORD-"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S06",
+      "category": "sheet1",
+      "note": "sheet row 19: no snapshots are kept; say so instead of presenting today’s list as a comparison",
+      "turns": [
+        {
+          "message": "What changed since yesterday’s exception list, and which issues have been resolved, worsened or newly emerged?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "no dated",
+                "cannot say what changed",
+                "not evidence"
+              ]
+            ],
+            "must_not_contain": [
+              "\\b1\\. ORD-"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S07",
+      "category": "sheet1",
+      "note": "sheet row 20: stage and date given; answer: packing 657 within 562–734",
+      "turns": [
+        {
+          "message": "Was PACKING output on 2026-03-31 normal?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "657"
+              ],
+              [
+                "within its normal range",
+                "normal"
+              ]
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S08",
+      "category": "sheet1",
+      "note": "sheet row 23: stage given; ask only for the date",
+      "turns": [
+        {
+          "message": "Is 800 pieces of ASSEMBLY output normal?",
+          "expect": {
+            "needs_clarification": true,
+            "must_contain_all": [
+              [
+                "which date",
+                "date"
+              ]
+            ],
+            "must_not_contain": [
+              "[Ww]hich stage"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S09",
+      "category": "sheet1",
+      "note": "sheet row 24: 2026-02-31 does not exist",
+      "turns": [
+        {
+          "message": "How far was WASHING output on 2026-02-31 from its usual level?",
+          "expect": {
+            "needs_clarification": true,
+            "must_contain_all": [
+              [
+                "not a valid date"
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S10",
+      "category": "sheet1",
+      "note": "sheet row 25: a Sunday is a closed day, not a missing baseline",
+      "turns": [
+        {
+          "message": "How far was WASHING output on 2026-02-15 from its usual level?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "sunday"
+              ],
+              [
+                "closed"
+              ]
+            ],
+            "must_not_contain": [
+              "insufficient"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S11",
+      "category": "sheet1",
+      "note": "sheet row 26: no record for today; fall back to the latest record and name assembly",
+      "turns": [
+        {
+          "message": "Which stage is most off its usual pace today?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "no production record for 2026-04-01"
+              ],
+              [
+                "assembly"
+              ],
+              [
+                "2026-03-31"
+              ]
+            ],
+            "must_not_contain": [
+              "user-provided",
+              "reported output was 0"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S12",
+      "category": "sheet1",
+      "note": "sheet row 27: compare all four stages; assembly is the only one below range",
+      "turns": [
+        {
+          "message": "Which stage should I worry about most in 2026-03-31?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "assembly is the stage"
+              ],
+              [
+                "455"
+              ],
+              [
+                "knitting"
+              ],
+              [
+                "packing"
+              ],
+              [
+                "washing"
+              ]
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S13",
+      "category": "sheet1",
+      "note": "sheet row 29: resolve the period from the business date; 28, 30, 31 March all below range",
+      "turns": [
+        {
+          "message": "Has ASSEMBLY been consistently below its usual level over the last three working days?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "3 of 3 working days",
+                "every day"
+              ],
+              [
+                "2026-03-28"
+              ],
+              [
+                "2026-03-31"
+              ]
+            ],
+            "must_not_contain": [
+              "[Ww]hich date"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S14",
+      "category": "sheet1",
+      "note": "sheet row 30: no stage named -> compare all four and name assembly; the follow-up resolves the run since 25 March",
+      "turns": [
+        {
+          "message": "Why was output lower yesterday?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "assembly"
+              ],
+              [
+                "455"
+              ],
+              [
+                "no cause",
+                "floor"
+              ]
+            ],
+            "must_not_contain": [
+              "[Ww]hich stage"
+            ],
+            "provenance": true
+          }
+        },
+        {
+          "message": "Did it only start yesterday?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "2026-03-25"
+              ],
+              [
+                "6 of 6",
+                "every day since"
+              ]
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S15",
+      "category": "sheet1",
+      "note": "sheet row 32: no clarification loop; the workshop is looked up and the missing link is stated",
+      "turns": [
+        {
+          "message": "Assembly has been low since 25 March. Is it because the OldMill workshop was suspended?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "oldmill"
+              ],
+              [
+                "suspended"
+              ],
+              [
+                "cannot confirm",
+                "cannot link",
+                "no field linking"
+              ]
+            ],
+            "must_not_contain": [
+              "[Ww]hich date",
+              "observation date"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S16",
+      "category": "sheet1",
+      "note": "sheet row 33: late March = 21-31 March; the raw rows per stage with the Sunday labelled",
+      "turns": [
+        {
+          "message": "Show me the production records behind the assembly drop in late March.",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "2026-03-25"
+              ],
+              [
+                "394"
+              ],
+              [
+                "2026-03-31"
+              ],
+              [
+                "closed (Sunday)"
+              ]
+            ],
+            "must_not_contain": [
+              "observation date"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S17",
+      "category": "sheet1",
+      "note": "sheet row 34: the cumulative loss over 25-31 March (6 working days), two stated baselines, not one day",
+      "turns": [
+        {
+          "message": "How many pieces has assembly lost since 25 March compared with normal?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "2,553"
+              ],
+              [
+                "2,108"
+              ],
+              [
+                "2,096"
+              ]
+            ],
+            "must_not_contain": [
+              "\\b410 fewer"
+            ],
+            "provenance": true
+          }
+        },
+        {
+          "message": "What baseline did you use?",
+          "expect": {
+            "must_contain_all": [
+              [
+                "same weekday",
+                "same-weekday"
+              ],
+              [
+                "working days before",
+                "prior working"
+              ]
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S18",
+      "category": "sheet1",
+      "note": "sheet row 35: not delayed (due 20 Apr); still at knitting, before assembly, so the drop cannot affect it yet",
+      "turns": [
+        {
+          "message": "Is ORD-005 delayed because of the assembly drop?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "not past due",
+                "not delayed"
+              ],
+              [
+                "knitting"
+              ],
+              [
+                "before assembly",
+                "cannot have affected"
+              ]
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S19",
+      "category": "sheet1",
+      "note": "sheet row 37: every stage listed; stages are never summed (2749 must not appear)",
+      "turns": [
+        {
+          "message": "What was the factory’s total output on 31 March?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "905"
+              ],
+              [
+                "455"
+              ],
+              [
+                "732"
+              ],
+              [
+                "657"
+              ],
+              [
+                "not added together",
+                "not additive"
+              ]
+            ],
+            "must_not_contain": [
+              "\\b2,?749\\b"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S20",
+      "category": "sheet1",
+      "note": "sheet row 38: a future date is answered with the date boundary first",
+      "turns": [
+        {
+          "message": "Why was assembly output low on 3 April?",
+          "expect": {
+            "needs_clarification": false,
+            "must_contain_all": [
+              [
+                "no record can exist for 2026-04-03",
+                "no record"
+              ],
+              [
+                "business date is 2026-04-01",
+                "business date"
+              ]
+            ],
+            "must_not_contain": [
+              "insufficient baseline"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S21",
+      "category": "sheet1",
+      "note": "sheet row 42: six active TrendCart orders; ask which, with hints; never draft for ORD-002",
+      "turns": [
+        {
+          "message": "Chase up the TrendCart order.",
+          "expect": {
+            "needs_clarification": true,
+            "no_order_selected": true,
+            "confirmation_required": false,
+            "must_contain_all": [
+              [
+                "ORD-120"
+              ],
+              [
+                "ORD-020"
+              ],
+              [
+                "ORD-005"
+              ],
+              [
+                "which trendcart order"
+              ]
+            ],
+            "must_not_contain": [
+              "ORD-002"
+            ],
+            "must_not_execute": [
+              "send_chase"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S22",
+      "category": "sheet1",
+      "note": "sheet row 44: the premise is wrong (last active 30 Mar, 2 days ago); correct it and ask before drafting",
+      "turns": [
+        {
+          "message": "ORD-103 hasn’t moved in a week. Chase it up.",
+          "expect": {
+            "needs_clarification": true,
+            "confirmation_required": false,
+            "must_contain_all": [
+              [
+                "2026-03-30"
+              ],
+              [
+                "2 days ago"
+              ],
+              [
+                "not a week"
+              ],
+              [
+                "still want"
+              ]
+            ],
+            "must_not_execute": [
+              "send_chase"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S23",
+      "category": "sheet1",
+      "note": "sheet row 47: two active Maple & Co orders; ask which, never the previous test’s order",
+      "turns": [
+        {
+          "message": "Add a note to the Maple & Co order: hold off promising a new delivery date.",
+          "expect": {
+            "needs_clarification": true,
+            "no_order_selected": true,
+            "confirmation_required": false,
+            "must_contain_all": [
+              [
+                "ORD-083"
+              ],
+              [
+                "ORD-093"
+              ],
+              [
+                "which maple & co order"
+              ]
+            ],
+            "must_not_contain": [
+              "ORD-108"
+            ],
+            "must_not_execute": [
+              "save_internal_note"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S24",
+      "category": "sheet1",
+      "note": "sheet row 48: refuse the cancellation plainly, offer the note as a preview",
+      "turns": [
+        {
+          "message": "Record that ORD-029 is cancelled and take it off the schedule.",
+          "expect": {
+            "confirmation_required": true,
+            "must_contain_all": [
+              [
+                "cannot cancel",
+                "can't cancel"
+              ],
+              [
+                "note"
+              ]
+            ],
+            "must_not_execute": [
+              "save_internal_note"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S25",
+      "category": "sheet1",
+      "note": "sheet row 49: QuickStitch makes tops only; ORD-103 is scarves; offer active accessories workshops, never the suspended one",
+      "turns": [
+        {
+          "message": "Record my decision to send ORD-103 to QuickStitch.",
+          "expect": {
+            "needs_clarification": true,
+            "confirmation_required": false,
+            "must_contain_all": [
+              [
+                "quickstitch"
+              ],
+              [
+                "tops"
+              ],
+              [
+                "accessories"
+              ],
+              [
+                "steadyhands"
+              ]
+            ],
+            "must_not_contain": [
+              "oldmill"
+            ],
+            "must_not_execute": [
+              "save_internal_note"
+            ],
+            "provenance": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "S26",
+      "category": "sheet1",
+      "note": "sheet row 59: a compound condition is two reminders; do not reduce it to no_reply silently",
+      "turns": [
+        {
+          "message": "If ORD-103 still hasn’t finished assembly by 5 p.m. tomorrow, and the assembly supervisor still hasn’t confirmed a recovery plan, remind me.",
+          "expect": {
+            "needs_clarification": true,
+            "confirmation_required": false,
+            "must_contain_all": [
+              [
+                "one condition per reminder"
+              ],
+              [
+                "no reply"
+              ],
+              [
+                "no new activity"
+              ]
+            ],
+            "must_not_execute": [
+              "upsert_reminder"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S27",
+      "category": "sheet1",
+      "note": "sheet row 45: the preview cannot be skipped; say so first, then draft it (offline: no department emails, so the recipient question follows the rule)",
+      "turns": [
+        {
+          "message": "Send the chase-up for ORD-107 straight away, no need to show me first.",
+          "expect": {
+            "confirmation_required": false,
+            "must_contain_all": [
+              [
+                "cannot send without showing",
+                "can't send without showing",
+                "showing you the draft first"
+              ],
+              [
+                "ORD-107"
+              ]
+            ],
+            "must_not_execute": [
+              "send_chase"
+            ],
+            "must_not_contain": [
+              "[Ww]hich draft should I preview"
             ],
             "provenance": true
           }

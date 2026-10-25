@@ -1,23 +1,23 @@
 {
   "meta": {
-    "run_at": "2026-10-25T17:27:49.531755+00:00",
+    "run_at": "2026-10-25T23:33:26.477219+00:00",
     "target": "in-process WorkflowEngine (CSV)",
     "model": "annotated-planner",
     "first_pass": false,
     "runner": "run_annotated_eval.py",
     "sent_externally": []
   },
-  "eval_version": "2026-10-26",
+  "eval_version": "2026-10-26b",
   "business_now": "2026-04-01T12:00:00+08:00",
   "summary": {
-    "scenarios": 56,
-    "scenarios_passed": 56,
+    "scenarios": 83,
+    "scenarios_passed": 83,
     "scenario_accuracy": 1.0,
     "not_run": [],
-    "turns": 79,
-    "turns_passed": 79,
+    "turns": 109,
+    "turns_passed": 109,
     "turn_accuracy": 1.0,
-    "numbers_stated": 1144,
+    "numbers_stated": 1782,
     "numbers_untraced": 0,
     "by_category": {
       "facts": {
@@ -79,6 +79,12 @@
         "passed": 2,
         "turns": 2,
         "turns_passed": 2
+      },
+      "sheet1": {
+        "scenarios": 27,
+        "passed": 27,
+        "turns": 30,
+        "turns_passed": 30
       }
     }
   },
@@ -109,7 +115,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+          "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -141,7 +147,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+          "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -276,7 +282,7 @@
               true
             ]
           ],
-          "answer": "Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-01 (including overdue active orders).\nEarlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107: due 2026-03-16, last activity 2026-04-01.\n2. ORD-120: due 2026-03-17, last activity 2026-03-30.\n3. ORD-083: due 2026-03-23, last activity 2026-03-30.\n4. ORD-114: due 2026-03-23, last activity 2026-03-30.\n5. ORD-002: due 2026-03-29, last activity 2026-03-23.\n6. ORD-093: due 2026-03-29, last activity 2026-04-01.\n7. ORD-020: due 2026-03-31, last activity 2026-03-30.\n8. ORD-055: due 2026-03-31, last activity 2026-04-01.\n9. ORD-029: due 2026-04-01, last activity 2026-04-01.\nRanking indicates review urgency, not a prediction of failure. Select an order ID to drill down.",
+          "answer": "Top 9 of 9 for 2026-04-01 to 2026-04-01 (overdue active orders first; business date 2026-04-01). Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107 (Northwind Apparel, 2000 Cardigan): 16 days overdue; stage PACKING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-03. Action: confirm a new date with the customer; chase the stage if idle.\n2. ORD-120 (TrendCart, 1500 Vest): 15 days overdue; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-09. Action: confirm a new date with the customer; chase the stage if idle.\n3. ORD-083 (Maple & Co, 1000 Hoodie): 9 days overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-04. Action: confirm a new date with the customer; chase the stage if idle.\n4. ORD-114 (Northwind Apparel, 2000 Hoodie): 9 days overdue; stage PACKING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-06. Action: confirm a new date with the customer; chase the stage if idle.\n5. ORD-002 (Cotton Club, 1000 Crewneck sweater): 3 days overdue; stage WASHING; last activity 2026-03-23 (9 d ago, suspected stalled); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n6. ORD-093 (Maple & Co, 100 Beanie): 3 days overdue; stage WASHING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n7. ORD-020 (TrendCart, 1200 Vest): 1 day overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n8. ORD-055 (Cotton Club, 800 Crewneck sweater): 1 day overdue; stage ASSEMBLY; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n9. ORD-029 (Northwind Apparel, 1500 Beanie): due today; stage WASHING; last activity 2026-04-01 (0 d ago); queue high, best-case finish 2026-04-13. Action: expedite, outsource or re-date today.\nOwner and escalation time are not recorded; the department is the order’s current stage.\nRanking indicates review urgency, not a prediction of failure.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -308,7 +314,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 17, \"by_stage\": {\"COMPLETE\": 11, \"ASSEMBLY\": 1, \"WASHING\": 1, \"KNITTING\": 4}, \"by_status\": {\"COMPLETE\": 11, \"IN_PROGRESS\": 6}, \"customer_quantities\": {\"TrendCart\": 15050}, \"customer_order_counts\": {\"TrendCart\": 17}, \"active_pieces\": 5600, \"overdue_active\": {\"count\": 2, \"order_ids\": [\"ORD-120\", \"ORD-020\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}, {\"order_id\": \"ORD-082\", \"idle_days\": 2}, {\"order_id\": \"ORD-120\", \"idle_days\": 2}, {\"order_id\": \"ORD-017\", \"idle_days\": 0}], \"idle_5_days_or_more\": [\"ORD-005\"]}, \"completed_delivery\": {\"completed\": 11, \"late\": 8, \"on_time\": 3, \"on_time_rate_pct\": 27.3, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-087\", \"ORD-028\", \"ORD-115\", \"ORD-090\", \"ORD-014\", \"ORD-054\", \"ORD-030\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"customer\": \"TrendCart\"}}",
+          "answer": "As of 2026-04-01: 6 orders in progress, 2 overdue (ORD-120, ORD-020), 0 due today, 1 idle 5+ days; 3 of 11 completed orders on time (27.3%).\n{\"total_orders\": 17, \"by_stage\": {\"COMPLETE\": 11, \"ASSEMBLY\": 1, \"WASHING\": 1, \"KNITTING\": 4}, \"by_status\": {\"COMPLETE\": 11, \"IN_PROGRESS\": 6}, \"customer_quantities\": {\"TrendCart\": 15050}, \"customer_order_counts\": {\"TrendCart\": 17}, \"active_pieces\": 5600, \"overdue_active\": {\"count\": 2, \"order_ids\": [\"ORD-120\", \"ORD-020\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}, {\"order_id\": \"ORD-082\", \"idle_days\": 2}, {\"order_id\": \"ORD-120\", \"idle_days\": 2}, {\"order_id\": \"ORD-017\", \"idle_days\": 0}], \"idle_5_days_or_more\": [\"ORD-005\"]}, \"completed_delivery\": {\"completed\": 11, \"late\": 8, \"on_time\": 3, \"on_time_rate_pct\": 27.3, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-087\", \"ORD-028\", \"ORD-115\", \"ORD-090\", \"ORD-014\", \"ORD-054\", \"ORD-030\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"customer\": \"TrendCart\"}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -419,7 +425,7 @@
               true
             ]
           ],
-          "answer": "Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-08 (including overdue active orders).\nEarlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107: due 2026-03-16, last activity 2026-04-01.\n2. ORD-120: due 2026-03-17, last activity 2026-03-30.\n3. ORD-083: due 2026-03-23, last activity 2026-03-30.\n4. ORD-114: due 2026-03-23, last activity 2026-03-30.\n5. ORD-002: due 2026-03-29, last activity 2026-03-23.\n6. ORD-093: due 2026-03-29, last activity 2026-04-01.\n7. ORD-020: due 2026-03-31, last activity 2026-03-30.\n8. ORD-055: due 2026-03-31, last activity 2026-04-01.\n9. ORD-029: due 2026-04-01, last activity 2026-04-01.\n10. ORD-108: due 2026-04-03, last activity 2026-03-31.\n11. ORD-103: due 2026-04-04, last activity 2026-03-30.\n12. ORD-061: due 2026-04-05, last activity 2026-03-30.\n13. ORD-099: due 2026-04-05, last activity 2026-03-31.\n14. ORD-062: due 2026-04-08, last activity 2026-03-31.\nRanking indicates review urgency, not a prediction of failure. Select an order ID to drill down.",
+          "answer": "Top 14 of 14 for 2026-04-01 to 2026-04-08 (overdue active orders first; business date 2026-04-01). Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107 (Northwind Apparel, 2000 Cardigan): 16 days overdue; stage PACKING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-03. Action: confirm a new date with the customer; chase the stage if idle.\n2. ORD-120 (TrendCart, 1500 Vest): 15 days overdue; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-09. Action: confirm a new date with the customer; chase the stage if idle.\n3. ORD-083 (Maple & Co, 1000 Hoodie): 9 days overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-04. Action: confirm a new date with the customer; chase the stage if idle.\n4. ORD-114 (Northwind Apparel, 2000 Hoodie): 9 days overdue; stage PACKING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-06. Action: confirm a new date with the customer; chase the stage if idle.\n5. ORD-002 (Cotton Club, 1000 Crewneck sweater): 3 days overdue; stage WASHING; last activity 2026-03-23 (9 d ago, suspected stalled); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n6. ORD-093 (Maple & Co, 100 Beanie): 3 days overdue; stage WASHING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n7. ORD-020 (TrendCart, 1200 Vest): 1 day overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n8. ORD-055 (Cotton Club, 800 Crewneck sweater): 1 day overdue; stage ASSEMBLY; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n9. ORD-029 (Northwind Apparel, 1500 Beanie): due today; stage WASHING; last activity 2026-04-01 (0 d ago); queue high, best-case finish 2026-04-13. Action: expedite, outsource or re-date today.\n10. ORD-108 (Harbor Knits, 2000 Scarf): due in 2 days; stage ASSEMBLY; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-15. Action: expedite, outsource or re-date today.\n11. ORD-103 (Bright Basics, 2000 Scarf): due in 3 days; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-16. Action: expedite, outsource or re-date today.\n12. ORD-061 (Harbor Knits, 800 Scarf): due in 4 days; stage WASHING; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-17. Action: expedite, outsource or re-date today.\n13. ORD-099 (Northwind Apparel, 1500 Polo shirt): due in 4 days; stage WASHING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-20. Action: expedite, outsource or re-date today.\n14. ORD-062 (Bright Basics, 2000 Scarf): due in 7 days; stage KNITTING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-21. Action: expedite, outsource or re-date today.\nOwner and escalation time are not recorded; the department is the order’s current stage.\nRanking indicates review urgency, not a prediction of failure.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -487,7 +493,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+          "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -522,7 +528,7 @@
               true
             ]
           ],
-          "answer": "Recorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
+          "answer": "Assembly on 2026-03-31: 455 pieces, below its normal range; the previous eight same weekdays ran 687–807 (mean 745.25), 39% below the mean.\nRecorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"change_pct\": -39,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -554,7 +560,7 @@
               true
             ]
           ],
-          "answer": "Recorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
+          "answer": "Assembly on 2026-03-31: 455 pieces, below its normal range; the previous eight same weekdays ran 687–807 (mean 745.25), 39% below the mean.\nRecorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"change_pct\": -39,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -580,7 +586,7 @@
               true
             ]
           ],
-          "answer": "Recorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\"\n}",
+          "answer": "Assembly on 2026-03-31: 455 pieces, below its normal range; the previous eight same weekdays ran 687–807 (mean 745.25), 39% below the mean.\nRecorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"change_pct\": -39,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\"\n}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -613,7 +619,7 @@
               true
             ]
           ],
-          "answer": "Recorded facts and labelled interpretation:\n{\n  \"stage\": \"WASHING\",\n  \"date\": \"2026-03-31\",\n  \"output\": 732,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 720,\n      \"source\": \"production_log.csv\",\n      \"row\": 136\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 774,\n      \"source\": \"production_log.csv\",\n      \"row\": 164\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 685,\n      \"source\": \"production_log.csv\",\n      \"row\": 192\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 668,\n      \"source\": \"production_log.csv\",\n      \"row\": 220\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 728,\n      \"source\": \"production_log.csv\",\n      \"row\": 248\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 737,\n      \"source\": \"production_log.csv\",\n      \"row\": 276\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 617,\n      \"source\": \"production_log.csv\",\n      \"row\": 304\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 741,\n      \"source\": \"production_log.csv\",\n      \"row\": 332\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 617,\n  \"maximum\": 774,\n  \"mean\": 708.75,\n  \"status\": \"within\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
+          "answer": "Washing on 2026-03-31: 732 pieces, within its normal range (normal); the previous eight same weekdays ran 617–774 (mean 708.75), 3% above the mean.\nRecorded facts and labelled interpretation:\n{\n  \"stage\": \"WASHING\",\n  \"date\": \"2026-03-31\",\n  \"output\": 732,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 720,\n      \"source\": \"production_log.csv\",\n      \"row\": 136\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 774,\n      \"source\": \"production_log.csv\",\n      \"row\": 164\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 685,\n      \"source\": \"production_log.csv\",\n      \"row\": 192\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 668,\n      \"source\": \"production_log.csv\",\n      \"row\": 220\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 728,\n      \"source\": \"production_log.csv\",\n      \"row\": 248\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 737,\n      \"source\": \"production_log.csv\",\n      \"row\": 276\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 617,\n      \"source\": \"production_log.csv\",\n      \"row\": 304\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 741,\n      \"source\": \"production_log.csv\",\n      \"row\": 332\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 617,\n  \"maximum\": 774,\n  \"mean\": 708.75,\n  \"change_pct\": 3,\n  \"status\": \"within\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -646,7 +652,7 @@
               true
             ]
           ],
-          "answer": "Recorded facts and labelled interpretation:\n{\n  \"stage\": \"PACKING\",\n  \"date\": \"2026-03-31\",\n  \"output\": 657,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 723,\n      \"source\": \"production_log.csv\",\n      \"row\": 137\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 734,\n      \"source\": \"production_log.csv\",\n      \"row\": 165\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 562,\n      \"source\": \"production_log.csv\",\n      \"row\": 193\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 702,\n      \"source\": \"production_log.csv\",\n      \"row\": 221\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 707,\n      \"source\": \"production_log.csv\",\n      \"row\": 249\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 605,\n      \"source\": \"production_log.csv\",\n      \"row\": 277\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 638,\n      \"source\": \"production_log.csv\",\n      \"row\": 305\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 671,\n      \"source\": \"production_log.csv\",\n      \"row\": 333\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": 800,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 562,\n  \"maximum\": 734,\n  \"mean\": 667.75,\n  \"status\": \"within\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
+          "answer": "The record shows 657 pieces on 2026-03-31, not 800. Packing on 2026-03-31: 657 pieces, within its normal range (normal); the previous eight same weekdays ran 562–734 (mean 667.75), 2% below the mean.\nRecorded facts and labelled interpretation:\n{\n  \"stage\": \"PACKING\",\n  \"date\": \"2026-03-31\",\n  \"output\": 657,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 723,\n      \"source\": \"production_log.csv\",\n      \"row\": 137\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 734,\n      \"source\": \"production_log.csv\",\n      \"row\": 165\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 562,\n      \"source\": \"production_log.csv\",\n      \"row\": 193\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 702,\n      \"source\": \"production_log.csv\",\n      \"row\": 221\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 707,\n      \"source\": \"production_log.csv\",\n      \"row\": 249\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 605,\n      \"source\": \"production_log.csv\",\n      \"row\": 277\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 638,\n      \"source\": \"production_log.csv\",\n      \"row\": 305\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 671,\n      \"source\": \"production_log.csv\",\n      \"row\": 333\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": 800,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 562,\n  \"maximum\": 734,\n  \"mean\": 667.75,\n  \"change_pct\": -2,\n  \"status\": \"within\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -679,7 +685,7 @@
               true
             ]
           ],
-          "answer": "Recorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
+          "answer": "Assembly on 2026-03-31: 455 pieces, below its normal range; the previous eight same weekdays ran 687–807 (mean 745.25), 39% below the mean.\nRecorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"change_pct\": -39,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -706,7 +712,7 @@
               true
             ]
           ],
-          "answer": "Recorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\"\n}",
+          "answer": "Assembly on 2026-03-31: 455 pieces, below its normal range; the previous eight same weekdays ran 687–807 (mean 745.25), 39% below the mean.\nRecorded facts and labelled interpretation:\n{\n  \"stage\": \"ASSEMBLY\",\n  \"date\": \"2026-03-31\",\n  \"output\": 455,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 807,\n      \"source\": \"production_log.csv\",\n      \"row\": 135\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 696,\n      \"source\": \"production_log.csv\",\n      \"row\": 163\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 786,\n      \"source\": \"production_log.csv\",\n      \"row\": 191\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 711,\n      \"source\": \"production_log.csv\",\n      \"row\": 219\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 687,\n      \"source\": \"production_log.csv\",\n      \"row\": 247\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 761,\n      \"source\": \"production_log.csv\",\n      \"row\": 275\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 735,\n      \"source\": \"production_log.csv\",\n      \"row\": 303\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 779,\n      \"source\": \"production_log.csv\",\n      \"row\": 331\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 687,\n  \"maximum\": 807,\n  \"mean\": 745.25,\n  \"change_pct\": -39,\n  \"status\": \"below\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\"\n}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -744,7 +750,7 @@
               true
             ]
           ],
-          "answer": "ORD-002 — Cotton Club, 1000 Crewneck sweater; status IN_PROGRESS, stage WASHING, due 2026-03-29, last recorded activity 2026-03-23.\nAlready overdue: due 2026-03-29, 3 days ago, still at WASHING. Last recorded activity 2026-03-23 (9 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-002\",\n  \"risk_level\": \"overdue\",\n  \"best_date\": \"2026-04-07\",\n  \"expected_date\": \"2026-04-07\",\n  \"stalled\": true,\n  \"level\": \"overdue\",\n  \"confidence\": \"certain\",\n  \"working_days_left\": 0,\n  \"margin\": 0,\n  \"late_days_best\": 6,\n  \"late_days_expected\": 6,\n  \"reason\": \"3 days past the 29 Mar due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": true,\n  \"completed_late\": false,\n  \"idle_days\": 9,\n  \"days_to_due\": -3,\n  \"activity_observation\": \"Last recorded activity was 9 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"3 days past the 29 Mar due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
+          "answer": "ORD-002 — Cotton Club, 1000 Crewneck sweater; status IN_PROGRESS, stage WASHING, due 2026-03-29, last recorded activity 2026-03-23.\nAlready overdue: due 2026-03-29, 3 days ago, still at WASHING. Best-case finish 2026-04-07, 8 working days after the due date (an estimate, not a promise). Last recorded activity 2026-03-23 (9 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-002\",\n  \"risk_level\": \"overdue\",\n  \"best_date\": \"2026-04-07\",\n  \"expected_date\": \"2026-04-07\",\n  \"stalled\": true,\n  \"level\": \"overdue\",\n  \"confidence\": \"certain\",\n  \"working_days_left\": 0,\n  \"margin\": 0,\n  \"days_past_due\": 3,\n  \"late_days_best\": 8,\n  \"late_days_expected\": 8,\n  \"reason\": \"3 days past the 29 Mar due date; finishes Tue 7 Apr at best, 8 working days after the due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": true,\n  \"completed_late\": false,\n  \"idle_days\": 9,\n  \"days_to_due\": -3,\n  \"activity_observation\": \"Last recorded activity was 9 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"3 days past the 29 Mar due date; finishes Tue 7 Apr at best, 8 working days after the due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -836,7 +842,7 @@
               true
             ]
           ],
-          "answer": "ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24.\nNot past due: due 2026-04-20, 19 days away. Projected risk high: Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date Last recorded activity 2026-03-24 (8 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-005\",\n  \"risk_level\": \"high\",\n  \"best_date\": \"2026-04-27\",\n  \"expected_date\": \"2026-04-27\",\n  \"stalled\": true,\n  \"level\": \"high\",\n  \"confidence\": \"medium\",\n  \"working_days_left\": 17,\n  \"margin\": 6,\n  \"late_days_best\": 6,\n  \"late_days_expected\": 6,\n  \"reason\": \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": false,\n  \"completed_late\": false,\n  \"idle_days\": 8,\n  \"days_to_due\": 19,\n  \"activity_observation\": \"Last recorded activity was 8 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
+          "answer": "ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24.\nNot past due, not delayed yet: due 2026-04-20, 19 days away. Projected risk high: Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date. Last recorded activity 2026-03-24 (8 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-005\",\n  \"risk_level\": \"high\",\n  \"best_date\": \"2026-04-27\",\n  \"expected_date\": \"2026-04-27\",\n  \"stalled\": true,\n  \"level\": \"high\",\n  \"confidence\": \"medium\",\n  \"working_days_left\": 17,\n  \"margin\": 6,\n  \"late_days_best\": 6,\n  \"late_days_expected\": 6,\n  \"reason\": \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": false,\n  \"completed_late\": false,\n  \"idle_days\": 8,\n  \"days_to_due\": 19,\n  \"activity_observation\": \"Last recorded activity was 8 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -864,7 +870,7 @@
               true
             ]
           ],
-          "answer": "ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24.\nNot past due: due 2026-04-20, 19 days away. Projected risk high: Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date Last recorded activity 2026-03-24 (8 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-005\",\n  \"risk_level\": \"high\",\n  \"best_date\": \"2026-04-27\",\n  \"expected_date\": \"2026-04-27\",\n  \"stalled\": true,\n  \"level\": \"high\",\n  \"confidence\": \"medium\",\n  \"working_days_left\": 17,\n  \"margin\": 6,\n  \"late_days_best\": 6,\n  \"late_days_expected\": 6,\n  \"reason\": \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": false,\n  \"completed_late\": false,\n  \"idle_days\": 8,\n  \"days_to_due\": 19,\n  \"activity_observation\": \"Last recorded activity was 8 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
+          "answer": "ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24.\nNot past due, not delayed yet: due 2026-04-20, 19 days away. Projected risk high: Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date. Last recorded activity 2026-03-24 (8 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-005\",\n  \"risk_level\": \"high\",\n  \"best_date\": \"2026-04-27\",\n  \"expected_date\": \"2026-04-27\",\n  \"stalled\": true,\n  \"level\": \"high\",\n  \"confidence\": \"medium\",\n  \"working_days_left\": 17,\n  \"margin\": 6,\n  \"late_days_best\": 6,\n  \"late_days_expected\": 6,\n  \"reason\": \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": false,\n  \"completed_late\": false,\n  \"idle_days\": 8,\n  \"days_to_due\": 19,\n  \"activity_observation\": \"Last recorded activity was 8 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -892,7 +898,7 @@
           "confirmation_required": false,
           "selected_order_id": null,
           "tools": [],
-          "answer": "Which aspect matters: due date, stage, latest activity, status or pieces?",
+          "answer": "Which aspect matters: due date, stage, latest activity, status, pieces or overall delivery risk?",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -1087,7 +1093,7 @@
               true
             ]
           ],
-          "answer": "Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-08 (including overdue active orders).\nEarlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107: due 2026-03-16, last activity 2026-04-01.\n2. ORD-120: due 2026-03-17, last activity 2026-03-30.\n3. ORD-083: due 2026-03-23, last activity 2026-03-30.\n4. ORD-114: due 2026-03-23, last activity 2026-03-30.\n5. ORD-002: due 2026-03-29, last activity 2026-03-23.\n6. ORD-093: due 2026-03-29, last activity 2026-04-01.\n7. ORD-020: due 2026-03-31, last activity 2026-03-30.\n8. ORD-055: due 2026-03-31, last activity 2026-04-01.\n9. ORD-029: due 2026-04-01, last activity 2026-04-01.\n10. ORD-108: due 2026-04-03, last activity 2026-03-31.\n11. ORD-103: due 2026-04-04, last activity 2026-03-30.\n12. ORD-061: due 2026-04-05, last activity 2026-03-30.\n13. ORD-099: due 2026-04-05, last activity 2026-03-31.\n14. ORD-062: due 2026-04-08, last activity 2026-03-31.\nRanking indicates review urgency, not a prediction of failure. Select an order ID to drill down.",
+          "answer": "Top 14 of 14 for 2026-04-01 to 2026-04-08 (overdue active orders first; business date 2026-04-01). Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107 (Northwind Apparel, 2000 Cardigan): 16 days overdue; stage PACKING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-03. Action: confirm a new date with the customer; chase the stage if idle.\n2. ORD-120 (TrendCart, 1500 Vest): 15 days overdue; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-09. Action: confirm a new date with the customer; chase the stage if idle.\n3. ORD-083 (Maple & Co, 1000 Hoodie): 9 days overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-04. Action: confirm a new date with the customer; chase the stage if idle.\n4. ORD-114 (Northwind Apparel, 2000 Hoodie): 9 days overdue; stage PACKING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-06. Action: confirm a new date with the customer; chase the stage if idle.\n5. ORD-002 (Cotton Club, 1000 Crewneck sweater): 3 days overdue; stage WASHING; last activity 2026-03-23 (9 d ago, suspected stalled); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n6. ORD-093 (Maple & Co, 100 Beanie): 3 days overdue; stage WASHING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n7. ORD-020 (TrendCart, 1200 Vest): 1 day overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n8. ORD-055 (Cotton Club, 800 Crewneck sweater): 1 day overdue; stage ASSEMBLY; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n9. ORD-029 (Northwind Apparel, 1500 Beanie): due today; stage WASHING; last activity 2026-04-01 (0 d ago); queue high, best-case finish 2026-04-13. Action: expedite, outsource or re-date today.\n10. ORD-108 (Harbor Knits, 2000 Scarf): due in 2 days; stage ASSEMBLY; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-15. Action: expedite, outsource or re-date today.\n11. ORD-103 (Bright Basics, 2000 Scarf): due in 3 days; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-16. Action: expedite, outsource or re-date today.\n12. ORD-061 (Harbor Knits, 800 Scarf): due in 4 days; stage WASHING; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-17. Action: expedite, outsource or re-date today.\n13. ORD-099 (Northwind Apparel, 1500 Polo shirt): due in 4 days; stage WASHING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-20. Action: expedite, outsource or re-date today.\n14. ORD-062 (Bright Basics, 2000 Scarf): due in 7 days; stage KNITTING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-21. Action: expedite, outsource or re-date today.\nOwner and escalation time are not recorded; the department is the order’s current stage.\nRanking indicates review urgency, not a prediction of failure.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -1115,7 +1121,7 @@
               true
             ]
           ],
-          "answer": "Business date: 2026-04-01. Review window: 2026-04-01 through 2026-04-08 (including overdue active orders).\nEarlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107: due 2026-03-16, last activity 2026-04-01.\n2. ORD-120: due 2026-03-17, last activity 2026-03-30.\n3. ORD-083: due 2026-03-23, last activity 2026-03-30.\n4. ORD-114: due 2026-03-23, last activity 2026-03-30.\n5. ORD-002: due 2026-03-29, last activity 2026-03-23.\n6. ORD-093: due 2026-03-29, last activity 2026-04-01.\n7. ORD-020: due 2026-03-31, last activity 2026-03-30.\n8. ORD-055: due 2026-03-31, last activity 2026-04-01.\n9. ORD-029: due 2026-04-01, last activity 2026-04-01.\n10. ORD-108: due 2026-04-03, last activity 2026-03-31.\n11. ORD-103: due 2026-04-04, last activity 2026-03-30.\n12. ORD-061: due 2026-04-05, last activity 2026-03-30.\n13. ORD-099: due 2026-04-05, last activity 2026-03-31.\n14. ORD-062: due 2026-04-08, last activity 2026-03-31.\nORD-107: actual rank 1; ORD-107 — Northwind Apparel, 2000 Cardigan; status IN_PROGRESS, stage PACKING, due 2026-03-16, last recorded activity 2026-04-01.\nRanking indicates review urgency, not a prediction of failure. Select an order ID to drill down.",
+          "answer": "Top 14 of 14 for 2026-04-01 to 2026-04-08 (overdue active orders first; business date 2026-04-01). Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107 (Northwind Apparel, 2000 Cardigan): 16 days overdue; stage PACKING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-03. Action: confirm a new date with the customer; chase the stage if idle.\n2. ORD-120 (TrendCart, 1500 Vest): 15 days overdue; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-09. Action: confirm a new date with the customer; chase the stage if idle.\n3. ORD-083 (Maple & Co, 1000 Hoodie): 9 days overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-04. Action: confirm a new date with the customer; chase the stage if idle.\n4. ORD-114 (Northwind Apparel, 2000 Hoodie): 9 days overdue; stage PACKING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-06. Action: confirm a new date with the customer; chase the stage if idle.\n5. ORD-002 (Cotton Club, 1000 Crewneck sweater): 3 days overdue; stage WASHING; last activity 2026-03-23 (9 d ago, suspected stalled); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n6. ORD-093 (Maple & Co, 100 Beanie): 3 days overdue; stage WASHING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n7. ORD-020 (TrendCart, 1200 Vest): 1 day overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n8. ORD-055 (Cotton Club, 800 Crewneck sweater): 1 day overdue; stage ASSEMBLY; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n9. ORD-029 (Northwind Apparel, 1500 Beanie): due today; stage WASHING; last activity 2026-04-01 (0 d ago); queue high, best-case finish 2026-04-13. Action: expedite, outsource or re-date today.\n10. ORD-108 (Harbor Knits, 2000 Scarf): due in 2 days; stage ASSEMBLY; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-15. Action: expedite, outsource or re-date today.\n11. ORD-103 (Bright Basics, 2000 Scarf): due in 3 days; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-16. Action: expedite, outsource or re-date today.\n12. ORD-061 (Harbor Knits, 800 Scarf): due in 4 days; stage WASHING; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-17. Action: expedite, outsource or re-date today.\n13. ORD-099 (Northwind Apparel, 1500 Polo shirt): due in 4 days; stage WASHING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-20. Action: expedite, outsource or re-date today.\n14. ORD-062 (Bright Basics, 2000 Scarf): due in 7 days; stage KNITTING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-21. Action: expedite, outsource or re-date today.\nOwner and escalation time are not recorded; the department is the order’s current stage.\nORD-107: actual rank 1; ORD-107 — Northwind Apparel, 2000 Cardigan; status IN_PROGRESS, stage PACKING, due 2026-03-16, last recorded activity 2026-04-01.\nRanking indicates review urgency, not a prediction of failure.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -1242,7 +1248,7 @@
           "confirmation_required": false,
           "selected_order_id": null,
           "tools": [],
-          "answer": "Which stage: knitting, assembly, washing or packing? (and which date, if not yesterday)",
+          "answer": "Which stage: knitting, assembly, washing or packing? Say \"all four\" to compare every stage. And which date, if not yesterday?",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -1435,7 +1441,7 @@
               true
             ]
           ],
-          "answer": "Recorded facts and labelled interpretation:\n{\n  \"date\": \"2026-03-25\",\n  \"comparison\": {\n    \"stage\": \"ASSEMBLY\",\n    \"date\": \"2026-03-25\",\n    \"output\": 394,\n    \"baseline_records\": [\n      {\n        \"date\": \"2026-01-28\",\n        \"pieces_completed\": 890,\n        \"source\": \"production_log.csv\",\n        \"row\": 111\n      },\n      {\n        \"date\": \"2026-02-04\",\n        \"pieces_completed\": 777,\n        \"source\": \"production_log.csv\",\n        \"row\": 139\n      },\n      {\n        \"date\": \"2026-02-11\",\n        \"pieces_completed\": 702,\n        \"source\": \"production_log.csv\",\n        \"row\": 167\n      },\n      {\n        \"date\": \"2026-02-18\",\n        \"pieces_completed\": 715,\n        \"source\": \"production_log.csv\",\n        \"row\": 195\n      },\n      {\n        \"date\": \"2026-02-25\",\n        \"pieces_completed\": 706,\n        \"source\": \"production_log.csv\",\n        \"row\": 223\n      },\n      {\n        \"date\": \"2026-03-04\",\n        \"pieces_completed\": 901,\n        \"source\": \"production_log.csv\",\n        \"row\": 251\n      },\n      {\n        \"date\": \"2026-03-11\",\n        \"pieces_completed\": 855,\n        \"source\": \"production_log.csv\",\n        \"row\": 279\n      },\n      {\n        \"date\": \"2026-03-18\",\n        \"pieces_completed\": 882,\n        \"source\": \"production_log.csv\",\n        \"row\": 307\n      }\n    ],\n    \"observation_source\": \"production_log.csv\",\n    \"user_observation\": null,\n    \"sample_count\": 8,\n    \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n    \"minimum\": 702,\n    \"maximum\": 901,\n    \"mean\": 803.5,\n    \"status\": \"below\",\n    \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\"\n  },\n  \"facts\": [\n    {\n      \"date\": \"2026-03-25\",\n      \"stage\": \"KNITTING\",\n      \"pieces_completed\": \"915\"\n    },\n    {\n      \"date\": \"2026-03-25\",\n      \"stage\": \"ASSEMBLY\",\n      \"pieces_completed\": \"394\"\n    },\n    {\n      \"date\": \"2026-03-25\",\n      \"stage\": \"WASHING\",\n      \"pieces_completed\": \"801\"\n    },\n    {\n      \"date\": \"2026-03-25\",\n      \"stage\": \"PACKING\",\n      \"pieces_completed\": \"658\"\n    }\n  ],\n  \"interpretation\": \"These are co-occurring facts, not proof of causation. The lower-output premise must be checked against the comparison.\",\n  \"missing\": \"No blocker, downtime, staffing, or per-order event fields are available.\",\n  \"next_check\": \"Verify upstream throughput, staffing and downtime with the operator; check whether the pattern repeats.\"\n}",
+          "answer": "Assembly on 2026-03-25: 394 pieces, below its normal range; the previous eight same weekdays ran 702–901 (mean 803.5), 51% below the mean. Same day, other stages: knitting 915, washing 801, packing 658. Upstream knitting fed 915 pieces that day. No blocker, downtime, staffing, or per-order event fields are available. Verify upstream throughput, staffing and downtime with the operator; check whether the pattern repeats.\nRecorded facts and labelled interpretation:\n{\n  \"date\": \"2026-03-25\",\n  \"comparison\": {\n    \"stage\": \"ASSEMBLY\",\n    \"date\": \"2026-03-25\",\n    \"output\": 394,\n    \"baseline_records\": [\n      {\n        \"date\": \"2026-01-28\",\n        \"pieces_completed\": 890,\n        \"source\": \"production_log.csv\",\n        \"row\": 111\n      },\n      {\n        \"date\": \"2026-02-04\",\n        \"pieces_completed\": 777,\n        \"source\": \"production_log.csv\",\n        \"row\": 139\n      },\n      {\n        \"date\": \"2026-02-11\",\n        \"pieces_completed\": 702,\n        \"source\": \"production_log.csv\",\n        \"row\": 167\n      },\n      {\n        \"date\": \"2026-02-18\",\n        \"pieces_completed\": 715,\n        \"source\": \"production_log.csv\",\n        \"row\": 195\n      },\n      {\n        \"date\": \"2026-02-25\",\n        \"pieces_completed\": 706,\n        \"source\": \"production_log.csv\",\n        \"row\": 223\n      },\n      {\n        \"date\": \"2026-03-04\",\n        \"pieces_completed\": 901,\n        \"source\": \"production_log.csv\",\n        \"row\": 251\n      },\n      {\n        \"date\": \"2026-03-11\",\n        \"pieces_completed\": 855,\n        \"source\": \"production_log.csv\",\n        \"row\": 279\n      },\n      {\n        \"date\": \"2026-03-18\",\n        \"pieces_completed\": 882,\n        \"source\": \"production_log.csv\",\n        \"row\": 307\n      }\n    ],\n    \"observation_source\": \"production_log.csv\",\n    \"user_observation\": null,\n    \"sample_count\": 8,\n    \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n    \"minimum\": 702,\n    \"maximum\": 901,\n    \"mean\": 803.5,\n    \"change_pct\": -51,\n    \"status\": \"below\",\n    \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\"\n  },\n  \"facts\": [\n    {\n      \"date\": \"2026-03-25\",\n      \"stage\": \"KNITTING\",\n      \"pieces_completed\": \"915\"\n    },\n    {\n      \"date\": \"2026-03-25\",\n      \"stage\": \"ASSEMBLY\",\n      \"pieces_completed\": \"394\"\n    },\n    {\n      \"date\": \"2026-03-25\",\n      \"stage\": \"WASHING\",\n      \"pieces_completed\": \"801\"\n    },\n    {\n      \"date\": \"2026-03-25\",\n      \"stage\": \"PACKING\",\n      \"pieces_completed\": \"658\"\n    }\n  ],\n  \"interpretation\": \"These are co-occurring facts, not proof of causation. The lower-output premise must be checked against the comparison.\",\n  \"missing\": \"No blocker, downtime, staffing, or per-order event fields are available.\",\n  \"next_check\": \"Verify upstream throughput, staffing and downtime with the operator; check whether the pattern repeats.\"\n}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -1468,7 +1474,7 @@
               true
             ]
           ],
-          "answer": "No orders recorded for customer 'Zara'. Customers on file: Bright Basics, Cotton Club, Harbor Knits, Loom & Leaf, Maple & Co, Northwind Apparel, TrendCart, UrbanThread.\n{\"total_orders\": 0, \"by_stage\": {}, \"by_status\": {}, \"customer_quantities\": {}, \"customer_order_counts\": {}, \"active_pieces\": 0, \"overdue_active\": {\"count\": 0, \"order_ids\": [], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [], \"idle_5_days_or_more\": []}, \"completed_delivery\": {\"completed\": 0, \"late\": 0, \"on_time\": 0, \"on_time_rate_pct\": null, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": []}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"customer\": \"Zara\"}}",
+          "answer": "No orders recorded for customer 'Zara'. Customers on file: Bright Basics, Cotton Club, Harbor Knits, Loom & Leaf, Maple & Co, Northwind Apparel, TrendCart, UrbanThread.\nAs of 2026-04-01: 0 orders in progress, 0 overdue, 0 due today, 0 idle 5+ days; 0 of 0 completed orders on time.\n{\"total_orders\": 0, \"by_stage\": {}, \"by_status\": {}, \"customer_quantities\": {}, \"customer_order_counts\": {}, \"active_pieces\": 0, \"overdue_active\": {\"count\": 0, \"order_ids\": [], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [], \"idle_5_days_or_more\": []}, \"completed_delivery\": {\"completed\": 0, \"late\": 0, \"on_time\": 0, \"on_time_rate_pct\": null, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": []}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"customer\": \"Zara\"}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -2090,11 +2096,16 @@
           "failed_checks": [],
           "untraced_numbers": [],
           "intent": "execution.chase",
-          "needs_clarification": true,
+          "needs_clarification": false,
           "confirmation_required": false,
           "selected_order_id": "ORD-120",
-          "tools": [],
-          "answer": "Which draft should I preview? Choose a draft number. Each draft is confirmed separately.",
+          "tools": [
+            [
+              "draft_chase",
+              true
+            ]
+          ],
+          "answer": "I cannot send without showing you the draft first: every send needs a preview and your confirmation. Here is the draft:\nDraft 1 · To: planner\nDepartment: ASSEMBLY\nSubject: ThreadPilot chase-up | ORD-120\nPlease check the current status and confirm the next steps for ORD-120. Thank you.\n\nDraft only; nothing sent. Ask to send a draft by number to review and confirm it.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -2153,7 +2164,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+          "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -2189,7 +2200,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+          "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -2224,7 +2235,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+          "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -2328,7 +2339,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 17, \"by_stage\": {\"COMPLETE\": 11, \"ASSEMBLY\": 1, \"WASHING\": 1, \"KNITTING\": 4}, \"by_status\": {\"COMPLETE\": 11, \"IN_PROGRESS\": 6}, \"customer_quantities\": {\"TrendCart\": 15050}, \"customer_order_counts\": {\"TrendCart\": 17}, \"active_pieces\": 5600, \"overdue_active\": {\"count\": 2, \"order_ids\": [\"ORD-120\", \"ORD-020\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}, {\"order_id\": \"ORD-082\", \"idle_days\": 2}, {\"order_id\": \"ORD-120\", \"idle_days\": 2}, {\"order_id\": \"ORD-017\", \"idle_days\": 0}], \"idle_5_days_or_more\": [\"ORD-005\"]}, \"completed_delivery\": {\"completed\": 11, \"late\": 8, \"on_time\": 3, \"on_time_rate_pct\": 27.3, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-087\", \"ORD-028\", \"ORD-115\", \"ORD-090\", \"ORD-014\", \"ORD-054\", \"ORD-030\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"customer\": \"TrendCart\"}}",
+          "answer": "As of 2026-04-01: 6 orders in progress, 2 overdue (ORD-120, ORD-020), 0 due today, 1 idle 5+ days; 3 of 11 completed orders on time (27.3%).\n{\"total_orders\": 17, \"by_stage\": {\"COMPLETE\": 11, \"ASSEMBLY\": 1, \"WASHING\": 1, \"KNITTING\": 4}, \"by_status\": {\"COMPLETE\": 11, \"IN_PROGRESS\": 6}, \"customer_quantities\": {\"TrendCart\": 15050}, \"customer_order_counts\": {\"TrendCart\": 17}, \"active_pieces\": 5600, \"overdue_active\": {\"count\": 2, \"order_ids\": [\"ORD-120\", \"ORD-020\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}, {\"order_id\": \"ORD-082\", \"idle_days\": 2}, {\"order_id\": \"ORD-120\", \"idle_days\": 2}, {\"order_id\": \"ORD-017\", \"idle_days\": 0}], \"idle_5_days_or_more\": [\"ORD-005\"]}, \"completed_delivery\": {\"completed\": 11, \"late\": 8, \"on_time\": 3, \"on_time_rate_pct\": 27.3, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-087\", \"ORD-028\", \"ORD-115\", \"ORD-090\", \"ORD-014\", \"ORD-054\", \"ORD-030\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"customer\": \"TrendCart\"}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -2423,7 +2434,7 @@
               true
             ]
           ],
-          "answer": "ORD-120 — TrendCart, 1500 Vest; status IN_PROGRESS, stage ASSEMBLY, due 2026-03-17, last recorded activity 2026-03-30.\nAlready overdue: due 2026-03-17, 15 days ago, still at ASSEMBLY. Last recorded activity 2026-03-30 (2 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-120\",\n  \"risk_level\": \"overdue\",\n  \"best_date\": \"2026-04-09\",\n  \"expected_date\": \"2026-04-09\",\n  \"stalled\": false,\n  \"level\": \"overdue\",\n  \"confidence\": \"certain\",\n  \"working_days_left\": 0,\n  \"margin\": 0,\n  \"late_days_best\": 8,\n  \"late_days_expected\": 8,\n  \"reason\": \"15 days past the 17 Mar due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": true,\n  \"completed_late\": false,\n  \"idle_days\": 2,\n  \"days_to_due\": -15,\n  \"activity_observation\": \"Last recorded activity was 2 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"15 days past the 17 Mar due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
+          "answer": "ORD-120 — TrendCart, 1500 Vest; status IN_PROGRESS, stage ASSEMBLY, due 2026-03-17, last recorded activity 2026-03-30.\nAlready overdue: due 2026-03-17, 15 days ago, still at ASSEMBLY. Best-case finish 2026-04-09, 20 working days after the due date (an estimate, not a promise). Last recorded activity 2026-03-30 (2 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-120\",\n  \"risk_level\": \"overdue\",\n  \"best_date\": \"2026-04-09\",\n  \"expected_date\": \"2026-04-09\",\n  \"stalled\": false,\n  \"level\": \"overdue\",\n  \"confidence\": \"certain\",\n  \"working_days_left\": 0,\n  \"margin\": 0,\n  \"days_past_due\": 15,\n  \"late_days_best\": 20,\n  \"late_days_expected\": 20,\n  \"reason\": \"15 days past the 17 Mar due date; finishes Thu 9 Apr at best, 20 working days after the due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": true,\n  \"completed_late\": false,\n  \"idle_days\": 2,\n  \"days_to_due\": -15,\n  \"activity_observation\": \"Last recorded activity was 2 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"15 days past the 17 Mar due date; finishes Thu 9 Apr at best, 20 working days after the due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -2475,7 +2486,7 @@
               true
             ]
           ],
-          "answer": "{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+          "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""
@@ -2569,6 +2580,1065 @@
             ]
           ],
           "answer": "5 findings as of 2026-04-01 (2 overdue, 3 high risk); top 5 by tier and score:\n1. [P2] ORD-120 (TrendCart) is 15 days overdue, still at ASSEMBLY. Confirm the customer has a new date; chase the stage if idle. (rule: IN_PROGRESS and due_date before the business date)\n2. [P2] ORD-017 (TrendCart) is at high risk: Even in the best case it finishes Wed 22 Apr, 10 working days after the 10 Apr due date. Review in the morning: expedite analysis or an early word to the customer. (rule: shared queue risk level high)\n3. [P2] ORD-096 (TrendCart) is at high risk: Even in the best case it finishes Mon 27 Apr, 8 working days after the 17 Apr due date. Review in the morning: expedite analysis or an early word to the customer. (rule: shared queue risk level high)\n4. [P2] ORD-005 (TrendCart) is at high risk: Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date. Review in the morning: expedite analysis or an early word to the customer. (rule: shared queue risk level high)\n5. [P2] ORD-020 (TrendCart) is 1 day overdue, still at WASHING. Confirm the customer has a new date; chase the stage if idle. (rule: IN_PROGRESS and due_date before the business date)\nFindings are patterns in recorded output, dates and queue projections; the log holds no downtime, staffing or cause fields.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S01",
+      "category": "sheet1",
+      "note": "sheet row 1: ambiguous referent; list the overdue candidates, never pick ORD-002 silently",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "What is the status of the order that was late yesterday?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[ORD-107]": true,
+            "contains[ORD-093]": true,
+            "contains[which]": true,
+            "absent[ORD-002 (is|—) ]": true,
+            "no_order_selected": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.lookup",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "search_orders",
+              true
+            ]
+          ],
+          "answer": "Which one? 8 active orders are overdue as of 2026-04-01: ORD-107 (Northwind Apparel, 2000 Cardigan, packing, 16 d overdue); ORD-120 (TrendCart, 1500 Vest, assembly, 15 d overdue); ORD-114 (Northwind Apparel, 2000 Hoodie, packing, 9 d overdue); ORD-083 (Maple & Co, 1000 Hoodie, washing, 9 d overdue); ORD-002 (Cotton Club, 1000 Crewneck sweater, washing, 3 d overdue, idle 9 d); ORD-093 (Maple & Co, 100 Beanie, washing, 3 d overdue); ORD-020 (TrendCart, 1200 Vest, washing, 1 d overdue); ORD-055 (Cotton Club, 800 Crewneck sweater, assembly, 1 d overdue). Give the order ID.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "category": "sheet1",
+      "note": "sheet row 7: already overdue; best case 2026-04-07, 8 working days after the due date (not 'six days')",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Will ORD-093 be late?",
+          "passed": true,
+          "checks": {
+            "contains[already overdue|already late|past due]": true,
+            "contains[2026-03-29|29 March 2026|29 Mar 2026|March 29, 2026|Mar 29, ]": true,
+            "contains[8 working day]": true,
+            "absent[\\b(six|6) days after the due date]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.risk",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": "ORD-093",
+          "tools": [
+            [
+              "refresh_order",
+              true
+            ],
+            [
+              "assess_order_risk",
+              true
+            ]
+          ],
+          "answer": "ORD-093 — Maple & Co, 100 Beanie; status IN_PROGRESS, stage WASHING, due 2026-03-29, last recorded activity 2026-04-01.\nAlready overdue: due 2026-03-29, 3 days ago, still at WASHING. Best-case finish 2026-04-07, 8 working days after the due date (an estimate, not a promise). Last recorded activity 2026-04-01 (0 days before the business date); a gap is not proof of a stoppage.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-093\",\n  \"risk_level\": \"overdue\",\n  \"best_date\": \"2026-04-07\",\n  \"expected_date\": \"2026-04-07\",\n  \"stalled\": false,\n  \"level\": \"overdue\",\n  \"confidence\": \"certain\",\n  \"working_days_left\": 0,\n  \"margin\": 0,\n  \"days_past_due\": 3,\n  \"late_days_best\": 8,\n  \"late_days_expected\": 8,\n  \"reason\": \"3 days past the 29 Mar due date; finishes Tue 7 Apr at best, 8 working days after the due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": true,\n  \"completed_late\": false,\n  \"idle_days\": 0,\n  \"days_to_due\": -3,\n  \"activity_observation\": \"Last recorded activity was 0 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"3 days past the 29 Mar due date; finishes Tue 7 Apr at best, 8 working days after the due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "category": "sheet1",
+      "note": "sheet row 9: criteria are given; rank by the shared queue risk and show the side-by-side facts; do not ask which criterion",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Compare ORD-005 and ORD-021: which has the higher delivery risk, considering due date, current production stage, last update and recorded blockers?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[ORD-005]": true,
+            "contains[ORD-021]": true,
+            "contains[higher delivery risk]": true,
+            "contains[blocker]": true,
+            "tool_any[rank_comparison]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.compare",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "compare_orders",
+              true
+            ],
+            [
+              "assess_order_risk",
+              true
+            ],
+            [
+              "rank_comparison",
+              true
+            ]
+          ],
+          "answer": "| Order | due_date | current_stage | last_activity_date | status |\n| --- | --- | --- | --- | --- |\n| ORD-005 | 2026-04-20 | KNITTING | 2026-03-24 | IN_PROGRESS |\n| ORD-021 | 2026-02-18 | COMPLETE | 2026-02-13 | COMPLETE |\nDelivery risk by the shared queue (late > high > medium > low, then the finish after the due date):\nORD-005: high — Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date; stage KNITTING, last activity 2026-03-24 (8 days ago) (suspected stalled).\nORD-021: no delivery risk — status COMPLETE, completed 2026-02-13, recorded days late -5; nothing left to chase.\nBlockers: not recorded in this data; a gap in activity is a review trigger, not a blocker. Higher delivery risk: ORD-005.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "category": "sheet1",
+      "note": "sheet row 11: a policy question about made-up orders gets the decision rule, not a candidate list",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "A VIP customer order is due later than a regular customer order. Should VIP status override the earlier deadline?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[vip]": true,
+            "contains[expedite|earlier due date]": true,
+            "absent[Which order do you mean]": true,
+            "no_order_selected": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.compare",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "explain_no_data",
+              false
+            ]
+          ],
+          "answer": "VIP status alone should not override an earlier firm commitment. The rule this system can apply: the earlier due date keeps priority unless the manager approves an expedite after seeing the queue impact (Risk → Analyze expedite impact shows the days saved for the VIP order and the lateness added to the regular one). The data has no customer-tier, penalty or contract fields, so weigh those outside the system. Give me the two order IDs and I will show the dates, stages, idle days and the expedite trade-off for both.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S05",
+      "category": "sheet1",
+      "note": "sheet row 17: exactly three, each with the reason and an action; the window question stays (dialogue design)",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Which three production exceptions require escalation before today’s morning meeting, and why?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[today only|next seven days]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.prioritize",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [],
+          "answer": "Due today only, or include the next seven days? Overdue active orders will be included.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        },
+        {
+          "turn": 1,
+          "message": "Today only.",
+          "passed": true,
+          "checks": {
+            "contains[Top 3]": true,
+            "contains[ORD-107]": true,
+            "contains[ORD-120]": true,
+            "contains[ORD-083]": true,
+            "contains[Action]": true,
+            "absent[\\b4\\. ORD-]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.prioritize",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "prioritize_orders",
+              true
+            ]
+          ],
+          "answer": "Top 3 of 9 for 2026-04-01 to 2026-04-01 (overdue active orders first; business date 2026-04-01). Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107 (Northwind Apparel, 2000 Cardigan): 16 days overdue; stage PACKING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-03. Action: confirm a new date with the customer; chase the stage if idle.\n2. ORD-120 (TrendCart, 1500 Vest): 15 days overdue; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-09. Action: confirm a new date with the customer; chase the stage if idle.\n3. ORD-083 (Maple & Co, 1000 Hoodie): 9 days overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-04. Action: confirm a new date with the customer; chase the stage if idle.\n6 more in the window: ORD-114, ORD-002, ORD-093, ORD-020, ORD-055, ORD-029.\nOwner and escalation time are not recorded; the department is the order’s current stage.\nRanking indicates review urgency, not a prediction of failure.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S06",
+      "category": "sheet1",
+      "note": "sheet row 19: no snapshots are kept; say so instead of presenting today’s list as a comparison",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "What changed since yesterday’s exception list, and which issues have been resolved, worsened or newly emerged?",
+          "passed": true,
+          "checks": {
+            "contains[no dated|cannot say what changed|not evidence]": true,
+            "absent[\\b1\\. ORD-]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.prioritize",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "explain_no_data",
+              false
+            ]
+          ],
+          "answer": "The system keeps no dated exception snapshots, so it cannot say what changed since yesterday. The archived 07:00 briefings hold each day’s counts and advice (Dashboard → Morning briefing); today’s list comes from \"what needs attention today\". A missing item is not evidence that it was resolved.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S07",
+      "category": "sheet1",
+      "note": "sheet row 20: stage and date given; answer: packing 657 within 562–734",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Was PACKING output on 2026-03-31 normal?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[657]": true,
+            "contains[within its normal range|normal]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.normality",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "check_normality",
+              true
+            ]
+          ],
+          "answer": "Packing on 2026-03-31: 657 pieces, within its normal range (normal); the previous eight same weekdays ran 562–734 (mean 667.75), 2% below the mean.\nRecorded facts and labelled interpretation:\n{\n  \"stage\": \"PACKING\",\n  \"date\": \"2026-03-31\",\n  \"output\": 657,\n  \"baseline_records\": [\n    {\n      \"date\": \"2026-02-03\",\n      \"pieces_completed\": 723,\n      \"source\": \"production_log.csv\",\n      \"row\": 137\n    },\n    {\n      \"date\": \"2026-02-10\",\n      \"pieces_completed\": 734,\n      \"source\": \"production_log.csv\",\n      \"row\": 165\n    },\n    {\n      \"date\": \"2026-02-17\",\n      \"pieces_completed\": 562,\n      \"source\": \"production_log.csv\",\n      \"row\": 193\n    },\n    {\n      \"date\": \"2026-02-24\",\n      \"pieces_completed\": 702,\n      \"source\": \"production_log.csv\",\n      \"row\": 221\n    },\n    {\n      \"date\": \"2026-03-03\",\n      \"pieces_completed\": 707,\n      \"source\": \"production_log.csv\",\n      \"row\": 249\n    },\n    {\n      \"date\": \"2026-03-10\",\n      \"pieces_completed\": 605,\n      \"source\": \"production_log.csv\",\n      \"row\": 277\n    },\n    {\n      \"date\": \"2026-03-17\",\n      \"pieces_completed\": 638,\n      \"source\": \"production_log.csv\",\n      \"row\": 305\n    },\n    {\n      \"date\": \"2026-03-24\",\n      \"pieces_completed\": 671,\n      \"source\": \"production_log.csv\",\n      \"row\": 333\n    }\n  ],\n  \"observation_source\": \"production_log.csv\",\n  \"user_observation\": null,\n  \"sample_count\": 8,\n  \"baseline\": \"previous eight same weekdays, excluding target and future dates\",\n  \"minimum\": 562,\n  \"maximum\": 734,\n  \"mean\": 667.75,\n  \"change_pct\": -2,\n  \"status\": \"within\",\n  \"limits\": \"Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.\",\n  \"baseline_note\": \"Compared with the previous eight same weekdays by default (Sundays closed); say \\\"compare with last week\\\" for another baseline.\"\n}",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S08",
+      "category": "sheet1",
+      "note": "sheet row 23: stage given; ask only for the date",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Is 800 pieces of ASSEMBLY output normal?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[which date|date]": true,
+            "absent[[Ww]hich stage]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.normality",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [],
+          "answer": "Which date is the 800-piece assembly figure for? (\"today\", \"yesterday\" or a date; I compare it with the same weekday in recent working weeks.)",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S09",
+      "category": "sheet1",
+      "note": "sheet row 24: 2026-02-31 does not exist",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "How far was WASHING output on 2026-02-31 from its usual level?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[not a valid date]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.normality",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [],
+          "answer": "2026-02-31 is not a valid date (February 2026 has 28 days). Which date should I check? For example \"yesterday\", \"31 March\" or \"2026-03-31\".",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S10",
+      "category": "sheet1",
+      "note": "sheet row 25: a Sunday is a closed day, not a missing baseline",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "How far was WASHING output on 2026-02-15 from its usual level?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[sunday]": true,
+            "contains[closed]": true,
+            "absent[insufficient]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.normality",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "check_normality",
+              true
+            ]
+          ],
+          "answer": "2026-02-15 was a Sunday: the factory is closed, no output is recorded for any stage, and a closed day is not compared with working-day levels. Ask about 2026-02-14 (Saturday) or 2026-02-16 (Monday) instead.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S11",
+      "category": "sheet1",
+      "note": "sheet row 26: no record for today; fall back to the latest record and name assembly",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Which stage is most off its usual pace today?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[no production record for 2026-04-01]": true,
+            "contains[assembly]": true,
+            "contains[2026-03-31]": true,
+            "absent[user-provided]": true,
+            "absent[reported output was 0]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.normality",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "stage_comparison",
+              true
+            ]
+          ],
+          "answer": "No production record for 2026-04-01 yet (the log ends 2026-03-31); using 2026-03-31 (Tuesday). Assembly is the stage to worry about on 2026-03-31: knitting 905 (within 797–1018); assembly 455 (below 687–807, -39%, 6 working days below); washing 732 (within 617–774); packing 657 (within 562–734). Each stage is compared with its own previous eight same weekdays.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S12",
+      "category": "sheet1",
+      "note": "sheet row 27: compare all four stages; assembly is the only one below range",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Which stage should I worry about most in 2026-03-31?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[assembly is the stage]": true,
+            "contains[455]": true,
+            "contains[knitting]": true,
+            "contains[packing]": true,
+            "contains[washing]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.normality",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "stage_comparison",
+              true
+            ]
+          ],
+          "answer": "Assembly is the stage to worry about on 2026-03-31: knitting 905 (within 797–1018); assembly 455 (below 687–807, -39%, 6 working days below); washing 732 (within 617–774); packing 657 (within 562–734). Each stage is compared with its own previous eight same weekdays.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S13",
+      "category": "sheet1",
+      "note": "sheet row 29: resolve the period from the business date; 28, 30, 31 March all below range",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Has ASSEMBLY been consistently below its usual level over the last three working days?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[3 of 3 working days|every day]": true,
+            "contains[2026-03-28]": true,
+            "contains[2026-03-31]": true,
+            "absent[[Ww]hich date]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.normality",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "production_window",
+              true
+            ]
+          ],
+          "answer": "Production the last 3 working days (2026-03-28 to 2026-03-31):\n| Date | Assembly |\n| --- | --- |\n| 2026-03-28 Sat | 445 (below 687–918) |\n| 2026-03-29 Sun | closed (Sunday) |\n| 2026-03-30 Mon | 396 (below 720–875) |\n| 2026-03-31 Tue | 455 (below 687–807) |\nAssembly: below its same-weekday range on 3 of 3 working days (every day since 2026-03-28); 1,296 pieces in total, about 1,030 short of the same-weekday means and about 986 short of its 760.5/day average over the 74 working days before. Stage outputs are not additive; packing is the closest thing to finished output. The log has no cause, downtime, staffing or team fields.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S14",
+      "category": "sheet1",
+      "note": "sheet row 30: no stage named -> compare all four and name assembly; the follow-up resolves the run since 25 March",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Why was output lower yesterday?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[assembly]": true,
+            "contains[455]": true,
+            "contains[no cause|floor]": true,
+            "absent[[Ww]hich stage]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.deviation",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "stage_comparison",
+              true
+            ]
+          ],
+          "answer": "Assembly is the stage to worry about on 2026-03-31: knitting 905 (within 797–1018); assembly 455 (below 687–807, -39%, 6 working days below); washing 732 (within 617–774); packing 657 (within 562–734). Each stage is compared with its own previous eight same weekdays. The log has no cause, downtime, staffing or team fields; the reason has to come from the floor.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        },
+        {
+          "turn": 1,
+          "message": "Did it only start yesterday?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[2026-03-25]": true,
+            "contains[6 of 6|every day since]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.deviation",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "production_window",
+              true
+            ]
+          ],
+          "answer": "No. Assembly has been below its same-weekday range for 6 consecutive working days, since 2026-03-25; 2026-03-31 was the latest of them, not the first.\nProduction since 2026-03-25:\n| Date | Assembly |\n| --- | --- |\n| 2026-03-25 Wed | 394 (below 702–901) |\n| 2026-03-26 Thu | 464 (below 703–868) |\n| 2026-03-27 Fri | 399 (below 702–895) |\n| 2026-03-28 Sat | 445 (below 687–918) |\n| 2026-03-29 Sun | closed (Sunday) |\n| 2026-03-30 Mon | 396 (below 720–875) |\n| 2026-03-31 Tue | 455 (below 687–807) |\nAssembly: below its same-weekday range on 6 of 6 working days (every day since 2026-03-25); 2,553 pieces in total, about 2,108 short of the same-weekday means and about 2,096 short of its 774.9/day average over the 71 working days before. Stage outputs are not additive; packing is the closest thing to finished output. The log has no cause, downtime, staffing or team fields.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S15",
+      "category": "sheet1",
+      "note": "sheet row 32: no clarification loop; the workshop is looked up and the missing link is stated",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Assembly has been low since 25 March. Is it because the OldMill workshop was suspended?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[oldmill]": true,
+            "contains[suspended]": true,
+            "contains[cannot confirm|cannot link|no field linking]": true,
+            "absent[[Ww]hich date]": true,
+            "absent[observation date]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.deviation",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "production_window",
+              true
+            ],
+            [
+              "list_workshops",
+              true
+            ]
+          ],
+          "answer": "Production since 2026-03-25 (to 2026-03-31, the latest record):\n| Date | Assembly |\n| --- | --- |\n| 2026-03-25 Wed | 394 (below 702–901) |\n| 2026-03-26 Thu | 464 (below 703–868) |\n| 2026-03-27 Fri | 399 (below 702–895) |\n| 2026-03-28 Sat | 445 (below 687–918) |\n| 2026-03-29 Sun | closed (Sunday) |\n| 2026-03-30 Mon | 396 (below 720–875) |\n| 2026-03-31 Tue | 455 (below 687–807) |\nAssembly: below its same-weekday range on 6 of 6 working days (every day since 2026-03-25); 2,553 pieces in total, about 2,108 short of the same-weekday means and about 2,096 short of its 774.9/day average over the 71 working days before. The log has no cause, downtime, staffing or team fields. Upstream stages inside their range make an input shortage unlikely; the cause has to be checked on the floor.\nOn the OldMill hypothesis: the workshop table lists W7 OldMill as SUSPENDED (“suspended after last month's quality audit”), with no suspension date and no field linking any workshop to the factory’s own stage output, so the data cannot confirm or rule out a link. Worth checking on the floor: did this workshop do assembly work for us, and when exactly was it suspended?",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S16",
+      "category": "sheet1",
+      "note": "sheet row 33: late March = 21-31 March; the raw rows per stage with the Sunday labelled",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Show me the production records behind the assembly drop in late March.",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[2026-03-25]": true,
+            "contains[394]": true,
+            "contains[2026-03-31]": true,
+            "contains[closed (Sunday)]": true,
+            "absent[observation date]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.deviation",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "production_window",
+              true
+            ]
+          ],
+          "answer": "Production late March (2026-03-21 to 2026-03-31):\n| Date | Assembly |\n| --- | --- |\n| 2026-03-21 Sat | 746 (within 687–918) |\n| 2026-03-22 Sun | closed (Sunday) |\n| 2026-03-23 Mon | 733 (within 720–875) |\n| 2026-03-24 Tue | 779 (within 687–807) |\n| 2026-03-25 Wed | 394 (below 702–901) |\n| 2026-03-26 Thu | 464 (below 703–868) |\n| 2026-03-27 Fri | 399 (below 702–895) |\n| 2026-03-28 Sat | 445 (below 687–918) |\n| 2026-03-29 Sun | closed (Sunday) |\n| 2026-03-30 Mon | 396 (below 720–875) |\n| 2026-03-31 Tue | 455 (below 687–807) |\nAssembly: below its same-weekday range on 6 of 9 working days (2026-03-25 to 2026-03-31); 4,811 pieces in total, about 2,161 short of the same-weekday means and about 2,172 short of its 775.9/day average over the 68 working days before. Stage outputs are not additive; packing is the closest thing to finished output. The log has no cause, downtime, staffing or team fields.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S17",
+      "category": "sheet1",
+      "note": "sheet row 34: the cumulative loss over 25-31 March (6 working days), two stated baselines, not one day",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "How many pieces has assembly lost since 25 March compared with normal?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[2,553]": true,
+            "contains[2,108]": true,
+            "contains[2,096]": true,
+            "absent[\\b410 fewer]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.deviation",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "production_window",
+              true
+            ]
+          ],
+          "answer": "Production since 2026-03-25 (to 2026-03-31, the latest record):\n| Date | Assembly |\n| --- | --- |\n| 2026-03-25 Wed | 394 (below 702–901) |\n| 2026-03-26 Thu | 464 (below 703–868) |\n| 2026-03-27 Fri | 399 (below 702–895) |\n| 2026-03-28 Sat | 445 (below 687–918) |\n| 2026-03-29 Sun | closed (Sunday) |\n| 2026-03-30 Mon | 396 (below 720–875) |\n| 2026-03-31 Tue | 455 (below 687–807) |\nAssembly: below its same-weekday range on 6 of 6 working days (every day since 2026-03-25); 2,553 pieces in total, about 2,108 short of the same-weekday means and about 2,096 short of its 774.9/day average over the 71 working days before. Stage outputs are not additive; packing is the closest thing to finished output. The log has no cause, downtime, staffing or team fields.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        },
+        {
+          "turn": 1,
+          "message": "What baseline did you use?",
+          "passed": true,
+          "checks": {
+            "contains[same weekday|same-weekday]": true,
+            "contains[working days before|prior working]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.deviation",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "production_window",
+              true
+            ]
+          ],
+          "answer": "Two baselines, both from production_log.csv, for since 2026-03-25 (to 2026-03-31, the latest record):\n1. Same-weekday band: for each day in the period, the previous eight records of that stage on the same weekday (Sundays are closed and never counted). A day is “below range” when it is under the lowest of those eight; the shortfall is the day’s output minus the mean of the eight, summed over the period.\n2. Prior working-day mean: the stage’s average over every working day before the period started; the shortfall is that average minus each day’s output, summed.\nAssembly: 2,553 pieces over 6 working days; 2,108 short by baseline 1, 2,096 short by baseline 2 (774.9/day over the 71 working days before the period).\nBoth are descriptive comparisons, not control limits or targets; say “compare with last week” for a different reference period.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S18",
+      "category": "sheet1",
+      "note": "sheet row 35: not delayed (due 20 Apr); still at knitting, before assembly, so the drop cannot affect it yet",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Is ORD-005 delayed because of the assembly drop?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[not past due|not delayed]": true,
+            "contains[knitting]": true,
+            "contains[before assembly|cannot have affected]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "order.risk",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": "ORD-005",
+          "tools": [
+            [
+              "refresh_order",
+              true
+            ],
+            [
+              "assess_order_risk",
+              true
+            ]
+          ],
+          "answer": "ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24.\nNot past due, not delayed yet: due 2026-04-20, 19 days away. Projected risk high: Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date. Last recorded activity 2026-03-24 (8 days before the business date); a gap is not proof of a stoppage. It is still at knitting, before assembly, so an assembly problem cannot have affected it yet.\nFacts and risk interpretation:\n{\n  \"order_id\": \"ORD-005\",\n  \"risk_level\": \"high\",\n  \"best_date\": \"2026-04-27\",\n  \"expected_date\": \"2026-04-27\",\n  \"stalled\": true,\n  \"level\": \"high\",\n  \"confidence\": \"medium\",\n  \"working_days_left\": 17,\n  \"margin\": 6,\n  \"late_days_best\": 6,\n  \"late_days_expected\": 6,\n  \"reason\": \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\",\n  \"scenario\": \"Current orders and approved dispatch priorities; no future arrivals\",\n  \"confidence_basis\": \"Rule-based distance from due date, not a probability\",\n  \"risk_flag\": true,\n  \"overdue\": false,\n  \"completed_late\": false,\n  \"idle_days\": 8,\n  \"days_to_due\": 19,\n  \"activity_observation\": \"Last recorded activity was 8 days before the business date; calendar gap, not proof of a stoppage.\",\n  \"reasons\": [\n    \"Not moving, and the projection assumes it moves. Even in the best case it finishes Mon 27 Apr, 6 working days after the 20 Apr due date\"\n  ],\n  \"assumptions\": [\n    \"Current orders only; identical capacity and arrivals (none) before and after an expedite.\",\n    \"Monday\\u2013Saturday; current stage starts with full order quantity because partial progress is unavailable.\",\n    \"Manager-approved priorities first, then earliest due date; at most one stage transition per day.\",\n    \"Each order normally uses at most 60% of daily stage capacity (minimum allocation cap 20 pieces).\",\n    \"Capacity: previous eight same weekdays, at least three samples per stage; historical completion factor capped at 1\\u20133.\",\n    \"No order value, customer weighting, penalty cost, overtime or guaranteed completion dates.\",\n    \"An approved queue changes this application\\u2019s dispatch plan, not an external factory system.\"\n  ],\n  \"limits\": \"A projected risk is not confirmed late delivery. Recorded overdue status is a separate fact. No per-order event history or recorded blockers exists in this dataset.\"\n}\nA risk pattern does not establish that it will be late. Request a status update if needed.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S19",
+      "category": "sheet1",
+      "note": "sheet row 37: every stage listed; stages are never summed (2749 must not appear)",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "What was the factory’s total output on 31 March?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[905]": true,
+            "contains[455]": true,
+            "contains[732]": true,
+            "contains[657]": true,
+            "contains[not added together|not additive]": true,
+            "absent[\\b2,?749\\b]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.output",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "stage_comparison",
+              true
+            ]
+          ],
+          "answer": "Recorded output on 2026-03-31 (Tuesday) by stage: knitting 905; assembly 455; washing 732; packing 657 pieces. Stage outputs are not added together: the same piece passes every stage, so packing (657) is the closest thing to finished output. Against each stage’s own previous eight same weekdays: knitting 905 (within 797–1018); assembly 455 (below 687–807, -39%, 6 working days below); washing 732 (within 617–774); packing 657 (within 562–734). Each stage is compared with its own previous eight same weekdays.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S20",
+      "category": "sheet1",
+      "note": "sheet row 38: a future date is answered with the date boundary first",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Why was assembly output low on 3 April?",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "contains[no record can exist for 2026-04-03|no record]": true,
+            "contains[business date is 2026-04-01|business date]": true,
+            "absent[insufficient baseline]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "operations.deviation",
+          "needs_clarification": false,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "stage_comparison",
+              true
+            ]
+          ],
+          "answer": "No record can exist for 2026-04-03: the business date is 2026-04-01 and the log ends 2026-03-31. The question’s premise cannot be checked yet. As of 2026-03-31: Assembly is the stage to worry about on 2026-03-31: knitting 905 (within 797–1018); assembly 455 (below 687–807, -39%, 6 working days below); washing 732 (within 617–774); packing 657 (within 562–734). Each stage is compared with its own previous eight same weekdays.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S21",
+      "category": "sheet1",
+      "note": "sheet row 42: six active TrendCart orders; ask which, with hints; never draft for ORD-002",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Chase up the TrendCart order.",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "confirmation_required": true,
+            "contains[ORD-120]": true,
+            "contains[ORD-020]": true,
+            "contains[ORD-005]": true,
+            "contains[which trendcart order]": true,
+            "absent[ORD-002]": true,
+            "not_executed[send_chase]": true,
+            "no_order_selected": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "execution.chase",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "search_orders",
+              true
+            ]
+          ],
+          "answer": "Which TrendCart order should I chase? ORD-120 (TrendCart, 1500 Vest, assembly, 15 d overdue); ORD-020 (TrendCart, 1200 Vest, washing, 1 d overdue); ORD-096 (TrendCart, 1000 Beanie, knitting, due in 16 d); ORD-005 (TrendCart, 500 Scarf, knitting, due in 19 d, idle 8 d); ORD-017 (TrendCart, 800 Cardigan, knitting, due in 9 d); ORD-082 (TrendCart, 600 Beanie, knitting, due in 30 d). Give the order ID.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S22",
+      "category": "sheet1",
+      "note": "sheet row 44: the premise is wrong (last active 30 Mar, 2 days ago); correct it and ask before drafting",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "ORD-103 hasn’t moved in a week. Chase it up.",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "confirmation_required": true,
+            "contains[2026-03-30]": true,
+            "contains[2 days ago]": true,
+            "contains[not a week]": true,
+            "contains[still want]": true,
+            "not_executed[send_chase]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "execution.chase",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": "ORD-103",
+          "tools": [
+            [
+              "refresh_order",
+              true
+            ]
+          ],
+          "answer": "ORD-103 was last active 2026-03-30, 2 days ago, not a week. It is Bright Basics, 2000 Scarf, at assembly, due in 3 days, so it is not stalled by the 5-day rule. Do you still want me to draft the chase-up?",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S23",
+      "category": "sheet1",
+      "note": "sheet row 47: two active Maple & Co orders; ask which, never the previous test’s order",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Add a note to the Maple & Co order: hold off promising a new delivery date.",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "confirmation_required": true,
+            "contains[ORD-083]": true,
+            "contains[ORD-093]": true,
+            "contains[which maple & co order]": true,
+            "absent[ORD-108]": true,
+            "not_executed[save_internal_note]": true,
+            "no_order_selected": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "execution.note",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": null,
+          "tools": [
+            [
+              "search_orders",
+              true
+            ]
+          ],
+          "answer": "Which Maple & Co order? ORD-083 (Maple & Co, 1000 Hoodie, washing, 9 d overdue); ORD-093 (Maple & Co, 100 Beanie, washing, 3 d overdue). Give the order ID.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S24",
+      "category": "sheet1",
+      "note": "sheet row 48: refuse the cancellation plainly, offer the note as a preview",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Record that ORD-029 is cancelled and take it off the schedule.",
+          "passed": true,
+          "checks": {
+            "confirmation_required": true,
+            "contains[cannot cancel|can't cancel]": true,
+            "contains[note]": true,
+            "not_executed[save_internal_note]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "execution.note",
+          "needs_clarification": false,
+          "confirmation_required": true,
+          "selected_order_id": "ORD-029",
+          "tools": [
+            [
+              "refresh_order",
+              true
+            ]
+          ],
+          "answer": "I cannot cancel or remove orders, or change the schedule: the chat reads the records and saves internal notes only. I can record the intent as a note:\nInternal note for ORD-029, business date 2026-04-01:\ncancelled; take it off the schedule\nPlease confirm to save. It will not be sent externally.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S25",
+      "category": "sheet1",
+      "note": "sheet row 49: QuickStitch makes tops only; ORD-103 is scarves; offer active accessories workshops, never the suspended one",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Record my decision to send ORD-103 to QuickStitch.",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "confirmation_required": true,
+            "contains[quickstitch]": true,
+            "contains[tops]": true,
+            "contains[accessories]": true,
+            "contains[steadyhands]": true,
+            "absent[oldmill]": true,
+            "not_executed[save_internal_note]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "execution.note",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": "ORD-103",
+          "tools": [
+            [
+              "refresh_order",
+              true
+            ],
+            [
+              "list_workshops",
+              true
+            ]
+          ],
+          "answer": "QuickStitch (W1) makes TOPS only; ORD-103 is ACCESSORIES (scarf). Record the note anyway, or choose another workshop? Active workshops that make accessories: W2 SteadyHands (170/day), W4 Little Loom (70/day), W6 Nimble Needle (130/day).",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S26",
+      "category": "sheet1",
+      "note": "sheet row 59: a compound condition is two reminders; do not reduce it to no_reply silently",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "If ORD-103 still hasn’t finished assembly by 5 p.m. tomorrow, and the assembly supervisor still hasn’t confirmed a recovery plan, remind me.",
+          "passed": true,
+          "checks": {
+            "needs_clarification": true,
+            "confirmation_required": true,
+            "contains[one condition per reminder]": true,
+            "contains[no reply]": true,
+            "contains[no new activity]": true,
+            "not_executed[upsert_reminder]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "execution.reminder",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": "ORD-103",
+          "tools": [
+            [
+              "refresh_order",
+              true
+            ]
+          ],
+          "answer": "I can watch one condition per reminder: no new activity recorded for the order, or no reply to the chase-up. Which should this reminder check? I can create a second reminder for the other condition.",
+          "ms": 0,
+          "model": "annotated-planner",
+          "request_id": ""
+        }
+      ]
+    },
+    {
+      "id": "S27",
+      "category": "sheet1",
+      "note": "sheet row 45: the preview cannot be skipped; say so first, then draft it (offline: no department emails, so the recipient question follows the rule)",
+      "passed": true,
+      "turns": [
+        {
+          "turn": 0,
+          "message": "Send the chase-up for ORD-107 straight away, no need to show me first.",
+          "passed": true,
+          "checks": {
+            "confirmation_required": true,
+            "contains[cannot send without showing|can't send without showing|showi]": true,
+            "contains[ORD-107]": true,
+            "absent[[Ww]hich draft should I preview]": true,
+            "not_executed[send_chase]": true
+          },
+          "failed_checks": [],
+          "untraced_numbers": [],
+          "intent": "execution.chase",
+          "needs_clarification": true,
+          "confirmation_required": false,
+          "selected_order_id": "ORD-107",
+          "tools": [],
+          "answer": "I cannot send without showing you the draft first: every send needs a preview and your confirmation. Who should receive the draft for ORD-107?",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""

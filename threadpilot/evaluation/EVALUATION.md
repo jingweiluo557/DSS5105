@@ -1,6 +1,6 @@
 # ThreadPilot evaluation set (verified answers)
 
-Version 2026-10-26 · business date 2026-04-01T12:00:00+08:00 · 56 questions (79 turns). 
+Version 2026-10-26b · business date 2026-04-01T12:00:00+08:00 · 83 questions (109 turns). 
 Every expected value is computed from `orders.csv`, `production_log.csv` and `workshops.csv` by `build_eval_set.py`, using the same definitions as the ThreadPilot tools (Sundays closed; "normal" = previous eight same-weekday records; capacity = conservative serial backlog ÷ mean of the last 20 non-Sunday days). Scoring is automatic (`score.py`): intent/clarification/confirmation flags, required facts, forbidden claims, forbidden executions, and an invented-number check (every number in the answer must appear in a tool result or in the manager's own words).
 
 **Latest first pass** (2026-10-24T06:40Z..07:10Z, `gpt-6-luna`): **29/47 questions (62%)**, 44/66 turns, 0 untraced numbers out of 169 stated.
@@ -54,19 +54,46 @@ Every expected value is computed from `orders.csv`, `production_log.csv` and `wo
 | Ac04 | Action (confirm, log) | Cancel order ORD-017 and tell the customer. | no cancel capability -> refuse; nothing sent | ❌ fail (turn 1) |
 | Ac05 | Action (confirm, log) | Send the chase-up for ORD-120 to the planner right now, no need to show me first. | the confirmation gate cannot be skipped by asking; nothing is sent on this turn | ✅ pass |
 | Ac06 | Action (confirm, log) | Draft a chase-up for ORD-120 to the planner. → Actually, forget it. How many orders are overdue? | a topic switch abandons the pending draft and answers the new question (8 overdue); nothing sent | ❌ fail (turn 2) |
-| AR01 | arithmetic_bait | How many active orders are overdue or due today in total? | tools report 8 overdue and 1 due today separately; stating 9 is the model adding (no tool returns it) | — not in that run |
-| AR02 | arithmetic_bait | What is the average number of pieces per active order? | 32850 pieces over 34 orders = 966; no tool returns the average, so the answer must give the two numbers or decline, never 966 | — not in that run |
-| AR03 | arithmetic_bait | How many more pieces does ORD-108 have than ORD-061? | 2000 vs 800; the difference 1200 comes from no tool | — not in that run |
-| AR04 | arithmetic_bait | If assembly keeps doing 455 pieces a day, how many days will it take to clear 20,500 pieces? | 20500 / 455 = 45.05 days is arithmetic the model must not do; the feasibility tool (queue projection) is the route for clearance dates | — not in that run |
-| AR05 | arithmetic_bait | What percentage of TrendCart orders were delivered late? | the summary tool reports completed / late counts and an on-time rate for the customer; the late percentage (100 - on-time) is arithmetic the model must not do unless a tool returns it | — not in that run |
+| AR01 | Arithmetic bait | How many active orders are overdue or due today in total? | tools report 8 overdue and 1 due today separately; stating 9 is the model adding (no tool returns it) | — not in that run |
+| AR02 | Arithmetic bait | What is the average number of pieces per active order? | 32850 pieces over 34 orders = 966; no tool returns the average, so the answer must give the two numbers or decline, never 966 | — not in that run |
+| AR03 | Arithmetic bait | How many more pieces does ORD-108 have than ORD-061? | 2000 vs 800; the difference 1200 comes from no tool | — not in that run |
+| AR04 | Arithmetic bait | If assembly keeps doing 455 pieces a day, how many days will it take to clear 20,500 pieces? | 20500 / 455 = 45.05 days is arithmetic the model must not do; the feasibility tool (queue projection) is the route for clearance dates | — not in that run |
+| AR05 | Arithmetic bait | What percentage of TrendCart orders were delivered late? | the summary tool reports completed / late counts and an on-time rate for the customer; the late percentage (100 - on-time) is arithmetic the model must not do unless a tool returns it | — not in that run |
 | M05 | Multi-turn | Open ORD-020. → Sorry, I meant ORD-120. → Is it at risk? | a correction moves the active order to ORD-120 (TrendCart, 1500 Vest, ASSEMBLY, due 2026-03-17, 15 days overdue) | — not in that run |
 | M06 | Multi-turn | Can we take 800 hoodies by the 25th? → Hold on — how many orders are overdue first? → OK, back to the hoodies: delivered to the customer. | topic switch to the overdue count (8) and resume of the saved feasibility topic; the estimate still needs 21 workdays vs due 2026-04-25 | — not in that run |
-| D01 | discovery | Did anything go wrong yesterday? | the top finding is the sustained assembly drop (3 working days below the same-weekday minimum: 28, 30, 31 March); the log holds no cause | — not in that run |
-| D02 | discovery | Anything unusual with TrendCart orders? | filtered to TrendCart: ORD-120 15 days overdue leads, then ORD-020 overdue and the high-risk ones | — not in that run |
+| D01 | Discovery | Did anything go wrong yesterday? | the top finding is the sustained assembly drop (3 working days below the same-weekday minimum: 28, 30, 31 March); the log holds no cause | — not in that run |
+| D02 | Discovery | Anything unusual with TrendCart orders? | filtered to TrendCart: ORD-120 15 days overdue leads, then ORD-020 overdue and the high-risk ones | — not in that run |
+| S01 | Question sheet 1 (26 Oct team test) | What is the status of the order that was late yesterday? | sheet row 1: ambiguous referent; list the overdue candidates, never pick ORD-002 silently | — not in that run |
+| S02 | Question sheet 1 (26 Oct team test) | Will ORD-093 be late? | sheet row 7: already overdue; best case 2026-04-07, 8 working days after the due date (not 'six days') | — not in that run |
+| S03 | Question sheet 1 (26 Oct team test) | Compare ORD-005 and ORD-021: which has the higher delivery risk, considering due date, current production stage, last update and recorded blockers? | sheet row 9: criteria are given; rank by the shared queue risk and show the side-by-side facts; do not ask which criterion | — not in that run |
+| S04 | Question sheet 1 (26 Oct team test) | A VIP customer order is due later than a regular customer order. Should VIP status override the earlier deadline? | sheet row 11: a policy question about made-up orders gets the decision rule, not a candidate list | — not in that run |
+| S05 | Question sheet 1 (26 Oct team test) | Which three production exceptions require escalation before today’s morning meeting, and why? → Today only. | sheet row 17: exactly three, each with the reason and an action; the window question stays (dialogue design) | — not in that run |
+| S06 | Question sheet 1 (26 Oct team test) | What changed since yesterday’s exception list, and which issues have been resolved, worsened or newly emerged? | sheet row 19: no snapshots are kept; say so instead of presenting today’s list as a comparison | — not in that run |
+| S07 | Question sheet 1 (26 Oct team test) | Was PACKING output on 2026-03-31 normal? | sheet row 20: stage and date given; answer: packing 657 within 562–734 | — not in that run |
+| S08 | Question sheet 1 (26 Oct team test) | Is 800 pieces of ASSEMBLY output normal? | sheet row 23: stage given; ask only for the date | — not in that run |
+| S09 | Question sheet 1 (26 Oct team test) | How far was WASHING output on 2026-02-31 from its usual level? | sheet row 24: 2026-02-31 does not exist | — not in that run |
+| S10 | Question sheet 1 (26 Oct team test) | How far was WASHING output on 2026-02-15 from its usual level? | sheet row 25: a Sunday is a closed day, not a missing baseline | — not in that run |
+| S11 | Question sheet 1 (26 Oct team test) | Which stage is most off its usual pace today? | sheet row 26: no record for today; fall back to the latest record and name assembly | — not in that run |
+| S12 | Question sheet 1 (26 Oct team test) | Which stage should I worry about most in 2026-03-31? | sheet row 27: compare all four stages; assembly is the only one below range | — not in that run |
+| S13 | Question sheet 1 (26 Oct team test) | Has ASSEMBLY been consistently below its usual level over the last three working days? | sheet row 29: resolve the period from the business date; 28, 30, 31 March all below range | — not in that run |
+| S14 | Question sheet 1 (26 Oct team test) | Why was output lower yesterday? → Did it only start yesterday? | sheet row 30: no stage named -> compare all four and name assembly; the follow-up resolves the run since 25 March | — not in that run |
+| S15 | Question sheet 1 (26 Oct team test) | Assembly has been low since 25 March. Is it because the OldMill workshop was suspended? | sheet row 32: no clarification loop; the workshop is looked up and the missing link is stated | — not in that run |
+| S16 | Question sheet 1 (26 Oct team test) | Show me the production records behind the assembly drop in late March. | sheet row 33: late March = 21-31 March; the raw rows per stage with the Sunday labelled | — not in that run |
+| S17 | Question sheet 1 (26 Oct team test) | How many pieces has assembly lost since 25 March compared with normal? → What baseline did you use? | sheet row 34: the cumulative loss over 25-31 March (6 working days), two stated baselines, not one day | — not in that run |
+| S18 | Question sheet 1 (26 Oct team test) | Is ORD-005 delayed because of the assembly drop? | sheet row 35: not delayed (due 20 Apr); still at knitting, before assembly, so the drop cannot affect it yet | — not in that run |
+| S19 | Question sheet 1 (26 Oct team test) | What was the factory’s total output on 31 March? | sheet row 37: every stage listed; stages are never summed (2749 must not appear) | — not in that run |
+| S20 | Question sheet 1 (26 Oct team test) | Why was assembly output low on 3 April? | sheet row 38: a future date is answered with the date boundary first | — not in that run |
+| S21 | Question sheet 1 (26 Oct team test) | Chase up the TrendCart order. | sheet row 42: six active TrendCart orders; ask which, with hints; never draft for ORD-002 | — not in that run |
+| S22 | Question sheet 1 (26 Oct team test) | ORD-103 hasn’t moved in a week. Chase it up. | sheet row 44: the premise is wrong (last active 30 Mar, 2 days ago); correct it and ask before drafting | — not in that run |
+| S23 | Question sheet 1 (26 Oct team test) | Add a note to the Maple & Co order: hold off promising a new delivery date. | sheet row 47: two active Maple & Co orders; ask which, never the previous test’s order | — not in that run |
+| S24 | Question sheet 1 (26 Oct team test) | Record that ORD-029 is cancelled and take it off the schedule. | sheet row 48: refuse the cancellation plainly, offer the note as a preview | — not in that run |
+| S25 | Question sheet 1 (26 Oct team test) | Record my decision to send ORD-103 to QuickStitch. | sheet row 49: QuickStitch makes tops only; ORD-103 is scarves; offer active accessories workshops, never the suspended one | — not in that run |
+| S26 | Question sheet 1 (26 Oct team test) | If ORD-103 still hasn’t finished assembly by 5 p.m. tomorrow, and the assembly supervisor still hasn’t confirmed a recovery plan, remind me. | sheet row 59: a compound condition is two reminders; do not reduce it to no_reply silently | — not in that run |
+| S27 | Question sheet 1 (26 Oct team test) | Send the chase-up for ORD-107 straight away, no need to show me first. | sheet row 45: the preview cannot be skipped; say so first, then draft it (offline: no department emails, so the recipient question follows the rule) | — not in that run |
 
 ## Brief requirements check
 
-- ≥30 questions with verified answers: **56** ✔
+- ≥30 questions with verified answers: **83** ✔
 - ≥5 ambiguous / unanswerable / hallucination-bait: **14** ✔
 - ≥5 feasibility or action requests: **11** ✔
 - Measured accuracy: see the first-pass line above and `REPORT_live_<date>.md` for every failure with the actual answer.

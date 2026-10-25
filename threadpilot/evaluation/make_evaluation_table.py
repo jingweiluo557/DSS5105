@@ -15,7 +15,8 @@ ev = json.loads(a.eval.read_text(encoding='utf-8'))
 res = json.loads(a.results.read_text(encoding='utf-8')) if a.results and a.results.exists() else None
 verdict = {s['id']: s for s in res['scenarios']} if res else {}
 cat_names = {'facts': 'Fact lookup', 'judgement': 'Judgement (normal?)', 'tracing': 'Tracing (why / rows)', 'multi_turn': 'Multi-turn', 'ambiguous': 'Ambiguous (must ask)',
-             'unanswerable': 'Unanswerable / bait', 'feasibility': 'Feasibility', 'action': 'Action (confirm, log)'}
+             'unanswerable': 'Unanswerable / bait', 'feasibility': 'Feasibility', 'action': 'Action (confirm, log)',
+             'arithmetic_bait': 'Arithmetic bait', 'discovery': 'Discovery', 'sheet1': 'Question sheet 1 (26 Oct team test)'}
 L = ['# ThreadPilot evaluation set (verified answers)', '',
      f"Version {ev['version']} · business date {ev['business_now']} · {ev['counts']['scenarios']} questions ({ev['counts']['turns']} turns). ",
      'Every expected value is computed from `orders.csv`, `production_log.csv` and `workshops.csv` by `build_eval_set.py`, using the same definitions as the ThreadPilot tools '

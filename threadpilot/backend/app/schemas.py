@@ -49,7 +49,7 @@ class Slots(StrictModel):
     observed_output: int | None = Field(default=None, ge=0)
     baseline: Literal['same_weekday'] | None = None
     comparison_fields: list[Literal['due_date', 'last_activity_date', 'current_stage', 'status', 'pieces', 'product', 'customer']] = Field(default_factory=list)
-    criterion: Literal['due_date', 'last_activity_date', 'idle_days'] | None = None
+    criterion: Literal['due_date', 'last_activity_date', 'idle_days', 'risk'] | None = None
     window_days: int | None = Field(default=None, ge=0, le=365)
     delivery_point: Literal['factory', 'customer'] | None = None
     delivery_buffer_days: int | None = Field(default=None, ge=0, le=60)
