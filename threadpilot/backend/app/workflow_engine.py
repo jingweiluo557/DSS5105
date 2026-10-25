@@ -1130,7 +1130,11 @@ class WorkflowEngine:
             if deadline <= now:
                 return self.ask('The reminder time must be in the future. What date and time?', state, result, now, calls, evidence)
             slots.deadline = deadline.isoformat()
-            preview = f"{'Update existing' if existing else 'Create'} reminder for {order_id} at {deadline.isoformat()}: notify only if {slots.condition} is still unmet in recorded data. Please confirm."
+            since = datetime.fromisoformat(existing['since']) if existing else now
+            meaning = {'no_activity': f"no new production activity has been recorded for {order_id} since {since.date().isoformat()} (its last_activity_date and stage are unchanged)",
+                       'no_reply': f"no reply to the chase-up for {order_id} has been recorded since {since.date().isoformat()}"}.get(slots.condition, f"{slots.condition} is still unmet in recorded data")
+            preview = (f"{'Update existing' if existing else 'Create'} reminder for {order_id} at {deadline.isoformat()}: notify only if {meaning}; "
+                       f"otherwise nothing is sent. Please confirm.")
             self.propose('reminder', order_id, {'condition': slots.condition, 'deadline': deadline.isoformat(),
                          'since': existing['since'] if existing else now.isoformat()}, preview, state, now)
             answer = preview

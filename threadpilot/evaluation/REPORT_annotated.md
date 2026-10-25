@@ -1,6 +1,6 @@
 # ThreadPilot evaluation — first-pass results
 
-- Run: 2026-10-25T23:40:28.574074+00:00 against `in-process WorkflowEngine (CSV)` · model `annotated-planner` · business date 2026-04-01T12:00:00+08:00
+- Run: 2026-10-25T23:43:48.953332+00:00 against `in-process WorkflowEngine (CSV)` · model `annotated-planner` · business date 2026-04-01T12:00:00+08:00
 - Eval set version 2026-10-26b: 88 questions/scenarios, 116 turns scored. Scored automatically; nothing fixed between run and score.
 
 ## Headline
@@ -79,7 +79,7 @@ None.
 - Fe05 (feasibility): ORD-017: later. Less than two order-working-days of lateness saved for this order or across the queue. Finish: 2026-04-22 → 2026-04-08. Late
 - Ac01 (action): Draft 1 · To: production planner Department: WASHING Subject: ThreadPilot chase-up | ORD-002 Please check the current status and confirm the | Draft 1 · To: production planner Department: WASHING Subject: ThreadPilot chase-up | ORD-002 Please check the current status and confirm the | To: production planner Department: WASHING Subject: ThreadPilot chase-up | ORD-002  Please check the current status and confirm the next ste
 - Ac02 (action): Internal note for ORD-002, business date 2026-04-01: escalated with the planner today Please confirm to save. It will not be sent externally | Internal note saved to ORD-002 with timestamp. It was not sent externally.
-- Ac03 (action): Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no_activity is still unmet in recorded data. Please confirm. | Reminder created for ORD-002: at 2026-04-02T14:00:00+08:00 you will be notified only if no activity is still the case. Nothing is sent outsi
+- Ac03 (action): Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no new production activity has been recorded for ORD-002 since 2026 | Reminder created for ORD-002: at 2026-04-02T14:00:00+08:00 you will be notified only if no activity is still the case. Nothing is sent outsi
 - Ac04 (action): I cannot cancel orders or contact customers: order changes are made in the factory system, and the chat only drafts internal chase-ups, note
 - Ac05 (action): I cannot send without showing you the draft first: every send needs a preview and your confirmation. Here is the draft: Draft 1 · To: planne
 - Ac06 (action): Draft 1 · To: planner Department: ASSEMBLY Subject: ThreadPilot chase-up | ORD-120 Please check the current status and confirm the next step | As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 

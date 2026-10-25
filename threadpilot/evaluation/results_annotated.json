@@ -1,6 +1,6 @@
 {
   "meta": {
-    "run_at": "2026-10-25T23:40:28.574074+00:00",
+    "run_at": "2026-10-25T23:43:48.953332+00:00",
     "target": "in-process WorkflowEngine (CSV)",
     "model": "annotated-planner",
     "first_pass": false,
@@ -2004,7 +2004,7 @@
               true
             ]
           ],
-          "answer": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no_activity is still unmet in recorded data. Please confirm.",
+          "answer": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no new production activity has been recorded for ORD-002 since 2026-04-01 (its last_activity_date and stage are unchanged); otherwise nothing is sent. Please confirm.",
           "ms": 0,
           "model": "annotated-planner",
           "request_id": ""

@@ -1,6 +1,6 @@
 {
  "meta": {
-  "run_at": "2026-10-25T23:40:28.574074+00:00",
+  "run_at": "2026-10-25T23:43:48.953332+00:00",
   "target": "in-process WorkflowEngine (CSV)",
   "model": "annotated-planner",
   "first_pass": false,
@@ -53,7 +53,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "5914b839-4659-47cb-a369-e9034d92b284",
+     "session_id": "53092919-654f-4021-b4ec-8759fe552f38",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -3063,7 +3063,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "5714c2c4-b2aa-40d1-9fed-2605984f46ce",
+     "session_id": "2a2f5901-9c04-471b-a181-7563f0a38245",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -6075,7 +6075,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "07a8f237-d5a1-4775-a3cd-cc39be4c7864",
+     "session_id": "2dbdc6bd-30ec-46bf-964b-532bb5b38616",
      "active_order": "ORD-053",
      "active_customer": "UrbanThread",
      "pending_clarification": null,
@@ -6245,7 +6245,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "64d03b58-a1ad-4a01-8f91-014aa8e69edb",
+     "session_id": "83470ebe-3a43-4ec7-930f-076994aa18ff",
      "active_order": "ORD-108",
      "active_customer": "Harbor Knits",
      "pending_clarification": null,
@@ -6469,7 +6469,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "52cfe8e6-f9e5-40de-b4b4-fa9cfa8dbe37",
+     "session_id": "0e3646e6-1132-479b-a570-2bc036bccedb",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -6625,7 +6625,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "92672cc3-3e7f-4d1f-9ac6-5ffd3c56faf1",
+     "session_id": "abf985b0-7e9e-4b8e-ae40-1200e4a20128",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -7309,7 +7309,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "af8dc938-eeda-48f4-828f-a49f09442f46",
+     "session_id": "07bef2bd-1838-4f87-8c6c-1b9f61f72003",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -7904,7 +7904,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "bf820ed5-2c95-4cd0-81f1-805f32cb17a3",
+     "session_id": "c54c593c-f7c0-49bc-b7b3-bf438d0ca14b",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -8060,7 +8060,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c3e22cb9-39ef-45f4-b1c6-7853e450e497",
+     "session_id": "82ae503e-8273-4e1f-88df-3d88a020c483",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -9019,7 +9019,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "73296ab0-9381-428b-88f3-ae2d493a5b75",
+     "session_id": "788500e0-bd6c-47c6-bddd-d6383b5e848f",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -9999,7 +9999,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "3a4e4f37-8cac-498f-9964-da4edd016577",
+     "session_id": "fe720f2f-bf27-4b00-8bab-3c35cdb8708f",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -10430,7 +10430,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "3faeec6b-c3f3-49ea-88c9-265839d7a0f2",
+     "session_id": "29c84b39-da27-48a4-90a1-d28de5de618c",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -13440,7 +13440,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "07106cc0-9d08-4098-b4bc-065a58b01142",
+     "session_id": "a37d2b92-c76e-4ecd-8065-193ad9c6c934",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -13761,7 +13761,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "23e055c1-4ceb-4d47-a88a-c433dee6e978",
+     "session_id": "8df06dbf-278c-476c-8e04-72e90bc66972",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -14082,7 +14082,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "23e055c1-4ceb-4d47-a88a-c433dee6e978",
+     "session_id": "8df06dbf-278c-476c-8e04-72e90bc66972",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -14446,7 +14446,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "33f5bf49-d4f7-4abe-9348-3582f0aeca3b",
+     "session_id": "1bbc71aa-3517-4207-8c4c-cd9ec968a97e",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -14767,7 +14767,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "768e5a21-91be-4399-827b-bf69acfdb0da",
+     "session_id": "c772238a-17a5-408f-9789-3f8a46a8055a",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -15089,7 +15089,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "d27d2427-0eab-4fcb-81ba-fbb6fa83649f",
+     "session_id": "dfda3789-fdd0-498b-8a46-2d02569eca97",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -15410,7 +15410,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "d27d2427-0eab-4fcb-81ba-fbb6fa83649f",
+     "session_id": "dfda3789-fdd0-498b-8a46-2d02569eca97",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -15776,7 +15776,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "9503e1ec-52d8-49e5-b406-8fa529f2140f",
+     "session_id": "b804412f-9a26-4d8a-a8e1-fb974523107e",
      "active_order": "ORD-002",
      "active_customer": "Cotton Club",
      "pending_clarification": null,
@@ -15989,7 +15989,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "4c5d88f3-a880-4d7f-998a-94ab309f61b9",
+     "session_id": "b4bd73b5-31f1-48e5-86cb-91d92d211965",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -16436,7 +16436,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "4c5d88f3-a880-4d7f-998a-94ab309f61b9",
+     "session_id": "b4bd73b5-31f1-48e5-86cb-91d92d211965",
      "active_order": "ORD-005",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -16721,7 +16721,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "4c5d88f3-a880-4d7f-998a-94ab309f61b9",
+     "session_id": "b4bd73b5-31f1-48e5-86cb-91d92d211965",
      "active_order": "ORD-005",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -16990,7 +16990,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "4c5d88f3-a880-4d7f-998a-94ab309f61b9",
+     "session_id": "b4bd73b5-31f1-48e5-86cb-91d92d211965",
      "active_order": "ORD-005",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -17305,7 +17305,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "230ca91f-71b2-4f16-a492-2256de974434",
+     "session_id": "25d55f28-837e-4f96-a69d-c6ea70bbe934",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -17472,7 +17472,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "230ca91f-71b2-4f16-a492-2256de974434",
+     "session_id": "25d55f28-837e-4f96-a69d-c6ea70bbe934",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -17753,7 +17753,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "230ca91f-71b2-4f16-a492-2256de974434",
+     "session_id": "25d55f28-837e-4f96-a69d-c6ea70bbe934",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -18056,7 +18056,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "e374c0bc-ad93-4d49-85a5-e526339a8e05",
+     "session_id": "769714f0-f657-454d-ab62-4bc3761ada7b",
      "active_order": "ORD-053",
      "active_customer": "UrbanThread",
      "pending_clarification": null,
@@ -18280,7 +18280,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "e374c0bc-ad93-4d49-85a5-e526339a8e05",
+     "session_id": "769714f0-f657-454d-ab62-4bc3761ada7b",
      "active_order": "ORD-053",
      "active_customer": "UrbanThread",
      "pending_clarification": null,
@@ -18492,7 +18492,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "e374c0bc-ad93-4d49-85a5-e526339a8e05",
+     "session_id": "769714f0-f657-454d-ab62-4bc3761ada7b",
      "active_order": "ORD-053",
      "active_customer": "UrbanThread",
      "pending_clarification": null,
@@ -18747,7 +18747,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "360b861f-0f86-4549-aea4-ae173c17bb27",
+     "session_id": "139c367c-5db3-4ac3-ae09-56e8574e296a",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -18893,7 +18893,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "360b861f-0f86-4549-aea4-ae173c17bb27",
+     "session_id": "139c367c-5db3-4ac3-ae09-56e8574e296a",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -19919,7 +19919,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "360b861f-0f86-4549-aea4-ae173c17bb27",
+     "session_id": "139c367c-5db3-4ac3-ae09-56e8574e296a",
      "active_order": "ORD-107",
      "active_customer": null,
      "pending_clarification": null,
@@ -20976,7 +20976,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "f7bcec84-0d41-4fd9-bdf7-99868d9e6b6f",
+     "session_id": "67711064-7902-40d4-9d78-43adaed6351c",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -21375,7 +21375,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "f1a0407e-b746-45b6-a1e0-be479fe676e2",
+     "session_id": "b989b6aa-aa28-409f-acf3-140d0c7d0aa2",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -21526,7 +21526,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "83366da9-5a4c-448f-a9e7-926ee7c959c8",
+     "session_id": "5853dafc-4c07-42ee-8b34-86846b2b9115",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -21966,7 +21966,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "e034edf2-a967-419f-854a-c843ca84a5e0",
+     "session_id": "aa361186-d7d2-4dd1-9856-efc1ad21a3a9",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -22112,7 +22112,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "56dd1236-0295-4a19-afc5-0c69715d7fda",
+     "session_id": "c49bee60-d19a-42cb-8e11-a8c554b4aa3e",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -22258,7 +22258,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "e214ad14-b68f-41ba-b20e-8ecc47990faf",
+     "session_id": "d5da7902-456f-471d-a737-938b8ada67a1",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -22404,7 +22404,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "a1c66006-1d3a-43f2-bb6f-7bb6a036156b",
+     "session_id": "c261100d-328a-47bd-bbaa-1c3072afef42",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -22531,7 +22531,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "f6911725-0477-4f6f-802e-eb6195459d00",
+     "session_id": "d41eef51-cc2c-4f86-afde-28d8478587d0",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -22660,7 +22660,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "3dfe77c2-4009-4fa1-a49d-71152622eba4",
+     "session_id": "bea2321a-9638-467d-88dc-830e9a4e106d",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -22788,7 +22788,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "1bcdeb67-dde0-463e-9f82-96cf50bb1ac7",
+     "session_id": "1709de8d-aaaf-4212-83ee-8aa0ac3b5f0b",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -23178,7 +23178,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c011231e-a0ba-411d-b37a-0f19a902e9dd",
+     "session_id": "304505ac-9dff-4d47-91cb-bf7768de15b3",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -23335,7 +23335,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c5cf856d-2479-4704-9621-f2e597d29984",
+     "session_id": "db779432-9fc3-4355-9694-0bb87b577dfe",
      "active_order": "ORD-005",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -23505,7 +23505,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "fc11d6e9-e851-467d-a636-5f002e66ef8c",
+     "session_id": "de7f8151-af9d-413a-b55a-371322193fe7",
      "active_order": "ORD-120",
      "active_customer": null,
      "pending_clarification": null,
@@ -23640,7 +23640,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "8e743ec5-0f01-4d89-a9d5-dacaaf739712",
+     "session_id": "c5966afb-ba5c-4249-8af2-b5a534f2aacf",
      "active_order": "ORD-053",
      "active_customer": null,
      "pending_clarification": null,
@@ -23773,7 +23773,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "9ed75ebd-03f4-4542-8a1f-785821c625e2",
+     "session_id": "fd4cbfb0-5781-4bb9-9eb0-1902b0bfdcdb",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -23919,7 +23919,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "9ed75ebd-03f4-4542-8a1f-785821c625e2",
+     "session_id": "fd4cbfb0-5781-4bb9-9eb0-1902b0bfdcdb",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -26327,7 +26327,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "9ed75ebd-03f4-4542-8a1f-785821c625e2",
+     "session_id": "fd4cbfb0-5781-4bb9-9eb0-1902b0bfdcdb",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -28743,7 +28743,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "9ed75ebd-03f4-4542-8a1f-785821c625e2",
+     "session_id": "fd4cbfb0-5781-4bb9-9eb0-1902b0bfdcdb",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -31167,7 +31167,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "94cc4371-18f7-4c48-8abe-ab960f2c7d5d",
+     "session_id": "558258b6-4152-4b1a-85a8-a82227293f9b",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -33444,7 +33444,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "b4881f52-d462-4117-9fda-6697715bce00",
+     "session_id": "db2d3893-2f09-4a49-a881-c91f9b2a035a",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -33590,7 +33590,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "5e467b14-393f-41b5-a512-58ef93b47116",
+     "session_id": "222b9bf8-ac0f-499f-b267-57ae7788cdcd",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -34022,7 +34022,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "72fb9e99-ae38-4df2-a3d4-a276672b44a4",
+     "session_id": "ef934ab5-e3f4-4ba7-820d-07fa6cb295d1",
      "active_order": "ORD-017",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -42335,7 +42335,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "92fdc037-47d8-424a-a60c-4845baa52c16",
+     "session_id": "94198f8d-2b1a-44c3-89c2-199f59abbeed",
      "active_order": "ORD-002",
      "active_customer": "Cotton Club",
      "pending_clarification": null,
@@ -42559,7 +42559,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "92fdc037-47d8-424a-a60c-4845baa52c16",
+     "session_id": "94198f8d-2b1a-44c3-89c2-199f59abbeed",
      "active_order": "ORD-002",
      "active_customer": "Cotton Club",
      "pending_clarification": null,
@@ -42790,14 +42790,14 @@
     "needs_clarification": false,
     "clarification_question": null,
     "confirmation_required": true,
-    "confirmation_id": "bfe12680-cb6a-4442-859c-e7b03eb706c3",
+    "confirmation_id": "fc874942-78f5-498e-be44-9d46b28cea36",
     "state": {
-     "session_id": "92fdc037-47d8-424a-a60c-4845baa52c16",
+     "session_id": "94198f8d-2b1a-44c3-89c2-199f59abbeed",
      "active_order": "ORD-002",
      "active_customer": "Cotton Club",
      "pending_clarification": null,
      "pending_action": {
-      "id": "bfe12680-cb6a-4442-859c-e7b03eb706c3",
+      "id": "fc874942-78f5-498e-be44-9d46b28cea36",
       "kind": "send",
       "order_id": "ORD-002",
       "payload": {
@@ -43023,14 +43023,14 @@
     "needs_clarification": false,
     "clarification_question": null,
     "confirmation_required": true,
-    "confirmation_id": "09ab1baf-b7c3-417d-9284-9276f83c2b65",
+    "confirmation_id": "43b69967-423b-413b-8810-f1d3959d385f",
     "state": {
-     "session_id": "a6eb1d5a-752b-4dda-bb9b-4319901eba49",
+     "session_id": "5faa33f2-69f3-4ec5-9e58-d2da174b1a86",
      "active_order": "ORD-002",
      "active_customer": "Cotton Club",
      "pending_clarification": null,
      "pending_action": {
-      "id": "09ab1baf-b7c3-417d-9284-9276f83c2b65",
+      "id": "43b69967-423b-413b-8810-f1d3959d385f",
       "kind": "note",
       "order_id": "ORD-002",
       "payload": {
@@ -43220,7 +43220,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "a6eb1d5a-752b-4dda-bb9b-4319901eba49",
+     "session_id": "5faa33f2-69f3-4ec5-9e58-d2da174b1a86",
      "active_order": "ORD-002",
      "active_customer": "Cotton Club",
      "pending_clarification": null,
@@ -43314,13 +43314,13 @@
      {
       "name": "save_internal_note",
       "arguments": {
-       "action_id": "09ab1baf-b7c3-417d-9284-9276f83c2b65",
+       "action_id": "43b69967-423b-413b-8810-f1d3959d385f",
        "order_id": "ORD-002",
        "text": "escalated with the planner today",
        "visibility": "internal"
       },
       "result": {
-       "id": "09ab1baf-b7c3-417d-9284-9276f83c2b65",
+       "id": "43b69967-423b-413b-8810-f1d3959d385f",
        "status": "saved",
        "kind": "note",
        "order_id": "ORD-002"
@@ -43376,7 +43376,7 @@
    "http_status": 200,
    "ms": 0,
    "response": {
-    "answer": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no_activity is still unmet in recorded data. Please confirm.",
+    "answer": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no new production activity has been recorded for ORD-002 since 2026-04-01 (its last_activity_date and stage are unchanged); otherwise nothing is sent. Please confirm.",
     "intent": "execution.reminder",
     "slots": {
      "order_ids": [
@@ -43414,14 +43414,14 @@
     "needs_clarification": false,
     "clarification_question": null,
     "confirmation_required": true,
-    "confirmation_id": "a9af075b-475b-41d7-91bc-6040083df476",
+    "confirmation_id": "0374f5e6-bab0-4e87-8a68-0699679a9be4",
     "state": {
-     "session_id": "4e581984-98c9-4df8-9620-920dd4894c80",
+     "session_id": "bd36492c-4d45-4528-8b40-c5509e5e0235",
      "active_order": "ORD-002",
      "active_customer": "Cotton Club",
      "pending_clarification": null,
      "pending_action": {
-      "id": "a9af075b-475b-41d7-91bc-6040083df476",
+      "id": "0374f5e6-bab0-4e87-8a68-0699679a9be4",
       "kind": "reminder",
       "order_id": "ORD-002",
       "payload": {
@@ -43429,7 +43429,7 @@
        "deadline": "2026-04-02T14:00:00+08:00",
        "since": "2026-04-01T12:00:00+08:00"
       },
-      "preview": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no_activity is still unmet in recorded data. Please confirm.",
+      "preview": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no new production activity has been recorded for ORD-002 since 2026-04-01 (its last_activity_date and stage are unchanged); otherwise nothing is sent. Please confirm.",
       "created_at": "2026-04-01T12:00:00+08:00",
       "source_snapshot": {
        "order_id": "ORD-002",
@@ -43494,7 +43494,7 @@
       },
       {
        "role": "assistant",
-       "content": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no_activity is still unmet in recorded data. Please confirm."
+       "content": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no new production activity has been recorded for ORD-002 since 2026-04-01 (its last_activity_date and stage are unchanged); otherwise nothing is sent. Please confirm."
       }
      ],
      "review_draft_id": null,
@@ -43612,7 +43612,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "4e581984-98c9-4df8-9620-920dd4894c80",
+     "session_id": "bd36492c-4d45-4528-8b40-c5509e5e0235",
      "active_order": "ORD-002",
      "active_customer": "Cotton Club",
      "pending_clarification": null,
@@ -43664,7 +43664,7 @@
       },
       {
        "role": "assistant",
-       "content": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no_activity is still unmet in recorded data. Please confirm."
+       "content": "Create reminder for ORD-002 at 2026-04-02T14:00:00+08:00: notify only if no new production activity has been recorded for ORD-002 since 2026-04-01 (its last_activity_date and stage are unchanged); otherwise nothing is sent. Please confirm."
       },
       {
        "role": "user",
@@ -43706,14 +43706,14 @@
      {
       "name": "upsert_reminder",
       "arguments": {
-       "action_id": "a9af075b-475b-41d7-91bc-6040083df476",
+       "action_id": "0374f5e6-bab0-4e87-8a68-0699679a9be4",
        "order_id": "ORD-002",
        "condition": "no_activity",
        "deadline": "2026-04-02T14:00:00+08:00",
        "since": "2026-04-01T12:00:00+08:00"
       },
       "result": {
-       "id": "a9af075b-475b-41d7-91bc-6040083df476",
+       "id": "0374f5e6-bab0-4e87-8a68-0699679a9be4",
        "status": "saved",
        "kind": "reminder",
        "order_id": "ORD-002"
@@ -43809,7 +43809,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "a5ec1eb5-4900-41e8-b0b3-66356a972a54",
+     "session_id": "4c228c49-5e66-40bf-9c09-aee6b4311b4e",
      "active_order": "ORD-017",
      "active_customer": null,
      "pending_clarification": null,
@@ -43944,7 +43944,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "8ec0f67a-fa85-48b9-92bc-00a4b836d041",
+     "session_id": "abf6f5d4-ccd2-4e8b-b86c-4f4a86c926d2",
      "active_order": "ORD-120",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -44168,7 +44168,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "ae01ebcc-86e2-4ce5-b499-7aa5536c67f2",
+     "session_id": "06110bf8-4f97-48f2-aa5b-1ec494006275",
      "active_order": "ORD-120",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -44390,7 +44390,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "ae01ebcc-86e2-4ce5-b499-7aa5536c67f2",
+     "session_id": "06110bf8-4f97-48f2-aa5b-1ec494006275",
      "active_order": "ORD-120",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -47449,7 +47449,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c357f493-af8f-431f-b99c-70c56cb85378",
+     "session_id": "2cbda2df-fc5c-4784-a1bc-df218d44a452",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -50459,7 +50459,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "e95d600e-e321-4434-a54f-95d146b3495f",
+     "session_id": "f6a171bd-2475-4c05-b1ff-725ef7ce16bc",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -53475,7 +53475,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c8ed10ae-0947-46ea-9831-85c8c83e0345",
+     "session_id": "05073d85-ce95-4621-aaac-aae18a934f2b",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -53700,7 +53700,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "63ef39ed-c687-48b8-b0d7-9f32c95f55b7",
+     "session_id": "aa4b863f-539a-4eea-9d78-aecdd94282a6",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -53827,7 +53827,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "5cc8b3e1-2669-442b-bf90-e07a84dfa4b6",
+     "session_id": "1d3dd9e8-1742-4093-b7ae-41620e150676",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -54424,7 +54424,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "021f933a-d88d-4f2d-aa7f-62de06465356",
+     "session_id": "6fd22010-0ac4-46ad-a14b-095cc090b687",
      "active_order": "ORD-020",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -54650,7 +54650,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "021f933a-d88d-4f2d-aa7f-62de06465356",
+     "session_id": "6fd22010-0ac4-46ad-a14b-095cc090b687",
      "active_order": "ORD-120",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -54920,7 +54920,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "021f933a-d88d-4f2d-aa7f-62de06465356",
+     "session_id": "6fd22010-0ac4-46ad-a14b-095cc090b687",
      "active_order": "ORD-120",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -55185,7 +55185,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "523eeb6b-0c09-4a91-90fa-d62f845d045e",
+     "session_id": "088035f5-f4fa-47dc-bee7-18099455fbb0",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -55331,7 +55331,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "523eeb6b-0c09-4a91-90fa-d62f845d045e",
+     "session_id": "088035f5-f4fa-47dc-bee7-18099455fbb0",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -58383,7 +58383,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "523eeb6b-0c09-4a91-90fa-d62f845d045e",
+     "session_id": "088035f5-f4fa-47dc-bee7-18099455fbb0",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -60799,7 +60799,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "2d06830f-abd5-479c-939d-f9e7f15575a1",
+     "session_id": "e7dedce1-bee7-41ad-a797-ceaef19e9849",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -69030,7 +69030,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c4d25315-358e-4ac6-ba29-9ca5cb69405e",
+     "session_id": "242f2e78-1215-41ec-87ed-d2375bd37e5a",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -77245,7 +77245,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "afdb27d0-1b6d-414e-9c9b-f7de19dd3576",
+     "session_id": "7d96f2bb-ffef-4e14-a994-9043492ce415",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -77710,7 +77710,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "198e27b9-0f1d-4fea-a085-63812edd4c8e",
+     "session_id": "e1f4a31f-65ca-4ee6-bad2-b7d75e327c97",
      "active_order": "ORD-093",
      "active_customer": "Maple & Co",
      "pending_clarification": null,
@@ -77931,7 +77931,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "41c98a7f-07ee-496e-9adb-c2c402fd9fa3",
+     "session_id": "506cfab7-7fb1-4b4b-82b0-dc2d307ca0ef",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -78224,7 +78224,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "39ff2f65-9449-4a01-8405-e401be0acf7f",
+     "session_id": "bcb9271f-b5c0-44bc-968a-9e082d8f44a8",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -78350,7 +78350,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "3194e976-50b1-46c2-b731-9d38c8ab3241",
+     "session_id": "b0310299-04cf-4a8f-beee-8b75c1769b7f",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -78496,7 +78496,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "3194e976-50b1-46c2-b731-9d38c8ab3241",
+     "session_id": "b0310299-04cf-4a8f-beee-8b75c1769b7f",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -79224,7 +79224,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "258df0d2-e5d1-488b-ad45-7baf97c31f97",
+     "session_id": "e8c125fe-3aa0-4899-a93b-1bb669f0e968",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -79350,7 +79350,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "9d84761a-b5af-4627-a997-6fadb3b3b752",
+     "session_id": "fb5b7d6e-adfa-4012-aef7-4407abafd228",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -79671,7 +79671,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "02d18406-2d5d-4246-a9c3-142cbc80aa62",
+     "session_id": "1e2924ff-84f2-4613-9bf0-a41b5c0a83fc",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -79817,7 +79817,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "a356493a-892c-47b8-9057-5987628c2a9c",
+     "session_id": "a6fbc0ff-9503-4604-84f2-65dd4e64be54",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -79963,7 +79963,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "52adda3e-8868-435f-ad13-57a2df17f0b5",
+     "session_id": "2cc3464a-e597-44ab-891d-035fde36fa5b",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -80093,7 +80093,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "ec8ede5e-6925-458e-95e0-c3d746cd9dbe",
+     "session_id": "0afe75f0-aed1-47e4-871c-87ed21956a89",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -80790,7 +80790,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "86d26311-267c-460b-9bc9-326c6cb88631",
+     "session_id": "bc438ee0-7019-4404-84ae-695360ba3acc",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -81486,7 +81486,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "946c038b-d2f2-4f80-9366-59538138a67e",
+     "session_id": "e8caacf5-0a9a-4745-90f7-d5ea9ca96cd7",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -81741,7 +81741,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "4c2778e6-e309-4abc-a97d-2f707ca8dafe",
+     "session_id": "0f2285cb-e306-4f2c-a165-68457e9ed418",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -82437,7 +82437,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "4c2778e6-e309-4abc-a97d-2f707ca8dafe",
+     "session_id": "0f2285cb-e306-4f2c-a165-68457e9ed418",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -82811,7 +82811,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "8ad726a7-9d7f-4432-87d8-fc5de5867cc1",
+     "session_id": "c3105f7e-521e-4163-a65d-a0d92c103c98",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -83165,7 +83165,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c37d05e0-d268-4b91-9f88-0c78b37615a1",
+     "session_id": "9809e5f8-d34d-4c6b-9876-16a29198ae73",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -83575,7 +83575,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "687ad273-2b18-43bf-8f0b-8552e6c8301d",
+     "session_id": "84c8f62f-cad0-4ed3-9fa9-1d76d69532c6",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -83906,7 +83906,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "687ad273-2b18-43bf-8f0b-8552e6c8301d",
+     "session_id": "84c8f62f-cad0-4ed3-9fa9-1d76d69532c6",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -84282,7 +84282,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "4ce606a1-01c6-49d9-9447-311d26c43169",
+     "session_id": "c8da4ef8-42a0-441c-ac3f-b8a14e8852d5",
      "active_order": "ORD-005",
      "active_customer": "TrendCart",
      "pending_clarification": null,
@@ -84494,7 +84494,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "93147c6c-dff3-409b-ba86-b5196bd9b5fd",
+     "session_id": "3610f2a8-a28e-472e-ae45-3859c08fdcad",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -85190,7 +85190,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "934485e2-100f-4a4b-b3c4-3e20a8aa635c",
+     "session_id": "6f9ec969-f6f7-48e7-b7ac-728e9d413bd2",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -85892,7 +85892,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "9561a6dd-8f61-4489-942e-3711f93ad043",
+     "session_id": "0de68cac-0f11-4897-bf59-5d96149a44cc",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -86274,7 +86274,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c2479248-b7a6-4be0-b473-8eed0dfd7916",
+     "session_id": "6f6ce7df-f159-42b9-907e-58d586e3a404",
      "active_order": "ORD-103",
      "active_customer": null,
      "pending_clarification": {
@@ -86482,7 +86482,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "2080686f-b73a-4af0-a3fc-05a35d6df662",
+     "session_id": "4a4df687-1cbc-4b44-81f6-552665a16b1b",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": {
@@ -86720,14 +86720,14 @@
     "needs_clarification": false,
     "clarification_question": null,
     "confirmation_required": true,
-    "confirmation_id": "28130dcc-d043-42b2-8e55-8f9aa5f240b4",
+    "confirmation_id": "8f1e0cfa-c49a-4550-a2e1-89833e193cb8",
     "state": {
-     "session_id": "cdd40897-deef-4c5c-b557-ba9329fc237b",
+     "session_id": "41d33de1-93d6-4148-bfcc-3377b3e39625",
      "active_order": "ORD-029",
      "active_customer": "Northwind Apparel",
      "pending_clarification": null,
      "pending_action": {
-      "id": "28130dcc-d043-42b2-8e55-8f9aa5f240b4",
+      "id": "8f1e0cfa-c49a-4550-a2e1-89833e193cb8",
       "kind": "note",
       "order_id": "ORD-029",
       "payload": {
@@ -86917,7 +86917,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "bc51659e-5f2c-4b74-bdff-c2c977c0516c",
+     "session_id": "fa338943-8809-42f4-ad20-0a4b176307e7",
      "active_order": "ORD-103",
      "active_customer": "Bright Basics",
      "pending_clarification": {
@@ -87143,7 +87143,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "de83645c-a39b-42f9-8ed7-0ab7a42a0e7e",
+     "session_id": "ce3ae830-f436-403b-bad0-0cc4fa4a79b5",
      "active_order": "ORD-103",
      "active_customer": "Bright Basics",
      "pending_clarification": {
@@ -87349,7 +87349,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "b6f401fb-96ad-4863-9f1a-ee345682d8a7",
+     "session_id": "0f2948f6-1d7c-4975-a11d-72908f9902f5",
      "active_order": "ORD-107",
      "active_customer": "Northwind Apparel",
      "pending_clarification": {
@@ -87538,7 +87538,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "8b59ec50-20aa-4432-b520-3bbf7be7fd50",
+     "session_id": "007e8f1b-3750-4453-83a9-1c278c7ae217",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -87664,7 +87664,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "97449b21-75a4-4431-a69b-cc7a282cde70",
+     "session_id": "19389879-68b1-4644-90b5-460dfc5c624b",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -96457,7 +96457,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "f4a5d7d7-9193-4ade-bfe2-bddd55040edd",
+     "session_id": "e6904042-d1e9-47ab-a4c2-15d4e5058876",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -96583,7 +96583,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "75887923-2602-49b1-9344-326313e1f026",
+     "session_id": "6e48bb61-e44c-4e62-9b4c-80914f767c29",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -97279,7 +97279,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "75887923-2602-49b1-9344-326313e1f026",
+     "session_id": "6e48bb61-e44c-4e62-9b4c-80914f767c29",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -98173,7 +98173,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c4608c84-5d2e-4dae-b4f1-c9e8c831ba81",
+     "session_id": "a0960133-dd5e-47ef-be07-f62cc2bce9cc",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,
@@ -98875,7 +98875,7 @@
     "confirmation_required": false,
     "confirmation_id": null,
     "state": {
-     "session_id": "c4608c84-5d2e-4dae-b4f1-c9e8c831ba81",
+     "session_id": "a0960133-dd5e-47ef-be07-f62cc2bce9cc",
      "active_order": null,
      "active_customer": null,
      "pending_clarification": null,

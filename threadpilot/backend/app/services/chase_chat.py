@@ -212,7 +212,8 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         department, department_email = destination(group)
         group_recipient = recipient or department_email
         subject = 'ThreadPilot chase-up | '+(', '.join(group) or 'Manager summary')
-        heading = f"Draft {selected if slots.action == 'revise' and selected else index} · To: {'Me' if group_recipient == 'self' else group_recipient or 'Not set'}\nDepartment: {department or 'Specified recipient'}\nSubject: {subject}\n"
+        to_line = 'Me' if group_recipient == 'self' else group_recipient or ('Not set' + (f" (no email saved for {department} in Settings; name a recipient before sending)" if department else ' (name a recipient before sending)'))
+        heading = f"Draft {selected if slots.action == 'revise' and selected else index} · To: {to_line}\nDepartment: {department or 'Specified recipient'}\nSubject: {subject}\n"
         answer_parts.append(heading)
         if emit:
             await emit(heading)
