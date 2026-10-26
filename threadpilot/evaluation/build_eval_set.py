@@ -81,6 +81,8 @@ def gold_facts(orders, log, workshops):
         g[oid] = order(oid)
         g[oid]['days_to_due'] = (d(g[oid]['due_date']) - TODAY).days
         g[oid]['idle_days'] = (TODAY - d(g[oid]['last_activity_date'])).days
+    g['ORD-093'] = order('ORD-093') | {'days_to_due': (d(order('ORD-093')['due_date']) - TODAY).days}
+    g['ORD-093'].update(queue_gold(orders, log, 'ORD-093'))
     g['hoodie_active'] = sorted(o['order_id'] for o in active if o['product'] == 'Hoodie')
     g['harbor_scarf_active'] = sorted(o['order_id'] for o in active if o['customer'] == 'Harbor Knits' and o['product'] == 'Scarf')
     g['trendcart_scarf_active'] = sorted(o['order_id'] for o in active if o['customer'] == 'TrendCart' and o['product'] == 'Scarf')
@@ -105,6 +107,25 @@ def gold_facts(orders, log, workshops):
                                      and (not w['max_batch_pieces'] or 250 <= int(w['max_batch_pieces']))]
     g['workshop_names'] = {w['workshop_id']: w['name'] for w in workshops}
     return g
+
+
+def queue_gold(orders, log, order_id: str) -> dict:
+    """Best-case finish and lateness for one order from the backend's own queue engine (pure Python, no server):
+    the figures 'Will ORD-093 be late?' must quote. Imported from the backend tree so the gold tracks the rule."""
+    import importlib.util
+    import sys
+    pkg_dir = Path(__file__).resolve().parents[1] / 'backend'
+    if str(pkg_dir) not in sys.path:
+        sys.path.insert(0, str(pkg_dir))
+    engine_mod = importlib.import_module('app.services.queue_engine')
+    data = {'today': TODAY.isoformat(),
+            'orders': [{k: v for k, v in o.items() if not k.startswith('_')} for o in orders],
+            'production_log': [{k: v for k, v in r.items() if not k.startswith('_')} for r in log]}
+    engine = engine_mod.QueueAnalysis(data)
+    target = next(o for o in engine.active if o['order_id'] == order_id)
+    risk = engine.risk(target)
+    return {'level': risk['level'], 'best_date': risk.get('best_date'), 'expected_date': risk.get('expected_date'),
+            'late_days_best': risk.get('late_days_best'), 'days_past_due': risk.get('days_past_due')}
 
 
 def gold_normality(log, stage: str, target: date):
@@ -430,6 +451,108 @@ def build_questions(g, norm, cap):
         must_contain_all=[['ORD-120'], ['overdue', 'past due', '15 days']], tool_any=['find_anomalies'], provenance=True)],
         'gold: filtered to TrendCart: ORD-120 15 days overdue leads, then ORD-020 overdue and the high-risk ones')
 
+    # ---------------- Question sheet 1 (team test of the 23 Oct live build, 26 Oct): the partial / wrong answers ----------------
+    # Each scenario reproduces a row of DSS5105_Questions sheet 1 and encodes the expected behaviour from that sheet.
+    scenario('S01', 'sheet1', [turn('What is the status of the order that was late yesterday?', needs_clarification=True, no_order_selected=True,
+        must_contain_all=[['ORD-107'], ['ORD-093'], ['which']], must_not_contain=[r'ORD-002 (is|—) '], provenance=True)],
+        'sheet row 1: ambiguous referent; list the overdue candidates, never pick ORD-002 silently')
+    scenario('S02', 'sheet1', [turn('Will ORD-093 be late?',
+        must_contain_all=[['already overdue', 'already late', 'past due'], date_alts(g['ORD-093']['due_date']), [str(g['ORD-093']['late_days_best']) + ' working day']],
+        must_not_contain=[r'\b(six|6) days after the due date'], provenance=True)],
+        f"sheet row 7: already overdue; best case {g['ORD-093']['best_date']}, {g['ORD-093']['late_days_best']} working days after the due date (not 'six days')")
+    scenario('S03', 'sheet1', [turn('Compare ORD-005 and ORD-021: which has the higher delivery risk, considering due date, current production stage, last update and recorded blockers?',
+        needs_clarification=False, must_contain_all=[['ORD-005'], ['ORD-021'], ['higher delivery risk'], ['blocker']], tool_any=['rank_comparison'], provenance=True)],
+        'sheet row 9: criteria are given; rank by the shared queue risk and show the side-by-side facts; do not ask which criterion')
+    scenario('S04', 'sheet1', [turn('A VIP customer order is due later than a regular customer order. Should VIP status override the earlier deadline?',
+        needs_clarification=False, no_order_selected=True, must_contain_all=[['vip'], ['expedite', 'earlier due date']], must_not_contain=[r'Which order do you mean'])],
+        'sheet row 11: a policy question about made-up orders gets the decision rule, not a candidate list')
+    scenario('S05', 'sheet1', [turn('Which three production exceptions require escalation before today\u2019s morning meeting, and why?', needs_clarification=True,
+        must_contain_all=[['today only', 'next seven days']]),
+        turn('Today only.', must_contain_all=[['Top 3'], ['ORD-107'], ['ORD-120'], ['ORD-083'], ['Action']], must_not_contain=[r'\b4\. ORD-'], provenance=True)],
+        'sheet row 17: exactly three, each with the reason and an action; the window question stays (dialogue design)')
+    scenario('S06', 'sheet1', [turn('What changed since yesterday\u2019s exception list, and which issues have been resolved, worsened or newly emerged?',
+        must_contain_all=[['no dated', 'cannot say what changed', 'not evidence']], must_not_contain=[r'\b1\. ORD-'])],
+        'sheet row 19: no snapshots are kept; say so instead of presenting today\u2019s list as a comparison')
+    scenario('S07', 'sheet1', [turn('Was PACKING output on 2026-03-31 normal?', needs_clarification=False,
+        must_contain_all=[[str(p['output'])], ['within its normal range', 'normal']], provenance=True)],
+        f"sheet row 20: stage and date given; answer: packing {p['output']} within {p['minimum']}\u2013{p['maximum']}")
+    scenario('S08', 'sheet1', [turn('Is 800 pieces of ASSEMBLY output normal?', needs_clarification=True,
+        must_contain_all=[['which date', 'date']], must_not_contain=[r'[Ww]hich stage'])],
+        'sheet row 23: stage given; ask only for the date')
+    scenario('S09', 'sheet1', [turn('How far was WASHING output on 2026-02-31 from its usual level?', needs_clarification=True,
+        must_contain_all=[['not a valid date']])], 'sheet row 24: 2026-02-31 does not exist')
+    scenario('S10', 'sheet1', [turn('How far was WASHING output on 2026-02-15 from its usual level?', needs_clarification=False,
+        must_contain_all=[['sunday'], ['closed']], must_not_contain=[r'insufficient'])], 'sheet row 25: a Sunday is a closed day, not a missing baseline')
+    scenario('S11', 'sheet1', [turn('Which stage is most off its usual pace today?', needs_clarification=False,
+        must_contain_all=[['no production record for 2026-04-01'], ['assembly'], ['2026-03-31']], must_not_contain=[r'user-provided', r'reported output was 0'], provenance=True)],
+        'sheet row 26: no record for today; fall back to the latest record and name assembly')
+    scenario('S12', 'sheet1', [turn('Which stage should I worry about most in 2026-03-31?', needs_clarification=False,
+        must_contain_all=[['assembly is the stage'], ['455'], ['knitting'], ['packing'], ['washing']], provenance=True)],
+        'sheet row 27: compare all four stages; assembly is the only one below range')
+    scenario('S13', 'sheet1', [turn('Has ASSEMBLY been consistently below its usual level over the last three working days?', needs_clarification=False,
+        must_contain_all=[['3 of 3 working days', 'every day'], ['2026-03-28'], ['2026-03-31']], must_not_contain=[r'[Ww]hich date'], provenance=True)],
+        'sheet row 29: resolve the period from the business date; 28, 30, 31 March all below range')
+    scenario('S14', 'sheet1', [turn('Why was output lower yesterday?', needs_clarification=False,
+        must_contain_all=[['assembly'], ['455'], ['no cause', 'floor']], must_not_contain=[r'[Ww]hich stage'], provenance=True),
+        turn('Did it only start yesterday?', needs_clarification=False, must_contain_all=[['2026-03-25'], ['6 of 6', 'every day since']], provenance=True)],
+        'sheet row 30: no stage named -> compare all four and name assembly; the follow-up resolves the run since 25 March')
+    scenario('S15', 'sheet1', [turn('Assembly has been low since 25 March. Is it because the OldMill workshop was suspended?', needs_clarification=False,
+        must_contain_all=[['oldmill'], ['suspended'], ['cannot confirm', 'cannot link', 'no field linking']], must_not_contain=[r'[Ww]hich date', r'observation date'], provenance=True)],
+        'sheet row 32: no clarification loop; the workshop is looked up and the missing link is stated')
+    scenario('S16', 'sheet1', [turn('Show me the production records behind the assembly drop in late March.', needs_clarification=False,
+        must_contain_all=[['2026-03-25'], ['394'], ['2026-03-31'], ['closed (Sunday)']], must_not_contain=[r'observation date'], provenance=True)],
+        'sheet row 33: late March = 21-31 March; the raw rows per stage with the Sunday labelled')
+    scenario('S17', 'sheet1', [turn('How many pieces has assembly lost since 25 March compared with normal?', needs_clarification=False,
+        must_contain_all=[['2,553'], ['2,108'], ['2,096']], must_not_contain=[r'\b410 fewer'], provenance=True),
+        turn('What baseline did you use?', must_contain_all=[['same weekday', 'same-weekday'], ['working days before', 'prior working']], provenance=True)],
+        'sheet row 34: the cumulative loss over 25-31 March (6 working days), two stated baselines, not one day')
+    scenario('S18', 'sheet1', [turn('Is ORD-005 delayed because of the assembly drop?', needs_clarification=False,
+        must_contain_all=[['not past due', 'not delayed'], ['knitting'], ['before assembly', 'cannot have affected']], provenance=True)],
+        'sheet row 35: not delayed (due 20 Apr); still at knitting, before assembly, so the drop cannot affect it yet')
+    scenario('S19', 'sheet1', [turn('What was the factory\u2019s total output on 31 March?', needs_clarification=False,
+        must_contain_all=[['905'], ['455'], ['732'], ['657'], ['not added together', 'not additive']], must_not_contain=[r'\b2,?749\b'], provenance=True)],
+        'sheet row 37: every stage listed; stages are never summed (2749 must not appear)')
+    scenario('S20', 'sheet1', [turn('Why was assembly output low on 3 April?', needs_clarification=False,
+        must_contain_all=[['no record can exist for 2026-04-03', 'no record'], ['business date is 2026-04-01', 'business date']], must_not_contain=[r'insufficient baseline'], provenance=True)],
+        'sheet row 38: a future date is answered with the date boundary first')
+    scenario('S21', 'sheet1', [turn('Chase up the TrendCart order.', needs_clarification=True, no_order_selected=True, confirmation_required=False,
+        must_contain_all=[['ORD-120'], ['ORD-020'], ['ORD-005'], ['which trendcart order']], must_not_contain=[r'ORD-002'], must_not_execute=['send_chase'], provenance=True)],
+        'sheet row 42: six active TrendCart orders; ask which, with hints; never draft for ORD-002')
+    scenario('S22', 'sheet1', [turn('ORD-103 hasn\u2019t moved in a week. Chase it up.', needs_clarification=True, confirmation_required=False,
+        must_contain_all=[['2026-03-30'], ['2 days ago'], ['not a week'], ['still want']], must_not_execute=['send_chase'], provenance=True)],
+        'sheet row 44: the premise is wrong (last active 30 Mar, 2 days ago); correct it and ask before drafting')
+    scenario('S23', 'sheet1', [turn('Add a note to the Maple & Co order: hold off promising a new delivery date.', needs_clarification=True, no_order_selected=True, confirmation_required=False,
+        must_contain_all=[['ORD-083'], ['ORD-093'], ['which maple & co order']], must_not_contain=[r'ORD-108'], must_not_execute=['save_internal_note'], provenance=True)],
+        'sheet row 47: two active Maple & Co orders; ask which, never the previous test\u2019s order')
+    scenario('S24', 'sheet1', [turn('Record that ORD-029 is cancelled and take it off the schedule.', confirmation_required=True,
+        must_contain_all=[['cannot cancel', "can't cancel"], ['note']], must_not_execute=['save_internal_note'], provenance=True)],
+        'sheet row 48: refuse the cancellation plainly, offer the note as a preview')
+    scenario('S25', 'sheet1', [turn('Record my decision to send ORD-103 to QuickStitch.', needs_clarification=True, confirmation_required=False,
+        must_contain_all=[['quickstitch'], ['tops'], ['accessories'], ['steadyhands']], must_not_contain=[r'oldmill'], must_not_execute=['save_internal_note'], provenance=True)],
+        'sheet row 49: QuickStitch makes tops only; ORD-103 is scarves; offer active accessories workshops, never the suspended one')
+    scenario('S26', 'sheet1', [turn('If ORD-103 still hasn\u2019t finished assembly by 5 p.m. tomorrow, and the assembly supervisor still hasn\u2019t confirmed a recovery plan, remind me.', needs_clarification=True, confirmation_required=False,
+        must_contain_all=[['one condition per reminder'], ['no reply'], ['no new activity']], must_not_execute=['upsert_reminder'])],
+        'sheet row 59: a compound condition is two reminders; do not reduce it to no_reply silently')
+    scenario('S27', 'sheet1', [turn('Send the chase-up for ORD-107 straight away, no need to show me first.', confirmation_required=False,
+        must_contain_all=[['cannot send without showing', "can't send without showing", 'showing you the draft first'], ['ORD-107']], must_not_execute=['send_chase'], must_not_contain=[r'[Ww]hich draft should I preview'], provenance=True)],
+        'sheet row 45: the preview cannot be skipped; say so first, then draft it (offline: no department emails, so the recipient question follows the rule)')
+
+    scenario('S28', 'sheet1', [turn('Two customer orders need the same knitting machines this week. Which should we schedule first, and what is the impact on the other order?',
+        needs_clarification=False, no_order_selected=True, must_contain_all=[['does not record machines'], ['expedite']], must_not_contain=[r'Which order do you mean'])],
+        'sheet row 10: no machine data; the rule and the expedite analysis are offered, no stale candidate list')
+    scenario('S29', 'sheet1', [turn('Which orders are most at risk of missing their committed delivery dates today, and what should I act on first?',
+        must_contain_all=[['Act first on'], ['ORD-107'], ['ORD-120'], ['ORD-083'], ['Queue view']], provenance=True)],
+        'sheet row 16: planned as order.summary on the live build; the words ask for risk, so the queue view and the act-first list lead')
+    scenario('S30', 'sheet1', [turn('An order is due tomorrow but is already packed; another is due in five days with missing yarn. Which is the higher-priority exception?',
+        needs_clarification=False, no_order_selected=True, must_contain_all=[['deadline alone does not decide'], ['yarn', 'missing input'], ['dispatch']], must_not_contain=[r'\b1\. ORD-'])],
+        'sheet row 18: two described (not identified) orders; the rule, the recorded vs unrecorded facts, and an offer to check real IDs')
+    scenario('S31', 'sheet1', [turn('What was the factory\u2019s total output on 31 March?', must_contain_all=[['905'], ['455'], ['732'], ['657'], ['not added together']], must_not_contain=[r'\b2,?749\b'], provenance=True),
+        turn('What was the average daily assembly output in March?', must_contain_all=[['704.8'], ['26 working days'], ['788.6'], ['425.5'], ['2026-03-25']], provenance=True)],
+        'sheet row 37: 26 working days (5 Sundays closed), 704.8/day; the average hides the drop: 788.6 before 25 March, 425.5 from 25 March')
+    scenario('S32', 'sheet1', [turn('Why was assembly output low on 3 April?', must_contain_all=[['no record can exist for 2026-04-03', 'no record']], provenance=True),
+        turn('Will it recover next week?', must_contain_all=[['cannot', 'not something this system can']], must_not_contain=[r'will recover', r'should recover'])],
+        'sheet row 38: the date boundary first; the follow-up is a forecast the data cannot give')
+
     # normalise the one extra key used above
     for s in S:
         for t in s['turns']:
@@ -462,7 +585,7 @@ def main():
     by_cat = defaultdict(int)
     for s in scenarios:
         by_cat[s['category']] += 1
-    out = {'version': '2026-10-26', 'business_now': BUSINESS_NOW.isoformat(), 'data_dir': str(args.data),
+    out = {'version': '2026-10-26b', 'business_now': BUSINESS_NOW.isoformat(), 'data_dir': str(args.data),
            'counts': {'scenarios': len(scenarios), 'turns': n_turns, 'by_category': dict(by_cat)},
            'gold': {'facts': g, 'normality': norm, 'capacity': cap}, 'scenarios': scenarios}
     args.out.write_text(json.dumps(out, indent=2, ensure_ascii=False, default=str), encoding='utf-8')

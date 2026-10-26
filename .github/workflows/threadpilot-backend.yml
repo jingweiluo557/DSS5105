@@ -54,6 +54,9 @@ jobs:
       - name: Install the locked dependencies
         working-directory: threadpilot/backend
         run: uv sync --locked --group dev
+      - name: Export the runtime contract for this commit (the openapi job commits it; the layout test compares against it)
+        working-directory: threadpilot/backend
+        run: uv run --locked python -m scripts.export_openapi
       - name: Run the backend test suite
         working-directory: threadpilot/backend
         shell: bash
@@ -75,7 +78,7 @@ jobs:
           path: threadpilot/backend/pytest-output.txt
 
   evaluation:
-    name: Offline evaluation replay (56 questions, annotated planner)
+    name: Offline evaluation replay (88 questions, annotated planner)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

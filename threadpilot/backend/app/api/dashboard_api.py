@@ -16,6 +16,7 @@ from ..sql_workflow_store import WorkflowBusy
 from ..workflow_api import business_now
 from ..forecast_store import load_forecasts
 from ..services.dashboard_service import forecast_matches, analyze
+from ..services import home_service
 
 router = APIRouter(prefix='/api', tags=['Dashboard'])
 
@@ -58,6 +59,15 @@ def save_email(day: date, body: EmailUpdate, request: Request, response: Respons
     if result is None:
         raise HTTPException(409, 'This draft changed on another device. Reopen it before saving.')
     return result
+
+@router.get('/dashboard/home')
+def dashboard_home(request: Request, response: Response):
+    """The GM home screen: status line, the decisions only the manager can make, order health, production pulse.
+    Same snapshot and detectors as the chat tools and the alert policy; nothing is stored or sent."""
+    response.headers['Cache-Control'] = 'no-store'
+    now = business_now()
+    return home_service.home(current_snapshot(request.app.state.database, now.date().isoformat()), now)
+
 
 @router.get('/dashboard')
 def dashboard(request: Request, response: Response):

@@ -59,11 +59,23 @@ What a clarification never does: pick the first match, choose a window or a date
 | A question about a customer, not an order ("is the Loom & Leaf order late?") | candidate list | A03 |
 | Weekday dates ("this Saturday") | resolved against the business clock | Fe03 |
 | A cancel in the middle of a draft | pending action cleared, nothing sent | Ac06 |
+| "The order that was late yesterday" (a description, with another order open in the UI) | the overdue candidates with stage, days overdue and idle days; the UI selection is ignored whenever the message names or describes an order | S01, S21, S23 |
+| A period in words ("since 25 March", "the last three working days", "late March") | `production_window`: per-day table, run of days below range, shortfall against two named baselines | S13, S15–S17 |
+| No stage named ("why was output lower yesterday?", "which stage is most off?") | all four stages compared on the date; the latest record is used when the date has none, and said so | S11, S12, S14, S19 |
+| An impossible, Sunday or future date | an answer: "not a valid date (February 2026 has 28 days)", "a Sunday: the factory is closed", "no record can exist for 2026-04-03; the business date is 2026-04-01" | S09, S10, S20 |
+| Follow-ups on a production answer ("did it only start yesterday?", "what baseline did you use?") | the run since its first day below range; both baseline rules with the figures they produced | S14, S17 |
+| A causal hypothesis ("is it because OldMill was suspended?") | the workshop row is quoted; the data has no field linking workshops to stage output, so the link is neither confirmed nor ruled out | S15 |
+| A hypothetical policy question ("should VIP status override an earlier deadline?") | the decision rule and the data's limits; no candidate list | S04 |
+| A claim in the request that the record contradicts ("ORD-103 hasn't moved in a week") | corrected first ("last active 2026-03-30, 2 days ago"), then "do you still want the chase-up?" | S22 |
+| "Send it straight away, no need to show me" | the rule is stated (every send is previewed and confirmed), then the draft follows | S27 |
+| An action the system cannot take ("cancel ORD-029 and take it off the schedule") | refused plainly and offered as an internal note | S24 |
+| A workshop that cannot make the order's category | flagged, with the eligible active workshops; the suspended one is never offered | S25 |
+| Two conditions in one reminder | one condition per reminder; the manager picks which, a second reminder is offered | S26 |
 
 ## 5. Smarter handling beyond scripts — what to build next
 
 1. **Policy, not scripts.** The 11 dialogues are tests, not the product. The product is the ladder above: any new phrasing that lands on a rung is handled. Keep adding *questions* to the evaluation set, not *scripts* to the engine.
-2. **Candidate-aware clarifications everywhere.** Rung 3 exists for order lookups; extend it to stages ("the slow one" after a stage list), customers and workshops.
+2. **Candidate-aware clarifications everywhere.** Rung 3 now covers order lookups, descriptions ("the late order"), customer-named chases and notes; extend it to stages ("the slow one" after a stage list) and workshops.
 3. **Confidence-weighted asking.** When the planner's confidence is between 0.65 and 0.85, run the tool *and* state the interpretation ("Reading this as ORD-005's risk — say if you meant another") instead of either guessing silently or asking. One extra line, no extra turn.
 4. **Resume by entity, not only by intent.** Today a topic is keyed by intent; keying it by (intent, order) lets "and the scarf one?" after a hoodie feasibility resume the right thread.
 5. **A discovery intent.** "Did anything go wrong yesterday?" currently maps to normality or the briefing; a `find_anomalies` tool (sustained drops, stalled customers, newly overdue) answers it directly and feeds the 07:00 briefing and the alert policy from one definition.

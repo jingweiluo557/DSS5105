@@ -1,5 +1,5 @@
 /* Presentation only: the workflow transport and session lifecycle stay in ai-stream.js. */
-const workspaceTools = [['ai','Conversation'],['orders','Orders'],['predictions','Historical predictions'],['exceptions','Exceptions'],['risk','Risk orders'],['feasibility','Feasibility'],['messages','Watches & receipts']];
+const workspaceTools = [['ai','Conversation'],['orders','Orders'],['exceptions','Exceptions'],['risk','Risk orders'],['feasibility','Feasibility'],['messages','Watches & receipts']];  // the model export page stays reachable from Settings (#/predictions)
 nav.splice(0, nav.length, ['dashboard','◫','Dashboard'], ['ai','✧','AI workspace'], ['activity','◷','Activity Log'], ['settings','⚙','Settings']);
 const workspaceShell = shell;
 shell = function(content) {

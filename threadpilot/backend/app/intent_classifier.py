@@ -43,7 +43,7 @@ deadline is the requested recipient reply deadline. Never confuse the two.
 Short mode/recipient/revision replies continue execution.chase. Do not invent recipients.),
 execution.note (3.2 INTERNAL decision note), execution.reminder (3.3 conditional monitoring),
 operations.output (recorded stage output on a date, stage + target_date, no comparison),
-order.rank (rank active orders: criterion idle_days | due_date, optional customer, window_days = list length),
+order.rank (rank active orders: criterion idle_days | due_date, optional customer, window_days = list length; order.compare criterion may also be risk),
 data.workshops (outside workshops able to take a product/category or batch: product, quantity),
 order.forecast (lead-time model delay probability / expected completion for ONE existing order),
 operations.discovery (ranked anomalies: did anything go wrong, anything unusual, what should I worry about; optional stage/customer),
@@ -56,7 +56,8 @@ merges them. Missing optional values are null or empty lists. Never fabricate an
 Singular customer order queries require lookup, not automatic first-order selection.
 Pronouns resolve to active_order except after comparison: reference=ambiguous then.
 Two IDs + compare: ask dimension via missing comparison_fields. 'Which more risky': action=rank,
-criterion=null until chosen. 'Due date and recent updates': comparison_fields due_date,last_activity_date.
+criterion=null until chosen; 'higher delivery risk considering due date, stage, last update': action=rank,
+criterion=risk with those comparison_fields. 'Due date and recent updates': comparison_fields due_date,last_activity_date.
 Attention today: do NOT assume window_days=0; ask today-only vs next seven days.
 New orders: quantity/product/due_date/delivery_point; delivered to customer is delivery_point=customer.
 Do not infer shipping buffer. One lost packing day: packing_loss_days=1.

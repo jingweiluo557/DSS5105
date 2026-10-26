@@ -9,20 +9,20 @@ function installReviewDraft(dialog, initial){
  const clear=()=>{try{localStorage.removeItem(key)}catch{}};
  const recovery=()=>{try{return JSON.parse(localStorage.getItem(key)||'null')}catch{return null}};
  function show(){
-  dialog.querySelector('[data-draft-candidate]').textContent=draft.candidate||'尚无候选草稿。';
+  dialog.querySelector('[data-draft-candidate]').textContent=draft.candidate||'No AI candidate yet.';
   dialog.querySelector('[data-draft-adopt]').disabled=!draft.candidate||draft.stale||finished;
   dialog.querySelector('[data-draft-generate]').disabled=draft.stale||finished;
-  message.textContent=draft.stale?'分析已过期或数据变化。文字已保留，请重新分析并核对。':`草稿 v${draft.version} 已保存；尚未提交审核。${draft.analysis_refreshed?' 已重新分析：保留的理由可能使用旧数字，请核对后再勾选确认。':''}`;
+  message.textContent=draft.stale?'The analysis is out of date or the data changed. Your text is kept; re-analyse and check it.':`Draft v${draft.version} saved; not submitted yet.${draft.analysis_refreshed?' Re-analysed: the kept reason may quote old numbers; check it before ticking the confirmation.':''}`;
  }
  function fill(){form.elements.note.value=draft.text;form.elements.reviewer.value=draft.reviewer;form.elements.decision.value=draft.decision;form.elements.reviewed.checked=false;show()}
  fill();
- if(finished){form.querySelectorAll('input,textarea,select,button').forEach(e=>e.disabled=true);message.textContent='此草稿已提交，只读。请关闭后重新分析以创建新审核。'}
+ if(finished){form.querySelectorAll('input,textarea,select,button').forEach(e=>e.disabled=true);message.textContent='This draft was submitted and is read-only. Close and re-analyse to start a new review.'}
  const cached=recovery();
  if(cached&&!finished){
-  if(cached.baseVersion===draft.version){for(const [k,n] of [['text','note'],['reviewer','reviewer'],['decision','decision']])form.elements[n].value=cached[k];message.textContent='已恢复本机未保存文字，正在同步。';timer=setTimeout(()=>flush().catch(report),500)}
-  else{dialog.querySelector('[data-draft-recover]').hidden=false;message.textContent='检测到本机未保存文字与服务器新版本；可选择恢复本机文字或继续使用服务器版本。'}
+  if(cached.baseVersion===draft.version){for(const [k,n] of [['text','note'],['reviewer','reviewer'],['decision','decision']])form.elements[n].value=cached[k];message.textContent='Restored unsaved text from this device; syncing.';timer=setTimeout(()=>flush().catch(report),500)}
+  else{dialog.querySelector('[data-draft-recover]').hidden=false;message.textContent='Unsaved text on this device and a newer version on the server: restore yours or keep the server version.'}
  }
- function report(error){if(!closed)message.textContent=error.message+' 当前表单文字已保留；如有版本冲突，请加载最新草稿。'}
+ function report(error){if(!closed)message.textContent=error.message+' Your text is kept; on a version conflict, load the latest draft.'}
  function flush(){
   clearTimeout(timer);
   const run=async()=>{
@@ -36,7 +36,7 @@ function installReviewDraft(dialog, initial){
   chain=chain.catch(()=>{}).then(run);return chain;
  }
  for(const name of ['note','reviewer','decision'])form.elements[name].addEventListener('input',()=>{
-  form.elements.reviewed.checked=false;remember();clearTimeout(timer);message.textContent='正在保存草稿…';timer=setTimeout(()=>flush().catch(report),500);
+  form.elements.reviewed.checked=false;remember();clearTimeout(timer);message.textContent='Saving draft…';timer=setTimeout(()=>flush().catch(report),500);
  });
  async function action(fn){
   if(working||finished)return;working=true;
@@ -48,11 +48,11 @@ function installReviewDraft(dialog, initial){
   finally{working=false;controls.forEach((e,i)=>e.disabled=was[i]);if(!closed){dialog.querySelector('[data-draft-adopt]').disabled=!draft.candidate||draft.stale;dialog.querySelector('[data-draft-generate]').disabled=draft.stale}}
  }
  dialog.querySelector('[data-draft-generate]').onclick=()=>action(async()=>{
-  message.textContent='AI 正在起草，原有表单文字保持不变…';
-  draft=await scheduleRequest('drafts/'+draft.id+'/generate',{method:'POST',body:JSON.stringify({version:draft.version,instruction:form.elements.draft_instruction.value.trim()||'请根据所选决策倾向和分析结果起草审核理由。'})});show();
+  message.textContent='Drafting with AI; your form text stays as it is…';
+  draft=await scheduleRequest('drafts/'+draft.id+'/generate',{method:'POST',body:JSON.stringify({version:draft.version,instruction:form.elements.draft_instruction.value.trim()||'Draft the decision reason from the chosen decision and the analysis.'})});show();
  });
  dialog.querySelector('[data-draft-adopt]').onclick=()=>action(async()=>{
-  if(form.elements.note.value.trim()&&!confirm('采用 AI 候选将替换当前理由，包括手动修改。继续？'))return;
+  if(form.elements.note.value.trim()&&!confirm('Adopting the AI candidate replaces the current reason, including your edits. Continue?'))return;
   draft=await scheduleRequest('drafts/'+draft.id+'/adopt',{method:'POST',body:JSON.stringify({version:draft.version})});clear();fill();
  });
  dialog.querySelector('[data-draft-refresh]').onclick=()=>action(async()=>{
@@ -66,14 +66,14 @@ function installReviewDraft(dialog, initial){
  };
  dialog.querySelector('[data-draft-recover]').onclick=()=>{
   const old=recovery();if(!old)return;
-  if(!confirm('将本机保留文字载入表单，替换当前显示内容？'))return;
+  if(!confirm('Load the text kept on this device into the form, replacing what is shown?'))return;
   form.elements.note.value=old.text;form.elements.reviewer.value=old.reviewer;form.elements.decision.value=old.decision;
   form.elements.reviewed.checked=false;remember();flush().catch(report);dialog.querySelector('[data-draft-recover]').hidden=true;
  };
  dialog.querySelector('[data-draft-chat]').onclick=()=>action(async()=>{
   window.reviewDraftContext=draft.id;sessionStorage.setItem('threadpilot-review-context',draft.id);
   dialog.close();state.selected=draft.order_id;save();go('ai');
-  ask(`请继续修改 ${draft.order_id} 的审核理由草稿。${form.elements.draft_instruction.value.trim()||'请根据当前决策倾向起草理由。'}`);
+  ask(`Continue editing the decision reason draft for ${draft.order_id}. ${form.elements.draft_instruction.value.trim()||'Draft the reason from the current decision.'}`);
  });
  return {flush,current:()=>draft,get busy(){return working},finish(){finished=true;clearTimeout(timer);clear();form.querySelectorAll('input,textarea,select,button').forEach(e=>e.disabled=true)},dispose(){closed=true;clearTimeout(timer);if(!finished&&!suppressSave&&dirty()){remember();flush().catch(()=>{})}}};
 }
@@ -82,6 +82,6 @@ window.reviewDraftContext=sessionStorage.getItem('threadpilot-review-context')||
 const reviewChatHTML=chatHTML;
 chatHTML=function(){
  const last=state.chat.findLast(m=>m.role==='assistant');
- return reviewChatHTML()+(last?.reviewDraft?`<div class="bubble"><p>审核理由草稿：采用文字不会执行排程。</p>${btn('review-draft-open','打开审核表单','primary',`data-id="${esc(last.reviewDraft.order_id)}" data-draft="${esc(last.reviewDraft.draft_id)}"`)}</div>`:'');
+ return reviewChatHTML()+(last?.reviewDraft?`<div class="bubble"><p>Decision reason draft: adopting the text does not change the schedule.</p>${btn('review-draft-open','Open the review form','primary',`data-id="${esc(last.reviewDraft.order_id)}" data-draft="${esc(last.reviewDraft.draft_id)}"`)}</div>`:'');
 };
 document.addEventListener('click',e=>{if(['new-chat','confirm-reset'].includes(e.target.closest('[data-action]')?.dataset.action)){window.reviewDraftContext=null;sessionStorage.removeItem('threadpilot-review-context')}},true);

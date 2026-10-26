@@ -20,12 +20,62 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         mode = 'summary'
     elif any(word in lower for word in ('separate', 'individually', '分别')):
         mode = 'separate'
+    from ..workflow_engine import detect_customer
+    from ..schemas import Slots as _Slots
+    notes = []
+    # "Chase up the TrendCart order": the customer named in the manager's words decides the candidates, never the
+    # order the UI happened to have open (26 Oct question sheet, rows 42 and 47).
+    customer = detect_customer(message, engine.tools) if not explicit and slots.action not in ('send', 'revise') else None
+    if customer:
+        matches = engine.tools.search_orders(_Slots(customer=customer))
+        if len(matches) == 1:
+            explicit = [matches[0].record['order_id']]
+        else:
+            state.active_order = None
+            state.chase_context = {}
+            state.last_order_ids = [e.record['order_id'] for e in matches]
+            text = (f"Which {customer} order should I chase? " + '; '.join(engine.candidate_hint(e.record, now) for e in matches) + '. Give the order ID.') if matches else f'{customer} has no order in progress to chase.'
+            found = [engine.candidate_call(matches, now, customer=customer)]
+            response = engine.ask(text, state, result, now, found, matches, state.last_order_ids) if matches else engine.response(state, result, now, text, found, [])
+            if emit: await emit(text)
+            return response
+    # "Send it straight away, no need to show me": the preview cannot be skipped, so draft and show it.
+    if slots.action == 'send' and not state.chase_drafts and (explicit or state.active_order) and re.search(r'straight away|right away|immediately|no need to show|without showing|don.t show', lower):
+        slots = slots.model_copy(update={'action': 'draft', 'draft_number': None})
+        result = result.model_copy(update={'slots': slots})
+        notes.append('I cannot send without showing you the draft first: every send needs a preview and your confirmation. Here is the draft:')
     fresh = bool(explicit and slots.action not in ('send', 'revise')) or 'based on these recommendations' in lower or 'for this action' in lower
     # A new chase request follows the resolved current order, not an older draft topic.
     switched = (state.last_intent != Intent.EXECUTION_CHASE and state.active_order
                 and slots.action not in ('send', 'revise') and not slots.draft_number and not explicit)
     if switched:
         explicit = [state.active_order]
+        fresh = True
+    # A claim about idle time is checked against the record before any draft ("hasn't moved in a week" vs 2 days).
+    claim = re.search(r"(?:hasn.t|has not|not) (?:moved|progressed|changed|had (?:any )?activity)[^.]*?(?:in|for) (?:over |more than |about |almost )?(a|an|\d+|one|two|three|four|five|six|seven) (week|weeks|day|days|fortnight)", lower)
+    if claim and len(explicit) == 1 and slots.action not in ('send', 'revise') and not prior.get('premise_checked') == explicit[0]:
+        words = {'a': 1, 'an': 1, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7}
+        n = int(claim[1]) if claim[1].isdigit() else words[claim[1]]
+        claimed = n * (7 if claim[2].startswith('week') else 14 if claim[2] == 'fortnight' else 1)
+        record = engine.tools.refresh_order(explicit[0]).record
+        from datetime import date as _date
+        idle = (now.date() - _date.fromisoformat(record['last_activity_date'])).days
+        if claimed - idle >= 2:
+            due = _date.fromisoformat(record['due_date'])
+            to_due = (due - now.date()).days
+            text = (f"{explicit[0]} was last active {record['last_activity_date']}, {idle} day{'s' if idle != 1 else ''} ago, not {claim[1]} {claim[2]}. "
+                    f"It is {record['customer']}, {record['pieces']} {record['product']}, at {record['current_stage'].lower()}, " +
+                    (f"due in {to_due} days" if to_due > 0 else 'due today' if to_due == 0 else f"{-to_due} days overdue") +
+                    ", so it is not stalled by the 5-day rule. Do you still want me to draft the chase-up?")
+            state.chase_context = {'premise_checked': explicit[0], 'order_ids': explicit, 'request': message}
+            state.active_order = explicit[0]
+            state.last_order_ids = explicit
+            state.last_intent = Intent.EXECUTION_CHASE
+            response = engine.ask(text, state, result, now, [ToolCall(name='refresh_order', arguments={'order_id': explicit[0]}, result=record)], [engine.tools.refresh_order(explicit[0])], explicit)
+            if emit: await emit(text)
+            return response
+    if prior.get('premise_checked') and not explicit and re.match(r'^\s*(yes|yes please|go ahead|draft it|please do|ok|okay|sure)\b', lower):
+        explicit = [prior['premise_checked']]
         fresh = True
     if fresh:
         state.chase_drafts = []
@@ -71,6 +121,8 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
     calls = []
 
     async def reply(text, question=False):
+        if notes:   # the "cannot skip the preview" rule is said first, whatever question follows it
+            text = notes[0].replace('Here is the draft:', '').rstrip() + ' ' + text
         response = (engine.ask(text, state, result, now, calls, rows, ids) if question else
                     engine.response(state, result, now, text, calls, rows))
         if emit:
@@ -160,7 +212,8 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         department, department_email = destination(group)
         group_recipient = recipient or department_email
         subject = 'ThreadPilot chase-up | '+(', '.join(group) or 'Manager summary')
-        heading = f"Draft {selected if slots.action == 'revise' and selected else index} · To: {'Me' if group_recipient == 'self' else group_recipient or 'Not set'}\nDepartment: {department or 'Specified recipient'}\nSubject: {subject}\n"
+        to_line = 'Me' if group_recipient == 'self' else group_recipient or ('Not set' + (f" (no email saved for {department} in Settings; name a recipient before sending)" if department else ' (name a recipient before sending)'))
+        heading = f"Draft {selected if slots.action == 'revise' and selected else index} · To: {to_line}\nDepartment: {department or 'Specified recipient'}\nSubject: {subject}\n"
         answer_parts.append(heading)
         if emit:
             await emit(heading)
@@ -190,6 +243,8 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         state.chase_drafts = generated
     footer = 'Draft only; nothing sent. Ask to send a draft by number to review and confirm it.'
     answer_parts.append(footer)
+    if notes:
+        answer_parts.insert(0, notes[0] + '\n')
     if emit:
         await emit(footer)
     calls.append(ToolCall(name='draft_chase', result={'drafts':generated}))

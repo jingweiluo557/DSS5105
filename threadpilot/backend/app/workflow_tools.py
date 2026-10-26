@@ -93,6 +93,85 @@ def resolve_date(value: str, now: datetime) -> date:
     return now.date().replace(day=int(match[1])) if match else date.fromisoformat(value)
 
 
+MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
+_MONTH_RE = r'(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)'
+_DAY_RE = r'(\d{1,2})(?:st|nd|rd|th)?'
+
+
+def _month_index(word: str) -> int:
+    return next(i for i, m in enumerate(MONTHS, 1) if m.startswith(word[:3]))
+
+
+def parse_day(text: str, now: datetime) -> date | None:
+    """'25 March', 'March 25', '25th', '2026-03-25' -> a date in the business year (None when the text is not a date)."""
+    t = text.strip().lower().rstrip('.,')
+    iso = re.search(r'(\d{4})-(\d{2})-(\d{2})', t)
+    if iso:
+        return date(int(iso[1]), int(iso[2]), int(iso[3]))     # raises ValueError for 2026-02-31
+    m = re.fullmatch(_DAY_RE + r'\s+(' + _MONTH_RE + r')(?:\s+(\d{4}))?', t) or re.fullmatch(r'(' + _MONTH_RE + r')\s+' + _DAY_RE.replace('(\\d{1,2})', '(\\d{1,2})') + r'(?:,?\s+(\d{4}))?', t)
+    if m:
+        g = m.groups()
+        day, month = (int(g[0]), g[1]) if g[0].isdigit() else (int(g[1]), g[0])
+        year = int(g[2]) if len(g) > 2 and g[2] else now.year
+        return date(year, _month_index(month), day)
+    try:
+        return resolve_date(t, now)
+    except ValueError:
+        return None
+
+
+def resolve_period(text: str, now: datetime, latest: date | None = None) -> dict | None:
+    """A date range named in plain words: 'since 25 March', '25 March to 31 March', '25-31 March', 'late March',
+    'last week', 'the last three working days', 'in March'. Returns {start, end, label, capped} with the end capped
+    to the latest log date, or None when the text names no period (a single date is not a period)."""
+    t = text.strip().lower()
+    end_cap = latest or (now.date() - timedelta(days=1))
+    words = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10}
+    m = re.search(r'(?:the\s+)?(?:last|past|previous)\s+(\d+|' + '|'.join(words) + r')\s+(working|business)?\s*days?', t)
+    if m:
+        n = int(m[1]) if m[1].isdigit() else words[m[1]]
+        day, got, start = end_cap, 0, end_cap
+        while got < n and (end_cap - day).days < 60:
+            if day.weekday() != 6 or not m[2]:
+                got += 1
+                start = day
+            day -= timedelta(days=1)
+        return {'start': start, 'end': end_cap, 'label': f'the last {n} {"working " if m[2] else ""}days ({start.isoformat()} to {end_cap.isoformat()})', 'capped': False}
+    if re.search(r'\blast week\b', t):
+        monday = now.date() - timedelta(days=now.date().weekday() + 7)
+        end = min(monday + timedelta(days=5), end_cap)
+        return {'start': monday, 'end': end, 'label': f'last week ({monday.isoformat()} to {end.isoformat()})', 'capped': end < monday + timedelta(days=5)}
+    if re.search(r'\bthis week\b', t):
+        monday = now.date() - timedelta(days=now.date().weekday())
+        return {'start': monday, 'end': end_cap, 'label': f'this week so far ({monday.isoformat()} to {end_cap.isoformat()})', 'capped': False}
+    m = re.search(r'\b(early|mid|late)\s+(' + _MONTH_RE + r')\b', t)
+    if m:
+        month = _month_index(m[2]); year = now.year
+        first = date(year, month, 1); last = (date(year + (month == 12), month % 12 + 1, 1) - timedelta(days=1))
+        start, end = {'early': (first, date(year, month, 10)), 'mid': (date(year, month, 11), date(year, month, 20)), 'late': (date(year, month, 21), last)}[m[1]]
+        end2 = min(end, end_cap)
+        return {'start': start, 'end': end2, 'label': f'{m[1]} {MONTHS[month - 1].title()} ({start.isoformat()} to {end2.isoformat()})', 'capped': end2 < end}
+    m = re.search(r'\b(?:from\s+)?' + _DAY_RE + r'\s*(' + _MONTH_RE + r')?\s*(?:to|-|–|through|until|till)\s*' + _DAY_RE + r'\s+(' + _MONTH_RE + r')\b', t)
+    if m:
+        month_b = _month_index(m[4]); month_a = _month_index(m[2]) if m[2] else month_b
+        start, end = date(now.year, month_a, int(m[1])), date(now.year, month_b, int(m[3]))
+        end2 = min(end, end_cap)
+        return {'start': start, 'end': end2, 'label': f'{start.isoformat()} to {end2.isoformat()}', 'capped': end2 < end}
+    m = re.search(r'\b(?:since|from|starting|after)\s+(?:the\s+)?(' + _DAY_RE + r'\s+' + _MONTH_RE + r'|' + _MONTH_RE + r'\s+' + _DAY_RE + r'|\d{4}-\d{2}-\d{2})\b', t)
+    if m:
+        start = parse_day(m[1], now)
+        if start:
+            if 'after' in m[0]:
+                start += timedelta(days=1)
+            return {'start': start, 'end': end_cap, 'label': f'since {start.isoformat()} (to {end_cap.isoformat()}, the latest record)', 'capped': False}
+    m = re.search(r'\b(?:in|during|for)\s+(' + _MONTH_RE + r')\b(?!\s+\d)', t)
+    if m:
+        month = _month_index(m[1]); first = date(now.year, month, 1); last = (date(now.year + (month == 12), month % 12 + 1, 1) - timedelta(days=1))
+        end2 = min(last, end_cap)
+        return {'start': first, 'end': end2, 'label': f'{MONTHS[month - 1].title()} ({first.isoformat()} to {end2.isoformat()})', 'capped': end2 < last}
+    return None
+
+
 class DataTools:
     def __init__(self, directory: Path) -> None:
         """场景 1.1–2.2：只读取正式数据目录。"""
@@ -198,6 +277,7 @@ class DataTools:
                 'observation_source': provenance, 'user_observation': slots.observed_output,
                 'sample_count': len(values), 'baseline': 'previous eight same weekdays, excluding target and future dates',
                 'minimum': min(values), 'maximum': max(values), 'mean': round(mean(values), 2),
+                'change_pct': round(100 * (output / mean(values) - 1)),
                 'status': 'below' if output < min(values) else 'above' if output > max(values) else 'within',
                 'limits': 'Descriptive historical range, not a statistical control limit. One low observation alone is not proof of a sustained problem.'}, baseline + observed
 
@@ -228,6 +308,141 @@ class DataTools:
             data['status'] = 'ok'
             data['note'] = 'Recorded stage output, not a judgement; ask whether it is normal to compare with the same weekday.'
         return data, rows
+
+    def latest_log_date(self) -> date | None:
+        dates = [date.fromisoformat(e.record['date']) for e in self.rows('production_log.csv') if e.record['stage'] == 'ASSEMBLY' or True]
+        return max(dates) if dates else None
+
+    def stage_band(self, rows: list[Evidence], day: date) -> dict | None:
+        """Previous eight same-weekday records before `day` for one stage (the check_normality rule)."""
+        base = sorted([e for e in rows if date.fromisoformat(e.record['date']) < day and date.fromisoformat(e.record['date']).weekday() == day.weekday()], key=lambda e: e.record['date'])[-8:]
+        if len(base) < 3:
+            return None
+        values = [int(e.record['pieces_completed']) for e in base]
+        return {'min': min(values), 'max': max(values), 'mean': round(mean(values), 1), 'samples': len(values), 'rows': base}
+
+    def stage_comparison(self, target: date, now: datetime) -> tuple[dict[str, Any], list[Evidence]]:
+        """Judgement across all four stages on one date: each against its own same-weekday band, ranked by how far
+        below the band mean it sits. Falls back to the latest recorded date when the requested one has no record."""
+        log = self.rows('production_log.csv')
+        latest = self.latest_log_date()
+        requested = target
+        if not any(e.record['date'] == target.isoformat() for e in log) and latest and target > latest:
+            target = latest
+        stages = []
+        evidence: list[Evidence] = []
+        for stage in ('KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING'):
+            rows = [e for e in log if e.record['stage'] == stage]
+            obs = next((e for e in rows if e.record['date'] == target.isoformat()), None)
+            band = self.stage_band(rows, target)
+            item = {'stage': stage, 'date': target.isoformat(), 'output': int(obs.record['pieces_completed']) if obs else None}
+            if obs:
+                evidence.append(obs)
+            if band and obs:
+                evidence.extend(band['rows'])
+                output = item['output']
+                item.update(minimum=band['min'], maximum=band['max'], mean=band['mean'], samples=band['samples'],
+                            status='below' if output < band['min'] else 'above' if output > band['max'] else 'within',
+                            change_pct=round(100 * (output / band['mean'] - 1), 1))
+                # consecutive working days below the band up to and including the target
+                run = 0
+                for e in sorted(rows, key=lambda e: e.record['date'], reverse=True):
+                    d0 = date.fromisoformat(e.record['date'])
+                    if d0 > target or d0.weekday() == 6:
+                        continue
+                    b = self.stage_band(rows, d0)
+                    if b is None or int(e.record['pieces_completed']) >= b['min']:
+                        break
+                    run += 1
+                item['below_days_running'] = run
+            else:
+                item.update(status='no_record' if not obs else 'no_baseline')
+            stages.append(item)
+        ranked = sorted([x for x in stages if x.get('change_pct') is not None], key=lambda x: x['change_pct'])
+        worst = ranked[0] if ranked else None
+        return {'requested_date': requested.isoformat(), 'date': target.isoformat(), 'weekday': target.strftime('%A'),
+                'used_latest_record': target != requested, 'stages': stages,
+                'most_off': worst['stage'] if worst and worst['status'] == 'below' else None,
+                'ranking': [x['stage'] for x in ranked],
+                'baseline': 'each stage against its own previous eight same weekdays (Sundays closed)',
+                'limits': 'Descriptive ranges, not control limits; stage outputs are not additive (the same piece passes every stage).'}, evidence
+
+    def production_window(self, period: dict, now: datetime, stage: str | None = None) -> tuple[dict[str, Any], list[Evidence]]:
+        """Retrieval + judgement over a date range: the raw rows per day and stage, each day against its same-weekday
+        band, the run of days below, and the cumulative shortfall against two stated baselines. Sundays are shown as
+        closed. Nothing is summed across stages."""
+        log = self.rows('production_log.csv')
+        start, end = period['start'], period['end']
+        days = [start + timedelta(days=i) for i in range((end - start).days + 1)]
+        stages = [stage] if stage else ['KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING']
+        table, evidence = [], []
+        per_stage = {}
+        for st in stages:
+            rows = [e for e in log if e.record['stage'] == st]
+            prior = [int(e.record['pieces_completed']) for e in rows if date.fromisoformat(e.record['date']) < start and date.fromisoformat(e.record['date']).weekday() != 6]
+            long_mean = round(mean(prior), 1) if len(prior) >= 10 else None
+            per_stage[st] = {'stage': st, 'working_days': 0, 'days_below_band': 0, 'total_pieces': 0, 'shortfall_vs_same_weekday_mean': 0.0,
+                             'shortfall_vs_prior_working_day_mean': 0.0 if long_mean else None, 'prior_working_day_mean': long_mean,
+                             'prior_working_days': len(prior), 'first_below': None, 'last_below': None, 'range_before': (min(prior), max(prior)) if prior else None}
+        for day in days:
+            row = {'date': day.isoformat(), 'weekday': day.strftime('%a')}
+            if day.weekday() == 6:
+                row['closed'] = True
+                table.append(row); continue
+            for st in stages:
+                rows = [e for e in log if e.record['stage'] == st]
+                obs = next((e for e in rows if e.record['date'] == day.isoformat()), None)
+                if not obs:
+                    row[st] = None; continue
+                evidence.append(obs)
+                output = int(obs.record['pieces_completed'])
+                band = self.stage_band(rows, day)
+                cell = {'pieces': output}
+                agg = per_stage[st]
+                agg['working_days'] += 1; agg['total_pieces'] += output
+                if band:
+                    cell.update(band_min=band['min'], band_max=band['max'], band_mean=band['mean'],
+                                status='below' if output < band['min'] else 'above' if output > band['max'] else 'within')
+                    if cell['status'] == 'below':
+                        agg['days_below_band'] += 1
+                        agg['first_below'] = agg['first_below'] or day.isoformat(); agg['last_below'] = day.isoformat()
+                    agg['shortfall_vs_same_weekday_mean'] = round(agg['shortfall_vs_same_weekday_mean'] + (band['mean'] - output), 1)
+                if agg['prior_working_day_mean']:
+                    agg['shortfall_vs_prior_working_day_mean'] = round(agg['shortfall_vs_prior_working_day_mean'] + (agg['prior_working_day_mean'] - output), 1)
+                row[st] = cell
+            table.append(row)
+        for st, agg in per_stage.items():
+            agg['every_working_day_below'] = agg['working_days'] > 0 and agg['days_below_band'] == agg['working_days']
+            agg['shortfall_vs_same_weekday_mean'] = round(agg['shortfall_vs_same_weekday_mean'])
+            if agg['shortfall_vs_prior_working_day_mean'] is not None:
+                agg['shortfall_vs_prior_working_day_mean'] = round(agg['shortfall_vs_prior_working_day_mean'])
+            # averages per working day ("what was the average daily assembly output in March?"), and the split around the
+            # first day below range so a period average cannot hide a drop inside it
+            values = [(r['date'], r[st]['pieces']) for r in table if not r.get('closed') and r.get(st)]
+            agg['sundays_closed'] = sum(1 for r in table if r.get('closed'))
+            agg['mean_per_working_day'] = round(mean(v for _, v in values), 1) if values else None
+            # the longest run of consecutive working days below range (latest wins a tie): where a sustained drop starts
+            best, cur = [], []
+            for d, _ in values:
+                cell = next(r[st] for r in table if r['date'] == d)
+                if cell.get('status') == 'below':
+                    cur.append(d)
+                    if len(cur) >= len(best):
+                        best = list(cur)
+                else:
+                    cur = []
+            agg['run_start'], agg['run_days'] = (best[0], len(best)) if len(best) >= 2 else (None, 0)
+            split = agg['run_start']
+            if split and any(d < split for d, _ in values):
+                agg['mean_before_run'] = round(mean(v for d, v in values if d < split), 1)
+                agg['mean_from_run'] = round(mean(v for d, v in values if d >= split), 1)
+            else:
+                agg['mean_before_run'] = agg['mean_from_run'] = None
+        return {'period': {'start': start.isoformat(), 'end': end.isoformat(), 'label': period.get('label', ''), 'capped_to_latest_record': period.get('capped', False)},
+                'latest_record': (self.latest_log_date() or end).isoformat(), 'rows': table, 'summary': list(per_stage.values()),
+                'baselines': {'same_weekday': 'previous eight same weekdays before each day (the normality rule)',
+                              'prior_working_day_mean': 'mean of every working day before the period start'},
+                'limits': 'Stage outputs are not additive; packing is the closest thing to finished output. The log has no cause, downtime, staffing or team fields.'}, evidence
 
     def list_workshops(self, slots: Slots) -> tuple[dict[str, Any], list[Evidence]]:
         """Retrieval: outside workshops that can take a category / batch size, with suspended ones listed separately."""
