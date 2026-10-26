@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 256" role="img" font-family="Calibri, Arial, sans-serif">
+<title>Share of orders that finished late, by the risk level they were given, with 95% intervals</title>
+<rect width="640" height="256" fill="#FFFFFF"/>
+<line x1="90.0" x2="90.0" y1="18" y2="200" stroke="#D5DEE0"/>
+<text x="90.0" y="216" text-anchor="middle" font-size="12" fill="#5E6E7A">0%</text>
+<line x1="190.0" x2="190.0" y1="18" y2="200" stroke="#D5DEE0"/>
+<text x="190.0" y="216" text-anchor="middle" font-size="12" fill="#5E6E7A">25%</text>
+<line x1="290.0" x2="290.0" y1="18" y2="200" stroke="#D5DEE0"/>
+<text x="290.0" y="216" text-anchor="middle" font-size="12" fill="#5E6E7A">50%</text>
+<line x1="390.0" x2="390.0" y1="18" y2="200" stroke="#D5DEE0"/>
+<text x="390.0" y="216" text-anchor="middle" font-size="12" fill="#5E6E7A">75%</text>
+<line x1="490.0" x2="490.0" y1="18" y2="200" stroke="#D5DEE0"/>
+<text x="490.0" y="216" text-anchor="middle" font-size="12" fill="#5E6E7A">100%</text>
+<text x="80" y="47" text-anchor="end" font-size="13" fill="#16262B">overdue</text>
+<rect x="90.0" y="32" width="400.0" height="22" rx="4" fill="#2E6F77"><title>overdue: 100.0% late of 1611</title></rect>
+<line x1="489.2" x2="490.0" y1="43" y2="43" stroke="#16262B" stroke-width="2"/>
+<text x="498.0" y="47" font-size="12" fill="#16262B">100% (n=1,611)</text>
+<text x="80" y="91" text-anchor="end" font-size="13" fill="#16262B">high</text>
+<rect x="90.0" y="76" width="384.8" height="22" rx="4" fill="#2E6F77"><title>high: 96.2% late of 3301</title></rect>
+<line x1="472.0" x2="477.2" y1="87" y2="87" stroke="#16262B" stroke-width="2"/>
+<text x="485.2" y="91" font-size="12" fill="#16262B">96.2% (n=3,301)</text>
+<text x="80" y="135" text-anchor="end" font-size="13" fill="#16262B">medium</text>
+<rect x="90.0" y="120" width="285.6" height="22" rx="4" fill="#2E6F77"><title>medium: 71.4% late of 1165</title></rect>
+<line x1="365.2" x2="385.6" y1="131" y2="131" stroke="#16262B" stroke-width="2"/>
+<text x="393.6" y="135" font-size="12" fill="#16262B">71.4% (n=1,165)</text>
+<text x="80" y="179" text-anchor="end" font-size="13" fill="#16262B">low</text>
+<rect x="90.0" y="164" width="16.4" height="22" rx="4" fill="#2E6F77"><title>low: 4.1% late of 1528</title></rect>
+<line x1="102.8" x2="110.8" y1="175" y2="175" stroke="#16262B" stroke-width="2"/>
+<text x="118.8" y="179" font-size="12" fill="#16262B">4.1% (n=1,528)</text>
+<text x="290.0" y="248" text-anchor="middle" font-size="13" fill="#16262B">Share that finished late</text>
+</svg>
