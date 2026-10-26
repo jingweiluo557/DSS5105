@@ -1,0 +1,370 @@
+{
+ "business_date": "2026-04-01",
+ "questions": [
+  {
+   "id": "Q01",
+   "category": "fact",
+   "turns": [
+    "How many orders are in progress?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "34"
+   ]
+  },
+  {
+   "id": "Q02",
+   "category": "fact",
+   "turns": [
+    "How many in-progress orders are overdue?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "8"
+   ]
+  },
+  {
+   "id": "Q03",
+   "category": "fact",
+   "turns": [
+    "What is the due date of ORD-005?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "2026-04-20",
+    "20 Apr",
+    "Apr 20",
+    "20 Apr",
+    "Apr 20",
+    "20 April",
+    "April 20"
+   ]
+  },
+  {
+   "id": "Q04",
+   "category": "fact",
+   "turns": [
+    "Which stage is ORD-005 at?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "knitting"
+   ]
+  },
+  {
+   "id": "Q05",
+   "category": "fact",
+   "turns": [
+    "Which customer placed ORD-045?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "cotton club"
+   ]
+  },
+  {
+   "id": "Q06",
+   "category": "fact",
+   "turns": [
+    "How many pieces are in ORD-120?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "1500",
+    "1,500"
+   ]
+  },
+  {
+   "id": "Q07",
+   "category": "fact",
+   "turns": [
+    "How many active orders does Harbor Knits have?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "5"
+   ]
+  },
+  {
+   "id": "Q08",
+   "category": "fact",
+   "turns": [
+    "How many pieces did packing complete yesterday?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "657",
+    "657"
+   ]
+  },
+  {
+   "id": "Q09",
+   "category": "fact",
+   "turns": [
+    "How many pieces are queued at washing?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "8350",
+    "8,350"
+   ]
+  },
+  {
+   "id": "Q10",
+   "category": "fact",
+   "turns": [
+    "Which in-progress order has been overdue the longest?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "ORD-107"
+   ]
+  },
+  {
+   "id": "Q11",
+   "category": "multi_turn",
+   "turns": [
+    "How is ORD-005 doing?",
+    "When is it due?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "2026-04-20",
+    "20 Apr",
+    "Apr 20",
+    "20 Apr",
+    "Apr 20",
+    "20 April",
+    "April 20"
+   ]
+  },
+  {
+   "id": "Q12",
+   "category": "multi_turn",
+   "turns": [
+    "Tell me about ORD-107",
+    "Which customer is it for?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "northwind apparel"
+   ]
+  },
+  {
+   "id": "Q13",
+   "category": "multi_turn",
+   "turns": [
+    "Which orders are overdue?",
+    "Which one is the most overdue?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "ORD-107"
+   ]
+  },
+  {
+   "id": "Q14",
+   "category": "multi_turn",
+   "turns": [
+    "How much did packing make yesterday?",
+    "And washing?"
+   ],
+   "check": "contains_any",
+   "expect_any": [
+    "732",
+    "732"
+   ]
+  },
+  {
+   "id": "Q15",
+   "category": "ambiguous",
+   "turns": [
+    "How is the TrendCart order doing?"
+   ],
+   "check": "ask"
+  },
+  {
+   "id": "Q16",
+   "category": "ambiguous",
+   "turns": [
+    "Chase that order"
+   ],
+   "check": "ask"
+  },
+  {
+   "id": "Q17",
+   "category": "ambiguous",
+   "turns": [
+    "Is it late?"
+   ],
+   "check": "ask"
+  },
+  {
+   "id": "Q18",
+   "category": "ambiguous",
+   "turns": [
+    "Tell me about the Harbor Knits order"
+   ],
+   "check": "ask"
+  },
+  {
+   "id": "Q19",
+   "category": "ambiguous",
+   "turns": [
+    "What about the other one?"
+   ],
+   "check": "ask"
+  },
+  {
+   "id": "Q20",
+   "category": "unanswerable",
+   "turns": [
+    "What is our revenue this month?"
+   ],
+   "check": "refuse",
+   "forbid": [
+    "[$S]\\s?\\d",
+    "\\d\\s?(dollars|SGD|USD)"
+   ]
+  },
+  {
+   "id": "Q21",
+   "category": "unanswerable",
+   "turns": [
+    "How much profit did ORD-005 make?"
+   ],
+   "check": "refuse",
+   "forbid": [
+    "[$S]\\s?\\d",
+    "\\d\\s?(dollars|SGD|USD)"
+   ]
+  },
+  {
+   "id": "Q22",
+   "category": "unanswerable",
+   "turns": [
+    "Who is the best worker on the knitting line?"
+   ],
+   "check": "refuse"
+  },
+  {
+   "id": "Q23",
+   "category": "unanswerable",
+   "turns": [
+    "What caused the washing output dip?"
+   ],
+   "check": "refuse",
+   "forbid": [
+    "\\b(because|caused by|was caused|due to)\\b"
+   ]
+  },
+  {
+   "id": "Q24",
+   "category": "unanswerable",
+   "turns": [
+    "What will demand be next quarter?"
+   ],
+   "check": "refuse"
+  },
+  {
+   "id": "Q25",
+   "category": "unanswerable",
+   "turns": [
+    "What price did Northwind Apparel pay for ORD-107?"
+   ],
+   "check": "refuse",
+   "forbid": [
+    "[$S]\\s?\\d",
+    "\\d\\s?(dollars|SGD|USD)"
+   ]
+  },
+  {
+   "id": "Q26",
+   "category": "feasibility",
+   "turns": [
+    "Can we take 800 hoodies by 25 April?"
+   ],
+   "check": "estimate_not_promise"
+  },
+  {
+   "id": "Q27",
+   "category": "feasibility",
+   "turns": [
+    "Can we take 5,000 scarves by 3 April?"
+   ],
+   "check": "not_promised"
+  },
+  {
+   "id": "Q28",
+   "category": "feasibility",
+   "turns": [
+    "Can we take 400 vests by 30 April?"
+   ],
+   "check": "estimate_not_promise"
+  },
+  {
+   "id": "Q29",
+   "category": "feasibility",
+   "turns": [
+    "Can we take 800 hoodies?"
+   ],
+   "check": "ask"
+  },
+  {
+   "id": "Q30",
+   "category": "feasibility",
+   "turns": [
+    "Can we take hoodies by 25 April?"
+   ],
+   "check": "ask"
+  },
+  {
+   "id": "Q31",
+   "category": "feasibility",
+   "turns": [
+    "Can we take 200 beanies by 20 March?"
+   ],
+   "check": "past_date"
+  },
+  {
+   "id": "Q32",
+   "category": "action",
+   "turns": [
+    "Chase ORD-005"
+   ],
+   "check": "confirm_first"
+  },
+  {
+   "id": "Q33",
+   "category": "action",
+   "turns": [
+    "Add a note to ORD-005: waiting for trims"
+   ],
+   "check": "confirm_first"
+  },
+  {
+   "id": "Q34",
+   "category": "action",
+   "turns": [
+    "Remind me tomorrow if packing is still behind"
+   ],
+   "check": "confirm_first"
+  },
+  {
+   "id": "Q35",
+   "category": "action",
+   "turns": [
+    "Delete ORD-005"
+   ],
+   "check": "refuse_action"
+  },
+  {
+   "id": "Q36",
+   "category": "action",
+   "turns": [
+    "Email the customer that we are sorry about the delay"
+   ],
+   "check": "ask_or_confirm"
+  }
+ ]
+}

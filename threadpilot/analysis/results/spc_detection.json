@@ -1,0 +1,430 @@
+{
+ "settings": {
+  "warmup_weeks": 8,
+  "eval_weeks": 8,
+  "baseline_weeks": 8,
+  "ewma": {
+   "lambda": 0.2,
+   "L": 3.0
+  },
+  "cusum": {
+   "k": 0.5,
+   "h": 4.0
+  },
+  "detect_window_workdays": 5,
+  "noise_sd_pct": {
+   "KNITTING": 8.7,
+   "ASSEMBLY": 8.1,
+   "WASHING": 8.7,
+   "PACKING": 8.8
+  }
+ },
+ "false_alarms": {
+  "in_control_stage_days": 76800,
+  "false_alarms": {
+   "current": 8535,
+   "shewhart_3s": 619,
+   "we_rules": 2297,
+   "ewma": 395,
+   "cusum": 982,
+   "3s_cusum": 1357
+  },
+  "per_100_stage_days": {
+   "current": 11.11,
+   "shewhart_3s": 0.81,
+   "we_rules": 2.99,
+   "ewma": 0.51,
+   "cusum": 1.28,
+   "3s_cusum": 1.77
+  },
+  "per_month_factory": {
+   "current": 11.6,
+   "shewhart_3s": 0.8,
+   "we_rules": 3.1,
+   "ewma": 0.5,
+   "cusum": 1.3,
+   "3s_cusum": 1.8
+  }
+ },
+ "detection": {
+  "events": [
+   {
+    "drop_pct": 50,
+    "duration_workdays": 1,
+    "runs": 200,
+    "current": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "shewhart_3s": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "we_rules": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "ewma": {
+     "detected_pct": 80,
+     "mean_delay_workdays": 0.18
+    },
+    "cusum": {
+     "detected_pct": 98,
+     "mean_delay_workdays": 0.03
+    },
+    "3s_cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    }
+   },
+   {
+    "drop_pct": 50,
+    "duration_workdays": 3,
+    "runs": 200,
+    "current": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "shewhart_3s": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "we_rules": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "ewma": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.24
+    },
+    "cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.01
+    },
+    "3s_cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    }
+   },
+   {
+    "drop_pct": 50,
+    "duration_workdays": 8,
+    "runs": 200,
+    "current": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "shewhart_3s": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "we_rules": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "ewma": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.29
+    },
+    "cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.02
+    },
+    "3s_cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    }
+   },
+   {
+    "drop_pct": 30,
+    "duration_workdays": 1,
+    "runs": 200,
+    "current": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "shewhart_3s": {
+     "detected_pct": 74,
+     "mean_delay_workdays": 0.07
+    },
+    "we_rules": {
+     "detected_pct": 80,
+     "mean_delay_workdays": 0.11
+    },
+    "ewma": {
+     "detected_pct": 32,
+     "mean_delay_workdays": 0.57
+    },
+    "cusum": {
+     "detected_pct": 60,
+     "mean_delay_workdays": 0.45
+    },
+    "3s_cusum": {
+     "detected_pct": 80,
+     "mean_delay_workdays": 0.17
+    }
+   },
+   {
+    "drop_pct": 30,
+    "duration_workdays": 3,
+    "runs": 200,
+    "current": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "shewhart_3s": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.26
+    },
+    "we_rules": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.17
+    },
+    "ewma": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.84
+    },
+    "cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.58
+    },
+    "3s_cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.21
+    }
+   },
+   {
+    "drop_pct": 30,
+    "duration_workdays": 8,
+    "runs": 200,
+    "current": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0
+    },
+    "shewhart_3s": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.41
+    },
+    "we_rules": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.27
+    },
+    "ewma": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.94
+    },
+    "cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.56
+    },
+    "3s_cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.26
+    }
+   },
+   {
+    "drop_pct": 20,
+    "duration_workdays": 1,
+    "runs": 200,
+    "current": {
+     "detected_pct": 92,
+     "mean_delay_workdays": 0.1
+    },
+    "shewhart_3s": {
+     "detected_pct": 46,
+     "mean_delay_workdays": 0.16
+    },
+    "we_rules": {
+     "detected_pct": 54,
+     "mean_delay_workdays": 0.28
+    },
+    "ewma": {
+     "detected_pct": 20,
+     "mean_delay_workdays": 0.47
+    },
+    "cusum": {
+     "detected_pct": 39,
+     "mean_delay_workdays": 0.81
+    },
+    "3s_cusum": {
+     "detected_pct": 56,
+     "mean_delay_workdays": 0.36
+    }
+   },
+   {
+    "drop_pct": 20,
+    "duration_workdays": 3,
+    "runs": 200,
+    "current": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.18
+    },
+    "shewhart_3s": {
+     "detected_pct": 75,
+     "mean_delay_workdays": 0.61
+    },
+    "we_rules": {
+     "detected_pct": 96,
+     "mean_delay_workdays": 0.78
+    },
+    "ewma": {
+     "detected_pct": 80,
+     "mean_delay_workdays": 1.33
+    },
+    "cusum": {
+     "detected_pct": 99,
+     "mean_delay_workdays": 1.16
+    },
+    "3s_cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.84
+    }
+   },
+   {
+    "drop_pct": 20,
+    "duration_workdays": 8,
+    "runs": 200,
+    "current": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.21
+    },
+    "shewhart_3s": {
+     "detected_pct": 96,
+     "mean_delay_workdays": 1.49
+    },
+    "we_rules": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.97
+    },
+    "ewma": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 1.72
+    },
+    "cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 1.18
+    },
+    "3s_cusum": {
+     "detected_pct": 100,
+     "mean_delay_workdays": 0.93
+    }
+   },
+   {
+    "drop_pct": 10,
+    "duration_workdays": 1,
+    "runs": 200,
+    "current": {
+     "detected_pct": 66,
+     "mean_delay_workdays": 0.94
+    },
+    "shewhart_3s": {
+     "detected_pct": 11,
+     "mean_delay_workdays": 1.18
+    },
+    "we_rules": {
+     "detected_pct": 22,
+     "mean_delay_workdays": 1.39
+    },
+    "ewma": {
+     "detected_pct": 8,
+     "mean_delay_workdays": 1.87
+    },
+    "cusum": {
+     "detected_pct": 18,
+     "mean_delay_workdays": 1.35
+    },
+    "3s_cusum": {
+     "detected_pct": 23,
+     "mean_delay_workdays": 1.41
+    }
+   },
+   {
+    "drop_pct": 10,
+    "duration_workdays": 3,
+    "runs": 200,
+    "current": {
+     "detected_pct": 87,
+     "mean_delay_workdays": 0.89
+    },
+    "shewhart_3s": {
+     "detected_pct": 26,
+     "mean_delay_workdays": 1.02
+    },
+    "we_rules": {
+     "detected_pct": 50,
+     "mean_delay_workdays": 1.38
+    },
+    "ewma": {
+     "detected_pct": 29,
+     "mean_delay_workdays": 1.76
+    },
+    "cusum": {
+     "detected_pct": 46,
+     "mean_delay_workdays": 1.77
+    },
+    "3s_cusum": {
+     "detected_pct": 48,
+     "mean_delay_workdays": 1.51
+    }
+   },
+   {
+    "drop_pct": 10,
+    "duration_workdays": 8,
+    "runs": 200,
+    "current": {
+     "detected_pct": 98,
+     "mean_delay_workdays": 1.15
+    },
+    "shewhart_3s": {
+     "detected_pct": 49,
+     "mean_delay_workdays": 3.29
+    },
+    "we_rules": {
+     "detected_pct": 86,
+     "mean_delay_workdays": 2.99
+    },
+    "ewma": {
+     "detected_pct": 74,
+     "mean_delay_workdays": 4.15
+    },
+    "cusum": {
+     "detected_pct": 87,
+     "mean_delay_workdays": 3.29
+    },
+    "3s_cusum": {
+     "detected_pct": 88,
+     "mean_delay_workdays": 3.08
+    }
+   }
+  ]
+ },
+ "real_data": {
+  "first_day": "2026-01-01",
+  "last_day": "2026-03-31",
+  "judged_stage_days": 236,
+  "alarms_before_the_event": {
+   "current": 25,
+   "shewhart_3s": 3,
+   "we_rules": 6,
+   "ewma": 1,
+   "cusum": 3,
+   "3s_cusum": 4
+  },
+  "assembly_event_days_flagged": {
+   "current": "6 of 6",
+   "shewhart_3s": "6 of 6",
+   "we_rules": "6 of 6",
+   "ewma": "4 of 6",
+   "cusum": "6 of 6",
+   "3s_cusum": "6 of 6"
+  },
+  "assembly_event_first_flag": {
+   "current": "2026-03-25",
+   "shewhart_3s": "2026-03-25",
+   "we_rules": "2026-03-25",
+   "ewma": "2026-03-26",
+   "cusum": "2026-03-25",
+   "3s_cusum": "2026-03-25"
+  }
+ }
+}

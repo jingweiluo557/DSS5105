@@ -1,0 +1,3436 @@
+{
+ "risk": {
+  "order_mornings": 7605,
+  "futures": 30,
+  "mornings": [
+   0,
+   10,
+   20,
+   30,
+   40,
+   50,
+   60,
+   75,
+   90,
+   110
+  ],
+  "distinct_orders": 3503,
+  "levels": {
+   "overdue": {
+    "n": 1611,
+    "late": 1611,
+    "late_pct": 100.0,
+    "ci95": [
+     99.8,
+     100.0
+    ]
+   },
+   "high": {
+    "n": 3301,
+    "late": 3175,
+    "late_pct": 96.2,
+    "ci95": [
+     95.5,
+     96.8
+    ]
+   },
+   "medium": {
+    "n": 1165,
+    "late": 832,
+    "late_pct": 71.4,
+    "ci95": [
+     68.8,
+     73.9
+    ]
+   },
+   "low": {
+    "n": 1528,
+    "late": 63,
+    "late_pct": 4.1,
+    "ci95": [
+     3.2,
+     5.2
+    ]
+   }
+  },
+  "confidence": {
+   "high": {
+    "n": 3150,
+    "call_right": 3142,
+    "pct": 99.7
+   },
+   "medium": {
+    "n": 2141,
+    "call_right": 1905,
+    "pct": 89.0
+   },
+   "low": {
+    "n": 703,
+    "call_right": 425,
+    "pct": 60.5
+   }
+  },
+  "auc_model": 0.982,
+  "auc_naive_days_to_due": 0.666,
+  "late_share_not_overdue": 67.9,
+  "finish_error": [
+   {
+    "ahead_workdays": "up to 10",
+    "n": 3151,
+    "mean": -1.0,
+    "mae": 1.1,
+    "within_2_pct": 94.0
+   },
+   {
+    "ahead_workdays": "11 to 25",
+    "n": 3722,
+    "mean": -1.3,
+    "mae": 1.6,
+    "within_2_pct": 84.4
+   },
+   {
+    "ahead_workdays": "over 25",
+    "n": 732,
+    "mean": -1.8,
+    "mae": 2.4,
+    "within_2_pct": 60.9
+   }
+  ]
+ },
+ "feasibility": {
+  "cases": 180,
+  "finished": 180,
+  "open_ended": 0,
+  "coverage": {
+   "n": 180,
+   "inside": 124,
+   "pct": 68.9,
+   "ci95": [
+    61.8,
+    75.2
+   ],
+   "below_best": 29,
+   "after_cautious": 27
+  },
+  "width": {
+   "median": 11.0,
+   "median_relative_pct": 37.0
+  },
+  "position_median": 0.51,
+  "naive": {
+   "n": 180,
+   "inside": 92,
+   "pct": 51.1,
+   "median_width": 20.0
+  },
+  "verdicts": {
+   "likely": {
+    "n": 66,
+    "on_time": 66,
+    "pct": 100.0,
+    "ci95": [
+     94.5,
+     100.0
+    ]
+   },
+   "tight": {
+    "n": 29,
+    "on_time": 25,
+    "pct": 86.2,
+    "ci95": [
+     69.4,
+     94.5
+    ]
+   },
+   "only_if_prioritised": {
+    "n": 63,
+    "on_time": 34,
+    "pct": 54.0,
+    "ci95": [
+     41.8,
+     65.7
+    ]
+   },
+   "unlikely": {
+    "n": 22,
+    "on_time": 5,
+    "pct": 22.7,
+    "ci95": [
+     10.1,
+     43.4
+    ]
+   }
+  },
+  "conformal": [
+   {
+    "target_pct": null,
+    "widen_by": 0,
+    "test_n": 90,
+    "test_inside_pct": 73.3,
+    "median_width": 9.5
+   },
+   {
+    "target_pct": 80,
+    "widen_by": 2,
+    "test_n": 90,
+    "test_inside_pct": 90.0,
+    "median_width": 13.5
+   },
+   {
+    "target_pct": 90,
+    "widen_by": 3,
+    "test_n": 90,
+    "test_inside_pct": 94.4,
+    "median_width": 15.5
+   }
+  ],
+  "shipped": {
+   "widen": 3,
+   "n": 180,
+   "inside_pct": 93.3,
+   "median_width": 17.0
+  },
+  "examples": [
+   {
+    "seed": 101,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 68,
+    "W": 59,
+    "best": 31,
+    "cautious": 68,
+    "low": 28,
+    "high": 71,
+    "verdict": "only_if_prioritised",
+    "actual": 60,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 101,
+    "morning": 0,
+    "pieces": 600,
+    "lead_days": 48,
+    "W": 42,
+    "best": 30,
+    "cautious": 50,
+    "low": 27,
+    "high": 53,
+    "verdict": "only_if_prioritised",
+    "actual": 46,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 101,
+    "morning": 0,
+    "pieces": 800,
+    "lead_days": 43,
+    "W": 38,
+    "best": 30,
+    "cautious": 46,
+    "low": 27,
+    "high": 49,
+    "verdict": "only_if_prioritised",
+    "actual": 46,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 101,
+    "morning": 20,
+    "pieces": 400,
+    "lead_days": 56,
+    "W": 49,
+    "best": 32,
+    "cautious": 64,
+    "low": 29,
+    "high": 67,
+    "verdict": "only_if_prioritised",
+    "actual": 47,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 20,
+    "pieces": 1200,
+    "lead_days": 27,
+    "W": 24,
+    "best": 32,
+    "cautious": 38,
+    "low": 29,
+    "high": 41,
+    "verdict": "unlikely",
+    "actual": 30,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 101,
+    "morning": 20,
+    "pieces": 1200,
+    "lead_days": 28,
+    "W": 25,
+    "best": 32,
+    "cautious": 38,
+    "low": 29,
+    "high": 41,
+    "verdict": "unlikely",
+    "actual": 30,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 101,
+    "morning": 40,
+    "pieces": 800,
+    "lead_days": 45,
+    "W": 40,
+    "best": 22,
+    "cautious": 35,
+    "low": 19,
+    "high": 38,
+    "verdict": "tight",
+    "actual": 35,
+    "naive": [
+     17,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 40,
+    "pieces": 1500,
+    "lead_days": 64,
+    "W": 56,
+    "best": 23,
+    "cautious": 48,
+    "low": 20,
+    "high": 51,
+    "verdict": "tight",
+    "actual": 50,
+    "naive": [
+     17,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 40,
+    "pieces": 600,
+    "lead_days": 35,
+    "W": 31,
+    "best": 22,
+    "cautious": 29,
+    "low": 19,
+    "high": 32,
+    "verdict": "tight",
+    "actual": 30,
+    "naive": [
+     17,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 18,
+    "W": 16,
+    "best": 13,
+    "cautious": 18,
+    "low": 10,
+    "high": 21,
+    "verdict": "only_if_prioritised",
+    "actual": 14,
+    "naive": [
+     21,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 60,
+    "pieces": 800,
+    "lead_days": 26,
+    "W": 23,
+    "best": 18,
+    "cautious": 21,
+    "low": 15,
+    "high": 24,
+    "verdict": "tight",
+    "actual": 18,
+    "naive": [
+     21,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 60,
+    "pieces": 600,
+    "lead_days": 19,
+    "W": 17,
+    "best": 14,
+    "cautious": 18,
+    "low": 11,
+    "high": 21,
+    "verdict": "only_if_prioritised",
+    "actual": 14,
+    "naive": [
+     21,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 90,
+    "pieces": 1000,
+    "lead_days": 63,
+    "W": 55,
+    "best": 12,
+    "cautious": 50,
+    "low": 9,
+    "high": 53,
+    "verdict": "tight",
+    "actual": 18,
+    "naive": [
+     13,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 90,
+    "pieces": 1200,
+    "lead_days": 37,
+    "W": 33,
+    "best": 13,
+    "cautious": 22,
+    "low": 10,
+    "high": 25,
+    "verdict": "likely",
+    "actual": 18,
+    "naive": [
+     13,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 101,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 44,
+    "W": 39,
+    "best": 12,
+    "cautious": 29,
+    "low": 9,
+    "high": 32,
+    "verdict": "likely",
+    "actual": 11,
+    "naive": [
+     13,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 102,
+    "morning": 0,
+    "pieces": 600,
+    "lead_days": 57,
+    "W": 50,
+    "best": 30,
+    "cautious": 58,
+    "low": 27,
+    "high": 61,
+    "verdict": "only_if_prioritised",
+    "actual": 53,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 36,
+    "W": 32,
+    "best": 31,
+    "cautious": 40,
+    "low": 28,
+    "high": 43,
+    "verdict": "only_if_prioritised",
+    "actual": 42,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 0,
+    "pieces": 600,
+    "lead_days": 49,
+    "W": 43,
+    "best": 30,
+    "cautious": 51,
+    "low": 27,
+    "high": 54,
+    "verdict": "only_if_prioritised",
+    "actual": 47,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 56,
+    "W": 49,
+    "best": 29,
+    "cautious": 58,
+    "low": 26,
+    "high": 61,
+    "verdict": "only_if_prioritised",
+    "actual": 60,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 20,
+    "pieces": 1200,
+    "lead_days": 25,
+    "W": 23,
+    "best": 28,
+    "cautious": 31,
+    "low": 25,
+    "high": 34,
+    "verdict": "unlikely",
+    "actual": 30,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 20,
+    "pieces": 1000,
+    "lead_days": 32,
+    "W": 29,
+    "best": 28,
+    "cautious": 35,
+    "low": 25,
+    "high": 38,
+    "verdict": "only_if_prioritised",
+    "actual": 32,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 40,
+    "pieces": 1200,
+    "lead_days": 41,
+    "W": 36,
+    "best": 29,
+    "cautious": 42,
+    "low": 26,
+    "high": 45,
+    "verdict": "only_if_prioritised",
+    "actual": 43,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 40,
+    "pieces": 1200,
+    "lead_days": 51,
+    "W": 45,
+    "best": 29,
+    "cautious": 49,
+    "low": 26,
+    "high": 52,
+    "verdict": "only_if_prioritised",
+    "actual": 50,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 40,
+    "pieces": 400,
+    "lead_days": 60,
+    "W": 53,
+    "best": 28,
+    "cautious": 55,
+    "low": 25,
+    "high": 58,
+    "verdict": "only_if_prioritised",
+    "actual": 59,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 60,
+    "pieces": 1200,
+    "lead_days": 48,
+    "W": 42,
+    "best": 30,
+    "cautious": 50,
+    "low": 27,
+    "high": 53,
+    "verdict": "only_if_prioritised",
+    "actual": 47,
+    "naive": [
+     22,
+     38
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 60,
+    "pieces": 1200,
+    "lead_days": 61,
+    "W": 53,
+    "best": 30,
+    "cautious": 61,
+    "low": 27,
+    "high": 64,
+    "verdict": "only_if_prioritised",
+    "actual": 64,
+    "naive": [
+     22,
+     38
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 60,
+    "pieces": 1200,
+    "lead_days": 70,
+    "W": 60,
+    "best": 30,
+    "cautious": 69,
+    "low": 27,
+    "high": 72,
+    "verdict": "only_if_prioritised",
+    "actual": 70,
+    "naive": [
+     22,
+     38
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 61,
+    "W": 53,
+    "best": 25,
+    "cautious": 51,
+    "low": 22,
+    "high": 54,
+    "verdict": "tight",
+    "actual": 61,
+    "naive": [
+     22,
+     37
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 90,
+    "pieces": 1000,
+    "lead_days": 42,
+    "W": 37,
+    "best": 25,
+    "cautious": 38,
+    "low": 22,
+    "high": 41,
+    "verdict": "only_if_prioritised",
+    "actual": 46,
+    "naive": [
+     22,
+     37
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 102,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 46,
+    "W": 41,
+    "best": 25,
+    "cautious": 40,
+    "low": 22,
+    "high": 43,
+    "verdict": "tight",
+    "actual": 49,
+    "naive": [
+     22,
+     37
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 103,
+    "morning": 0,
+    "pieces": 1500,
+    "lead_days": 43,
+    "W": 38,
+    "best": 31,
+    "cautious": 47,
+    "low": 28,
+    "high": 50,
+    "verdict": "only_if_prioritised",
+    "actual": 42,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 103,
+    "morning": 0,
+    "pieces": 1500,
+    "lead_days": 58,
+    "W": 51,
+    "best": 31,
+    "cautious": 59,
+    "low": 28,
+    "high": 62,
+    "verdict": "only_if_prioritised",
+    "actual": 52,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 103,
+    "morning": 0,
+    "pieces": 1500,
+    "lead_days": 66,
+    "W": 58,
+    "best": 31,
+    "cautious": 66,
+    "low": 28,
+    "high": 69,
+    "verdict": "only_if_prioritised",
+    "actual": 55,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 20,
+    "pieces": 600,
+    "lead_days": 58,
+    "W": 51,
+    "best": 27,
+    "cautious": 57,
+    "low": 24,
+    "high": 60,
+    "verdict": "only_if_prioritised",
+    "actual": 41,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 20,
+    "pieces": 400,
+    "lead_days": 52,
+    "W": 46,
+    "best": 26,
+    "cautious": 51,
+    "low": 23,
+    "high": 54,
+    "verdict": "only_if_prioritised",
+    "actual": 39,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 21,
+    "W": 19,
+    "best": 25,
+    "cautious": 29,
+    "low": 22,
+    "high": 32,
+    "verdict": "unlikely",
+    "actual": 25,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 103,
+    "morning": 40,
+    "pieces": 1500,
+    "lead_days": 38,
+    "W": 34,
+    "best": 23,
+    "cautious": 31,
+    "low": 20,
+    "high": 34,
+    "verdict": "tight",
+    "actual": 26,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 40,
+    "pieces": 1000,
+    "lead_days": 70,
+    "W": 61,
+    "best": 23,
+    "cautious": 51,
+    "low": 20,
+    "high": 54,
+    "verdict": "likely",
+    "actual": 41,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 40,
+    "pieces": 800,
+    "lead_days": 69,
+    "W": 60,
+    "best": 22,
+    "cautious": 50,
+    "low": 19,
+    "high": 53,
+    "verdict": "likely",
+    "actual": 41,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 60,
+    "pieces": 1500,
+    "lead_days": 21,
+    "W": 18,
+    "best": 13,
+    "cautious": 15,
+    "low": 10,
+    "high": 18,
+    "verdict": "likely",
+    "actual": 14,
+    "naive": [
+     20,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 19,
+    "W": 17,
+    "best": 10,
+    "cautious": 14,
+    "low": 7,
+    "high": 17,
+    "verdict": "likely",
+    "actual": 10,
+    "naive": [
+     20,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 60,
+    "pieces": 600,
+    "lead_days": 28,
+    "W": 24,
+    "best": 12,
+    "cautious": 15,
+    "low": 9,
+    "high": 18,
+    "verdict": "likely",
+    "actual": 14,
+    "naive": [
+     20,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 90,
+    "pieces": 1200,
+    "lead_days": 66,
+    "W": 58,
+    "best": 12,
+    "cautious": 53,
+    "low": 9,
+    "high": 56,
+    "verdict": "tight",
+    "actual": 9,
+    "naive": [
+     10,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 90,
+    "pieces": 400,
+    "lead_days": 16,
+    "W": 15,
+    "best": 5,
+    "cautious": 5,
+    "low": 2,
+    "high": 8,
+    "verdict": "likely",
+    "actual": 4,
+    "naive": [
+     10,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 103,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 20,
+    "W": 18,
+    "best": 7,
+    "cautious": 7,
+    "low": 4,
+    "high": 10,
+    "verdict": "likely",
+    "actual": 4,
+    "naive": [
+     10,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 0,
+    "pieces": 400,
+    "lead_days": 69,
+    "W": 60,
+    "best": 30,
+    "cautious": 68,
+    "low": 27,
+    "high": 71,
+    "verdict": "only_if_prioritised",
+    "actual": 44,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 0,
+    "pieces": 600,
+    "lead_days": 60,
+    "W": 52,
+    "best": 30,
+    "cautious": 60,
+    "low": 27,
+    "high": 63,
+    "verdict": "only_if_prioritised",
+    "actual": 43,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 0,
+    "pieces": 600,
+    "lead_days": 39,
+    "W": 34,
+    "best": 30,
+    "cautious": 42,
+    "low": 27,
+    "high": 45,
+    "verdict": "only_if_prioritised",
+    "actual": 36,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 104,
+    "morning": 20,
+    "pieces": 800,
+    "lead_days": 14,
+    "W": 13,
+    "best": 18,
+    "cautious": 22,
+    "low": 15,
+    "high": 25,
+    "verdict": "unlikely",
+    "actual": 17,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 104,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 22,
+    "W": 20,
+    "best": 21,
+    "cautious": 24,
+    "low": 18,
+    "high": 27,
+    "verdict": "unlikely",
+    "actual": 21,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 104,
+    "morning": 20,
+    "pieces": 400,
+    "lead_days": 24,
+    "W": 22,
+    "best": 19,
+    "cautious": 23,
+    "low": 16,
+    "high": 26,
+    "verdict": "only_if_prioritised",
+    "actual": 20,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 40,
+    "pieces": 400,
+    "lead_days": 23,
+    "W": 21,
+    "best": 11,
+    "cautious": 12,
+    "low": 8,
+    "high": 15,
+    "verdict": "likely",
+    "actual": 10,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 40,
+    "pieces": 400,
+    "lead_days": 18,
+    "W": 17,
+    "best": 10,
+    "cautious": 12,
+    "low": 7,
+    "high": 15,
+    "verdict": "likely",
+    "actual": 9,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 40,
+    "pieces": 1500,
+    "lead_days": 62,
+    "W": 54,
+    "best": 12,
+    "cautious": 23,
+    "low": 9,
+    "high": 26,
+    "verdict": "likely",
+    "actual": 12,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 60,
+    "pieces": 800,
+    "lead_days": 37,
+    "W": 32,
+    "best": 8,
+    "cautious": 12,
+    "low": 5,
+    "high": 15,
+    "verdict": "likely",
+    "actual": 16,
+    "naive": [
+     11,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 60,
+    "pieces": 1500,
+    "lead_days": 17,
+    "W": 15,
+    "best": 13,
+    "cautious": 13,
+    "low": 10,
+    "high": 16,
+    "verdict": "tight",
+    "actual": 10,
+    "naive": [
+     11,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 60,
+    "pieces": 600,
+    "lead_days": 51,
+    "W": 44,
+    "best": 7,
+    "cautious": 14,
+    "low": 4,
+    "high": 17,
+    "verdict": "likely",
+    "actual": 22,
+    "naive": [
+     11,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 90,
+    "pieces": 800,
+    "lead_days": 39,
+    "W": 35,
+    "best": 11,
+    "cautious": 35,
+    "low": 8,
+    "high": 38,
+    "verdict": "tight",
+    "actual": 16,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 90,
+    "pieces": 800,
+    "lead_days": 53,
+    "W": 47,
+    "best": 11,
+    "cautious": 64,
+    "low": 8,
+    "high": 67,
+    "verdict": "only_if_prioritised",
+    "actual": 27,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 104,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 54,
+    "W": 47,
+    "best": 11,
+    "cautious": 66,
+    "low": 8,
+    "high": 69,
+    "verdict": "only_if_prioritised",
+    "actual": 20,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 36,
+    "W": 32,
+    "best": 31,
+    "cautious": 40,
+    "low": 28,
+    "high": 43,
+    "verdict": "only_if_prioritised",
+    "actual": 39,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 105,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 64,
+    "W": 56,
+    "best": 31,
+    "cautious": 64,
+    "low": 28,
+    "high": 67,
+    "verdict": "only_if_prioritised",
+    "actual": 54,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 0,
+    "pieces": 400,
+    "lead_days": 14,
+    "W": 13,
+    "best": 22,
+    "cautious": 30,
+    "low": 19,
+    "high": 33,
+    "verdict": "unlikely",
+    "actual": 22,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 105,
+    "morning": 20,
+    "pieces": 800,
+    "lead_days": 47,
+    "W": 41,
+    "best": 30,
+    "cautious": 51,
+    "low": 27,
+    "high": 54,
+    "verdict": "only_if_prioritised",
+    "actual": 37,
+    "naive": [
+     14,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 20,
+    "pieces": 1200,
+    "lead_days": 35,
+    "W": 31,
+    "best": 30,
+    "cautious": 40,
+    "low": 27,
+    "high": 43,
+    "verdict": "only_if_prioritised",
+    "actual": 34,
+    "naive": [
+     14,
+     36
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 105,
+    "morning": 20,
+    "pieces": 800,
+    "lead_days": 24,
+    "W": 22,
+    "best": 27,
+    "cautious": 32,
+    "low": 24,
+    "high": 35,
+    "verdict": "unlikely",
+    "actual": 24,
+    "naive": [
+     14,
+     36
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 105,
+    "morning": 40,
+    "pieces": 800,
+    "lead_days": 24,
+    "W": 22,
+    "best": 19,
+    "cautious": 21,
+    "low": 16,
+    "high": 24,
+    "verdict": "tight",
+    "actual": 20,
+    "naive": [
+     17,
+     38
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 40,
+    "pieces": 600,
+    "lead_days": 20,
+    "W": 18,
+    "best": 19,
+    "cautious": 20,
+    "low": 16,
+    "high": 23,
+    "verdict": "unlikely",
+    "actual": 18,
+    "naive": [
+     17,
+     38
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 40,
+    "pieces": 1500,
+    "lead_days": 39,
+    "W": 35,
+    "best": 20,
+    "cautious": 29,
+    "low": 17,
+    "high": 32,
+    "verdict": "likely",
+    "actual": 33,
+    "naive": [
+     17,
+     38
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 60,
+    "pieces": 800,
+    "lead_days": 24,
+    "W": 21,
+    "best": 15,
+    "cautious": 17,
+    "low": 12,
+    "high": 20,
+    "verdict": "likely",
+    "actual": 16,
+    "naive": [
+     19,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 53,
+    "W": 46,
+    "best": 16,
+    "cautious": 33,
+    "low": 13,
+    "high": 36,
+    "verdict": "likely",
+    "actual": 29,
+    "naive": [
+     19,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 67,
+    "W": 58,
+    "best": 16,
+    "cautious": 41,
+    "low": 13,
+    "high": 44,
+    "verdict": "likely",
+    "actual": 29,
+    "naive": [
+     19,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 90,
+    "pieces": 1000,
+    "lead_days": 45,
+    "W": 40,
+    "best": 9,
+    "cautious": 26,
+    "low": 6,
+    "high": 29,
+    "verdict": "likely",
+    "actual": 22,
+    "naive": [
+     13,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 28,
+    "W": 25,
+    "best": 13,
+    "cautious": 14,
+    "low": 10,
+    "high": 17,
+    "verdict": "likely",
+    "actual": 17,
+    "naive": [
+     13,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 105,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 25,
+    "W": 23,
+    "best": 13,
+    "cautious": 13,
+    "low": 10,
+    "high": 16,
+    "verdict": "likely",
+    "actual": 15,
+    "naive": [
+     13,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 0,
+    "pieces": 1500,
+    "lead_days": 44,
+    "W": 39,
+    "best": 31,
+    "cautious": 48,
+    "low": 28,
+    "high": 51,
+    "verdict": "only_if_prioritised",
+    "actual": 42,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 106,
+    "morning": 0,
+    "pieces": 400,
+    "lead_days": 49,
+    "W": 43,
+    "best": 30,
+    "cautious": 51,
+    "low": 27,
+    "high": 54,
+    "verdict": "only_if_prioritised",
+    "actual": 40,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 66,
+    "W": 58,
+    "best": 31,
+    "cautious": 66,
+    "low": 28,
+    "high": 69,
+    "verdict": "only_if_prioritised",
+    "actual": 53,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 20,
+    "pieces": 1000,
+    "lead_days": 17,
+    "W": 16,
+    "best": 19,
+    "cautious": 22,
+    "low": 16,
+    "high": 25,
+    "verdict": "unlikely",
+    "actual": 18,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 106,
+    "morning": 20,
+    "pieces": 800,
+    "lead_days": 65,
+    "W": 57,
+    "best": 22,
+    "cautious": 54,
+    "low": 19,
+    "high": 57,
+    "verdict": "tight",
+    "actual": 46,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 20,
+    "pieces": 400,
+    "lead_days": 26,
+    "W": 23,
+    "best": 19,
+    "cautious": 24,
+    "low": 16,
+    "high": 27,
+    "verdict": "only_if_prioritised",
+    "actual": 23,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 40,
+    "pieces": 1000,
+    "lead_days": 37,
+    "W": 33,
+    "best": 18,
+    "cautious": 24,
+    "low": 15,
+    "high": 27,
+    "verdict": "likely",
+    "actual": 22,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 40,
+    "pieces": 1000,
+    "lead_days": 42,
+    "W": 37,
+    "best": 18,
+    "cautious": 27,
+    "low": 15,
+    "high": 30,
+    "verdict": "likely",
+    "actual": 29,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 40,
+    "pieces": 1500,
+    "lead_days": 55,
+    "W": 48,
+    "best": 18,
+    "cautious": 34,
+    "low": 15,
+    "high": 37,
+    "verdict": "likely",
+    "actual": 30,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 60,
+    "pieces": 800,
+    "lead_days": 58,
+    "W": 50,
+    "best": 9,
+    "cautious": 25,
+    "low": 6,
+    "high": 28,
+    "verdict": "likely",
+    "actual": 11,
+    "naive": [
+     16,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 60,
+    "pieces": 600,
+    "lead_days": 61,
+    "W": 53,
+    "best": 9,
+    "cautious": 26,
+    "low": 6,
+    "high": 29,
+    "verdict": "likely",
+    "actual": 10,
+    "naive": [
+     16,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 31,
+    "W": 27,
+    "best": 9,
+    "cautious": 13,
+    "low": 6,
+    "high": 16,
+    "verdict": "likely",
+    "actual": 11,
+    "naive": [
+     16,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 44,
+    "W": 39,
+    "best": 14,
+    "cautious": 29,
+    "low": 11,
+    "high": 32,
+    "verdict": "likely",
+    "actual": 27,
+    "naive": [
+     5,
+     31
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 22,
+    "W": 20,
+    "best": 12,
+    "cautious": 16,
+    "low": 9,
+    "high": 19,
+    "verdict": "likely",
+    "actual": 10,
+    "naive": [
+     5,
+     31
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 106,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 31,
+    "W": 28,
+    "best": 13,
+    "cautious": 18,
+    "low": 10,
+    "high": 21,
+    "verdict": "likely",
+    "actual": 15,
+    "naive": [
+     5,
+     31
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 0,
+    "pieces": 600,
+    "lead_days": 53,
+    "W": 46,
+    "best": 30,
+    "cautious": 54,
+    "low": 27,
+    "high": 57,
+    "verdict": "only_if_prioritised",
+    "actual": 40,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 63,
+    "W": 55,
+    "best": 31,
+    "cautious": 63,
+    "low": 28,
+    "high": 66,
+    "verdict": "only_if_prioritised",
+    "actual": 51,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 0,
+    "pieces": 1500,
+    "lead_days": 56,
+    "W": 49,
+    "best": 31,
+    "cautious": 58,
+    "low": 28,
+    "high": 61,
+    "verdict": "only_if_prioritised",
+    "actual": 43,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 20,
+    "pieces": 1000,
+    "lead_days": 44,
+    "W": 39,
+    "best": 24,
+    "cautious": 39,
+    "low": 21,
+    "high": 42,
+    "verdict": "tight",
+    "actual": 34,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 20,
+    "pieces": 800,
+    "lead_days": 22,
+    "W": 20,
+    "best": 21,
+    "cautious": 25,
+    "low": 18,
+    "high": 28,
+    "verdict": "unlikely",
+    "actual": 20,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 20,
+    "pieces": 1000,
+    "lead_days": 48,
+    "W": 42,
+    "best": 24,
+    "cautious": 43,
+    "low": 21,
+    "high": 46,
+    "verdict": "only_if_prioritised",
+    "actual": 39,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 40,
+    "pieces": 400,
+    "lead_days": 30,
+    "W": 27,
+    "best": 17,
+    "cautious": 20,
+    "low": 14,
+    "high": 23,
+    "verdict": "likely",
+    "actual": 21,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 40,
+    "pieces": 800,
+    "lead_days": 52,
+    "W": 46,
+    "best": 18,
+    "cautious": 31,
+    "low": 15,
+    "high": 34,
+    "verdict": "likely",
+    "actual": 40,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 40,
+    "pieces": 400,
+    "lead_days": 59,
+    "W": 52,
+    "best": 17,
+    "cautious": 34,
+    "low": 14,
+    "high": 37,
+    "verdict": "likely",
+    "actual": 42,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 60,
+    "pieces": 1500,
+    "lead_days": 31,
+    "W": 27,
+    "best": 15,
+    "cautious": 20,
+    "low": 12,
+    "high": 23,
+    "verdict": "likely",
+    "actual": 23,
+    "naive": [
+     13,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 60,
+    "pieces": 800,
+    "lead_days": 26,
+    "W": 23,
+    "best": 15,
+    "cautious": 17,
+    "low": 12,
+    "high": 20,
+    "verdict": "likely",
+    "actual": 17,
+    "naive": [
+     13,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 60,
+    "pieces": 600,
+    "lead_days": 51,
+    "W": 44,
+    "best": 15,
+    "cautious": 32,
+    "low": 12,
+    "high": 35,
+    "verdict": "likely",
+    "actual": 30,
+    "naive": [
+     13,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 23,
+    "W": 21,
+    "best": 7,
+    "cautious": 10,
+    "low": 4,
+    "high": 13,
+    "verdict": "likely",
+    "actual": 7,
+    "naive": [
+     8,
+     33
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 48,
+    "W": 42,
+    "best": 13,
+    "cautious": 34,
+    "low": 10,
+    "high": 37,
+    "verdict": "likely",
+    "actual": 13,
+    "naive": [
+     8,
+     33
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 107,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 29,
+    "W": 26,
+    "best": 7,
+    "cautious": 14,
+    "low": 4,
+    "high": 17,
+    "verdict": "likely",
+    "actual": 8,
+    "naive": [
+     8,
+     33
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 0,
+    "pieces": 600,
+    "lead_days": 59,
+    "W": 52,
+    "best": 30,
+    "cautious": 59,
+    "low": 27,
+    "high": 62,
+    "verdict": "only_if_prioritised",
+    "actual": 55,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 108,
+    "morning": 0,
+    "pieces": 400,
+    "lead_days": 70,
+    "W": 61,
+    "best": 30,
+    "cautious": 69,
+    "low": 27,
+    "high": 72,
+    "verdict": "only_if_prioritised",
+    "actual": 60,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 0,
+    "pieces": 1500,
+    "lead_days": 38,
+    "W": 34,
+    "best": 31,
+    "cautious": 42,
+    "low": 28,
+    "high": 45,
+    "verdict": "only_if_prioritised",
+    "actual": 38,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 108,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 31,
+    "W": 28,
+    "best": 23,
+    "cautious": 29,
+    "low": 20,
+    "high": 32,
+    "verdict": "only_if_prioritised",
+    "actual": 31,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 108,
+    "morning": 20,
+    "pieces": 1000,
+    "lead_days": 26,
+    "W": 23,
+    "best": 23,
+    "cautious": 26,
+    "low": 20,
+    "high": 29,
+    "verdict": "only_if_prioritised",
+    "actual": 26,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 108,
+    "morning": 20,
+    "pieces": 400,
+    "lead_days": 33,
+    "W": 29,
+    "best": 22,
+    "cautious": 29,
+    "low": 19,
+    "high": 32,
+    "verdict": "tight",
+    "actual": 31,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 108,
+    "morning": 40,
+    "pieces": 600,
+    "lead_days": 25,
+    "W": 23,
+    "best": 21,
+    "cautious": 27,
+    "low": 18,
+    "high": 30,
+    "verdict": "only_if_prioritised",
+    "actual": 23,
+    "naive": [
+     17,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 40,
+    "pieces": 600,
+    "lead_days": 59,
+    "W": 52,
+    "best": 24,
+    "cautious": 49,
+    "low": 21,
+    "high": 52,
+    "verdict": "tight",
+    "actual": 48,
+    "naive": [
+     17,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 40,
+    "pieces": 800,
+    "lead_days": 26,
+    "W": 24,
+    "best": 21,
+    "cautious": 27,
+    "low": 18,
+    "high": 30,
+    "verdict": "only_if_prioritised",
+    "actual": 24,
+    "naive": [
+     17,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 60,
+    "pieces": 400,
+    "lead_days": 26,
+    "W": 23,
+    "best": 24,
+    "cautious": 27,
+    "low": 21,
+    "high": 30,
+    "verdict": "unlikely",
+    "actual": 23,
+    "naive": [
+     20,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 60,
+    "pieces": 400,
+    "lead_days": 49,
+    "W": 42,
+    "best": 25,
+    "cautious": 45,
+    "low": 22,
+    "high": 48,
+    "verdict": "only_if_prioritised",
+    "actual": 36,
+    "naive": [
+     20,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 20,
+    "W": 18,
+    "best": 19,
+    "cautious": 26,
+    "low": 16,
+    "high": 29,
+    "verdict": "unlikely",
+    "actual": 19,
+    "naive": [
+     20,
+     35
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 108,
+    "morning": 90,
+    "pieces": 1200,
+    "lead_days": 34,
+    "W": 30,
+    "best": 17,
+    "cautious": 24,
+    "low": 14,
+    "high": 27,
+    "verdict": "likely",
+    "actual": 26,
+    "naive": [
+     16,
+     31
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 69,
+    "W": 60,
+    "best": 17,
+    "cautious": 50,
+    "low": 14,
+    "high": 53,
+    "verdict": "likely",
+    "actual": 31,
+    "naive": [
+     16,
+     31
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 108,
+    "morning": 90,
+    "pieces": 1000,
+    "lead_days": 27,
+    "W": 24,
+    "best": 14,
+    "cautious": 20,
+    "low": 11,
+    "high": 23,
+    "verdict": "likely",
+    "actual": 18,
+    "naive": [
+     16,
+     31
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 0,
+    "pieces": 800,
+    "lead_days": 28,
+    "W": 25,
+    "best": 30,
+    "cautious": 35,
+    "low": 27,
+    "high": 38,
+    "verdict": "unlikely",
+    "actual": 31,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 109,
+    "morning": 0,
+    "pieces": 1000,
+    "lead_days": 42,
+    "W": 37,
+    "best": 30,
+    "cautious": 45,
+    "low": 27,
+    "high": 48,
+    "verdict": "only_if_prioritised",
+    "actual": 37,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 17,
+    "W": 16,
+    "best": 24,
+    "cautious": 31,
+    "low": 21,
+    "high": 34,
+    "verdict": "unlikely",
+    "actual": 23,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 109,
+    "morning": 20,
+    "pieces": 400,
+    "lead_days": 28,
+    "W": 25,
+    "best": 20,
+    "cautious": 25,
+    "low": 17,
+    "high": 28,
+    "verdict": "tight",
+    "actual": 20,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 20,
+    "pieces": 1200,
+    "lead_days": 45,
+    "W": 40,
+    "best": 22,
+    "cautious": 38,
+    "low": 19,
+    "high": 41,
+    "verdict": "tight",
+    "actual": 28,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 20,
+    "pieces": 800,
+    "lead_days": 50,
+    "W": 44,
+    "best": 21,
+    "cautious": 41,
+    "low": 18,
+    "high": 44,
+    "verdict": "tight",
+    "actual": 31,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 40,
+    "pieces": 1200,
+    "lead_days": 19,
+    "W": 18,
+    "best": 9,
+    "cautious": 13,
+    "low": 6,
+    "high": 16,
+    "verdict": "likely",
+    "actual": 11,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 40,
+    "pieces": 600,
+    "lead_days": 42,
+    "W": 37,
+    "best": 12,
+    "cautious": 18,
+    "low": 9,
+    "high": 21,
+    "verdict": "likely",
+    "actual": 16,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 40,
+    "pieces": 1200,
+    "lead_days": 31,
+    "W": 28,
+    "best": 12,
+    "cautious": 15,
+    "low": 9,
+    "high": 18,
+    "verdict": "likely",
+    "actual": 14,
+    "naive": [
+     16,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 67,
+    "W": 58,
+    "best": 10,
+    "cautious": 22,
+    "low": 7,
+    "high": 25,
+    "verdict": "likely",
+    "actual": 13,
+    "naive": [
+     10,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 60,
+    "pieces": 1500,
+    "lead_days": 24,
+    "W": 21,
+    "best": 14,
+    "cautious": 14,
+    "low": 11,
+    "high": 17,
+    "verdict": "likely",
+    "actual": 13,
+    "naive": [
+     10,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 60,
+    "pieces": 800,
+    "lead_days": 70,
+    "W": 60,
+    "best": 9,
+    "cautious": 21,
+    "low": 6,
+    "high": 24,
+    "verdict": "likely",
+    "actual": 13,
+    "naive": [
+     10,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 49,
+    "W": 43,
+    "best": 15,
+    "cautious": 34,
+    "low": 12,
+    "high": 37,
+    "verdict": "likely",
+    "actual": 21,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 90,
+    "pieces": 1200,
+    "lead_days": 34,
+    "W": 30,
+    "best": 13,
+    "cautious": 21,
+    "low": 10,
+    "high": 24,
+    "verdict": "likely",
+    "actual": 17,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 109,
+    "morning": 90,
+    "pieces": 400,
+    "lead_days": 47,
+    "W": 41,
+    "best": 11,
+    "cautious": 31,
+    "low": 8,
+    "high": 34,
+    "verdict": "likely",
+    "actual": 20,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 0,
+    "pieces": 1000,
+    "lead_days": 64,
+    "W": 56,
+    "best": 30,
+    "cautious": 64,
+    "low": 27,
+    "high": 67,
+    "verdict": "only_if_prioritised",
+    "actual": 47,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 29,
+    "W": 26,
+    "best": 30,
+    "cautious": 35,
+    "low": 27,
+    "high": 38,
+    "verdict": "unlikely",
+    "actual": 33,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 110,
+    "morning": 0,
+    "pieces": 1000,
+    "lead_days": 44,
+    "W": 39,
+    "best": 30,
+    "cautious": 47,
+    "low": 27,
+    "high": 50,
+    "verdict": "only_if_prioritised",
+    "actual": 39,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 31,
+    "W": 28,
+    "best": 27,
+    "cautious": 34,
+    "low": 24,
+    "high": 37,
+    "verdict": "only_if_prioritised",
+    "actual": 24,
+    "naive": [
+     14,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 48,
+    "W": 42,
+    "best": 27,
+    "cautious": 48,
+    "low": 24,
+    "high": 51,
+    "verdict": "only_if_prioritised",
+    "actual": 31,
+    "naive": [
+     14,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 18,
+    "W": 17,
+    "best": 26,
+    "cautious": 28,
+    "low": 23,
+    "high": 31,
+    "verdict": "unlikely",
+    "actual": 21,
+    "naive": [
+     14,
+     36
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 110,
+    "morning": 40,
+    "pieces": 1200,
+    "lead_days": 40,
+    "W": 36,
+    "best": 14,
+    "cautious": 20,
+    "low": 11,
+    "high": 23,
+    "verdict": "likely",
+    "actual": 17,
+    "naive": [
+     17,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 40,
+    "pieces": 1200,
+    "lead_days": 34,
+    "W": 30,
+    "best": 14,
+    "cautious": 18,
+    "low": 11,
+    "high": 21,
+    "verdict": "likely",
+    "actual": 15,
+    "naive": [
+     17,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 40,
+    "pieces": 1500,
+    "lead_days": 16,
+    "W": 15,
+    "best": 12,
+    "cautious": 14,
+    "low": 9,
+    "high": 17,
+    "verdict": "tight",
+    "actual": 11,
+    "naive": [
+     17,
+     37
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 60,
+    "pieces": 400,
+    "lead_days": 66,
+    "W": 57,
+    "best": 7,
+    "cautious": 34,
+    "low": 4,
+    "high": 37,
+    "verdict": "likely",
+    "actual": 5,
+    "naive": [
+     8,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 60,
+    "pieces": 1200,
+    "lead_days": 19,
+    "W": 17,
+    "best": 10,
+    "cautious": 10,
+    "low": 7,
+    "high": 13,
+    "verdict": "likely",
+    "actual": 8,
+    "naive": [
+     8,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 60,
+    "pieces": 600,
+    "lead_days": 42,
+    "W": 36,
+    "best": 8,
+    "cautious": 18,
+    "low": 5,
+    "high": 21,
+    "verdict": "likely",
+    "actual": 9,
+    "naive": [
+     8,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 14,
+    "W": 13,
+    "best": 17,
+    "cautious": 17,
+    "low": 14,
+    "high": 20,
+    "verdict": "unlikely",
+    "actual": 11,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 90,
+    "pieces": 1200,
+    "lead_days": 41,
+    "W": 36,
+    "best": 15,
+    "cautious": 26,
+    "low": 12,
+    "high": 29,
+    "verdict": "likely",
+    "actual": 12,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 110,
+    "morning": 90,
+    "pieces": 1200,
+    "lead_days": 64,
+    "W": 56,
+    "best": 15,
+    "cautious": 54,
+    "low": 12,
+    "high": 57,
+    "verdict": "tight",
+    "actual": 12,
+    "naive": [
+     5,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 0,
+    "pieces": 600,
+    "lead_days": 34,
+    "W": 30,
+    "best": 30,
+    "cautious": 38,
+    "low": 27,
+    "high": 41,
+    "verdict": "only_if_prioritised",
+    "actual": 38,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 111,
+    "morning": 0,
+    "pieces": 1000,
+    "lead_days": 26,
+    "W": 23,
+    "best": 30,
+    "cautious": 34,
+    "low": 27,
+    "high": 37,
+    "verdict": "unlikely",
+    "actual": 32,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 111,
+    "morning": 0,
+    "pieces": 1000,
+    "lead_days": 40,
+    "W": 35,
+    "best": 30,
+    "cautious": 44,
+    "low": 27,
+    "high": 47,
+    "verdict": "only_if_prioritised",
+    "actual": 41,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 111,
+    "morning": 20,
+    "pieces": 1200,
+    "lead_days": 65,
+    "W": 57,
+    "best": 32,
+    "cautious": 73,
+    "low": 29,
+    "high": 76,
+    "verdict": "only_if_prioritised",
+    "actual": 55,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 20,
+    "pieces": 600,
+    "lead_days": 54,
+    "W": 47,
+    "best": 31,
+    "cautious": 61,
+    "low": 28,
+    "high": 64,
+    "verdict": "only_if_prioritised",
+    "actual": 46,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 20,
+    "pieces": 600,
+    "lead_days": 58,
+    "W": 51,
+    "best": 31,
+    "cautious": 65,
+    "low": 28,
+    "high": 68,
+    "verdict": "only_if_prioritised",
+    "actual": 49,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 40,
+    "pieces": 1000,
+    "lead_days": 49,
+    "W": 43,
+    "best": 25,
+    "cautious": 42,
+    "low": 22,
+    "high": 45,
+    "verdict": "tight",
+    "actual": 39,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 40,
+    "pieces": 600,
+    "lead_days": 25,
+    "W": 23,
+    "best": 24,
+    "cautious": 27,
+    "low": 21,
+    "high": 30,
+    "verdict": "unlikely",
+    "actual": 23,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 40,
+    "pieces": 1500,
+    "lead_days": 43,
+    "W": 38,
+    "best": 25,
+    "cautious": 39,
+    "low": 22,
+    "high": 42,
+    "verdict": "only_if_prioritised",
+    "actual": 38,
+    "naive": [
+     17,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 66,
+    "W": 57,
+    "best": 19,
+    "cautious": 43,
+    "low": 16,
+    "high": 46,
+    "verdict": "likely",
+    "actual": 32,
+    "naive": [
+     23,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 59,
+    "W": 51,
+    "best": 19,
+    "cautious": 39,
+    "low": 16,
+    "high": 42,
+    "verdict": "likely",
+    "actual": 32,
+    "naive": [
+     23,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 60,
+    "pieces": 800,
+    "lead_days": 38,
+    "W": 33,
+    "best": 18,
+    "cautious": 27,
+    "low": 15,
+    "high": 30,
+    "verdict": "likely",
+    "actual": 25,
+    "naive": [
+     23,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 65,
+    "W": 57,
+    "best": 5,
+    "cautious": 13,
+    "low": 2,
+    "high": 16,
+    "verdict": "likely",
+    "actual": 6,
+    "naive": [
+     14,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 90,
+    "pieces": 1500,
+    "lead_days": 60,
+    "W": 53,
+    "best": 12,
+    "cautious": 15,
+    "low": 9,
+    "high": 18,
+    "verdict": "likely",
+    "actual": 10,
+    "naive": [
+     14,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 111,
+    "morning": 90,
+    "pieces": 800,
+    "lead_days": 45,
+    "W": 40,
+    "best": 8,
+    "cautious": 12,
+    "low": 5,
+    "high": 15,
+    "verdict": "likely",
+    "actual": 7,
+    "naive": [
+     14,
+     35
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 0,
+    "pieces": 1000,
+    "lead_days": 67,
+    "W": 58,
+    "best": 30,
+    "cautious": 67,
+    "low": 27,
+    "high": 70,
+    "verdict": "only_if_prioritised",
+    "actual": 62,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 112,
+    "morning": 0,
+    "pieces": 1500,
+    "lead_days": 51,
+    "W": 45,
+    "best": 31,
+    "cautious": 53,
+    "low": 28,
+    "high": 56,
+    "verdict": "only_if_prioritised",
+    "actual": 46,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 112,
+    "morning": 0,
+    "pieces": 1200,
+    "lead_days": 33,
+    "W": 29,
+    "best": 31,
+    "cautious": 38,
+    "low": 28,
+    "high": 41,
+    "verdict": "unlikely",
+    "actual": 31,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 112,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 43,
+    "W": 38,
+    "best": 22,
+    "cautious": 37,
+    "low": 19,
+    "high": 40,
+    "verdict": "tight",
+    "actual": 42,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 112,
+    "morning": 20,
+    "pieces": 1000,
+    "lead_days": 62,
+    "W": 54,
+    "best": 22,
+    "cautious": 51,
+    "low": 19,
+    "high": 54,
+    "verdict": "tight",
+    "actual": 51,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 20,
+    "pieces": 1500,
+    "lead_days": 24,
+    "W": 22,
+    "best": 20,
+    "cautious": 24,
+    "low": 17,
+    "high": 27,
+    "verdict": "only_if_prioritised",
+    "actual": 20,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 40,
+    "pieces": 800,
+    "lead_days": 28,
+    "W": 25,
+    "best": 26,
+    "cautious": 28,
+    "low": 23,
+    "high": 31,
+    "verdict": "unlikely",
+    "actual": 27,
+    "naive": [
+     15,
+     36
+    ],
+    "on_time": false
+   },
+   {
+    "seed": 112,
+    "morning": 40,
+    "pieces": 1200,
+    "lead_days": 43,
+    "W": 38,
+    "best": 26,
+    "cautious": 38,
+    "low": 23,
+    "high": 41,
+    "verdict": "tight",
+    "actual": 35,
+    "naive": [
+     15,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 40,
+    "pieces": 400,
+    "lead_days": 38,
+    "W": 34,
+    "best": 25,
+    "cautious": 33,
+    "low": 22,
+    "high": 36,
+    "verdict": "tight",
+    "actual": 31,
+    "naive": [
+     15,
+     36
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 60,
+    "pieces": 1200,
+    "lead_days": 29,
+    "W": 25,
+    "best": 20,
+    "cautious": 24,
+    "low": 17,
+    "high": 27,
+    "verdict": "tight",
+    "actual": 24,
+    "naive": [
+     20,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 60,
+    "pieces": 1500,
+    "lead_days": 43,
+    "W": 37,
+    "best": 21,
+    "cautious": 34,
+    "low": 18,
+    "high": 37,
+    "verdict": "tight",
+    "actual": 34,
+    "naive": [
+     20,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 60,
+    "pieces": 1000,
+    "lead_days": 30,
+    "W": 26,
+    "best": 20,
+    "cautious": 24,
+    "low": 17,
+    "high": 27,
+    "verdict": "tight",
+    "actual": 25,
+    "naive": [
+     20,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 90,
+    "pieces": 800,
+    "lead_days": 26,
+    "W": 23,
+    "best": 14,
+    "cautious": 17,
+    "low": 11,
+    "high": 20,
+    "verdict": "likely",
+    "actual": 16,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 90,
+    "pieces": 600,
+    "lead_days": 60,
+    "W": 53,
+    "best": 14,
+    "cautious": 38,
+    "low": 11,
+    "high": 41,
+    "verdict": "likely",
+    "actual": 21,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   },
+   {
+    "seed": 112,
+    "morning": 90,
+    "pieces": 1200,
+    "lead_days": 57,
+    "W": 50,
+    "best": 14,
+    "cautious": 36,
+    "low": 11,
+    "high": 39,
+    "verdict": "likely",
+    "actual": 22,
+    "naive": [
+     14,
+     34
+    ],
+    "on_time": true
+   }
+  ]
+ }
+}
