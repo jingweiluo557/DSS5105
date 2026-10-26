@@ -554,7 +554,8 @@ class WorkflowEngine:
             if not data['findings']:
                 answer = f"Nothing unusual in the recorded data as of {data['business_date']}: no sustained stage drop, no stalled customer, no overdue or near-due miss, no idle order."
             else:
-                answer = (f"{data['total']} finding{'s' if data['total'] != 1 else ''} as of {data['business_date']} ({', '.join(f'{v} {k.replace(chr(95), ' ')}' for k, v in data['by_kind'].items())}); top {data['shown']} by tier and score:\n" +
+                kind_summary = ', '.join(f"{v} {k.replace('_', ' ')}" for k, v in data['by_kind'].items())
+                answer = (f"{data['total']} finding{'s' if data['total'] != 1 else ''} as of {data['business_date']} ({kind_summary}); top {data['shown']} by tier and score:\n" +
                           '\n'.join(f"{i}. [{f['tier']}] {f['title']}. {f['action']} (rule: {f['rule']})" for i, f in enumerate(data['findings'], 1)) +
                           '\n' + data['limits'])
         elif intent == Intent.ORDER_RANK:
