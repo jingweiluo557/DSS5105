@@ -10,6 +10,8 @@ __pycache__/
 node_modules/
 test-results/
 playwright-report/
+dist/
+.build/
 *.log
 .DS_Store
 Thumbs.db
@@ -22,3 +24,8 @@ data/snapshots/*
 !data/snapshots/.gitkeep
 backend/runtime/*
 !backend/runtime/.gitkeep
+
+# Raw evaluation conversations stay local; publish reviewed summaries only.
+docs/reports/*/live-results.json
+docs/reports/*/source.tsv
+docs/reports/*/*.xml

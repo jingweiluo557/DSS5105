@@ -1,4 +1,5 @@
 """场景 1.2/2.1：前端和原有意图工具使用同一数据库。"""
+from ..business_clock import BusinessClock
 from datetime import datetime, timezone
 from sqlalchemy import select
 from ..crud.data_record import MODELS, fields
@@ -14,6 +15,16 @@ class DatabaseDataTools(DataTools):
         """场景 1.1–3.3：保留原业务算法，仅替换存储适配器。"""
         self.database = database
 
+    def queue_snapshot(self, now):
+        from .scheduling_service import current_snapshot
+        data = current_snapshot(self.database, now.date().isoformat())
+        evidence = [Evidence(source=name, row=r['_record_id'],
+                            url=f"/api/evidence/{name}/{r['_record_id']}", record_id=r['_record_id'],
+                            version=r['_version'], record={k: '' if v is None else str(v)
+                                                          for k, v in r.items() if not k.startswith('_')})
+                    for name in ('orders', 'production_log') for r in data[name]]
+        return data, evidence
+
     def rows(self, source: str) -> list[Evidence]:
         """场景 1.2：每次打开新事务读取已提交数据，证据使用稳定记录 ID。"""
         name = source.removesuffix('.csv')
@@ -28,7 +39,7 @@ class DatabaseDataTools(DataTools):
 
 def snapshot(database: Database, today: str) -> dict:
     """场景 1.2/2.1：请求时生成快照，文件导出仅供下载，不作问答缓存。"""
-    result: dict = {'today': today, 'generated_at': datetime.now(timezone.utc).isoformat()}
+    result: dict = {'today': today, 'generated_at': BusinessClock().now().isoformat()}
     with database.sessions() as session:
         for name, model in MODELS.items():
             ordering = (model.date, model.id) if name == 'production_log' else (model.id,)

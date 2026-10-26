@@ -1,5 +1,10 @@
 # 系统架构概览
 
+云端采用 `WORKFLOW_STORAGE=database`，会话、业务时钟、加密邮箱凭据、发送记录和定时任务均存储在共享 MySQL。
+本地模式保留 SQLite。云函数不依赖驻留后台线程，分钟定时函数调用
+`POST /api/internal/email/run`，按业务时钟判断晨报与已审核邮件是否到期。
+事务锁和消息 ID 防止多实例重复提交；提交结果不明时不自动重发。
+
 适用版本：API 2.0.0。系统包含 Web 客户端、FastAPI 服务、MySQL 业务库和 SQLite 会话存储。
 
 ## 请求处理

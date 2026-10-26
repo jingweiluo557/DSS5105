@@ -2,6 +2,7 @@
 import asyncio
 import os
 import uuid
+import secrets
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
@@ -37,16 +38,36 @@ def create_app() -> FastAPI:
         app.state.database = Database(app.state.settings)
         app.state.sql_agent = None
         app.state.sync = SyncService(app.state.database, app.state.settings)
-        app.state.sync.start()
+        if app.state.settings.background_tasks_enabled:
+            app.state.sync.start()
         app.state.client = AsyncOpenAI(api_key=key, base_url=app.state.settings.openai_base_url, timeout=app.state.settings.openai_timeout_seconds, max_retries=0) if key else None
         initialize_workflow(app, DATA, ROOT)
-        monitor = asyncio.create_task(monitor_loop(app))
+        monitor = asyncio.create_task(monitor_loop(app)) if app.state.settings.background_tasks_enabled else None
+        from .api.dashboard_api import morning_loop
+        morning = asyncio.create_task(morning_loop(app)) if app.state.settings.morning_scheduler_enabled else None
+        from .services.briefing_delivery import delivery_loop
+        delivery = asyncio.create_task(delivery_loop(app)) if app.state.settings.email_scheduler_enabled else None
+        from .services.scheduled_email import scheduled_email_loop
+        email_queue = asyncio.create_task(scheduled_email_loop(app)) if app.state.settings.email_scheduler_enabled else None
         try:
             yield
         finally:
-            monitor.cancel()
-            with suppress(asyncio.CancelledError):
-                await monitor
+            if email_queue:
+                email_queue.cancel()
+                with suppress(asyncio.CancelledError):
+                    await email_queue
+            if delivery:
+                delivery.cancel()
+                with suppress(asyncio.CancelledError):
+                    await delivery
+            if morning:
+                morning.cancel()
+                with suppress(asyncio.CancelledError):
+                    await morning
+            if monitor:
+                monitor.cancel()
+                with suppress(asyncio.CancelledError):
+                    await monitor
             if app.state.client:
                 await app.state.client.close()
             app.state.sync.close()
@@ -61,19 +82,36 @@ def create_app() -> FastAPI:
         servers=[{'url': 'http://127.0.0.1:8000', 'description': 'Local development; replace with your team server when deployed'}],
     )
     app.state.client = None
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=['http://127.0.0.1:8765', 'http://localhost:8765', 'http://127.0.0.1:8000', 'http://localhost:8000'],
-        allow_methods=['GET', 'POST', 'PUT', 'DELETE'], allow_headers=['Content-Type', 'Authorization', 'X-Confirm-Write'],
-    )
-
     @app.middleware('http')
     async def request_identity(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """场景 1.1–3.3：为每次请求添加可追踪标识。"""
         request.state.request_id = str(uuid.uuid4())
+        settings = getattr(app.state, 'settings', None)
+        token = settings.api_access_token.get_secret_value() if settings else ''
+        protected = request.url.path == '/chat' or request.url.path.startswith('/api/')
+        exempt = request.url.path in ('/api/v1/health', '/api/internal/reminders/run', '/api/internal/briefings/run', '/api/internal/email/run', '/api/v1/workflow/replies', '/api/outlook/callback')
+        request.state.role = 'manager'
+        manager_token = settings.manager_access_token.get_secret_value() if settings and hasattr(settings, 'manager_access_token') else ''
+        if (token or manager_token) and protected and not exempt and request.method != 'OPTIONS':
+            from .api.security import resolve_role
+            role = resolve_role(request.headers.get('X-ThreadPilot-Token', ''), settings)
+            if role is None:
+                return JSONResponse(status_code=401, content={'error': {'code': 'UNAUTHORIZED', 'message': 'Application access token required.'}})
+            request.state.role = role
         response = await call_next(request)
         response.headers['X-Request-ID'] = request.state.request_id
+        # Revalidate application assets so a normal reload cannot mix old and new UI.
+        if request.method in ('GET', 'HEAD') and not request.url.path.startswith('/api/'):
+            if request.url.path == '/' or request.url.path.endswith(('.html', '.js', '.css')):
+                response.headers['Cache-Control'] = 'no-cache, must-revalidate'
         return response
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=Settings().cors_origins,
+        allow_credentials=True,
+        allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allow_headers=['Content-Type', 'Authorization', 'X-Confirm-Write', 'X-ThreadPilot-Token'],
+    )
 
     @app.exception_handler(HTTPException)
     async def app_error(request: Request, error: HTTPException) -> JSONResponse:
@@ -99,11 +137,17 @@ def create_app() -> FastAPI:
         """场景 1.1–3.3：查询客户端配置状态，不调用模型。"""
         return {'status': 'ok', 'configured': app.state.client is not None, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1'), 'streaming': True}
 
+    @app.get('/api/v1/whoami', tags=['Health'])
+    async def whoami(request: Request) -> dict[str, Any]:
+        """Which role the supplied workspace key carries ('manager' unless a separate manager key is configured)."""
+        return {'role': getattr(request.state, 'role', 'manager'), 'manager_key_configured': bool(app.state.settings.manager_access_token.get_secret_value())}
+
     install_workflow_routes(app, DATA)
-    from .api import data_api, sync_api, snapshot_api, ai_api
-    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router):
+    from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api, scheduling_api, morning_api, outlook_api, email_api, email_scheduler_api, alerts_api, feasibility_api
+    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router, dashboard_api.router, scheduling_api.router, morning_api.router, outlook_api.router, email_api.router, email_scheduler_api.router, alerts_api.router, feasibility_api.router):
         app.include_router(router)
-    app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')
+    if Settings().serve_frontend:
+        app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')
     return app
 
 

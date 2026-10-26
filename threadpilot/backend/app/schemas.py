@@ -12,14 +12,26 @@ class StrictModel(BaseModel):
 
 
 class Intent(StrEnum):
+    GENERAL = 'general.answer'
+    ORDER_SUMMARY = 'order.summary'
+    RISK_OVERVIEW = 'order.risk_overview'
     ORDER_LOOKUP = 'order.lookup'
     ORDER_REFRESH = 'order.refresh'
     ORDER_RISK = 'order.risk'
+    ORDER_EXPEDITE = 'order.expedite'
+    REVIEW_REASON = 'review.reason'
     ORDER_COMPARE = 'order.compare'
     ORDER_COMMITMENT = 'order.commitment'
     ORDER_PRIORITIZE = 'order.prioritize'
+    MORNING_BRIEFING = 'operations.briefing'
     OPERATIONS_NORMALITY = 'operations.normality'
     OPERATIONS_DEVIATION = 'operations.deviation'
+    OPERATIONS_OUTPUT = 'operations.output'          # Sprint 2: recorded stage output on a date (no judgement)
+    ORDER_RANK = 'order.rank'                        # Sprint 2: rank active orders by idle days / due date
+    ORDER_FORECAST = 'order.forecast'                # Sprint 2: AFT delay probability + completion range
+    WORKSHOPS = 'data.workshops'                     # Sprint 2: outside workshops able to take a batch
+    UNANSWERABLE = 'general.unanswerable'            # Sprint 2: explicit refusal with the stated non-goal
+    OPERATIONS_DISCOVERY = 'operations.discovery'    # Sprint 2: ranked anomalies ("did anything go wrong yesterday?")
     EXECUTION_CHASE = 'execution.chase'
     EXECUTION_NOTE = 'execution.note'
     EXECUTION_REMINDER = 'execution.reminder'
@@ -36,18 +48,24 @@ class Slots(StrictModel):
     target_date: str | None = None
     observed_output: int | None = Field(default=None, ge=0)
     baseline: Literal['same_weekday'] | None = None
-    comparison_fields: list[Literal['due_date', 'last_activity_date', 'current_stage', 'status']] = Field(default_factory=list)
-    criterion: Literal['due_date', 'last_activity_date'] | None = None
+    comparison_fields: list[Literal['due_date', 'last_activity_date', 'current_stage', 'status', 'pieces', 'product', 'customer']] = Field(default_factory=list)
+    criterion: Literal['due_date', 'last_activity_date', 'idle_days', 'risk'] | None = None
     window_days: int | None = Field(default=None, ge=0, le=365)
     delivery_point: Literal['factory', 'customer'] | None = None
     delivery_buffer_days: int | None = Field(default=None, ge=0, le=60)
     packing_loss_days: int | None = Field(default=None, ge=0, le=60)
+    review_decision: Literal['save', 'apply', 'reject'] | None = None
+    chase_mode: Literal['summary', 'separate'] | None = None
+    draft_number: int | None = Field(default=None, ge=1, le=10)
     recipient: str | None = None
+    department: Literal['KNITTING','ASSEMBLY','WASHING','PACKING'] | None = None
     tone: str | None = None
     text: str | None = None
+    reason: Literal['money', 'people', 'cause', 'delete', 'cancel', 'external', 'future', 'other'] | None = None
     deadline: str | None = None
-    condition: Literal['no_reply', 'no_activity'] | None = None
-    action: Literal['read', 'draft', 'revise', 'send', 'save', 'create', 'update', 'explain', 'evidence', 'recommend', 'rank', 'confirm_target'] = 'read'
+    send_at: str | None = None
+    condition: Literal['no_reply', 'no_activity', 'stage_below_range'] | None = None
+    action: Literal['read', 'draft', 'revise', 'send', 'save', 'create', 'update', 'explain', 'evidence', 'recommend', 'rank', 'confirm_target', 'adopt'] = 'read'
     reference: Literal['explicit', 'active', 'ambiguous', 'none'] = 'none'
 
 
@@ -94,6 +112,7 @@ class PendingAction(StrictModel):
     preview: str
     created_at: datetime
     source_snapshot: dict[str, str] = Field(default_factory=dict)
+    source_snapshots: dict[str, dict[str, str]] = Field(default_factory=dict)
 
 
 class DialogState(StrictModel):
@@ -107,13 +126,18 @@ class DialogState(StrictModel):
     comparison_orders: list[str] = Field(default_factory=list)
     last_order_ids: list[str] = Field(default_factory=list)
     draft: dict[str, str] | None = None
+    chase_context: dict[str, Any] = Field(default_factory=dict)
+    chase_drafts: list[dict[str, Any]] = Field(default_factory=list)
     history: list[dict[str, str]] = Field(default_factory=list)
+    review_draft_id: str | None = None
     revision: int = 0
+    topics: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
 
 class ChatRequest(StrictModel):
     message: str = Field(min_length=1, max_length=1500)
     session_id: str | None = Field(default=None, pattern=r'^[a-f0-9-]{36}$')
+    review_draft_id: str | None = Field(default=None, pattern=r'^[a-f0-9-]{36}$')
     confirmation_id: str | None = None
     selected_order_id: str | None = Field(default=None, pattern=r'^ORD-\d{3}$')
 
@@ -133,6 +157,7 @@ class ChatResponse(StrictModel):
     order_ids: list[str] = Field(default_factory=list)
     selected_order_id: str | None = None
     sources: list[str] = Field(default_factory=list)
+    source_details: str = ''
     request_id: str = ''
     model: str = 'gpt-4.1'
     business_date: str

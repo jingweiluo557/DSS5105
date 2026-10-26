@@ -1,0 +1,107 @@
+name: ThreadPilot backend
+
+on:
+  push:
+    paths: ["threadpilot/**", ".github/workflows/threadpilot-backend.yml"]
+  pull_request:
+    paths: ["threadpilot/**", ".github/workflows/threadpilot-backend.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  openapi:
+    name: Keep docs/openapi.json in step with the code
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install uv
+      - name: Install the locked dependencies
+        working-directory: threadpilot/backend
+        run: uv sync --locked --group dev
+      - name: Export the runtime contract
+        working-directory: threadpilot/backend
+        run: uv run --locked python -m scripts.export_openapi
+      - name: Commit the export when it changed
+        shell: bash
+        run: |
+          if git diff --quiet -- threadpilot/docs/openapi.json; then echo "openapi.json unchanged"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add threadpilot/docs/openapi.json
+          git commit -m "Export docs/openapi.json from the running code [skip ci]"
+          git push
+          echo "::notice title=openapi::docs/openapi.json re-exported and committed; the test suite below ran against the previous export"
+
+  tests:
+    name: pytest (SQLite, no model key, no MySQL)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install uv
+      - name: Install the locked dependencies
+        working-directory: threadpilot/backend
+        run: uv sync --locked --group dev
+      - name: Export the runtime contract for this commit (the openapi job commits it; the layout test compares against it)
+        working-directory: threadpilot/backend
+        run: uv run --locked python -m scripts.export_openapi
+      - name: Run the backend test suite
+        working-directory: threadpilot/backend
+        shell: bash
+        run: |
+          # GitHub runs `shell: bash` with -e -o pipefail: a grep that finds nothing must not abort the step.
+          status=0
+          uv run --locked pytest -q -rfE --tb=short 2>&1 | tee pytest-output.txt || status=$?
+          # Surface failures as check-run annotations (readable through the API when raw logs are not)
+          { grep -E "^(FAILED|ERROR) " pytest-output.txt || true; } | head -10 | while IFS= read -r line; do echo "::error title=pytest::${line:0:400}"; done
+          summary=$(tail -n 1 pytest-output.txt)
+          echo "::notice title=pytest summary::${summary}"
+          { echo "### pytest (exit ${status})"; echo '```'; tail -c 20000 pytest-output.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit $status
+      - name: Upload the pytest output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-output
+          path: threadpilot/backend/pytest-output.txt
+
+  evaluation:
+    name: Offline evaluation replay (88 questions, annotated planner)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install uv
+      - name: Install the locked dependencies
+        working-directory: threadpilot/backend
+        run: uv sync --locked --group dev
+      - name: Rebuild the evaluation set from the CSVs and check it is unchanged
+        working-directory: threadpilot/evaluation
+        run: |
+          ../backend/.venv/bin/python build_eval_set.py --out /tmp/eval_set.json
+          ../backend/.venv/bin/python - <<'PY'
+          import json
+          a = json.load(open('/tmp/eval_set.json')); b = json.load(open('eval_set.json'))
+          assert a['gold'] == b['gold'] and a['scenarios'] == b['scenarios'], 'eval_set.json is out of date: run build_eval_set.py and commit'
+          print('eval_set.json reproducible')
+          PY
+      - name: Replay every question through the server and require all to pass
+        working-directory: threadpilot/evaluation
+        run: |
+          ../backend/.venv/bin/python run_annotated_eval.py --out /tmp/transcript_annotated.json
+          ../backend/.venv/bin/python score.py --eval eval_set.json --transcript /tmp/transcript_annotated.json --out /tmp/results.json --report /tmp/REPORT.md --strict
+          ../backend/.venv/bin/python verify_tool_results.py --eval eval_set.json --transcript /tmp/transcript_annotated.json

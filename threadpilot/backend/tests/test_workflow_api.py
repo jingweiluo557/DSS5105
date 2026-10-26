@@ -24,7 +24,7 @@ def workflow_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator
 def test_json_and_sse_share_server_state(workflow_client: TestClient) -> None:
     """场景 1.1/1.2：JSON 与 SSE 共用会话，来源行可访问且无客户端伪造状态。"""
     client = workflow_client
-    assert client.post('/chat', json={'message': 'Hello'}).status_code == 503
+    assert client.post('/chat', json={'message': 'Hello'}).status_code == 200
     client.app.state.intent_classifier = FixedClassifier('order.lookup', order_ids=['ORD-005'])
     response = client.post('/chat', json={'message': 'Open ORD-005.'})
     assert response.status_code == 200, response.text

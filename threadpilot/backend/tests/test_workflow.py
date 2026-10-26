@@ -164,7 +164,11 @@ def test_workbook_multiturn_scenario(scenario: str, tmp_path: Path, storage: str
             assert response.needs_clarification == clarification, (row, response.answer)
             names = [call.name for call in response.tool_calls]
             assert (tool in names) if tool else not names, (row, names)
-            assert phrase in response.answer, (row, response.answer)
+            if phrase.endswith('.csv'):
+                assert phrase in response.sources or phrase.removesuffix('.csv') in response.sources
+                assert 'Source evidence:' not in response.answer
+            else:
+                assert phrase in response.answer, (row, response.answer)
             writes = [c for c in response.tool_calls if c.requires_confirmation]
             assert not writes or engine.confirmation_word(text)
             if response.evidence:
@@ -319,7 +323,8 @@ def test_dialog_fixture_matches_original_workbook() -> None:
 
 
 def test_ambiguous_comparative_rank_asks_criterion(tmp_path: Path) -> None:
-    """场景 1.4：比较风险时即使模型标记 ambiguous，也应追问比较准则。"""
+    """场景 1.4：比较后问"哪个更有风险"仍追问准则（设计第 16 行）；选"delivery risk"后按共享队列风险排序；
+    问题本身列出准则（26 Oct 问题表第 9 行）时直接排序，不追问。"""
     async def run() -> None:
         """场景 1.4：复现真实模型评测发现的边界并断言正确后续。"""
         engine = make_engine(tmp_path)
@@ -327,9 +332,16 @@ def test_ambiguous_comparative_rank_asks_criterion(tmp_path: Path) -> None:
         session = response.state.session_id
         response = await engine.chat(ChatRequest(message='Which is more risky?', session_id=session), FixedClassifier('order.compare', action='rank', reference='ambiguous'))
         assert response.needs_clarification and 'due-date pressure' in response.answer
+        response = await engine.chat(ChatRequest(message='Overall delivery risk.', session_id=session), FixedClassifier('order.compare', action='rank', criterion='risk', reference='ambiguous'))
+        assert not response.needs_clarification and 'Higher delivery risk: ORD-005' in response.answer
+        assert response.tool_calls[-1].name == 'rank_comparison' and response.tool_calls[-1].arguments == {'criterion': 'risk'}
         response = await engine.chat(ChatRequest(message='Nearest deadline.', session_id=session), FixedClassifier('order.compare', action='rank', criterion='due_date', reference='ambiguous'))
         assert not response.needs_clarification
         assert 'Review ORD-005 first' in response.answer
+        # the criteria stated in the question: no clarification
+        response = await engine.chat(ChatRequest(message='Compare ORD-005 and ORD-021: which has the higher delivery risk, considering due date, stage and last update?'),
+                                     FixedClassifier('order.compare', order_ids=['ORD-005', 'ORD-021'], action='rank', comparison_fields=['due_date', 'current_stage', 'last_activity_date']))
+        assert not response.needs_clarification and 'Higher delivery risk: ORD-005' in response.answer
     asyncio.run(run())
 
 

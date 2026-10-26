@@ -1,5 +1,14 @@
 # ThreadPilot 操作手册
 
+## 邮箱与演示时间
+
+Settings → Business date 设置日期时间，再点 Start demo clock；时间按正常速度推进。
+Use real time 恢复真实时间。重设时钟后，旧演示轮次未发送的邮件会取消，需重新审核安排。
+Connect Outlook 连接发件邮箱，Manager delivery preferences 设置经理晨报收件人，Department emails 设置部门邮箱。
+在订单中生成 chase-up 后核对收件人、内容和发送时间，确认后才提交。
+Activity Log → Email deliveries 展开每行查看正文及发送结果。
+Accepted by Microsoft 表示 Microsoft 接受请求，不代表收件箱已经投递。
+
 适用版本：API 2.0.0，FastAPI + MySQL + 意图工作流 / 只读 SQL Agent。页面为英文，文中的按钮名称与界面一致。
 
 ## 1. 启动前准备

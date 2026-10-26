@@ -33,12 +33,12 @@ def test_workflow_stream_metadata(client: TestClient) -> None:
     assert frames[2][1]['request_id'] == response.headers['x-request-id']
 
 
-def test_stream_errors_before_sse(client: TestClient) -> None:
-    """场景 1.1–3.3：模型错误在建立 SSE 前返回非 200 JSON。"""
+def test_stream_model_failure_falls_back(client: TestClient) -> None:
+    """模型不可用仍返回基础回答，错误原文不进入 SSE。"""
     path = '/api/v1/workflow/chat/stream'
-    assert client.post(path, json={'message': 'Hi'}).status_code == 503
+    assert 'event: done' in client.post(path, json={'message': 'Hi'}).text
     provider(client, lambda _: httpx.Response(429, json={'error': {'message': 'PRIVATE_DETAIL'}}))
     response = client.post(path, json={'message': 'Hi'})
-    assert response.status_code == 429
-    assert response.json()['error']['code'] == 'MODEL_RATE_LIMITED'
+    assert response.status_code == 200
+    assert 'event: done' in response.text
     assert 'PRIVATE_DETAIL' not in response.text

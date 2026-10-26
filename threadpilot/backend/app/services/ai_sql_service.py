@@ -3,6 +3,7 @@ import json
 import re
 import sqlite3
 import threading
+from contextlib import nullcontext
 from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
@@ -18,6 +19,7 @@ from langchain_openai import ChatOpenAI
 from ..config import Settings
 from ..crud.data_record import MODELS
 from ..db.session import make_engine
+from ..sql_workflow_store import SQLWorkflowStore
 
 SQL_SYSTEM_PROMPT = '''You are ThreadPilot's read-only factory analyst. Every factual answer must use a
 fresh sql_db_query in THIS turn. History provides references, never current facts. Ask minimal
@@ -92,20 +94,26 @@ class AISQLService:
         self.llm = ChatOpenAI(model=settings.openai_model, api_key=settings.openai_api_key.get_secret_value(),
                               base_url=settings.openai_base_url, timeout=settings.openai_timeout_seconds, max_retries=0)
         self.lock = threading.Lock()
-        settings.workflow_db.parent.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(settings.workflow_db) as db:
-            db.execute('CREATE TABLE IF NOT EXISTS sql_sessions (id TEXT PRIMARY KEY, history TEXT NOT NULL)')
+        self.history_engine = make_engine(settings.database_url.get_secret_value()) if settings.workflow_storage == 'database' else None
+        self.history_store = SQLWorkflowStore(self.history_engine) if self.history_engine else None
+        if self.history_store is None:
+            settings.workflow_db.parent.mkdir(parents=True, exist_ok=True)
+            with sqlite3.connect(settings.workflow_db) as db:
+                db.execute('CREATE TABLE IF NOT EXISTS sql_sessions (id TEXT PRIMARY KEY, history TEXT NOT NULL)')
 
     def ask(self, message: str, session_id: str | None, business_time: str) -> dict[str, Any]:
         """场景 1.1–2.2：多轮仅保存问答上下文，每轮工具都重新执行查询。"""
-        with self.lock:
+        with self.lock, self.history_store.turn_lock('sql:' + session_id) if self.history_store and session_id else nullcontext():
             history: list[dict[str, str]] = []
             if session_id:
-                with sqlite3.connect(self.settings.workflow_db) as db:
-                    row = db.execute('SELECT history FROM sql_sessions WHERE id=?', (session_id,)).fetchone()
-                if row is None:
-                    raise KeyError('Unknown SQL session')
-                history = json.loads(row[0])
+                if self.history_store:
+                    history = self.history_store.load_history(session_id)
+                else:
+                    with sqlite3.connect(self.settings.workflow_db) as db:
+                        row = db.execute('SELECT history FROM sql_sessions WHERE id=?', (session_id,)).fetchone()
+                    if row is None:
+                        raise KeyError('Unknown SQL session')
+                    history = json.loads(row[0])
             else:
                 session_id = str(uuid4())
             evidence: list[dict[str, Any]] = []
@@ -143,10 +151,15 @@ class AISQLService:
             if not evidence:
                 answer = 'No current database evidence was retrieved. Please clarify the order, customer, date window or question. For actions requiring confirmation, use /chat.'
             history.extend([{'role': 'user', 'content': message}, {'role': 'assistant', 'content': answer[:8000]}])
-            with sqlite3.connect(self.settings.workflow_db) as db:
-                db.execute('INSERT INTO sql_sessions(id,history) VALUES (?,?) ON CONFLICT(id) DO UPDATE SET history=excluded.history', (session_id, json.dumps(history[-8:])))
+            if self.history_store:
+                self.history_store.save_history(session_id, history[-8:])
+            else:
+                with sqlite3.connect(self.settings.workflow_db) as db:
+                    db.execute('INSERT INTO sql_sessions(id,history) VALUES (?,?) ON CONFLICT(id) DO UPDATE SET history=excluded.history', (session_id, json.dumps(history[-8:])))
             return {'session_id': session_id, 'answer': answer, 'queries': evidence, 'business_time': business_time}
 
     def close(self) -> None:
         """场景 1.2：释放只读连接池。"""
         self.engine.dispose()
+        if self.history_engine:
+            self.history_engine.dispose()

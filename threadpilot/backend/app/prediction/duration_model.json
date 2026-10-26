@@ -1,0 +1,16 @@
+{
+  "model": "lognormal_aft_with_censoring",
+  "version": "v2",
+  "target": "actual lead time in days (completed_date - order_date)",
+  "features": [
+    "pieces"
+  ],
+  "intercept": 3.1617916264239287,
+  "slope_per_sd_pieces": 0.2450330803985724,
+  "sigma": 0.22527493412458646,
+  "pieces_mean": 705.2325581395348,
+  "pieces_sd": 521.2925053645697,
+  "n_completed": 86,
+  "n_censored": 34,
+  "reference_date": "2026-04-01"
+}

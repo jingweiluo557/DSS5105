@@ -1,21 +1,46 @@
-# SSE 接口说明
+# Conversation streaming API
 
-Web 客户端使用 **`POST /api/v1/workflow/chat/stream`**。完整字段和联调示例以 [API_DOCUMENTATION.md](API_DOCUMENTATION.md) 为准。
+`POST /api/v1/workflow/chat/stream` (also `/chat/stream`) accepts the same JSON body as `/api/v1/workflow/chat`. Send `Content-Type: application/json`; include `X-ThreadPilot-Token` when application access control is enabled.
 
-| 项目 | 工作流 SSE |
-|---|---|
-| 路径 | `/api/v1/workflow/chat/stream` |
-| 请求 | message、session_id、confirmation_id、selected_order_id |
-| 上下文 | 服务端 SQLite 会话 |
-| 返回节奏 | 完成分类、规则与必要操作后，start → 一次完整 answer delta → done |
-| 错误 | 已处理的业务前置/模型错误在流开始前返回非 200 JSON |
-| done | 完整 ChatResponse，含 intent、state、确认状态、工具轨迹、记录证据 |
-| 写操作 | 必须预览、明确确认；取消读取不保证撤销已执行操作 |
+```json
+{"message":"Which orders are most at risk?","session_id":null}
+```
 
-该接口在完整答案通过验证后发送事件，不提供模型 token 的实时增量输出；等待分类与规则执行期间可能没有数据，也没有心跳。前端 90 秒无数据会中止读取。
+Optional fields: `session_id` from the previous response, `selected_order_id` for initial order context, `review_draft_id` for review-reason editing, and `confirmation_id` for a reviewed action. Messages are limited to 1,500 characters. A model-generated confirmation is never sufficient to execute an action.
 
-客户端使用 POST fetch 读取 SSE，缓冲到空行后解析事件，不把网络 chunk 当作事件边界。只有 done 才表示完整接收；发送是否成功仍须检查 `tool_calls` 中的业务结果。确认重试应保留同一 session_id 和 confirmation_id，避免重新创建操作。不支持 Last-Event-ID 续传。
+## Events
 
-[前端实现](../frontend/ai-stream.js) · [请求示例](../docs/examples/workflow-chat-request.json)
+The response uses `text/event-stream` with UTF-8 JSON data:
 
-[Swagger](http://127.0.0.1:8000/docs) · [在线 OpenAPI](http://127.0.0.1:8000/openapi.json) · [版本化定义](../docs/openapi.json)
+```text
+event: start
+data: {"request_id":"..."}
+
+event: delta
+data: {"text":"The highest-priority orders "}
+
+event: delta
+data: {"text":"are listed below."}
+
+event: done
+data: {"answer":"...","state":{},"tool_calls":[],"evidence":[]}
+```
+
+The `done` example is abbreviated: its actual payload is the complete `ChatResponse`, including the persisted session ID in `state`. `delta.text` chunks concatenate to the visible answer. Planning and tool execution precede narration; model narration then emits actual upstream text chunks. Exact confirmation, draft or deterministic fallback messages may arrive in one chunk. There is no artificial typing simulation.
+
+A `: keep-alive` comment is sent after 15 seconds without an event. `start` is immediate, not evidence that generation has completed. Read until `done` or `error`; HTTP 200 alone is not success.
+
+```text
+event: error
+data: {"message":"Generation interrupted. Please retry.","request_id":"..."}
+```
+
+Request-schema/authentication failures can be ordinary HTTP errors before the stream starts. Errors during processing are stream events. If a provider fails before narration, eligible workflows return a clearly identified basic answer. A failure after partial text produces an error instead of silently appending a template.
+
+## Client and deployment behavior
+
+Use streaming `fetch` with a reader (POST is not supported by the native EventSource interface). Decode UTF-8 incrementally and buffer incomplete SSE frames. Render text safely; use final metadata for evidence/action cards. The frontend supports cancellation, retry, stable scroll position and a new-conversation guard against late events.
+
+Disconnecting cancels the worker and upstream stream. It does not undo a write or saved draft that already completed. An interrupted partial answer is not a completed saved conversation turn. Retry confirmed actions with the same confirmation ID to preserve idempotency.
+
+Disable reverse-proxy response buffering and compression modes that batch SSE. Preserve `Cache-Control: no-cache` and `X-Accel-Buffering: no`; configure gateway timeouts for the full request, including planning and tools. Some gateways ignore these headers: verify time to first text and multiple incremental chunks through the actual public HTTPS endpoint before release.

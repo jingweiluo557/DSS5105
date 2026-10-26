@@ -10,3 +10,7 @@ data/staging
 data/snapshots
 data/*.xlsx
 test-results
+.build
+dist
+**/*.log
+**/*.zip

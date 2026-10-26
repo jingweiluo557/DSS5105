@@ -1,5 +1,10 @@
 # ThreadPilot 前端说明
 
+Settings 的 Business date 支持设置会正常推进的演示时间；所有业务页面读取服务端业务时钟。
+邮箱设置由 `email-settings.js` 管理；订单催办由 `email-chase.js` 提供预览、审核和发送。
+Activity Log 的邮件记录逐行展开查看详情。封面保留进入工作台按钮，不再展示语音按钮。
+云端前端通过 Git 构建时设置 `THREADPILOT_PUBLIC_API_BASE`；授权请求携带后端 OAuth Cookie。
+
 适用版本：API 2.0.0。前端使用原生 HTML、CSS 和 JavaScript，由 FastAPI 同源托管。启动步骤见 [项目说明](../README.md)，操作说明见 [用户手册](../docs/USER_MANUAL.md)。
 
 ## 数据加载与模块职责

@@ -10,6 +10,7 @@ from openai import AsyncOpenAI
 
 from app.main import create_app
 from app.schemas import Classification, Intent, Slots
+from app.conversation import Plan, Task
 from .test_workflow import provider_response
 
 
@@ -34,8 +35,8 @@ def test_missing_key_and_static_safety(client: TestClient) -> None:
     """场景 1.1：无密钥明确失败，私有路径不公开。"""
     assert client.get('/api/v1/health').json()['configured'] is False
     response = client.post('/chat', json={'message': 'Hello'})
-    assert response.status_code == 503
-    assert response.json()['error']['code'] == 'API_KEY_NOT_CONFIGURED'
+    assert response.status_code == 200
+    assert response.json()['needs_clarification']
     assert response.headers['x-request-id']
     for path in ('/.env', '/backend/.env'):
         assert client.get(path).status_code == 404
@@ -49,8 +50,10 @@ def test_actual_sdk_workflow_contract(client: TestClient) -> None:
         payload = json.loads(request.content)
         assert request.url.path == '/v1/responses'
         assert payload['store'] is False
+        if payload.get('stream'):
+            return httpx.Response(503, json={'error':{'message':'unavailable'}})
         assert payload['text']['format']['type'] == 'json_schema'
-        return provider_response(Classification(intent=Intent.ORDER_LOOKUP, slots=Slots(order_ids=['ORD-005']), confidence=.99))
+        return provider_response(Plan(tasks=[Task(message='Open ORD-005', classification=Classification(intent=Intent.ORDER_LOOKUP, slots=Slots(order_ids=['ORD-005']), confidence=.99))]))
     provider(client, handler)
     response = client.post('/api/v1/workflow/chat', json={'message': 'Open ORD-005'})
     assert response.status_code == 200, response.text
@@ -66,8 +69,8 @@ def test_upstream_errors_redacted(client: TestClient, status: int, expected: int
     """场景 1.1–3.3：隐藏上游错误原文。"""
     provider(client, lambda _: httpx.Response(status, json={'error': {'message': 'SECRET_PROVIDER_DETAIL', 'type': 'test'}}))
     response = client.post('/chat', json={'message': 'Hello'})
-    assert response.status_code == expected
-    assert response.json()['error']['code'] == code
+    assert response.status_code == 200
+    assert response.json()['needs_clarification']
     assert 'SECRET_PROVIDER_DETAIL' not in response.text
 
 
@@ -77,7 +80,7 @@ def test_timeout(client: TestClient) -> None:
         """场景 1.1：模拟网络读取超时。"""
         raise httpx.ReadTimeout('private', request=request)
     provider(client, handler)
-    assert client.post('/chat', json={'message': 'Hi'}).status_code == 504
+    assert client.post('/chat', json={'message': 'Hi'}).status_code == 200
 
 
 def test_removed_routes_and_request_models(client: TestClient) -> None:

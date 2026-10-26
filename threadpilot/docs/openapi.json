@@ -36,6 +36,30 @@
         }
       }
     },
+    "/api/v1/whoami": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Whoami",
+        "description": "Which role the supplied workspace key carries ('manager' unless a separate manager key is configured).",
+        "operationId": "whoami_api_v1_whoami_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Whoami Api V1 Whoami Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workflow/chat": {
       "post": {
         "tags": [
@@ -120,6 +144,31 @@
         }
       }
     },
+    "/api/internal/reminders/run": {
+      "post": {
+        "tags": [
+          "Internal"
+        ],
+        "summary": "Evaluate Scheduled Reminders",
+        "operationId": "evaluate_scheduled_reminders_api_internal_reminders_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Evaluate Scheduled Reminders Api Internal Reminders Run Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workflow/chat/stream": {
       "post": {
         "tags": [
@@ -140,7 +189,7 @@
         },
         "responses": {
           "200": {
-            "description": "Validated workflow SSE: start, delta, done",
+            "description": "Validated workflow SSE: start, facts, delta, done",
             "content": {
               "text/event-stream": {
                 "schema": {
@@ -911,6 +960,1483 @@
           }
         }
       }
+    },
+    "/api/dashboard/briefings/{day}/email": {
+      "post": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Generate Email",
+        "operationId": "generate_email_api_dashboard_briefings__day__email_post",
+        "parameters": [
+          {
+            "name": "day",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Day"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Save Email",
+        "operationId": "save_email_api_dashboard_briefings__day__email_put",
+        "parameters": [
+          {
+            "name": "day",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Day"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/home": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Dashboard Home",
+        "description": "The GM home screen: status line, the decisions only the manager can make, order health, production pulse.\nSame snapshot and detectors as the chat tools and the alert policy; nothing is stored or sent.",
+        "operationId": "dashboard_home_api_dashboard_home_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Dashboard",
+        "operationId": "dashboard_api_dashboard_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/tasks": {
+      "post": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Add Task",
+        "operationId": "add_task_api_dashboard_tasks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewTask"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/tasks/{task_id}": {
+      "put": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Update Task",
+        "operationId": "update_task_api_dashboard_tasks__task_id__put",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/briefings/run": {
+      "post": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Run Briefing",
+        "operationId": "run_briefing_api_internal_briefings_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/predictions": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Prediction List",
+        "operationId": "prediction_list_api_predictions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/predictions/{order_id}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Prediction Source",
+        "operationId": "prediction_source_api_predictions__order_id__get",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard/sources/{kind}": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Diagnosis Source",
+        "operationId": "diagnosis_source_api_dashboard_sources__kind__get",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/risk": {
+      "get": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Risk",
+        "operationId": "risk_api_scheduling_risk_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/orders/{order_id}/preview": {
+      "post": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Preview",
+        "operationId": "preview_api_scheduling_orders__order_id__preview_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/reviews/{review_id}/decision": {
+      "post": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Decide",
+        "operationId": "decide_api_scheduling_reviews__review_id__decision_post",
+        "parameters": [
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Review Id"
+            }
+          },
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Decision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/history": {
+      "get": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "History",
+        "operationId": "history_api_scheduling_history_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/orders/{order_id}/draft": {
+      "post": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Open Draft",
+        "operationId": "open_draft_api_scheduling_orders__order_id__draft_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/drafts/{draft_id}": {
+      "get": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Get Draft",
+        "operationId": "get_draft_api_scheduling_drafts__draft_id__get",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Edit Draft",
+        "operationId": "edit_draft_api_scheduling_drafts__draft_id__patch",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftEdit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduling/drafts/{draft_id}/{action}": {
+      "post": {
+        "tags": [
+          "Scheduling"
+        ],
+        "summary": "Draft Action",
+        "operationId": "draft_action_api_scheduling_drafts__draft_id___action__post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "generate",
+                "adopt",
+                "refresh"
+              ],
+              "type": "string",
+              "title": "Action"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftTurn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/morning": {
+      "get": {
+        "tags": [
+          "Morning briefing"
+        ],
+        "summary": "Morning List",
+        "operationId": "morning_list_api_morning_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/morning/reports/{report_id}": {
+      "get": {
+        "tags": [
+          "Morning briefing"
+        ],
+        "summary": "Morning Report",
+        "operationId": "morning_report_api_morning_reports__report_id__get",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/morning/generate": {
+      "post": {
+        "tags": [
+          "Morning briefing"
+        ],
+        "summary": "Morning Generate",
+        "operationId": "morning_generate_api_morning_generate_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/status": {
+      "get": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Status",
+        "operationId": "status_api_outlook_status_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/connect": {
+      "post": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Connect",
+        "operationId": "connect_api_outlook_connect_post",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "settings",
+                "test"
+              ],
+              "type": "string",
+              "default": "test",
+              "title": "Source"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/callback": {
+      "get": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Callback",
+        "operationId": "callback_api_outlook_callback_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/disconnect": {
+      "post": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Disconnect",
+        "operationId": "disconnect_api_outlook_disconnect_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/send": {
+      "post": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Send",
+        "operationId": "send_api_outlook_send_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendEmail"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/outlook/messages": {
+      "get": {
+        "tags": [
+          "Outlook"
+        ],
+        "summary": "Messages",
+        "operationId": "messages_api_outlook_messages_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/settings": {
+      "get": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Settings",
+        "operationId": "settings_api_email_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Save",
+        "operationId": "save_api_email_settings_put",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailPreferences"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/clock": {
+      "get": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Clock Status",
+        "operationId": "clock_status_api_email_clock_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Set Clock",
+        "operationId": "set_clock_api_email_clock_put",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClockChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/activity": {
+      "get": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Activity",
+        "operationId": "activity_api_email_activity_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/connect": {
+      "post": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Connect",
+        "operationId": "connect_api_email_connect_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/email/disconnect": {
+      "post": {
+        "tags": [
+          "Email settings"
+        ],
+        "summary": "Disconnect",
+        "operationId": "disconnect_api_email_disconnect_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/email/run": {
+      "post": {
+        "tags": [
+          "Email scheduler"
+        ],
+        "summary": "Run Email",
+        "operationId": "run_email_api_internal_email_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/preview": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Preview",
+        "operationId": "preview_api_alerts_preview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/policy": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Policy",
+        "operationId": "policy_api_alerts_policy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/kpis": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Kpis",
+        "operationId": "kpis_api_alerts_kpis_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/shelve": {
+      "put": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Shelve",
+        "operationId": "shelve_api_alerts_shelve_put",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Shelve"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/feedback": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Feedback",
+        "operationId": "feedback_api_alerts_feedback_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Feedback"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/alerts/run": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Run",
+        "operationId": "run_api_internal_alerts_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feasibility/estimate": {
+      "post": {
+        "tags": [
+          "Feasibility"
+        ],
+        "summary": "Estimate",
+        "operationId": "estimate_api_feasibility_estimate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstimateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1007,6 +2533,18 @@
               }
             ],
             "title": "Session Id"
+          },
+          "review_draft_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9-]{36}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Draft Id"
           },
           "confirmation_id": {
             "anyOf": [
@@ -1129,6 +2667,11 @@
             "type": "array",
             "title": "Sources"
           },
+          "source_details": {
+            "type": "string",
+            "title": "Source Details",
+            "default": ""
+          },
           "request_id": {
             "type": "string",
             "title": "Request Id",
@@ -1169,6 +2712,124 @@
           "business_date"
         ],
         "title": "ChatResponse"
+      },
+      "ClockChange": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "live",
+              "demo"
+            ],
+            "title": "Mode"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "version"
+        ],
+        "title": "ClockChange"
+      },
+      "CustomerContact": {
+        "properties": {
+          "customer": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Customer"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Name",
+            "default": ""
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer",
+          "email"
+        ],
+        "title": "CustomerContact"
+      },
+      "Decision": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "save",
+              "apply",
+              "reject"
+            ],
+            "title": "Decision"
+          },
+          "reviewed_by": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Reviewed By"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Note"
+          },
+          "draft_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Id"
+          },
+          "draft_version": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "decision",
+          "reviewed_by",
+          "note"
+        ],
+        "title": "Decision"
       },
       "DialogState": {
         "properties": {
@@ -1259,6 +2920,19 @@
             ],
             "title": "Draft"
           },
+          "chase_context": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Chase Context"
+          },
+          "chase_drafts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Chase Drafts"
+          },
           "history": {
             "items": {
               "additionalProperties": {
@@ -1269,15 +2943,256 @@
             "type": "array",
             "title": "History"
           },
+          "review_draft_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Draft Id"
+          },
           "revision": {
             "type": "integer",
             "title": "Revision",
             "default": 0
+          },
+          "topics": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Topics"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "title": "DialogState"
+      },
+      "DraftEdit": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "reviewer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewer"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "save",
+                  "apply",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "title": "DraftEdit"
+      },
+      "DraftTurn": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "instruction": {
+            "type": "string",
+            "maxLength": 1500,
+            "minLength": 1,
+            "title": "Instruction",
+            "default": "Draft a review reason."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "title": "DraftTurn"
+      },
+      "EmailPreferences": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          },
+          "manager_email": {
+            "type": "string",
+            "title": "Manager Email"
+          },
+          "manager_name": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Manager Name",
+            "default": "Manager"
+          },
+          "briefing_enabled": {
+            "type": "boolean",
+            "title": "Briefing Enabled",
+            "default": false
+          },
+          "subject_prefix": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Subject Prefix",
+            "default": "ThreadPilot morning briefing"
+          },
+          "customers": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerContact"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Customers"
+          },
+          "departments": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Departments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "manager_email"
+        ],
+        "title": "EmailPreferences"
+      },
+      "EmailUpdate": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Subject"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 12000,
+            "minLength": 1,
+            "title": "Body"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject",
+          "body",
+          "version"
+        ],
+        "title": "EmailUpdate"
+      },
+      "EstimateRequest": {
+        "properties": {
+          "quantity": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Quantity"
+          },
+          "product": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Product"
+          },
+          "due_date": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 3,
+            "title": "Due Date",
+            "description": "ISO date, \"the 25th\", \"this Saturday\", \"in 10 working days\""
+          },
+          "delivery_point": {
+            "type": "string",
+            "enum": [
+              "factory",
+              "customer"
+            ],
+            "title": "Delivery Point",
+            "default": "factory"
+          },
+          "packing_loss_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 60.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Packing Loss Days"
+          },
+          "delivery_buffer_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 60.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Buffer Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quantity",
+          "product",
+          "due_date"
+        ],
+        "title": "EstimateRequest"
       },
       "Evidence": {
         "properties": {
@@ -1355,6 +3270,32 @@
         ],
         "title": "Evidence"
       },
+      "Feedback": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Key"
+          },
+          "useful": {
+            "type": "boolean",
+            "title": "Useful"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "useful"
+        ],
+        "title": "Feedback"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1371,20 +3312,53 @@
       "Intent": {
         "type": "string",
         "enum": [
+          "general.answer",
+          "order.summary",
+          "order.risk_overview",
           "order.lookup",
           "order.refresh",
           "order.risk",
+          "order.expedite",
+          "review.reason",
           "order.compare",
           "order.commitment",
           "order.prioritize",
+          "operations.briefing",
           "operations.normality",
           "operations.deviation",
+          "operations.output",
+          "order.rank",
+          "order.forecast",
+          "data.workshops",
+          "general.unanswerable",
+          "operations.discovery",
           "execution.chase",
           "execution.note",
           "execution.reminder",
           "unknown"
         ],
         "title": "Intent"
+      },
+      "NewTask": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "NewTask"
       },
       "PendingAction": {
         "properties": {
@@ -1425,6 +3399,16 @@
             },
             "type": "object",
             "title": "Source Snapshot"
+          },
+          "source_snapshots": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Source Snapshots"
           }
         },
         "additionalProperties": false,
@@ -1635,6 +3619,79 @@
         ],
         "title": "ReplyEvent"
       },
+      "SendEmail": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "to": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "To"
+          },
+          "subject": {
+            "type": "string",
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Subject"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 12000,
+            "minLength": 1,
+            "title": "Body"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true,
+            "title": "Confirmed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "to",
+          "subject",
+          "body",
+          "confirmed"
+        ],
+        "title": "SendEmail"
+      },
+      "Shelve": {
+        "properties": {
+          "target": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Target",
+            "description": "an alert key (kind:entity) or a kind"
+          },
+          "days": {
+            "type": "integer",
+            "maximum": 90.0,
+            "minimum": 1.0,
+            "title": "Days"
+          },
+          "set_by": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Set By",
+            "default": "manager"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target",
+          "days"
+        ],
+        "title": "Shelve"
+      },
       "Slots": {
         "properties": {
           "order_ids": {
@@ -1749,7 +3806,10 @@
                 "due_date",
                 "last_activity_date",
                 "current_stage",
-                "status"
+                "status",
+                "pieces",
+                "product",
+                "customer"
               ]
             },
             "type": "array",
@@ -1761,7 +3821,9 @@
                 "type": "string",
                 "enum": [
                   "due_date",
-                  "last_activity_date"
+                  "last_activity_date",
+                  "idle_days",
+                  "risk"
                 ]
               },
               {
@@ -1824,6 +3886,50 @@
             ],
             "title": "Packing Loss Days"
           },
+          "review_decision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "save",
+                  "apply",
+                  "reject"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Decision"
+          },
+          "chase_mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "summary",
+                  "separate"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chase Mode"
+          },
+          "draft_number": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Number"
+          },
           "recipient": {
             "anyOf": [
               {
@@ -1834,6 +3940,23 @@
               }
             ],
             "title": "Recipient"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "KNITTING",
+                  "ASSEMBLY",
+                  "WASHING",
+                  "PACKING"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
           },
           "tone": {
             "anyOf": [
@@ -1857,6 +3980,27 @@
             ],
             "title": "Text"
           },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "money",
+                  "people",
+                  "cause",
+                  "delete",
+                  "cancel",
+                  "external",
+                  "future",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
           "deadline": {
             "anyOf": [
               {
@@ -1868,13 +4012,25 @@
             ],
             "title": "Deadline"
           },
+          "send_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Send At"
+          },
           "condition": {
             "anyOf": [
               {
                 "type": "string",
                 "enum": [
                   "no_reply",
-                  "no_activity"
+                  "no_activity",
+                  "stage_below_range"
                 ]
               },
               {
@@ -1897,7 +4053,8 @@
               "evidence",
               "recommend",
               "rank",
-              "confirm_target"
+              "confirm_target",
+              "adopt"
             ],
             "title": "Action",
             "default": "read"
@@ -1971,6 +4128,25 @@
           "created_at"
         ],
         "title": "SyncRead"
+      },
+      "TaskUpdate": {
+        "properties": {
+          "done": {
+            "type": "boolean",
+            "title": "Done"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "done",
+          "version"
+        ],
+        "title": "TaskUpdate"
       },
       "ToolCall": {
         "properties": {

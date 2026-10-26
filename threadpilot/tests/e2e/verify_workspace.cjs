@@ -10,6 +10,8 @@ const screenshots = process.env.WORKSPACE_SCREENSHOT_DIR || require('os').tmpdir
   const requests = [];
   const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'application/json');
+    if(req.url==='/api/email/clock')return res.end(JSON.stringify(require('./clock.fixture.cjs')));
+    if(req.url==='/api/scheduling/risk'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify(require('./queue.fixture.cjs')));}
     if (req.url === '/api/snapshot') return res.end(fs.readFileSync(path.join(__dirname, 'snapshot.fixture.json')));
     if (req.url === '/api/v1/health') return res.end(JSON.stringify({configured:true, model:'fixture'}));
     if (req.url.startsWith('/api/evidence/')) return res.end(JSON.stringify({record_id:20}));
@@ -37,7 +39,9 @@ const screenshots = process.env.WORKSPACE_SCREENSHOT_DIR || require('os').tmpdir
     await page.goto(`http://127.0.0.1:${server.address().port}/#/ai`);
     await page.locator('.copilot-workspace').waitFor();
     assert.equal(await page.locator('.sidebar nav a').count(),4);
-    await page.getByRole('button',{name:'Generate daily report ↗'}).click();
+    assert.equal(await page.getByRole('link',{name:'Open AI briefing ↗'}).getAttribute('href'),'briefing.html');
+    await page.locator('[name=visible-question]').fill('Show the morning priorities');
+    await page.locator('[data-form=chat] [type=submit]').click();
     await page.getByText('Verified order result 1',{exact:true}).waitFor();
     await page.locator('[name=visible-question]').fill('Why this order?');
     await page.locator('[data-form=chat] [type=submit]').click();
@@ -45,7 +49,10 @@ const screenshots = process.env.WORKSPACE_SCREENSHOT_DIR || require('os').tmpdir
     assert.equal(requests[1].session_id,'session-1');
     assert.equal(requests[1].confirmation_id,'confirmation-1');
     assert.equal(await page.locator('.turn-list li').count(),2);
-    assert.equal(await page.locator('.evidence-record').count(),2);
+    assert.equal(await page.locator('.copilot-evidence').count(),0);
+    assert.equal(await page.getByText('SOURCE RECORDS',{exact:true}).count(),0);
+    assert.equal(await page.getByRole('heading',{name:'Conversation record',exact:true}).count(),1);
+    assert.equal(await page.locator('.copilot-chat a[href$="/api/evidence/orders/20"]').count(),2);
     await page.locator('[data-action=jump-turn]').first().click();
     const downloadEvent=page.waitForEvent('download');
     await page.getByRole('button',{name:'Export conversation'}).click();

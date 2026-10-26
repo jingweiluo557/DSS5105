@@ -14,30 +14,45 @@ from openai import APIConnectionError, APIStatusError, APITimeoutError, RateLimi
 from pydantic import AwareDatetime, BaseModel, Field
 
 from .intent_classifier import IntentClassifier
+from .conversation import ConversationAgent
+from .services.review_drafts import DraftConflict
 from .schemas import ChatRequest, ChatResponse, Evidence
 from .streaming import event
 from .workflow_engine import WorkflowEngine
 from .workflow_store import WebhookSender, WorkflowStore
+from .sql_workflow_store import SQLWorkflowStore, WorkflowBusy
 from .services.snapshot_service import DatabaseDataTools
 from sqlalchemy.exc import SQLAlchemyError
 
 
 def business_now() -> datetime:
     """场景 1.2/3.3：默认复现数据日期；设 BUSINESS_NOW=live 后使用实际时钟。"""
-    value = os.getenv('BUSINESS_NOW', 'live')
-    if value == 'live':
-        return datetime.now(timezone(timedelta(hours=8)))
-    result = datetime.fromisoformat(value)
-    if result.tzinfo is None:
-        raise ValueError('BUSINESS_NOW must include timezone')
-    return result
+    from .business_clock import BusinessClock
+    return BusinessClock().now()
 
 
 def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
     """场景 1.1–3.3：复用现有客户端，业务数据和私有 SQLite 分离。"""
     sender_url = os.getenv('CHASE_WEBHOOK_URL', '')
     sender = WebhookSender(sender_url, os.getenv('CHASE_WEBHOOK_TOKEN', '')) if sender_url else None
-    app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), WorkflowStore(app.state.settings.workflow_db), business_now, sender)
+    store = (SQLWorkflowStore(app.state.database.engine) if app.state.settings.workflow_storage == 'database'
+             else WorkflowStore(app.state.settings.workflow_db))
+    app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), store, business_now, sender)
+    from .services.scheduled_email import ScheduledEmail
+    app.state.workflow.email_scheduler = ScheduledEmail(app.state.settings)
+    from .services.review_chat import review_reason_handler
+    app.state.workflow.review_reason_handler = review_reason_handler(app)
+    async def morning_handler(classification, state, now):
+        from .api.morning_api import generate_morning
+        from .schemas import ToolCall, Intent
+        report=(await generate_morning(app))['report']
+        state.last_intent=Intent.MORNING_BRIEFING
+        state.pending_clarification=None
+        answer='\n\n'.join(label+': '+report[key] for label,key in [('Production review','yesterday'),('Priority issue','top_issue'),('Manager decisions','decide'),('Calculation basis','production_note')])
+        answer+='\n\nBusiness date: '+report['business_date']+'; Generated: '+report['generated_at']+'. Open the briefing page to view the supporting records.'
+        return app.state.workflow.response(state,classification,now,answer,
+            [ToolCall(name='generate_morning_briefing',result={'report_id':report['id'],'model':report['model']})],[])
+    app.state.workflow.morning_handler=morning_handler
 
 
 async def monitor_loop(app: FastAPI) -> None:
@@ -47,7 +62,7 @@ async def monitor_loop(app: FastAPI) -> None:
             engine = app.state.workflow
             async with engine.lock:
                 engine.store.evaluate_reminders(engine.clock(), engine.tools)
-        except (OSError, ValueError, sqlite3.Error, SQLAlchemyError):
+        except (OSError, ValueError, sqlite3.Error, SQLAlchemyError, WorkflowBusy):
             logging.getLogger(__name__).warning('Reminder source unavailable; pending checks retained')
         await asyncio.sleep(30)
 
@@ -60,18 +75,20 @@ class ReplyEvent(BaseModel):
 
 def install_workflow_routes(app: FastAPI, data: Path) -> None:
     """场景 1.1–3.3：保留原接口并增加完整工作流、证据和通知入口。"""
-    async def run(body: ChatRequest, request: Request) -> ChatResponse:
+    async def run(body: ChatRequest, request: Request, emit=None) -> ChatResponse:
         """场景 1.1–3.3：映射模型与数据错误，不泄露上游异常文本。"""
         if not body.message.strip():
             raise HTTPException(422, {'code': 'EMPTY_MESSAGE', 'message': 'Message cannot be blank.'})
         classifier = getattr(app.state, 'intent_classifier', None)
         if classifier is None:
-            if app.state.client is None:
-                raise HTTPException(503, {'code': 'API_KEY_NOT_CONFIGURED', 'message': 'Configure OPENAI_API_KEY.'})
-            classifier = IntentClassifier(app.state.client, app.state.settings.openai_model, app.state.settings.intent_api_style)
+            classifier = ConversationAgent(app.state.client, app.state.settings.openai_model, app.state.settings.intent_api_style)
         try:
-            result = await app.state.workflow.chat(body, classifier)
+            result = await app.state.workflow.chat(body, classifier, emit=emit, role=getattr(request.state, 'role', 'manager'))
             return result.model_copy(update={'request_id': request.state.request_id, 'model': os.getenv('OPENAI_MODEL', 'gpt-4.1')})
+        except WorkflowBusy:
+            raise HTTPException(409, {'code': 'SESSION_BUSY', 'message': 'This conversation is processing another request. Retry shortly.'})
+        except DraftConflict as error:
+            raise HTTPException(409, {'code': 'DRAFT_CHANGED', 'message': str(error)})
         except KeyError:
             raise HTTPException(404, {'code': 'UNKNOWN_SESSION', 'message': 'Start a new conversation.'})
         except APITimeoutError:
@@ -91,18 +108,59 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
         """场景 1.1–3.3：JSON 工作流入口，传回 session_id 延续上下文。"""
         return await run(body, request)
 
+    @app.post('/api/internal/reminders/run', tags=['Internal'])
+    def evaluate_scheduled_reminders(request: Request) -> dict[str, str]:
+        token = request.app.state.settings.scheduler_token.get_secret_value()
+        if not token or not secrets.compare_digest(request.headers.get('authorization', '').encode(), ('Bearer ' + token).encode()):
+            raise HTTPException(401, {'code': 'UNAUTHORIZED', 'message': 'Scheduler authentication required.'})
+        engine = app.state.workflow
+        try:
+            engine.store.evaluate_reminders(engine.clock(), engine.tools)
+        except WorkflowBusy:
+            return {'status': 'already_running'}
+        return {'status': 'completed'}
+
     @app.post('/api/v1/workflow/chat/stream', tags=['Workflow'], response_class=StreamingResponse,
-              responses={200: {'description': 'Validated workflow SSE: start, delta, done',
+              responses={200: {'description': 'Validated workflow SSE: start, facts, delta, done',
                                'content': {'text/event-stream': {'schema': {'type': 'string'}}}}})
     async def workflow_stream(body: ChatRequest, request: Request) -> StreamingResponse:
         """场景 1.1–3.3：完成规则验证后发送 SSE，避免未验证文本抢先展示。"""
-        result = await run(body, request)
-
         async def frames() -> AsyncIterator[str]:
-            """场景 1.1–3.3：兼容现有前端 start/delta/done 事件协议。"""
-            yield event('start', {'request_id': result.request_id, 'model': result.model})
-            yield event('delta', {'text': result.answer})
-            yield event('done', result.model_dump(mode='json'))
+            queue = asyncio.Queue(maxsize=32)
+            emitted = False
+            async def emit(text, kind='delta'):
+                # 'facts': the server's own answer, sent before the model narrates so the first useful line lands early
+                nonlocal emitted
+                if kind == 'delta':
+                    emitted = True
+                await queue.put((kind, {'text':text}))
+            async def produce():
+                try:
+                    result = await run(body, request, emit)
+                    if not emitted:
+                        await emit(result.answer)
+                    await queue.put(('done', result.model_dump(mode='json')))
+                except HTTPException as error:
+                    detail = error.detail if isinstance(error.detail, dict) else {'message':str(error.detail)}
+                    await queue.put(('error', {**detail,'request_id':request.state.request_id}))
+                except Exception:
+                    logging.getLogger(__name__).exception('Conversation stream failed')
+                    await queue.put(('error', {'message':'Generation interrupted. Please retry.','request_id':request.state.request_id}))
+            worker = asyncio.create_task(produce())
+            try:
+                yield event('start', {'request_id':request.state.request_id})
+                while True:
+                    try:
+                        kind, payload = await asyncio.wait_for(queue.get(), timeout=15)
+                    except asyncio.TimeoutError:
+                        yield ': keep-alive\n\n'
+                        continue
+                    yield event(kind, payload)
+                    if kind in ('done','error'):
+                        break
+            finally:
+                worker.cancel()
+                await asyncio.gather(worker, return_exceptions=True)
         return StreamingResponse(frames(), media_type='text/event-stream', headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
     @app.get('/api/v1/evidence/{source}/{row}', response_model=Evidence, tags=['Evidence'])
