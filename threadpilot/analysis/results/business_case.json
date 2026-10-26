@@ -1,0 +1,223 @@
+{
+  "inputs": {
+    "factory_days_per_month": 26,
+    "paid_hours_per_month": 190.7,
+    "planner_base_salary_year": 48171,
+    "employer_cpf_rate": 0.17,
+    "assistant_base_salary_month": 3500,
+    "usd_to_sgd": 1.3,
+    "cny_to_sgd": 0.18,
+    "openai_usd_per_m_input": 2.0,
+    "openai_usd_per_m_output": 8.0,
+    "model_calls_per_question": 2,
+    "input_tokens_per_call": 4000,
+    "output_tokens_per_call": 600,
+    "questions_per_day": 25,
+    "cloudbase_cny_per_month": 199,
+    "maintenance_hours_per_month": 4,
+    "late_penalty_per_working_day": 0.01,
+    "late_penalty_cap": 0.1,
+    "fob_usd_per_piece": {
+      "Hoodie": 9,
+      "Cardigan": 10,
+      "Crewneck sweater": 9,
+      "Vest": 7,
+      "Polo shirt": 6,
+      "Beanie": 3,
+      "Scarf": 4
+    }
+  },
+  "tasks": [
+    {
+      "task": "Morning report: export orders and production log, refresh the spreadsheet, compare each stage with its usual level, look for stalled orders, write the summary",
+      "minutes": [
+        20,
+        30,
+        60
+      ],
+      "per_day": [
+        1,
+        1,
+        1
+      ],
+      "minutes_with_threadpilot": [
+        3,
+        5,
+        10
+      ]
+    },
+    {
+      "task": "Order status call-back (\u201cHow is the TrendCart order doing?\u201d)",
+      "minutes": [
+        5,
+        10,
+        20
+      ],
+      "per_day": [
+        2,
+        3,
+        5
+      ],
+      "minutes_with_threadpilot": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "Can we take this order? (capacity, queue, finish date)",
+      "minutes": [
+        30,
+        45,
+        90
+      ],
+      "per_day": [
+        0.2,
+        0.5,
+        1
+      ],
+      "minutes_with_threadpilot": [
+        5,
+        10,
+        15
+      ]
+    },
+    {
+      "task": "Why did a stage drop? (pull history, chart, explain)",
+      "minutes": [
+        15,
+        30,
+        60
+      ],
+      "per_day": [
+        0.3,
+        0.5,
+        1
+      ],
+      "minutes_with_threadpilot": [
+        2,
+        5,
+        10
+      ]
+    },
+    {
+      "task": "Chase-up: find the order and owner, draft and send",
+      "minutes": [
+        5,
+        10,
+        15
+      ],
+      "per_day": [
+        0.5,
+        1,
+        2
+      ],
+      "minutes_with_threadpilot": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "task": "Reminder: re-check tomorrow whether a stage caught up",
+      "minutes": [
+        5,
+        10,
+        15
+      ],
+      "per_day": [
+        0.5,
+        1,
+        2
+      ],
+      "minutes_with_threadpilot": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "task": "Weekly KPI dashboard and report (per factory day: weekly time / 6)",
+      "minutes": [
+        10,
+        20,
+        30
+      ],
+      "per_day": [
+        1,
+        1,
+        1
+      ],
+      "minutes_with_threadpilot": [
+        2,
+        5,
+        8
+      ]
+    }
+  ],
+  "planner_loaded_month_sgd": 4697,
+  "planner_rate_sgd_per_hour": 24.6,
+  "assistant_loaded_month_sgd": 4095,
+  "hours_month_before": [
+    62,
+    73,
+    87
+  ],
+  "hours_month_after": [
+    9,
+    11,
+    13
+  ],
+  "hours_month_saved": [
+    51,
+    62,
+    75
+  ],
+  "fte_saved": [
+    0.27,
+    0.33,
+    0.39
+  ],
+  "labour_value_year_sgd": [
+    15200.0,
+    18400.0,
+    22100.0
+  ],
+  "running_month_sgd": {
+    "model": 22,
+    "cloud": 36,
+    "upkeep": 99,
+    "total": 156
+  },
+  "per_question_usd": 0.0256,
+  "avg_order_value_usd": 5515,
+  "orders": 120,
+  "late_value_per_order_day_sgd": 72,
+  "lateness": {
+    "days_avoided_per_2_months": 30.5,
+    "ci95": [
+      17.8,
+      43.2
+    ],
+    "late_orders_avoided_per_2_months": 1.6,
+    "value_year_sgd": {
+      "mean": 13100.0,
+      "low": 7700.0,
+      "high": 18600.0
+    },
+    "sensitivity_year_sgd": {
+      "m3_r1": 6700.0,
+      "m5_r1": 13500.0,
+      "m10_r1": 19600.0,
+      "m3_r2": 6800.0,
+      "m5_r2": 13100.0,
+      "m10_r2": 15900.0,
+      "m3_r4": 5600.0,
+      "m5_r4": 6700.0,
+      "m10_r4": 9500.0
+    }
+  },
+  "assistant_year_sgd": 49100.0,
+  "running_year_sgd": 1900.0,
+  "net_year_mid_sgd": 29600.0
+}
