@@ -95,12 +95,26 @@ class AlertDelivery:
         self.settings = settings
         self.outlook = OutlookService(settings)
         self.preferences = EmailSettings(settings)
-        self.ledger = AlertLedger(ledger_path or settings.workflow_db.with_name('alerts.sqlite3'))
+        if settings.workflow_storage == 'database' and ledger_path is None:
+            from .sql_alert_ledger import SQLAlertLedger
+            self.ledger = SQLAlertLedger(settings)
+        else:
+            self.ledger = AlertLedger(ledger_path or settings.workflow_db.with_name('alerts.sqlite3'))
 
     def evaluate(self, data: dict, now: datetime) -> list[alert_policy.Decision]:
         return alert_policy.gate(alert_policy.detect(data, now), self.ledger.history(), now, self.ledger.shelved())
 
     async def run(self, snapshot_loader, now: datetime | None = None, send: bool | None = None) -> dict:
+        if hasattr(self.ledger, 'engine'):
+            from ..sql_workflow_store import SQLWorkflowStore, WorkflowBusy
+            try:
+                with SQLWorkflowStore(self.ledger.engine).turn_lock('alert-delivery'):
+                    return await self._run(snapshot_loader, now, send)
+            except WorkflowBusy:
+                return {'status': 'busy'}
+        return await self._run(snapshot_loader, now, send)
+
+    async def _run(self, snapshot_loader, now: datetime | None = None, send: bool | None = None) -> dict:
         """One scheduler tick. snapshot_loader() -> the queue snapshot dict; send defaults to the ALERT_EMAILS_ENABLED flag."""
         now = now or BusinessClock(self.settings).now()
         send = getattr(self.settings, 'alert_emails_enabled', False) if send is None else send

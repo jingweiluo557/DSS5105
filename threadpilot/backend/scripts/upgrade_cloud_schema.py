@@ -46,9 +46,9 @@ def main():
     if not args.apply:
         print('Read-only check complete. No database changes.')
         return
-    if version not in ('0008_ai_morning', '0009_cloud_mail'):
+    if version not in ('0008_ai_morning', '0009_cloud_mail', '0010_cloud_alerts'):
         raise ValueError('Unexpected starting revision; review migrations before applying.')
-    command.upgrade(Config(str(ROOT / 'backend/alembic.ini')), '0009_cloud_mail')
+    command.upgrade(Config(str(ROOT / 'backend/alembic.ini')), '0010_cloud_alerts')
     with engine.connect() as connection:
         after = snapshot(connection)
         updated = connection.execute(text('SELECT version_num FROM alembic_version')).scalar_one()
