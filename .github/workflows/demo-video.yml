@@ -31,9 +31,9 @@ on:
         type: boolean
         default: true
       burn_slide_captions:
-        description: Burn the slide narration into a caption band on the slides (off = clean slides for a voice-over; the .srt is still produced)
+        description: Burn the slide narration into a caption band on the slides (off = clean slides under the recorded voice-over in demo/voice; the .srt is still produced)
         type: boolean
-        default: true
+        default: false
 
 jobs:
   record:
