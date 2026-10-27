@@ -231,12 +231,14 @@
       "click": {
         "text": "Confirm send"
       },
-      "optional": true
+      "optional": true,
+      "real": true
     },
     {
       "at": 87.5,
       "waitAnswer": true,
-      "optional": true
+      "optional": true,
+      "real": true
     },
     {
       "at": 88.5,
@@ -276,15 +278,18 @@
         "into": "[data-form=\"chat\"] textarea",
         "text": "Confirm.",
         "cps": 16
-      }
+      },
+      "real": true
     },
     {
       "at": 104.5,
-      "press": "Enter"
+      "press": "Enter",
+      "real": true
     },
     {
       "at": 104.7,
-      "waitAnswer": true
+      "waitAnswer": true,
+      "real": true
     },
     {
       "at": 105.5,

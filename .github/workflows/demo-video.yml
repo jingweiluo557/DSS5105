@@ -1,0 +1,76 @@
+name: Record the demo video
+
+# Records threadpilot/demo/demo_timeline.json against the deployed site on a GitHub runner and uploads the result,
+# so nobody has to install Node, Playwright or ffmpeg locally. Run it from the Actions tab ("Run workflow").
+# Needs one repository secret: THREADPILOT_ACCESS_KEY (Settings → Secrets and variables → Actions). The key is read
+# from the secret into the recorder's environment only; it is never printed or stored in the artifact.
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: The deployed site to record
+        default: https://threadpilot-dss5105-track1-i7gxvcy5k7ef5ac9b.webapps.tcloudbase.com
+        required: true
+      dry_run:
+        description: Leave out the steps that act for real (sending the chase-up, confirming the watch)
+        type: boolean
+        default: true
+      compress_waits:
+        description: Speed-up factor for the model's thinking time in the cut (1 = keep real time)
+        default: "8"
+        required: true
+      timeline:
+        description: Timeline file (relative to threadpilot/)
+        default: demo/demo_timeline.json
+        required: true
+
+jobs:
+  record:
+    name: Record and cut
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright, Chromium and ffmpeg
+        working-directory: threadpilot
+        run: |
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core > /dev/null
+      - name: Check the site is reachable and runs the current build
+        run: |
+          code=$(curl -s -o /tmp/index.html -w "%{http_code}" "${{ inputs.site_url }}/")
+          echo "site HTTP $code"
+          if grep -q "20261026-home" /tmp/index.html; then echo "::notice title=build::the site serves the 26 Oct frontend (home screen present)";
+          else echo "::warning title=build::the site does not serve the 26 Oct frontend yet; the home-screen steps will be skipped or fail"; fi
+      - name: Record
+        working-directory: threadpilot
+        env:
+          THREADPILOT_DEMO_URL: ${{ inputs.site_url }}
+          THREADPILOT_ACCESS_KEY: ${{ secrets.THREADPILOT_ACCESS_KEY }}
+        run: |
+          if [ -z "$THREADPILOT_ACCESS_KEY" ]; then echo "::error title=secret::THREADPILOT_ACCESS_KEY is not set in the repository secrets"; exit 1; fi
+          node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.dry_run && '--dry-run' || '' }}
+      - name: Summary
+        if: always()
+        working-directory: threadpilot
+        run: |
+          { echo "### Demo recording"; echo; echo '```'; ls -la dist/demo 2>/dev/null || echo "no output"; echo; python3 -c "import json;d=json.load(open('dist/demo/run_log.json'));print(f\"recorded {d['total_s']:.1f} s, drift {d['drift_s']:.1f} s\");[print('step',s['step'],'at',s['at'],'error:',s['error'][:160]) for s in d['steps'] if 'error' in s]" 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the video, captions and log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-video
+          path: |
+            threadpilot/dist/demo/demo_final.mp4
+            threadpilot/dist/demo/demo_cut.mp4
+            threadpilot/dist/demo/demo_cut.srt
+            threadpilot/dist/demo/demo.srt
+            threadpilot/dist/demo/run_log.json
+            threadpilot/dist/demo/failed-step-*.png
+          if-no-files-found: warn
+          retention-days: 14

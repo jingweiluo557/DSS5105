@@ -44,6 +44,7 @@ const outDir = path.resolve(args.out || 'dist/demo');
 const BASE = (process.env.THREADPILOT_DEMO_URL || 'http://127.0.0.1:8765').replace(/\/$/, '');
 const KEY = process.env.THREADPILOT_ACCESS_KEY || '';
 const timeline = JSON.parse(fs.readFileSync(timelinePath, 'utf8'));
+if (args['dry-run']) timeline.steps = timeline.steps.filter(s => !s.real);   // steps marked "real": true act on the live system (send, confirm)
 const vp = Object.assign({ width: 430, height: 932, scale: 2 }, timeline.viewport || {});
 fs.mkdirSync(outDir, { recursive: true });
 

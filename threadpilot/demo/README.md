@@ -2,7 +2,11 @@
 
 `record_demo.cjs` drives the site through `demo_timeline.json` on a fixed timeline, draws a visible cursor that glides to every target with a ripple on each click, shows the narration as a caption bar, records the run as a video and writes the captions as an `.srt` with the real timestamps. It is the 2-minute demo of the Sprint 2 video ("one general manager's day"), recorded as a 1920 × 1080 desktop video: the app fills 1920 × 972 and the captions sit in a 108 px band underneath, so nothing covers the page.
 
-## Run it
+## Run it without installing anything: GitHub Actions
+
+Actions tab → **Record the demo video** → **Run workflow**. A GitHub runner installs Playwright and ffmpeg, records the deployed site and uploads `demo-video` (the mp4s, the .srt files, the run log) as an artifact on the run page; download it from there. One-time setup: add the workspace access key as the repository secret `THREADPILOT_ACCESS_KEY` (Settings → Secrets and variables → Actions → New repository secret). The workflow's inputs: the site URL, `dry_run` (on by default: leaves out the send and the watch confirmation), the speed-up factor, and the timeline file.
+
+## Run it locally
 
 ```sh
 cd threadpilot
@@ -31,7 +35,7 @@ For a phone-shaped recording instead, set `viewport` to `{"width": 430, "height"
 
 `demo_timeline.json` is the script. Each step has `at` (planned seconds) and one action: `say` (caption + subtitle cue), `goto`, `click`, `type`, `press`, `scroll`, `waitAnswer`, `waitFor`, `hold`; `optional: true` lets a step fail without stopping the run. The header in `record_demo.cjs` documents every field. Steps never run earlier than planned; when the model takes longer than the gap you left, every later step shifts by the same amount, so the spacing you planned is kept and the subtitles still line up.
 
-Two steps act for real on the live system: `Confirm send` (sends the chase-up through the connected mailbox to the department address saved in Settings) and `Confirm.` (creates the watch). Both are `optional`; remove them, or type `Cancel` instead, for a dry run.
+Two steps act for real on the live system: `Confirm send` (sends the chase-up through the connected mailbox to the department address saved in Settings) and `Confirm.` (creates the watch). Both are marked `"real": true`; `--dry-run` (the default in the Actions workflow) leaves them out.
 
 ## Editing the final cut
 
