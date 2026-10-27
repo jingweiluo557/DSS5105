@@ -10,7 +10,7 @@ Actions tab → **Record the presentation video** → **Run workflow**. A GitHub
 
 `demo/slides/` holds the deck as files (`deck.json`, one HTML per slide, `assets/`), the same content as the Claude Slides artifact. `render_slides.cjs` turns them into 1920 × 1080 PNGs; `assemble_video.cjs` holds each for the duration in its speaker note (`<aside>0:08–0:30 · [Presenter] …`), cross-fades between them, and appends the demo. To change timing or wording, edit the HTML (the `<aside>` is the narration and the timing). To use a deck edited on the Slides page instead, export it as PDF to `demo/slides/deck.pdf`: the pages are then used in place of the HTML, and the notes still come from the HTML.
 
-Fill the placeholders before the final take: attendance on the cover, the Sprint 1 feedback on slide 2, the live second-pass score on slide 5, the YouTube link on slides 1 and 8.
+Fill the placeholder before the final take: attendance on the cover.
 
 ## Run it locally
 
@@ -46,6 +46,6 @@ Two steps act for real on the live system: `Confirm send` (sends the chase-up th
 ## Editing the final cut
 
 - Keep `demo_cut.mp4` honest: the on-screen tag already says the model waits are sped up; do not cut them out entirely.
-- `demo_final.mp4` already has the captions burned in; upload `demo_cut.srt` to YouTube as well only if you want closed captions people can switch off.
+- `demo_final.mp4` already has the captions burned in; `demo_cut.srt` is the same text as a subtitle file, if a player or editor needs it.
 - Record the voice-over from the `say` lines, or let the captions carry the narration and add music.
 - A take that goes wrong: fix the step in the timeline and re-run; nothing is cached.
