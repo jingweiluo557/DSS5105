@@ -20,14 +20,15 @@
   const stale=report.fingerprint!==data.current_fingerprint;
   $('#report').innerHTML=`<section class="brief-card"><strong>Model: ${esc(report.model)}</strong><p>Business date: ${esc(report.business_date)}<br>Latest production record: ${esc(report.latest_production_date||'Not available')}</p>${report.generation_version!=='morning-v7-en-bullets'?'<p>Archived report. Generate a new briefing for the current English bullet-point format.</p>':''}${stale?'<p>This report uses an older snapshot. Generate a new briefing for current data.</p>':''}</section><div class="brief-grid">${[['Production review','yesterday'],['Key priorities','top_issue'],['Action items','decide'],['Calculation basis','production_note']].map(([label,key])=>`<section class="brief-card"><h2>${label}</h2>${sectionBody(key,report[key])}<details><summary>View supporting records</summary>${report.sections[key].evidence.map(ref=>`<h3>${esc(ref)}</h3><pre>${esc(JSON.stringify(report.facts[ref],null,2))}</pre>`).join('')}</details></section>`).join('')}</div><section class="brief-card"><h2>Snapshot facts</h2><p>In progress: ${report.facts.counts.in_progress} · Overdue: ${report.facts.counts.overdue} · High risk: ${report.facts.counts.high} · Medium risk: ${report.facts.counts.medium}</p><p>Yesterday’s stage completions: ${report.facts.yesterday.records_available?report.facts.yesterday.stage_completions+' (across stages, not finished garments)':'No records available; actual output is unknown'}</p></section>`;
  }
- async function load(){
+ async function load(keepSelection=false){
   data=await request('/api/morning');
+  if(!keepSelection)selected=data.reports[0]?.id??null;
   render();$('#status').textContent=data.model_configured?'':'Configure the model before generating a briefing.';
  }
  $('#reload').onclick=()=>load().catch(e=>$('#status').textContent=e.message);
  $('#generate').onclick=async()=>{
   if(generating)return;generating=true;$('#generate').disabled=true;$('#status').textContent='Reading the snapshot and generating your briefing…';
-  try{const r=await request('/api/morning/generate',{method:'POST'});selected=r.report.id;await load();$('#status').textContent=r.status==='already_saved'?'Loaded the saved briefing for this snapshot.':'Briefing generated and saved.'}
+  try{const r=await request('/api/morning/generate',{method:'POST'});selected=r.report.id;await load(true);$('#status').textContent=r.status==='already_saved'?'Loaded the saved briefing for this snapshot.':'Briefing generated and saved.'}
   catch(e){$('#status').textContent=e.message+' No new report was generated. The previous report is preserved.'}
   finally{generating=false;$('#generate').disabled=false}
  };

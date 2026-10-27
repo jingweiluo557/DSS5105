@@ -75,10 +75,14 @@ class MorningService:
     def public(row):
         return {**dict(row), 'payload': None, **json.loads(row['payload'])}
 
-    def list(self):
+    def list(self, today=None):
+        ordering = [reports.c.generated_at.desc(), reports.c.id.desc()]
+        if today is not None:
+            ordering = [sa.case((reports.c.business_date == today, 0), else_=1),
+                        reports.c.business_date.desc(), *ordering]
         with self.database.sessions() as session:
             return [self.public(r) for r in session.execute(sa.select(reports).order_by(
-                reports.c.generated_at.desc()).limit(30)).mappings()]
+                *ordering).limit(30)).mappings()]
 
     def get(self, rid):
         with self.database.sessions() as session:
