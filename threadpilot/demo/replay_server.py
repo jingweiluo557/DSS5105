@@ -66,15 +66,54 @@ for row in risk['orders']:
     row['forecast'] = {k: f[k] for k in ('delay_probability', 'expected_completion_date', 'completion_range_80pct', 'typical_lead_days_for_this_size')}
 home = home_service.home(data, NOW)
 alerts = alert_policy.summarize(alert_policy.gate(alert_policy.detect(data, NOW), [], NOW))
-TASKS = [
-    {'id': 'manual:1', 'order_id': None, 'title': 'Call Northwind about the beanie delivery', 'origin': 'manual', 'done': False, 'version': 1, 'reasons': []},
-    {'id': 'ai:1', 'order_id': 'ORD-120', 'title': 'Re-date ORD-120 with TrendCart; projected finish Apr 11, nine days after its due date.', 'origin': 'ai', 'done': False, 'version': 1, 'reasons': ['AI recommendation']},
-    {'id': 'ai:3', 'order_id': None, 'title': 'Ask the floor what changed at assembly; output has been below range since 25 Mar.', 'origin': 'ai', 'done': False, 'version': 1, 'reasons': ['AI recommendation']},
-]
-BRIEFING = {'id': 'r1', 'day': data['today'], 'business_date': data['today'], 'generated_at': NOW.isoformat(),
-            'yesterday': '- The latest record, 31 Mar, shows assembly at 455 pieces against a 687–807 normal range: the sixth working day below range.',
-            'top_issue': '- Eight orders are overdue; ORD-107 and ORD-120 are the oldest.\n- Assembly is 39% below its normal range.',
-            'decide': '- Re-date ORD-120 with TrendCart; projected finish Apr 9.\n- Ask the floor what changed at assembly.\n- Expedite ORD-108 or tell Harbor Knits a new date.'}
+
+
+def _d(iso):
+    return datetime.fromisoformat(iso + 'T00:00:00').strftime('%-d %b')
+
+
+def write_briefing():
+    """The 07:00 briefing without a model: the same three sections the live model writes, filled from the home
+    screen's own facts (the live site's model is grounding-checked against the same packet), so nothing on screen disagrees."""
+    pulse = {r['stage']: r for r in home['pulse']}
+    below = [r for r in home['pulse'] if r['status'] == 'below']
+    within = [r for r in home['pulse'] if r['status'] != 'below']
+    day = home['pulse'][0]['date']
+    if below:
+        b = below[0]
+        yesterday = (f"On {_d(day)} {b['stage'].lower()} made {b['pieces']:,} pieces against a normal range of {b['band']['min']:,}–{b['band']['max']:,}, "
+                     f"below range for {b['below_days']} working days in a row; " + ', '.join(f"{r['stage'].lower()} ({r['pieces']:,})" for r in within) + ' were within range.')
+    else:
+        yesterday = f"On {_d(day)} every stage was within its normal range."
+    overdue = sorted((r for r in risk['orders'] if r['risk']['level'] == 'overdue'), key=lambda r: -r['risk']['days_past_due'])
+    top = [f"{len(overdue)} orders are overdue; the oldest are " + ' and '.join(f"{r['order_id']} ({r['customer']}, {r['risk']['days_past_due']} days)" for r in overdue[:2]) + '.']
+    for b in below:
+        card = next((c for c in home['decisions'] if c['kind'] == 'stage_drop' and c['entity'] == b['stage']), None)
+        waiting = f"; {card['lines'][1][0].lower()}{card['lines'][1][1:]}" if card and len(card['lines']) > 1 else ''
+        top.append(f"{b['stage'].title()} is {abs(b['change_pct'])}% under its normal range since {_d(b['below_since'])}{waiting}. The log records no cause.")
+    decide = []
+    for card in home['decisions']:
+        if card['kind'] == 'stage_drop':
+            decide.append(f"Ask the floor what changed at {card['entity'].lower()} and when it recovers.")
+        elif card['kind'] == 'will_miss':
+            o = next(r for r in risk['orders'] if r['order_id'] == card['entity'])
+            decide.append(f"Expedite, outsource or re-date {o['order_id']} ({o['customer']}): due {_d(o['due_date'])}, best case {_d(o['risk']['best_date'])}.")
+    return {'yesterday': yesterday, 'top_issue': '\n'.join('- ' + t for t in top), 'decide': '\n'.join('- ' + t for t in decide)}
+
+
+_brief = write_briefing()
+BRIEFING = {'id': 'r1', 'day': data['today'], 'business_date': data['today'], 'generated_at': NOW.replace(hour=7, minute=0).isoformat(),
+            'model': 'offline replay (scripted, no model)', 'generation_version': 'morning-v8-dashboard-actions-decisions', 'fingerprint': 'replay',
+            'latest_production_date': home['pulse'][0]['date'], **_brief,
+            'production_note': 'Normal range = the previous eight same-weekday records per stage; the factory is closed on Sundays.',
+            'sections': {k: {'text': v, 'evidence': ['home']} for k, v in {**_brief, 'production_note': 'Normal range = the previous eight same-weekday records.'}.items()},
+            'facts': {'home': {'status': home['status'], 'pulse': home['pulse'], 'counts': home['counts']},
+                      'counts': {'in_progress': home['counts']['in_progress'], 'overdue': home['counts']['overdue'],
+                                 'high': sum(r['risk']['level'] == 'high' for r in risk['orders']), 'medium': sum(r['risk']['level'] == 'medium' for r in risk['orders'])},
+                      'yesterday': {'records_available': True, 'stage_completions': sum(r['pieces'] or 0 for r in home['pulse'])}}}
+TASKS = [{'id': 'manual:1', 'order_id': None, 'title': 'Call Northwind about the beanie delivery', 'origin': 'manual', 'done': False, 'version': 1, 'reasons': []}]
+TASKS += [{'id': f'ai:{i}', 'order_id': (re.findall(r'ORD-\d+', t) or [None])[0], 'title': t, 'origin': 'ai', 'done': False, 'version': 1, 'reasons': ['AI recommendation']}
+          for i, t in enumerate(l[2:] for l in _brief['decide'].splitlines())]
 DASHBOARD = {'business_date': data['today'], 'counts': home['counts'], 'health': home['health'], 'tasks': TASKS, 'ai_briefing': BRIEFING,
              'history': [], 'advice': [], 'orders': [], 'production': [], 'briefings': [], 'forecast': {'available': False}}
 
@@ -165,6 +204,29 @@ def readable(response) -> str:
     return text.strip()
 
 
+def feasibility_estimate(body):
+    """POST /api/feasibility/estimate, as app/api/feasibility_api.py: the chat's estimate_capacity tool plus chart rows."""
+    from app.workflow_tools import resolve_date
+    try:
+        from app.api.feasibility_api import chart_rows
+    except Exception:  # noqa: BLE001  (the API module needs FastAPI's router; the rows function is all we use)
+        chart_rows = _chart_rows
+    qty = int(body['quantity'])
+    slots = Slots(quantity=qty, product=body['product'], due_date=resolve_date(body['due_date'], NOW).isoformat(),
+                  delivery_point=body.get('delivery_point') or 'factory', packing_loss_days=body.get('packing_loss_days'), delivery_buffer_days=body.get('delivery_buffer_days'))
+    est, evidence = tools.capacity(slots, NOW)
+    return {'business_date': data['today'], 'request': slots.model_dump(exclude_none=True), 'estimate': est, 'chart': chart_rows(est, qty), 'evidence_count': len(evidence)}
+
+
+def _chart_rows(data_, quantity):
+    import ast
+    src = (ROOT / 'backend/app/api/feasibility_api.py').read_text()
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == 'chart_rows')
+    ns = {}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), 'feasibility_api', 'exec'), ns)
+    return ns['chart_rows'](data_, quantity)
+
+
 class RecordingSender:
     async def send(self, payload, idempotency_key):
         return 'replay-receipt'
@@ -200,6 +262,7 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/scheduling/risk': return risk
         if path == '/api/dashboard/home': return home
         if path == '/api/dashboard': return DASHBOARD
+        if path == '/api/morning': return {'business_date': data['today'], 'reports': [BRIEFING], 'current_fingerprint': 'replay', 'model_configured': False}
         if path == '/api/v1/health': return {'status': 'ok', 'configured': True, 'model': 'offline replay', 'streaming': True}
         if path == '/api/v1/whoami': return {'role': 'manager'}
         if path == '/api/alerts/preview': return alerts
@@ -240,6 +303,9 @@ class Handler(SimpleHTTPRequestHandler):
     def do_POST(self):
         path = urlparse(self.path).path
         if path == '/api/v1/workflow/chat/stream': return self.stream_chat()
+        if path == '/api/feasibility/estimate':
+            n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')
+            return self.send_json(feasibility_estimate(body))
         if path == '/api/dashboard/tasks':
             n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')
             TASKS.insert(0, {'id': 'manual:' + str(body.get('id', len(TASKS))), 'order_id': None, 'title': body.get('title', ''), 'origin': 'manual', 'done': False, 'version': 1, 'reasons': []})

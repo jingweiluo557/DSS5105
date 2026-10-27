@@ -11,7 +11,7 @@
    --fade N    cross-fade seconds between slides (default 0.5)
 
    --voice DIR voice-over clips (default demo/voice): one clip per slide named after the slide id (cover.m4a,
-               change.m4a, … .m4a/.mp3/.wav/.aac/.ogg) — each slide then lasts as long as its clip plus a short pause,
+               problem.m4a, … .m4a/.mp3/.wav/.aac/.ogg) — each slide then lasts as long as its clip plus a short pause,
                instead of the time in its notes; or one clip slides.* laid over all the slides at the notes' timing;
                and demo.* laid over the demo. Slides without a clip keep their notes' timing, silent.
 

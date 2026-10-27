@@ -15,7 +15,7 @@ const { chromium } = require('playwright');
 
 const args = Object.fromEntries(process.argv.slice(2).map((a, i, all) => a.startsWith('--') ? [a.slice(2), all[i + 1] && !all[i + 1].startsWith('--') ? all[i + 1] : true] : []).filter(Boolean));
 const slidesDir = path.resolve(args.slides || path.join(__dirname, 'slides'));
-const outDir = path.resolve(args.out || 'dist/slides');
+const outDir = path.resolve(args.out || 'dist/slides');   // --pdf FILE also writes the slides as one PDF
 const W = 1920, H = 1080;
 fs.mkdirSync(outDir, { recursive: true });
 
@@ -60,6 +60,7 @@ function parseNotes(html) {
   } else {
     const browser = await chromium.launch();
     const page = await browser.newPage({ viewport: { width: W, height: H } });
+    const sections = [];
     for (const [i, id] of order.entries()) {
       const html = fs.readFileSync(path.join(slidesDir, 'slides', `${id}.html`), 'utf8');
       // images are inlined: a page set with setContent has no origin, so file:// pictures would not load
@@ -67,12 +68,19 @@ function parseNotes(html) {
         const file = path.join(slidesDir, 'assets', f); const ext = path.extname(f).slice(1).replace('jpg', 'jpeg');
         return `src="data:image/${ext};base64,${fs.readFileSync(file).toString('base64')}"`;
       });
+      sections.push(section);
       await page.setContent(`<!doctype html><html><head><meta charset="utf-8">${fontLinks}<style>${BASE_CSS}</style></head><body>${section}</body></html>`, { waitUntil: 'load' });
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(300);
       const file = path.join(outDir, `${String(i + 1).padStart(2, '0')}-${id}.png`);
       await page.screenshot({ path: file, clip: { x: 0, y: 0, width: W, height: H } });
       slides.push({ id, file });
+    }
+    if (args.pdf) {   // the slides as one PDF, 1920 x 1080 pages, links clickable (for the submission's .pdf)
+      await page.setContent(`<!doctype html><html><head><meta charset="utf-8">${fontLinks}<style>${BASE_CSS} @page{size:${W}px ${H}px;margin:0} html,body{height:auto;overflow:visible} section{break-after:page;flex:none}</style></head><body>${sections.join('')}</body></html>`, { waitUntil: 'load' });
+      await page.evaluate(() => document.fonts.ready);
+      await page.pdf({ path: path.resolve(args.pdf), width: `${W}px`, height: `${H}px`, printBackground: true, pageRanges: `1-${sections.length}` });
+      console.log(`PDF → ${path.resolve(args.pdf)}`);
     }
     await browser.close();
   }

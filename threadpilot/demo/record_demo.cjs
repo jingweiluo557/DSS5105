@@ -24,12 +24,14 @@
    "click": "css" | {"text": "…"}  glide the cursor there and click (ripple); {"text"} matches visible text, last match
    "type": {"into": "css", "text": "…", "cps": 14}   click the field, then type at cps characters per second
    "press": "Enter"
+   "fill": {"into": "css", "value": "…"}            glide to a field, click it and set its value (dates, numbers)
    "scroll": {"to": "css"} | {"y": 600} | {"by": 400}   smooth scroll
    "waitAnswer": true              wait until the co-pilot has answered (shows a "waiting for the model" tag; the
                                    interval is listed in waits.json so --compress-waits can speed it up)
    "waitFor": {"css": "…"} | {"text": "…"}            wait for an element (timeout 120 s)
    "hold": 2                       pause that many seconds
    "optional": true                a failing step is logged and skipped instead of stopping the run
+ --badge "text"  shows a small fixed label at the top of the page for the whole recording (e.g. "Offline replay").
  A step runs no earlier than its "at"; if an earlier step overran (the model was slow), every later step shifts by the
  same amount, so the spacing you planned is kept and the .srt still matches the video.
 */
@@ -70,6 +72,8 @@ const OVERLAY = `
     #__demo-wait{position:fixed;right:14px;top:var(--demo-wait-top, 14px);bottom:var(--demo-wait-bottom, auto);z-index:2147483644;pointer-events:none;background:rgba(224,122,95,.95);
       color:#fff;font:600 13px/1 'IBM Plex Sans','Segoe UI',Arial,sans-serif;padding:8px 12px;border-radius:999px;opacity:0;transition:opacity .2s}
     #__demo-wait.on{opacity:1}
+    #__demo-badge{position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:2147483643;pointer-events:none;
+      background:rgba(28,39,51,.88);color:#F3F1EC;font:600 14px/1 'IBM Plex Sans','Segoe UI',Arial,sans-serif;padding:9px 16px;border-radius:999px;letter-spacing:.2px}
   \`;
   const style = document.createElement('style'); style.textContent = css;
   const cursor = document.createElement('div'); cursor.id = '__demo-cursor';
@@ -78,6 +82,7 @@ const OVERLAY = `
   const wait = document.createElement('div'); wait.id = '__demo-wait'; wait.textContent = 'waiting for the model · sped up in the final cut';
   const mount = () => {
     document.documentElement.append(style, cursor, caption, wait);
+    if (window.__demoBadge) { const b = document.createElement('div'); b.id = '__demo-badge'; b.textContent = window.__demoBadge; document.documentElement.append(b); }
     const r = document.documentElement.style;
     if (window.__demoCaptionSize) r.setProperty('--demo-caption-size', window.__demoCaptionSize + 'px');
     if (window.__demoCaptionTop === -1) { caption.style.display = 'none'; }
@@ -170,7 +175,8 @@ async function chatIdle(page, timeoutMs = 180000) {
   const band = timeline.captions === 'band' ? Number(timeline.bandHeight || 108) : 0;   // captions burned into a band under the page
   const captionTop = band ? -1 : (timeline.captionTop ?? (vp.width < 700 ? 76 : 0));   // px from the top; 0 = bottom; -1 = hidden
   const captionSize = timeline.captionSize ?? (vp.width < 700 ? 17 : 26);
-  await context.addInitScript(([t, sz]) => { window.__demoCaptionTop = t; window.__demoCaptionSize = sz; }, [captionTop, captionSize]);
+  const badge = typeof args.badge === 'string' ? args.badge : (timeline.badge || '');
+  await context.addInitScript(([t, sz, b]) => { window.__demoCaptionTop = t; window.__demoCaptionSize = sz; window.__demoBadge = b; }, [captionTop, captionSize, badge]);
   await context.addInitScript(OVERLAY);
   if (KEY) {
     const origin = process.env.THREADPILOT_API_ORIGIN || '';
@@ -185,6 +191,17 @@ async function chatIdle(page, timeoutMs = 180000) {
   }
   const page = await context.newPage();
   page.on('pageerror', e => console.error('page error:', e.message));
+  // a click that opens another page (e.g. the full briefing) destroys the context mid-step: wait for the new page and retry
+  const evaluate = page.evaluate.bind(page);
+  page.evaluate = async (fn, arg) => {
+    for (let i = 0; ; i++) {
+      try { return await evaluate(fn, arg); }
+      catch (e) {
+        if (i >= 4 || !/Execution context was destroyed|navigat/i.test(e.message)) throw e;
+        await page.waitForLoadState('load').catch(() => {}); await sleep(400);
+      }
+    }
+  };
 
   const cues = [], waits = [], log = [];
   const t0 = now();
@@ -204,7 +221,8 @@ async function chatIdle(page, timeoutMs = 180000) {
       }
       if (step.hide) { closeCue(); await page.evaluate(() => window.__demo.caption('')); }
       if (step.goto) {
-        const onSite = page.url().startsWith(BASE) && step.goto.startsWith('#');
+        const here = new URL(page.url() === 'about:blank' ? BASE + '/x.html' : page.url());
+        const onSite = page.url().startsWith(BASE) && step.goto.startsWith('#') && ['/', '/index.html'].includes(here.pathname);
         if (onSite) { await page.evaluate(h => { location.hash = h; }, step.goto); await sleep(600); }   // in-app route change, no reload
         else { const url = step.goto.startsWith('http') ? step.goto : BASE + '/' + step.goto.replace(/^\//, ''); await page.goto(url, { waitUntil: 'load' }); await sleep(900); }
         await page.evaluate(() => window.__demo.show());
@@ -215,6 +233,12 @@ async function chatIdle(page, timeoutMs = 180000) {
         const field = locatorFor(page, step.type.into);
         await clickAt(page, field, targetTimeout);
         await page.keyboard.type(step.type.text, { delay: Math.round(1000 / (step.type.cps || 14)) });
+      }
+      if (step.fill) {
+        const field = locatorFor(page, step.fill.into);
+        await clickAt(page, field, targetTimeout);
+        await field.fill(String(step.fill.value));
+        await sleep(250);
       }
       if (step.press) await page.keyboard.press(step.press);
       if (step.scroll) {

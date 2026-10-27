@@ -1,233 +1,242 @@
 {
-  "_comment": "One general manager's day, recorded as a 1920x1080 desktop video. Times are the planned timeline in seconds; model waits stretch it and --compress-waits squeezes them back. Captions are the narration: read them aloud in the voice-over, or keep them as subtitles.",
+  "_comment": "One general manager's day, recorded as a 1920x1080 desktop video: 07:00 briefing, 09:40 order question, 11:15 feasibility (chat, then the Feasibility page), 14:30 chase-up, 17:00 watch, and a question the data cannot answer. Times are planned seconds; model waits stretch the run and --compress-waits squeezes them back. Captions are burned into a band under the page.",
   "viewport": {
     "width": 1920,
     "height": 972,
     "scale": 1
   },
+  "captions": "band",
+  "bandHeight": 108,
   "steps": [
     {
       "at": 0.0,
       "goto": "#/dashboard",
-      "say": "07:00 — the day starts with one screen: what to decide today."
+      "say": "07:00 — before the manager asks anything, the day is already on one screen."
     },
     {
-      "at": 2.4,
-      "say": "RED. Eight overdue. Assembly 39% below its normal range for six days. Three decisions."
+      "at": 2.8,
+      "say": "RED: eight orders overdue, assembly 39% below its normal range for six days, three decisions."
     },
     {
-      "at": 3.1,
+      "at": 3.4,
       "scroll": {
         "to": "article.decision >> nth=0"
       }
     },
     {
-      "at": 6.0,
-      "say": "Each card is one decision with one button. Nothing here was asked for: the discovery tool found it."
+      "at": 7.4,
+      "say": "Each decision has one button. Nothing here was asked for: the discovery tool found it."
     },
     {
-      "at": 7.1,
+      "at": 11.4,
       "scroll": {
-        "to": ".pulse-col >> nth=0"
+        "to": "section.home-briefing"
       },
-      "optional": true
+      "say": "The 07:00 morning briefing, written on a schedule: yesterday’s output, what is at risk, what to decide today."
     },
     {
-      "at": 9.5,
-      "scroll": {
-        "to": "section.home-ask"
+      "at": 16.4,
+      "click": {
+        "text": "Open the full briefing"
       }
     },
     {
-      "at": 11.9,
+      "at": 17.4,
+      "say": "The full briefing: production, priorities and action items, each with its supporting records. The actions become the day’s to-do list."
+    },
+    {
+      "at": 20.6,
+      "scroll": {
+        "by": 340
+      }
+    },
+    {
+      "at": 23.6,
       "goto": "#/ai",
       "say": "09:40 — on the floor. “How is the TrendCart order doing?”"
     },
     {
-      "at": 13.1,
+      "at": 24.8,
       "type": {
         "into": "[data-form=\"chat\"] textarea",
         "text": "How is the TrendCart order doing?",
-        "cps": 30
+        "cps": 40
       }
     },
     {
-      "at": 15.0,
+      "at": 26.0,
       "click": "[data-form=\"chat\"] button[type=\"submit\"]"
-    },
-    {
-      "at": 15.2,
-      "waitAnswer": true
-    },
-    {
-      "at": 15.8,
-      "say": "TrendCart has six orders, so it asks instead of guessing."
-    },
-    {
-      "at": 19.0,
-      "type": {
-        "into": "[data-form=\"chat\"] textarea",
-        "text": "The scarf one.",
-        "cps": 30
-      }
-    },
-    {
-      "at": 20.1,
-      "click": "[data-form=\"chat\"] button[type=\"submit\"]"
-    },
-    {
-      "at": 20.3,
-      "waitAnswer": true
-    },
-    {
-      "at": 21.0,
-      "say": "Now it knows which order: ORD-005, 500 scarves, at knitting, due 20 April, idle 8 days."
-    },
-    {
-      "at": 24.6,
-      "type": {
-        "into": "[data-form=\"chat\"] textarea",
-        "text": "Why would you flag it?",
-        "cps": 30
-      }
     },
     {
       "at": 26.1,
-      "click": "[data-form=\"chat\"] button[type=\"submit\"]"
-    },
-    {
-      "at": 26.3,
       "waitAnswer": true
     },
     {
-      "at": 26.9,
-      "say": "The reason comes from the data, and every number opens the rows behind it."
+      "at": 26.7,
+      "say": "TrendCart has six orders, so it asks instead of guessing."
     },
     {
-      "at": 29.3,
+      "at": 29.5,
+      "type": {
+        "into": "[data-form=\"chat\"] textarea",
+        "text": "The scarf one.",
+        "cps": 40
+      }
+    },
+    {
+      "at": 30.2,
+      "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+    },
+    {
+      "at": 30.4,
+      "waitAnswer": true
+    },
+    {
+      "at": 31.0,
+      "say": "Now it knows which order: ORD-005, 500 scarves, at knitting, due 20 April, idle 8 days. Every number opens its source rows."
+    },
+    {
+      "at": 33.6,
       "click": {
         "text": "Sources ·"
       },
       "optional": true
     },
     {
-      "at": 31.6,
-      "hold": 1.0
-    },
-    {
-      "at": 33.2,
+      "at": 36.4,
       "say": "11:15 — “A customer wants 800 hoodies by the 25th. Can we take it?”"
     },
     {
-      "at": 34.0,
+      "at": 37.0,
       "type": {
         "into": "[data-form=\"chat\"] textarea",
         "text": "Can we take 800 hoodies by the 25th?",
-        "cps": 30
+        "cps": 40
       }
     },
     {
-      "at": 36.4,
+      "at": 38.3,
       "click": "[data-form=\"chat\"] button[type=\"submit\"]"
     },
     {
-      "at": 36.5,
+      "at": 38.4,
       "waitAnswer": true
     },
     {
-      "at": 37.2,
+      "at": 39.0,
       "say": "It asks the one thing that changes the answer: ready at the factory, or delivered?"
     },
     {
-      "at": 40.4,
+      "at": 42.2,
       "type": {
         "into": "[data-form=\"chat\"] textarea",
         "text": "Delivered to the customer.",
-        "cps": 30
+        "cps": 40
       }
     },
     {
-      "at": 42.0,
+      "at": 43.2,
       "click": "[data-form=\"chat\"] button[type=\"submit\"]"
     },
     {
-      "at": 42.1,
+      "at": 43.4,
       "waitAnswer": true
     },
     {
-      "at": 42.7,
-      "say": "An estimate with its assumptions: the queue's finish date, the on-time chance, the bottleneck stage. Not a yes."
-    },
-    {
-      "at": 46.6,
-      "type": {
-        "into": "[data-form=\"chat\"] textarea",
-        "text": "What if packing loses a day?",
-        "cps": 30
-      }
-    },
-    {
-      "at": 48.3,
-      "click": "[data-form=\"chat\"] button[type=\"submit\"]"
-    },
-    {
-      "at": 48.4,
-      "waitAnswer": true
+      "at": 44.0,
+      "say": "An estimate with its assumptions: the queue’s finish date, the on-time chance, the bottleneck stage. Not a yes."
     },
     {
       "at": 49.0,
-      "say": "What-ifs re-run the same tool with one assumption changed."
+      "say": "Can the factory take on more orders? The Feasibility page runs the same tool over the whole queue."
     },
     {
-      "at": 51.4,
-      "hold": 0.7
+      "at": 49.6,
+      "click": "nav.workspace-tools a[href=\"#/feasibility\"]"
     },
     {
-      "at": 53.0,
-      "say": "14:30 — “That order hasn’t moved in a week. Chase it up.”"
+      "at": 51.2,
+      "fill": {
+        "into": "#feasibility-form input[name=\"qty\"]",
+        "value": "800"
+      }
+    },
+    {
+      "at": 52.2,
+      "fill": {
+        "into": "#feasibility-form input[name=\"due\"]",
+        "value": "2026-04-25"
+      }
+    },
+    {
+      "at": 53.2,
+      "click": "#feasibility-form button[type=\"submit\"]"
     },
     {
       "at": 53.8,
-      "type": {
-        "into": "[data-form=\"chat\"] textarea",
-        "text": "That order hasn’t moved in a week. Chase it up.",
-        "cps": 30
+      "waitFor": {
+        "text": "with usual new orders",
+        "timeout": 20000
       }
     },
     {
-      "at": 59.3,
-      "click": "[data-form=\"chat\"] button[type=\"submit\"]"
-    },
-    {
-      "at": 59.5,
-      "waitAnswer": true
+      "at": 54.4,
+      "say": "Our own queue finishes 30 April, after the 25th; an eligible outside workshop could make 10 April, its stage coverage still to be checked."
     },
     {
       "at": 60.2,
-      "say": "It checks the claim first: last activity 24 March, 8 days, then drafts to the knitting team with the facts filled in. Nothing is sent yet."
+      "scroll": {
+        "to": "#capacity-picture"
+      },
+      "say": "Why: the queued work plus this order is over capacity at assembly, washing and packing before the 25th."
     },
     {
-      "at": 63.3,
+      "at": 65.4,
+      "click": "nav.workspace-tools a[href=\"#/ai\"]",
+      "say": "14:30 — “That order hasn’t moved in a week. Chase it up.”"
+    },
+    {
+      "at": 66.4,
       "type": {
         "into": "[data-form=\"chat\"] textarea",
-        "text": "Preview draft 1",
-        "cps": 30
+        "text": "That order hasn’t moved in a week. Chase it up.",
+        "cps": 40
       }
     },
     {
-      "at": 64.9,
+      "at": 68.0,
       "click": "[data-form=\"chat\"] button[type=\"submit\"]"
     },
     {
-      "at": 65.0,
+      "at": 68.1,
       "waitAnswer": true
     },
     {
-      "at": 65.7,
-      "say": "Preview first. Sending needs the manager's confirmation, and it is logged."
+      "at": 68.7,
+      "say": "It checks the claim first: last activity 24 March, 8 days ago, then drafts to the knitting team. Nothing is sent yet."
     },
     {
-      "at": 68.8,
+      "at": 72.9,
+      "type": {
+        "into": "[data-form=\"chat\"] textarea",
+        "text": "Preview draft 1",
+        "cps": 40
+      }
+    },
+    {
+      "at": 73.7,
+      "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+    },
+    {
+      "at": 73.8,
+      "waitAnswer": true
+    },
+    {
+      "at": 74.4,
+      "say": "Preview first. Sending needs the manager’s confirmation, and it is logged."
+    },
+    {
+      "at": 77.6,
       "click": {
         "text": "Confirm send"
       },
@@ -235,107 +244,97 @@
       "real": true
     },
     {
-      "at": 69.2,
+      "at": 78.0,
       "waitAnswer": true,
       "optional": true,
       "real": true
     },
     {
-      "at": 70.0,
+      "at": 78.8,
       "say": "Sent, and recorded in the activity log with who, when and what."
     },
     {
-      "at": 72.0,
-      "hold": 0.7
-    },
-    {
-      "at": 73.6,
+      "at": 82.6,
       "say": "17:00 — “Remind me tomorrow if packing is still behind.”"
     },
     {
-      "at": 74.3,
+      "at": 83.3,
       "type": {
         "into": "[data-form=\"chat\"] textarea",
         "text": "Remind me tomorrow if packing is still behind.",
-        "cps": 30
+        "cps": 40
       }
     },
     {
-      "at": 77.1,
+      "at": 84.9,
       "click": "[data-form=\"chat\"] button[type=\"submit\"]"
     },
     {
-      "at": 77.3,
+      "at": 85.0,
       "waitAnswer": true
     },
     {
-      "at": 77.9,
+      "at": 85.6,
       "say": "A standing watch: the server checks packing against its normal range tomorrow and only speaks if it is still behind."
     },
     {
-      "at": 81.5,
+      "at": 89.6,
       "type": {
         "into": "[data-form=\"chat\"] textarea",
         "text": "Confirm.",
-        "cps": 30
+        "cps": 40
       },
       "real": true
     },
     {
-      "at": 82.7,
-      "real": true,
-      "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+      "at": 90.2,
+      "click": "[data-form=\"chat\"] button[type=\"submit\"]",
+      "real": true
     },
     {
-      "at": 82.8,
+      "at": 90.3,
       "waitAnswer": true,
       "real": true
     },
     {
-      "at": 83.4,
-      "say": "Confirmed. The watch runs on the server; nothing is sent outside the system until it fires."
+      "at": 90.9,
+      "say": "Confirmed. The watch runs on the server; nothing leaves the system until it fires."
     },
     {
-      "at": 85.5,
-      "hold": 0.7
-    },
-    {
-      "at": 87.0,
+      "at": 95.1,
       "say": "And when there is no answer in the data, it says so."
     },
     {
-      "at": 87.9,
+      "at": 95.8,
       "type": {
         "into": "[data-form=\"chat\"] textarea",
         "text": "What revenue did the TrendCart orders bring in this quarter?",
-        "cps": 30
+        "cps": 40
       }
     },
     {
-      "at": 91.0,
+      "at": 97.7,
       "click": "[data-form=\"chat\"] button[type=\"submit\"]"
     },
     {
-      "at": 91.2,
+      "at": 97.8,
       "waitAnswer": true
     },
     {
-      "at": 91.8,
+      "at": 98.4,
       "say": "No prices in the data, so no revenue figure. It never invents one."
     },
     {
-      "at": 94.1,
-      "say": "ThreadPilot: a manager's co-pilot, all day, with every number traceable."
+      "at": 102.4,
+      "say": "ThreadPilot: the general manager’s co-pilot, all day, with every number traceable."
     },
     {
-      "at": 96.5,
+      "at": 105.6,
       "hold": 1.0
     },
     {
-      "at": 97.7,
+      "at": 106.8,
       "hide": true
     }
-  ],
-  "captions": "band",
-  "bandHeight": 108
+  ]
 }

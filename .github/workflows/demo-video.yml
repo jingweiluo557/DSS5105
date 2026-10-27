@@ -1,8 +1,8 @@
 name: Record the presentation video
 
 # Builds the whole Sprint 2 video on a GitHub runner: the slides (threadpilot/demo/slides, held for the seconds in
-# their speaker notes) followed by the demo recorded against the deployed site (threadpilot/demo/demo_timeline.json),
-# and uploads presentation.mp4 + presentation.srt. Nobody has to install Node, Playwright or ffmpeg locally.
+# their speaker notes or the length of their voice clip) followed by the demo (threadpilot/demo/demo_timeline.json),
+# and uploads Presentation_Group19_Sprint2.mp4 / .srt / .pdf. Nobody has to install Node, Playwright or ffmpeg locally.
 # Run it from the Actions tab ("Run workflow").
 # Needs one repository secret: THREADPILOT_ACCESS_KEY (Settings → Secrets and variables → Actions). The key is read
 # from the secret into the recorder's environment only; it is never printed or stored in the artifact.
@@ -58,7 +58,7 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core poppler-utils > /dev/null
       - name: Render the slides
         working-directory: threadpilot
-        run: node demo/render_slides.cjs --slides demo/slides --out dist/slides
+        run: node demo/render_slides.cjs --slides demo/slides --out dist/slides --pdf dist/Presentation_Group19_Sprint2.pdf
       - name: Start the offline replay server
         if: ${{ inputs.include_demo && inputs.mode == 'offline' }}
         working-directory: threadpilot
@@ -73,8 +73,8 @@ jobs:
         run: |
           code=$(curl -s -o /tmp/index.html -w "%{http_code}" "${{ inputs.site_url }}/")
           echo "site HTTP $code"
-          if grep -q "20261026-home" /tmp/index.html; then echo "::notice title=build::the site serves the 26 Oct frontend (home screen present)";
-          else echo "::warning title=build::the site does not serve the 26 Oct frontend yet; the home-screen steps will be skipped or fail"; fi
+          if grep -q "20261028-feasibility" /tmp/index.html; then echo "::notice title=build::the site serves the 28 Oct frontend";
+          else echo "::warning title=build::the site does not serve the 28 Oct frontend yet; the home-screen and feasibility steps may differ or fail"; fi
       - name: Record the demo
         if: ${{ inputs.include_demo }}
         working-directory: threadpilot
@@ -84,11 +84,17 @@ jobs:
         run: |
           if [ "${{ inputs.mode }}" = "live" ] && [ -z "$THREADPILOT_ACCESS_KEY" ]; then echo "::error title=secret::THREADPILOT_ACCESS_KEY is not set in the repository secrets"; exit 1; fi
           # offline: nothing is sent, so the confirm steps stay in; live: dry_run decides
-          node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.mode == 'live' && inputs.dry_run && '--dry-run' || '' }}
+          # offline: a label on screen says so for the whole recording
+          node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.mode == 'live' && inputs.dry_run && '--dry-run' || '' }} ${{ inputs.mode == 'offline' && '--badge "Offline replay · real app and tools · scripted planner, no model"' || '' }}
       - name: Assemble the presentation
         if: always()
         working-directory: threadpilot
-        run: node demo/assemble_video.cjs --slides dist/slides --demo dist/demo --out dist/presentation ${{ inputs.burn_slide_captions && '--burn' || '' }} ${{ inputs.include_demo && '' || '--no-demo' }}
+        run: |
+          node demo/assemble_video.cjs --slides dist/slides --demo dist/demo --out dist/presentation ${{ inputs.burn_slide_captions && '--burn' || '' }} ${{ inputs.include_demo && '' || '--no-demo' }}
+          # the names the course asks for: Presentation_GroupNN_Sprint2 .mp4 / .pdf
+          cp dist/presentation/presentation.mp4 dist/presentation/Presentation_Group19_Sprint2.mp4
+          cp dist/presentation/presentation.srt dist/presentation/Presentation_Group19_Sprint2.srt
+          cp dist/Presentation_Group19_Sprint2.pdf dist/presentation/ 2>/dev/null || true
       - name: Summary
         if: always()
         working-directory: threadpilot
@@ -100,8 +106,9 @@ jobs:
         with:
           name: presentation-video
           path: |
-            threadpilot/dist/presentation/presentation.mp4
-            threadpilot/dist/presentation/presentation.srt
+            threadpilot/dist/presentation/Presentation_Group19_Sprint2.mp4
+            threadpilot/dist/presentation/Presentation_Group19_Sprint2.srt
+            threadpilot/dist/presentation/Presentation_Group19_Sprint2.pdf
             threadpilot/dist/presentation/slides.mp4
             threadpilot/dist/presentation/slides.srt
             threadpilot/dist/slides/*.png
