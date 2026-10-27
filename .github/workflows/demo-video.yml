@@ -10,12 +10,17 @@ name: Record the presentation video
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "live = record the deployed site (needs the secret and the deploy); offline = replay server on the runner (real engine and UI, scripted planner, no model, nothing sent)"
+        type: choice
+        options: [offline, live]
+        default: offline
       site_url:
-        description: The deployed site to record
+        description: The deployed site to record (live mode)
         default: https://threadpilot-dss5105-track1-i7gxvcy5k7ef5ac9b.webapps.tcloudbase.com
         required: true
       dry_run:
-        description: Leave out the steps that act for real (sending the chase-up, confirming the watch)
+        description: Live mode only - leave out the steps that act for real (sending the chase-up, confirming the watch)
         type: boolean
         default: true
       compress_waits:
@@ -54,8 +59,17 @@ jobs:
       - name: Render the slides
         working-directory: threadpilot
         run: node demo/render_slides.cjs --slides demo/slides --out dist/slides
+      - name: Start the offline replay server
+        if: ${{ inputs.include_demo && inputs.mode == 'offline' }}
+        working-directory: threadpilot
+        run: |
+          python -m pip install -q uv
+          (cd backend && uv sync --locked --group dev)
+          nohup backend/.venv/bin/python demo/replay_server.py 8765 > replay.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8765/api/v1/health > /dev/null && break; sleep 1; done
+          cat replay.log
       - name: Check the site is reachable and runs the current build
-        if: ${{ inputs.include_demo }}
+        if: ${{ inputs.include_demo && inputs.mode == 'live' }}
         run: |
           code=$(curl -s -o /tmp/index.html -w "%{http_code}" "${{ inputs.site_url }}/")
           echo "site HTTP $code"
@@ -65,11 +79,12 @@ jobs:
         if: ${{ inputs.include_demo }}
         working-directory: threadpilot
         env:
-          THREADPILOT_DEMO_URL: ${{ inputs.site_url }}
-          THREADPILOT_ACCESS_KEY: ${{ secrets.THREADPILOT_ACCESS_KEY }}
+          THREADPILOT_DEMO_URL: ${{ inputs.mode == 'live' && inputs.site_url || 'http://127.0.0.1:8765' }}
+          THREADPILOT_ACCESS_KEY: ${{ inputs.mode == 'live' && secrets.THREADPILOT_ACCESS_KEY || '' }}
         run: |
-          if [ -z "$THREADPILOT_ACCESS_KEY" ]; then echo "::error title=secret::THREADPILOT_ACCESS_KEY is not set in the repository secrets"; exit 1; fi
-          node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.dry_run && '--dry-run' || '' }}
+          if [ "${{ inputs.mode }}" = "live" ] && [ -z "$THREADPILOT_ACCESS_KEY" ]; then echo "::error title=secret::THREADPILOT_ACCESS_KEY is not set in the repository secrets"; exit 1; fi
+          # offline: nothing is sent, so the confirm steps stay in; live: dry_run decides
+          node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.mode == 'live' && inputs.dry_run && '--dry-run' || '' }}
       - name: Assemble the presentation
         if: always()
         working-directory: threadpilot

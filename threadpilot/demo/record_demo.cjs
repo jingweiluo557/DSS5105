@@ -150,7 +150,7 @@ async function clickAt(page, locator, timeout) {
 async function chatIdle(page, timeoutMs = 180000) {
   // the composer's button reads "Thinking…" while a request is in flight and the status bubble is on screen:
   // first let the request start (up to 3 s), then wait for it to finish
-  await page.waitForFunction(() => /Thinking/.test(document.querySelector('[data-form="chat"] button[type="submit"]')?.textContent || '') || document.querySelector('.bubble[role="status"]'), null, { timeout: 3000, polling: 100 }).catch(() => {});
+  await page.waitForFunction(() => /Thinking/.test(document.querySelector('[data-form="chat"] button[type="submit"]')?.textContent || '') || document.querySelector('.bubble[role="status"]'), null, { timeout: 1200, polling: 50 }).catch(() => {});
   await page.waitForFunction(() => {
     const busy = document.querySelector('[data-form="chat"] button[type="submit"]');
     const thinking = [...document.querySelectorAll('.bubble[role="status"]')].length > 0;
@@ -229,7 +229,7 @@ async function chatIdle(page, timeoutMs = 180000) {
       if (step.waitAnswer) {
         await page.evaluate(() => window.__demo.waiting(true));
         const w = { start: elapsed(), end: null };
-        await sleep(600);
+        await sleep(250);
         await chatIdle(page, step.timeout || 180000);
         w.end = elapsed(); waits.push(w);
         await page.evaluate(() => window.__demo.waiting(false));
@@ -276,9 +276,17 @@ async function chatIdle(page, timeoutMs = 180000) {
       const segs = []; let cursorMs = 0;
       for (const w of waits) { if (w.start > cursorMs) segs.push([cursorMs, w.start, 1]); segs.push([w.start, w.end, factor]); cursorMs = w.end; }
       if (cursorMs < total) segs.push([cursorMs, total, 1]);
-      const filt = segs.map(([s, e, f], i) => `[0:v]trim=start=${(s / 1000).toFixed(3)}:end=${(e / 1000).toFixed(3)},setpts=(PTS-STARTPTS)/${f}[v${i}]`).join(';') + ';' + segs.map((_, i) => `[v${i}]`).join('') + `concat=n=${segs.length}:v=1:a=0[out]`;
+      // one pass per segment (a single filter graph over a long recording needs too much memory), then a concat
+      const segDir = path.join(outDir, 'segments'); fs.mkdirSync(segDir, { recursive: true });
+      const segFiles = segs.map(([s, e, f], i) => {
+        const file = path.join(segDir, `seg-${String(i).padStart(2, '0')}.mp4`);
+        execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-threads', '2', '-ss', (s / 1000).toFixed(3), '-to', (e / 1000).toFixed(3), '-i', webm, '-vf', `setpts=PTS/${f},fps=30`, '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', file], { stdio: 'inherit' });
+        return file;
+      });
+      const segList = path.join(segDir, 'list.txt');
+      fs.writeFileSync(segList, segFiles.map(f => `file '${f.replace(/'/g, "'\\''")}'`).join('\n') + '\n');
       const cut = path.join(outDir, 'demo_cut.mp4');
-      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-threads', '2', '-i', webm, '-filter_complex', filt, '-map', '[out]', '-r', '30', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', cut], { stdio: 'inherit' });
+      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', segList, '-c', 'copy', cut], { stdio: 'inherit' });
       const remap = ms => { let out = 0; for (const [s, e, f] of segs) { if (ms <= s) break; out += (Math.min(ms, e) - s) / f; } return out; };
       const srt2 = cues.map((c, i) => `${i + 1}\n${srtTime(remap(c.start))} --> ${srtTime(remap(c.end ?? total))}\n${c.text}\n`).join('\n');
       fs.writeFileSync(path.join(outDir, 'demo_cut.srt'), srt2);
