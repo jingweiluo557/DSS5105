@@ -5,7 +5,7 @@
  run as a video and writes the captions as an .srt with the real timestamps.
 
    node demo/record_demo.cjs --timeline demo/demo_timeline.json --out dist/demo
-   node demo/record_demo.cjs --timeline demo/demo_timeline.json --out dist/demo --compress-waits 8 --pad 1920x1080
+   node demo/record_demo.cjs --timeline demo/demo_timeline.json --out dist/demo --compress-waits 8
 
  Environment (never put these in the timeline file):
    THREADPILOT_DEMO_URL        the site, e.g. https://threadpilot-…webapps.tcloudbase.com   (or http://127.0.0.1:8765)
@@ -14,7 +14,10 @@
    THREADPILOT_API_ORIGIN      the backend origin the site is configured for (default: read from the page's config)
 
  Timeline file: {"viewport": {"width": 430, "height": 932, "scale": 2}, "captionTop": 76, "steps": [ … ]}
- (captionTop: px from the top for the caption bar; 0 = along the bottom; default 76 on phone widths, 0 on desktop). Each step has "at" (seconds
+ (captionTop: px from the top for the caption bar; 0 = along the bottom; default 76 on phone widths, 0 on desktop;
+  captionSize: caption font px, default 17 on phones, 26 on desktop;
+  captions: "band" + bandHeight: no caption over the page; after recording the frame is extended by bandHeight px at the
+  bottom and the .srt is burned into that band — for a 1920x1080 final, record at viewport 1920x972 with bandHeight 108). Each step has "at" (seconds
  on the planned timeline) and one action:
    "say": "text"                   caption shown until the next "say" (or "hide": true); also an .srt cue
    "goto": "#/ai"                  navigate (hash route or full URL)
@@ -59,7 +62,7 @@ const OVERLAY = `
     #__demo-caption{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);max-width:88vw;z-index:2147483644;
       /* on a phone the composer sits at the bottom, so the caption goes under the top bar instead */
       top:var(--demo-caption-top, auto);bottom:var(--demo-caption-bottom, 28px);
-      pointer-events:none;background:rgba(20,28,38,.86);color:#F6F4EF;font:600 17px/1.4 'IBM Plex Sans','Segoe UI',Arial,sans-serif;
+      pointer-events:none;background:rgba(20,28,38,.86);color:#F6F4EF;font:600 var(--demo-caption-size, 17px)/1.4 'IBM Plex Sans','Segoe UI',Arial,sans-serif;
       padding:12px 20px;border-radius:12px;text-align:center;letter-spacing:.1px;opacity:0;transition:opacity .25s;
       box-shadow:0 8px 28px rgba(0,0,0,.35)}
     #__demo-caption.on{opacity:1}
@@ -74,8 +77,10 @@ const OVERLAY = `
   const wait = document.createElement('div'); wait.id = '__demo-wait'; wait.textContent = 'waiting for the model · sped up in the final cut';
   const mount = () => {
     document.documentElement.append(style, cursor, caption, wait);
-    if (window.__demoCaptionTop) {
-      const r = document.documentElement.style;
+    const r = document.documentElement.style;
+    if (window.__demoCaptionSize) r.setProperty('--demo-caption-size', window.__demoCaptionSize + 'px');
+    if (window.__demoCaptionTop === -1) { caption.style.display = 'none'; }
+    else if (window.__demoCaptionTop) {
       r.setProperty('--demo-caption-top', window.__demoCaptionTop + 'px'); r.setProperty('--demo-caption-bottom', 'auto');
       r.setProperty('--demo-wait-top', 'auto'); r.setProperty('--demo-wait-bottom', '14px');
     }
@@ -161,8 +166,10 @@ async function chatIdle(page, timeoutMs = 180000) {
     isMobile: vp.width < 700, hasTouch: false,
     recordVideo: { dir: outDir, size: { width: vp.width * vp.scale, height: vp.height * vp.scale } },
   });
-  const captionTop = timeline.captionTop ?? (vp.width < 700 ? 76 : 0);   // px from the top; 0 = bottom of the screen
-  await context.addInitScript(t => { window.__demoCaptionTop = t; }, captionTop);
+  const band = timeline.captions === 'band' ? Number(timeline.bandHeight || 108) : 0;   // captions burned into a band under the page
+  const captionTop = band ? -1 : (timeline.captionTop ?? (vp.width < 700 ? 76 : 0));   // px from the top; 0 = bottom; -1 = hidden
+  const captionSize = timeline.captionSize ?? (vp.width < 700 ? 17 : 26);
+  await context.addInitScript(([t, sz]) => { window.__demoCaptionTop = t; window.__demoCaptionSize = sz; }, [captionTop, captionSize]);
   await context.addInitScript(OVERLAY);
   if (KEY) {
     const origin = process.env.THREADPILOT_API_ORIGIN || '';
@@ -260,9 +267,9 @@ async function chatIdle(page, timeoutMs = 180000) {
   // ---------------------------------------------------------------- optional ffmpeg post-processing
   const factor = Number(args['compress-waits'] || 0);
   const pad = typeof args.pad === 'string' ? args.pad : null;
-  if (factor > 1 || pad) {
+  if (factor > 1 || pad || band) {
     if (!which('ffmpeg')) { console.error('ffmpeg not found: skipping --compress-waits / --pad'); return; }
-    let input = webm;
+    let input = webm, srtForBurn = path.join(outDir, 'demo.srt');
     if (factor > 1 && waits.length) {
       // split into kept and sped-up segments, re-time the captions the same way
       const segs = []; let cursorMs = 0;
@@ -276,7 +283,19 @@ async function chatIdle(page, timeoutMs = 180000) {
       fs.writeFileSync(path.join(outDir, 'demo_cut.srt'), srt2);
       const newLen = segs.reduce((a, [s, e, f]) => a + (e - s) / f, 0);
       console.log(`compressed waits ×${factor} → ${cut} (${(newLen / 1000).toFixed(1)} s) + demo_cut.srt`);
-      input = cut;
+      input = cut; srtForBurn = path.join(outDir, 'demo_cut.srt');
+    }
+    if (band) {
+      // the page was recorded band px shorter than the frame: add the band below it and burn the captions into it
+      const W = vp.width * vp.scale, H = vp.height * vp.scale + band;
+      const out = path.join(outDir, 'demo_final.mp4');
+      // libass sizes an .srt on a 288-line canvas, so px values are scaled by 288/H
+      const k = 288 / H, fontPx = Math.round(band * 0.32);
+      const style = `FontName=DejaVu Sans,FontSize=${Math.max(6, Math.round(fontPx * k))},Bold=1,PrimaryColour=&H00F6F4EF,BorderStyle=1,Outline=0,Shadow=0,Alignment=2,MarginV=${Math.round((band - fontPx) / 2 * k)},MarginL=${Math.round(120 * 384 / W)},MarginR=${Math.round(120 * 384 / W)}`;
+      const srtArg = srtForBurn.replace(/\\/g, '/').replace(/:/g, '\\:').replace(/'/g, "\\'");
+      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-threads', '2', '-i', input, '-vf', `pad=${W}:${H}:0:0:color=#1C2733,subtitles='${srtArg}':force_style='${style}'`, '-r', '30', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', out], { stdio: 'inherit' });
+      console.log(`captions burned into a ${band}px band → ${out} (${W}x${H})`);
+      input = out;
     }
     if (pad) {
       const [W, H] = pad.split('x').map(Number);
