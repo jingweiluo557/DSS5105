@@ -1,7 +1,9 @@
-name: Record the demo video
+name: Record the presentation video
 
-# Records threadpilot/demo/demo_timeline.json against the deployed site on a GitHub runner and uploads the result,
-# so nobody has to install Node, Playwright or ffmpeg locally. Run it from the Actions tab ("Run workflow").
+# Builds the whole Sprint 2 video on a GitHub runner: the slides (threadpilot/demo/slides, held for the seconds in
+# their speaker notes) followed by the demo recorded against the deployed site (threadpilot/demo/demo_timeline.json),
+# and uploads presentation.mp4 + presentation.srt. Nobody has to install Node, Playwright or ffmpeg locally.
+# Run it from the Actions tab ("Run workflow").
 # Needs one repository secret: THREADPILOT_ACCESS_KEY (Settings → Secrets and variables → Actions). The key is read
 # from the secret into the recorder's environment only; it is never printed or stored in the artifact.
 
@@ -24,6 +26,14 @@ on:
         description: Timeline file (relative to threadpilot/)
         default: demo/demo_timeline.json
         required: true
+      include_demo:
+        description: Record the demo and append it to the slides (off = slides only, no secret needed)
+        type: boolean
+        default: true
+      burn_slide_captions:
+        description: Burn the slide narration into a caption band on the slides (off = clean slides for a voice-over; the .srt is still produced)
+        type: boolean
+        default: true
 
 jobs:
   record:
@@ -40,14 +50,19 @@ jobs:
         run: |
           npm install --no-save playwright@1.63.0
           npx playwright install --with-deps chromium
-          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core > /dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core poppler-utils > /dev/null
+      - name: Render the slides
+        working-directory: threadpilot
+        run: node demo/render_slides.cjs --slides demo/slides --out dist/slides
       - name: Check the site is reachable and runs the current build
+        if: ${{ inputs.include_demo }}
         run: |
           code=$(curl -s -o /tmp/index.html -w "%{http_code}" "${{ inputs.site_url }}/")
           echo "site HTTP $code"
           if grep -q "20261026-home" /tmp/index.html; then echo "::notice title=build::the site serves the 26 Oct frontend (home screen present)";
           else echo "::warning title=build::the site does not serve the 26 Oct frontend yet; the home-screen steps will be skipped or fail"; fi
-      - name: Record
+      - name: Record the demo
+        if: ${{ inputs.include_demo }}
         working-directory: threadpilot
         env:
           THREADPILOT_DEMO_URL: ${{ inputs.site_url }}
@@ -55,17 +70,26 @@ jobs:
         run: |
           if [ -z "$THREADPILOT_ACCESS_KEY" ]; then echo "::error title=secret::THREADPILOT_ACCESS_KEY is not set in the repository secrets"; exit 1; fi
           node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.dry_run && '--dry-run' || '' }}
+      - name: Assemble the presentation
+        if: always()
+        working-directory: threadpilot
+        run: node demo/assemble_video.cjs --slides dist/slides --demo dist/demo --out dist/presentation ${{ inputs.burn_slide_captions && '--burn' || '' }} ${{ inputs.include_demo && '' || '--no-demo' }}
       - name: Summary
         if: always()
         working-directory: threadpilot
         run: |
-          { echo "### Demo recording"; echo; echo '```'; ls -la dist/demo 2>/dev/null || echo "no output"; echo; python3 -c "import json;d=json.load(open('dist/demo/run_log.json'));print(f\"recorded {d['total_s']:.1f} s, drift {d['drift_s']:.1f} s\");[print('step',s['step'],'at',s['at'],'error:',s['error'][:160]) for s in d['steps'] if 'error' in s]" 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload the video, captions and log
+          { echo "### Presentation video"; echo; echo '```'; ls -la dist/presentation dist/demo 2>/dev/null || echo "no output"; echo; python3 -c "import json;d=json.load(open('dist/demo/run_log.json'));print(f\"demo recorded {d['total_s']:.1f} s, drift {d['drift_s']:.1f} s\");[print('step',s['step'],'at',s['at'],'error:',s['error'][:160]) for s in d['steps'] if 'error' in s]" 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the video, the slides, the captions and the log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: demo-video
+          name: presentation-video
           path: |
+            threadpilot/dist/presentation/presentation.mp4
+            threadpilot/dist/presentation/presentation.srt
+            threadpilot/dist/presentation/slides.mp4
+            threadpilot/dist/presentation/slides.srt
+            threadpilot/dist/slides/*.png
             threadpilot/dist/demo/demo_final.mp4
             threadpilot/dist/demo/demo_cut.mp4
             threadpilot/dist/demo/demo_cut.srt

@@ -1,0 +1,28 @@
+<section id="validation" data-transition="fade" style="background:#24476A;color:#F3F1EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Measured by code, first pass reported as run</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#1C2733;padding:36px;border-radius:16px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:96px;font-weight:600;line-height:1">62%</p>
+<p style="font-size:28px;color:#C9D3DD">29 of 47 questions right on the first live pass, 24 Oct, before any fix</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#1C2733;padding:36px;border-radius:16px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:96px;font-weight:600;line-height:1">41</p>
+<p style="font-size:28px;color:#C9D3DD">of 59 questions our team wrote were wrong or partial on the live build</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#1C2733;padding:36px;border-radius:16px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:96px;font-weight:600;line-height:1">88/88</p>
+<p style="font-size:28px;color:#C9D3DD">questions (116 turns) pass after the fixes, re-run on every push</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#F3F1EC;color:#1C2733;padding:36px;border-radius:16px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:96px;font-weight:600;line-height:1">0</p>
+<p style="font-size:28px;color:#3A4A5C">of 2,117 numbers stated without a tool result behind them</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:30px;color:#E6ECF2">Gold answers are computed from the CSVs by code. 19 are ambiguous, unanswerable or bait; 11 are feasibility or action requests.</p>
+<p style="font-size:30px;color:#E6ECF2">Also: 11 of 11 tool results match an independent recomputation; 45 of 45 scripted dialogue turns pass.</p>
+<p style="font-size:26px;color:#B7C7D8">“After the fixes” = server replay with a fixed planner, no model. Live second pass on the deployed site: [__ / 88].</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#B7C7D8">ThreadPilot · Group 19 · 5</p>
+<aside>1:24–1:56 · [Presenter 3]. “We built an evaluation set whose answers are computed from the data by code, not typed by hand. The first live pass, before fixing anything, scored 62 percent, and we report it as it ran. Then each of us wrote questions the system had never seen: 41 of 59 came back wrong or partial. Every failure traced to one of seven server-side causes; after fixing them, all 88 questions pass on every push, and not one of 2,117 stated numbers lacks a tool result behind it. To be clear, that 88 is a replay without the model; the live second pass on the deployed site is [result].” Before recording: run evaluation/run_live_eval.py on the deployed site and fill the live figure, or say it is pending. Check the counts in evaluation/EVALUATION.md (ambiguous/bait and feasibility/action counts).</aside>
+</section>

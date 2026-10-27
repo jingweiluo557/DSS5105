@@ -4,7 +4,13 @@
 
 ## Run it without installing anything: GitHub Actions
 
-Actions tab → **Record the demo video** → **Run workflow**. A GitHub runner installs Playwright and ffmpeg, records the deployed site and uploads `demo-video` (the mp4s, the .srt files, the run log) as an artifact on the run page; download it from there. One-time setup: add the workspace access key as the repository secret `THREADPILOT_ACCESS_KEY` (Settings → Secrets and variables → Actions → New repository secret). The workflow's inputs: the site URL, `dry_run` (on by default: leaves out the send and the watch confirmation), the speed-up factor, and the timeline file.
+Actions tab → **Record the presentation video** → **Run workflow**. A GitHub runner renders the slides (`demo/slides`, each held for the seconds in its speaker notes), records the demo on the deployed site, joins the two and uploads `presentation-video` as an artifact on the run page: `presentation.mp4` (1920 × 1080, slides then demo, under 5 minutes), `presentation.srt` (the whole narration), `slides.mp4`/`slides.srt`, the slide PNGs and `demo_final.mp4`. One-time setup: add the workspace access key as the repository secret `THREADPILOT_ACCESS_KEY` (Settings → Secrets and variables → Actions → New repository secret). The workflow's inputs: the site URL, `dry_run` (on by default: leaves out the send and the watch confirmation), the speed-up factor, the timeline file, `include_demo` (off = slides only, needs no secret) and `burn_slide_captions` (on by default: the narration appears as captions on the slides; turn it off for clean slides under a recorded voice-over).
+
+## The slides
+
+`demo/slides/` holds the deck as files (`deck.json`, one HTML per slide, `assets/`), the same content as the Claude Slides artifact. `render_slides.cjs` turns them into 1920 × 1080 PNGs; `assemble_video.cjs` holds each for the duration in its speaker note (`<aside>0:08–0:30 · [Presenter] …`), cross-fades between them, and appends the demo. To change timing or wording, edit the HTML (the `<aside>` is the narration and the timing). To use a deck edited on the Slides page instead, export it as PDF to `demo/slides/deck.pdf`: the pages are then used in place of the HTML, and the notes still come from the HTML.
+
+Fill the placeholders before the final take: attendance on the cover, the Sprint 1 feedback on slide 2, the live second-pass score on slide 5, the YouTube link on slides 1 and 8.
 
 ## Run it locally
 
