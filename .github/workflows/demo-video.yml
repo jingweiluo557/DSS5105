@@ -78,7 +78,7 @@ jobs:
         if: always()
         working-directory: threadpilot
         run: |
-          { echo "### Presentation video"; echo; echo '```'; ls -la dist/presentation dist/demo 2>/dev/null || echo "no output"; echo; python3 -c "import json;d=json.load(open('dist/demo/run_log.json'));print(f\"demo recorded {d['total_s']:.1f} s, drift {d['drift_s']:.1f} s\");[print('step',s['step'],'at',s['at'],'error:',s['error'][:160]) for s in d['steps'] if 'error' in s]" 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "### Presentation video"; echo; echo '```'; ls -la dist/presentation dist/demo 2>/dev/null || echo "no output"; echo; python3 -c "import json;d=json.load(open('dist/demo/run_log.json'));print(f\"demo recorded {d['total_s']:.1f} s, drift {d['drift_s']:.1f} s\");[print('step',s['step'],'at',s['at'],'error:',s['error'][:160]) for s in d['steps'] if 'error' in s]" 2>/dev/null || true; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload the video, the slides, the captions and the log
         if: always()
         uses: actions/upload-artifact@v4
