@@ -1,0 +1,18 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-26T14:55:00Z"},
+  "lists": "css",
+  "title": "ThreadPilot — Sprint 2 (Group 19, Track 1)",
+  "order": ["cover", "change", "architecture", "tools", "validation", "hardcases", "interface", "next"],
+  "sections": {
+    "s1": {"description": "Who we are and what changed since Sprint 1", "start": "cover"},
+    "s2": {"description": "How the co-pilot is built: a bounded model over typed tools", "start": "architecture"},
+    "s3": {"description": "What we measured and what it taught us", "start": "validation"},
+    "s4": {"description": "The interface, next steps and the demo hand-off", "start": "interface"}
+  },
+  "faces": {
+    "source-serif-4": {"family": "Source Serif 4", "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap"},
+    "ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"}
+  },
+  "designSystems": []
+}

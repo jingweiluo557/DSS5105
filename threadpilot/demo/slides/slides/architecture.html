@@ -1,0 +1,38 @@
+<section id="architecture" data-transition="fade" style="background:#F6F4EF;color:#1C2733;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">The model routes; code computes</h2>
+<div style="display:flex;align-items:stretch;gap:12px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:2px solid #D5D9DE;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600">Manager</h3>
+<p style="font-size:24px;color:#4A5563">Phone or laptop; types or speaks</p>
+</div>
+<x-connector head="end" style="width:44px;color:#3F6C94;border-width:4px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:2px solid #D5D9DE;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600">Planner model</h3>
+<p style="font-size:24px;color:#4A5563">Picks the intent and slots; never states a number</p>
+</div>
+<x-connector head="end" style="width:44px;color:#3F6C94;border-width:4px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1C2733;color:#F3F1EC;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600">Workflow rules</h3>
+<p style="font-size:24px;color:#C9D3DD">Ask, don’t guess; carry context; gate every write</p>
+</div>
+<x-connector head="end" style="width:44px;color:#3F6C94;border-width:4px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:2px solid #3F6C94;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600">30 typed tools</h3>
+<p style="font-size:24px;color:#4A5563">Retrieval, judgement, tracing, discovery, action</p>
+</div>
+<x-connector head="end" style="width:44px;color:#3F6C94;border-width:4px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:2px solid #D5D9DE;border-radius:16px;padding:24px">
+<h3 style="font-size:30px;font-weight:600">CloudBase MySQL</h3>
+<p style="font-size:24px;color:#4A5563">120 orders, 360 output rows, 8 workshops</p>
+</div>
+</div>
+<p style="font-size:28px;color:#4A5563">The server’s facts reach the screen first; the model only words them. A minute timer runs the 07:00 briefing, the watches and the alerts.</p>
+<table style="font-size:26px;color:#1C2733">
+<tr><th style="width:24%">We chose</th><th style="width:22%">Over</th><th style="width:54%">Why, and the cost we accept</th></tr>
+<tr><td>Typed tools</td><td>One run_sql tool</td><td>Every number traceable; new phrasings must be taught</td></tr>
+<tr><td>Queue simulation + AFT</td><td>A learned risk score</td><td>Dates you can inspect plus an on-time chance (AUC 0.90)</td></tr>
+<tr><td>Preview, then exact “send now”</td><td>The model judging “yes”</td><td>15-minute single-use key, logged; one extra step</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#6A7179">ThreadPilot · Group 19 · 3</p>
+<aside>0:30–1:02 · [Presenter 2]. “A question goes to a planner model that only picks the intent and the details, never a number. Server rules decide whether to ask a question back, keep the conversation’s context, and stop any write at a preview. Thirty typed tools do every lookup and calculation over the factory data in MySQL on Tencent CloudBase, and the answer streams the facts first, then the model’s wording. Three choices: typed tools over one SQL tool, so numbers are traceable; a queue simulation plus our lead-time model over a black-box score; and an exact confirmation phrase over letting the model decide what ‘yes’ means.”</aside>
+</section>
