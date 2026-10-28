@@ -44,7 +44,9 @@ function parseNotes(html) {
   const t = raw.match(/^(\d+):(\d\d)\s*[–-]\s*(\d+):(\d\d)\s*·?\s*(?:\[[^\]]*\]\.?\s*)?/);
   const seconds = t ? (Number(t[3]) * 60 + Number(t[4])) - (Number(t[1]) * 60 + Number(t[2])) : null;
   let narration = t ? raw.slice(t[0].length) : raw;
-  narration = narration.split(/\s(?:Before recording|Cut straight)/)[0].trim();   // the production reminders are not narration
+  // the narration is the quoted text; anything after the closing quote is a production reminder, not narration
+  if (narration.startsWith('“') && narration.lastIndexOf('”') > 0) narration = narration.slice(1, narration.lastIndexOf('”'));
+  narration = narration.split(/\s(?:Before recording|Before the final take|Cut straight)/)[0].trim();
   return { seconds, narration };
 }
 
