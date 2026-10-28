@@ -1,5 +1,5 @@
 {
-  "_comment": "One general manager's day, recorded as a 1920x1080 desktop video: 07:00 briefing, 09:40 order question, 11:15 feasibility (chat, then the Feasibility page), 14:30 chase-up, 17:00 watch, and a question the data cannot answer. Times are planned seconds; model waits stretch the run and --compress-waits squeezes them back. Captions are burned into a band under the page.",
+  "_comment": "One general manager's day, recorded as a 1920x1080 desktop video: 07:00 briefing, 09:40 order question, 11:15 feasibility (chat, then the Feasibility page), 14:30 chase-up, 17:00 watch, and a question the data cannot answer; the closing slide (demo/slides, afterDemo) follows in the assembled video. Times are planned seconds; model waits stretch the run and --compress-waits squeezes them back. Captions are burned into a band under the page.",
   "viewport": {
     "width": 1920,
     "height": 972,
@@ -325,15 +325,11 @@
       "say": "No prices in the data, so no revenue figure. It never invents one."
     },
     {
-      "at": 102.4,
-      "say": "ThreadPilot: the general manager’s co-pilot, all day, with every number traceable."
+      "at": 102.0,
+      "hold": 0.6
     },
     {
-      "at": 105.6,
-      "hold": 1.0
-    },
-    {
-      "at": 106.8,
+      "at": 102.8,
       "hide": true
     }
   ]

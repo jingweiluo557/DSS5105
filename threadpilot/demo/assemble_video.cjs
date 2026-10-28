@@ -15,6 +15,7 @@
                instead of the time in its notes; or one clip slides.* laid over all the slides at the notes' timing;
                and demo.* laid over the demo. Slides without a clip keep their notes' timing, silent.
 
+ Slides listed in deck.json "afterDemo" (marked after: true in slides.json) close the video after the demo, with a fade.
  Inputs: <slides>/slides.json from render_slides.cjs; <demo>/demo_final.mp4 (+ demo_cut.srt) from record_demo.cjs.
  Outputs: <out>/presentation.mp4, presentation.srt, slides.mp4, slides.srt. Warns when the total passes 4:55.
 */
@@ -43,6 +44,8 @@ for (const s of meta.slides) {
   s.clip = clipFor(s.id);
   if (s.clip) { s.seconds = Math.ceil((audioLen(s.clip) + PAUSE) * 10) / 10; perSlideVoice = true; }
 }
+const closing = meta.slides.filter(s => s.after);          // shown after the demo
+meta.slides = meta.slides.filter(s => !s.after);
 const slidesVoice = !perSlideVoice ? clipFor('slides') : null;
 const demoVoice = clipFor('demo');
 if (perSlideVoice) console.log(`voice-over: ${meta.slides.filter(s => s.clip).length} of ${meta.slides.length} slides have a clip; those slides last as long as their clip`);
@@ -112,7 +115,8 @@ if (withDemo) {
   const demoLen = Number(probe.pop().split(',').pop());
   const [dw, dh] = probe[0].split(',').map(Number);
   const demoPart = path.join(outDir, 'demo_fit.mp4');
-  const vf = (dw !== W || dh !== H) ? `scale=-2:${H}:flags=bicubic,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=#1C2733,fps=30,setsar=1` : 'fps=30,setsar=1';
+  const vf = ((dw !== W || dh !== H) ? `scale=-2:${H}:flags=bicubic,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=#1C2733,fps=30,setsar=1` : 'fps=30,setsar=1')
+    + (closing.length ? `,fade=t=out:st=${Math.max(0, demoLen - 0.6).toFixed(2)}:d=0.6` : '');   // fade into the closing slide
   if (demoVoice) run(['-i', demo, '-i', demoVoice, '-filter_complex', `[1:a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=${demoLen}[va]`, '-map', '0:v', '-map', '[va]', '-vf', vf, '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', '-c:a', 'aac', '-b:a', '160k', '-shortest', demoPart]);
   else run(['-i', demo, '-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo', '-map', '0:v', '-map', '1:a', '-vf', vf, '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', '-c:a', 'aac', '-b:a', '96k', '-shortest', demoPart]);
   parts.push(demoPart);
@@ -125,10 +129,25 @@ if (withDemo) {
   }
   total += demoLen;
 }
+// ---------------------------------------------------------------- + closing slides (fade in from the demo's fade-out)
+let srtOut = fs.existsSync(path.join(outDir, 'presentation.srt')) && withDemo ? fs.readFileSync(path.join(outDir, 'presentation.srt'), 'utf8').trim() : slidesSrt.trim();
+for (const [i, s] of closing.entries()) {
+  const part = path.join(outDir, `closing_${i + 1}.mp4`);
+  const vf = `scale=${W}:${H},format=yuv420p,fps=30,setsar=1,fade=t=in:st=0:d=0.6`;
+  const audio = s.clip ? ['-i', s.clip] : ['-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo'];
+  run(['-loop', '1', '-t', String(s.seconds), '-i', s.file, ...audio, '-filter_complex', `[1:a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=${s.seconds},atrim=0:${s.seconds}[a]`,
+       '-map', '0:v', '-map', '[a]', '-vf', vf, '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', '-c:a', 'aac', '-b:a', '160k', '-t', String(s.seconds), part]);
+  parts.push(part);
+  const text = (s.narration || '').trim();
+  if (text) { const n = srtOut ? srtOut.split(/\n\n+/).length : 0; srtOut += `\n\n${n + 1}\n${srtTime(total)} --> ${srtTime(total + s.seconds)}\n${text}`; }
+  total += s.seconds;
+}
+fs.writeFileSync(path.join(outDir, 'presentation.srt'), srtOut.trim() + '\n');
 const list = path.join(outDir, 'parts.txt');
 fs.writeFileSync(list, parts.map(p => `file '${p.replace(/'/g, "'\\''")}'`).join('\n') + '\n');
 const final = path.join(outDir, 'presentation.mp4');
 run(['-f', 'concat', '-safe', '0', '-i', list, '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', '-r', '30', '-c:a', 'aac', '-b:a', '160k', final]);
 const mm = Math.floor(total / 60), ss = Math.round(total % 60);
-console.log(`presentation.mp4: slides ${Math.round(slidesLen)} s${withDemo ? ` + demo ${Math.round(total - slidesLen)} s` : ''} = ${mm}:${String(ss).padStart(2, '0')} → ${final}`);
+const closingLen = closing.reduce((a, s) => a + s.seconds, 0);
+console.log(`presentation.mp4: slides ${Math.round(slidesLen)} s${withDemo ? ` + demo ${Math.round(total - slidesLen - closingLen)} s` : ''}${closingLen ? ` + closing ${Math.round(closingLen)} s` : ''} = ${mm}:${String(ss).padStart(2, '0')} → ${final}`);
 if (total > 295) console.warn(`::warning title=length::the video is ${mm}:${String(ss).padStart(2, '0')}, over the 5:00 limit: shorten slide timings in the notes or the demo timeline`);

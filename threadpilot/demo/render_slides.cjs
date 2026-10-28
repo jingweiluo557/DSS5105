@@ -90,9 +90,11 @@ function parseNotes(html) {
     const html = fs.existsSync(path.join(slidesDir, 'slides', `${s.id}.html`)) ? fs.readFileSync(path.join(slidesDir, 'slides', `${s.id}.html`), 'utf8') : '';
     Object.assign(s, parseNotes(html));
   }
+  for (const s of slides) if ((deck.afterDemo || []).includes(s.id)) s.after = true;   // closing slides, shown after the demo
   const missing = slides.filter(s => !s.seconds);
   if (missing.length) { const each = Math.max(8, Math.round(170 / slides.length)); missing.forEach(s => { s.seconds = each; }); console.warn(`no timing in the notes of ${missing.map(s => s.id).join(', ')}: ${each} s each`); }
   fs.writeFileSync(path.join(outDir, 'slides.json'), JSON.stringify({ width: W, height: H, slides }, null, 2));
-  const total = slides.reduce((a, s) => a + s.seconds, 0);
-  console.log(`${slides.length} slides → ${outDir} (${total} s planned)`);
+  const total = slides.filter(s => !s.after).reduce((a, s) => a + s.seconds, 0);
+  const after = slides.filter(s => s.after);
+  console.log(`${slides.length} slides → ${outDir} (${total} s planned before the demo${after.length ? `, ${after.map(s => s.id).join(', ')} after it (${after.reduce((a, s) => a + s.seconds, 0)} s)` : ''})`);
 })().catch(e => { console.error(e); process.exit(1); });

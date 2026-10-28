@@ -12,7 +12,8 @@
     "roadmap",
     "architecture",
     "features",
-    "validation"
+    "validation",
+    "end"
   ],
   "sections": {
     "s1": {
@@ -24,7 +25,7 @@
       "start": "roadmap"
     },
     "s3": {
-      "description": "Validation, then the demo",
+      "description": "Validation, the demo, and the closing slide",
       "start": "validation"
     }
   },
@@ -38,5 +39,8 @@
       "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
     }
   },
-  "designSystems": []
+  "designSystems": [],
+  "afterDemo": [
+    "end"
+  ]
 }

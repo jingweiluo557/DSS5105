@@ -1,6 +1,6 @@
 # Scripted demo recording
 
-`record_demo.cjs` drives the site through `demo_timeline.json` on a fixed timeline, draws a visible cursor that glides to every target with a ripple on each click, shows the narration as a caption bar, records the run as a video and writes the captions as an `.srt` with the real timestamps. It is the demo of the Sprint 2 video ("one general manager's day", about 2:28: the 07:00 briefing, an order question, feasibility in the chat and on the Feasibility page, a chase-up, a watch, and a question the data cannot answer), recorded as a 1920 × 1080 desktop video: the app fills 1920 × 972 and the captions sit in a 108 px band underneath, so nothing covers the page.
+`record_demo.cjs` drives the site through `demo_timeline.json` on a fixed timeline, draws a visible cursor that glides to every target with a ripple on each click, shows the narration as a caption bar, records the run as a video and writes the captions as an `.srt` with the real timestamps. It is the demo of the Sprint 2 video ("one general manager's day", about 2:22: the 07:00 briefing, an order question, feasibility in the chat and on the Feasibility page, a chase-up, a watch, and a question the data cannot answer), recorded as a 1920 × 1080 desktop video: the app fills 1920 × 972 and the captions sit in a 108 px band underneath, so nothing covers the page.
 
 ## Run it without installing anything: GitHub Actions
 
@@ -14,7 +14,7 @@ Actions tab → **Record the presentation video** → **Run workflow**. A GitHub
 
 `demo/slides/` holds the deck as files (`deck.json`, one HTML per slide, `assets/`), the same content as the Claude Slides artifact. `render_slides.cjs` turns them into 1920 × 1080 PNGs; `assemble_video.cjs` holds each for the duration in its speaker note (`<aside>0:06–0:34 · [Presenter] …`), cross-fades between them, and appends the demo. To change timing or wording, edit the HTML (the `<aside>` is the narration and the timing). To use a deck edited on the Slides page instead, export it as PDF to `demo/slides/deck.pdf`: the pages are then used in place of the HTML, and the notes still come from the HTML.
 
-The deck has six slides in the order the brief asks for: objective (cover, problem, under 1 minute), tech (Sprint 1 to-dos with owner and status, architecture, features with owner and status, validation), then the demo. `--pdf FILE` on `render_slides.cjs` also writes the slides as one PDF with clickable links; the workflow names its outputs `Presentation_Group19_Sprint2.mp4` and `.pdf`.
+The deck has six slides in the order the brief asks for: objective (cover, problem, under 1 minute), tech (Sprint 1 to-dos with owner and status, architecture, features with owner and status, validation), then the demo, then a closing slide (`end`, listed in `deck.json` under `afterDemo`; the demo fades into it). `--pdf FILE` on `render_slides.cjs` also writes the slides as one PDF with clickable links; the workflow names its outputs `Presentation_Group19_Sprint2.mp4` and `.pdf`.
 
 ## Run it locally
 

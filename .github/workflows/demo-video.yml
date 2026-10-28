@@ -84,8 +84,7 @@ jobs:
         run: |
           if [ "${{ inputs.mode }}" = "live" ] && [ -z "$THREADPILOT_ACCESS_KEY" ]; then echo "::error title=secret::THREADPILOT_ACCESS_KEY is not set in the repository secrets"; exit 1; fi
           # offline: nothing is sent, so the confirm steps stay in; live: dry_run decides
-          # offline: a label on screen says so for the whole recording
-          node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.mode == 'live' && inputs.dry_run && '--dry-run' || '' }} ${{ inputs.mode == 'offline' && '--badge "Offline replay · real app and tools · scripted planner, no model"' || '' }}
+          node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.mode == 'live' && inputs.dry_run && '--dry-run' || '' }}
       - name: Assemble the presentation
         if: always()
         working-directory: threadpilot
