@@ -189,7 +189,7 @@
         },
         "responses": {
           "200": {
-            "description": "Validated workflow SSE: start, facts, delta, done",
+            "description": "Validated workflow SSE: start, step (planner / memory / tool calls), facts, delta, done",
             "content": {
               "text/event-stream": {
                 "schema": {
@@ -2380,6 +2380,47 @@
         }
       }
     },
+    "/api/alerts/test": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Test Alert",
+        "operationId": "test_alert_api_alerts_test_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/internal/alerts/run": {
       "post": {
         "tags": [
@@ -2431,6 +2472,29 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/voice/transcribe": {
+      "post": {
+        "tags": [
+          "Voice"
+        ],
+        "summary": "Transcribe",
+        "operationId": "transcribe_api_v1_voice_transcribe_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Transcribe Api V1 Voice Transcribe Post"
                 }
               }
             }
@@ -2906,6 +2970,20 @@
             "type": "array",
             "title": "Last Order Ids"
           },
+          "discussed_orders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Discussed Orders"
+          },
+          "recent_orders": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recent Orders"
+          },
           "draft": {
             "anyOf": [
               {
@@ -3069,6 +3147,11 @@
           "briefing_enabled": {
             "type": "boolean",
             "title": "Briefing Enabled",
+            "default": false
+          },
+          "alert_emails_enabled": {
+            "type": "boolean",
+            "title": "Alert Emails Enabled",
             "default": false
           },
           "subject_prefix": {
