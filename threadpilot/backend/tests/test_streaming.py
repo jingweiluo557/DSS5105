@@ -27,7 +27,12 @@ def test_workflow_stream_metadata(client: TestClient) -> None:
     frames = [(frame.splitlines()[0].removeprefix('event: '),
                json.loads(frame.splitlines()[1].removeprefix('data: ')))
               for frame in response.text.strip().split('\n\n')]
+    # Sprint 3: 'step' events (planner reading, each tool call, narration) stream before the answer text
+    steps = [data for name, data in frames if name == 'step']
+    frames = [(name, data) for name, data in frames if name != 'step']
     assert [name for name, _ in frames] == ['start', 'delta', 'done']
+    assert [s['phase'] for s in steps][:2] == ['plan', 'plan'] and steps[1]['text'] == 'order.lookup'
+    assert {s['text'] for s in steps if s['phase'] == 'tool'} == {c['name'] for c in frames[2][1]['tool_calls']}
     assert frames[1][1]['text'] == frames[2][1]['answer']
     assert frames[2][1]['state']['active_order'] == 'ORD-005'
     assert frames[2][1]['request_id'] == response.headers['x-request-id']
