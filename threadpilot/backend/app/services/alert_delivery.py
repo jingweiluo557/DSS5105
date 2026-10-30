@@ -103,13 +103,14 @@ class AlertDelivery:
     async def run(self, snapshot_loader, now: datetime | None = None, send: bool | None = None) -> dict:
         """One scheduler tick. snapshot_loader() -> the queue snapshot dict; send defaults to the ALERT_EMAILS_ENABLED flag."""
         now = now or BusinessClock(self.settings).now()
-        send = getattr(self.settings, 'alert_emails_enabled', False) if send is None else send
+        prefs = await asyncio.to_thread(self.preferences.read)
+        if send is None:
+            send = self.enabled(prefs)
         data = await asyncio.to_thread(snapshot_loader)
         decisions = await asyncio.to_thread(self.evaluate, data, now)
         result = {'business_date': now.date().isoformat(), 'send': send, **{k: len(v) for k, v in alert_policy.summarize(decisions).items() if isinstance(v, list)}}
         immediate = [d for d in decisions if d.channel == 'email_now']
         digest = [d for d in decisions if d.channel == 'digest']
-        prefs = await asyncio.to_thread(self.preferences.read)
         recipient, name = prefs.get('manager_email'), prefs.get('manager_name', 'Manager')
         if immediate:
             mail = alert_policy.render_email(immediate, now, name)
@@ -125,6 +126,29 @@ class AlertDelivery:
             result['digest_email'] = {'subject': mail['subject'], 'status': status, 'items': len(mail['keys'])}
         return result
 
+    def enabled(self, prefs: dict | None = None) -> bool:
+        """Alert emails go out when the deployment flag (ALERT_EMAILS_ENABLED) or the manager's own switch in Settings is on."""
+        prefs = prefs if prefs is not None else self.preferences.read()
+        return bool(getattr(self.settings, 'alert_emails_enabled', False) or prefs.get('alert_emails_enabled'))
+
+    async def test(self, snapshot_loader, now: datetime | None = None) -> dict:
+        """The manager's "send a test alert": the email the policy would send right now (or the top open item), marked
+        as a test, sent to the manager only. Not recorded in the ledger, so it never counts against caps or cooldowns."""
+        now = now or BusinessClock(self.settings).now()
+        data = await asyncio.to_thread(snapshot_loader)
+        decisions = await asyncio.to_thread(self.evaluate, data, now)
+        chosen = [d for d in decisions if d.channel == 'email_now'] or [d for d in decisions if d.channel == 'digest'][:5]
+        if not chosen:
+            alerts = alert_policy.detect(data, now)[:1]
+            chosen = [alert_policy.Decision(a, 'email_now', 'test: the top open item') for a in alerts]
+        prefs = await asyncio.to_thread(self.preferences.read)
+        mail = alert_policy.render_email(chosen, now, prefs.get('manager_name', 'Manager'))
+        if not mail:
+            return {'status': 'nothing_to_send', 'message': 'No open alert right now.'}
+        mail = {**mail, 'subject': '[Test] ' + mail['subject'], 'body': 'This is a test of ThreadPilot alert emails, sent because you asked for it.\n\n' + mail['body']}
+        status = await self._send(mail, prefs.get('manager_email'), True)
+        return {'status': status, 'recipient': prefs.get('manager_email'), 'subject': mail['subject'], 'body': mail['body']}
+
     async def _send(self, mail: dict, recipient: str | None, send: bool) -> str:
         if not send:
             return 'dry_run'
@@ -135,3 +159,18 @@ class AlertDelivery:
             return outcome.get('status', 'unknown')
         except Exception:
             return 'unknown'
+
+
+async def alert_loop(app, every_seconds: int = 300) -> None:
+    """Long-running servers: evaluate the alert policy every few minutes (CloudBase calls /api/internal/email/run on its
+    minute timer instead). Sends only when enabled; caps, cooldowns and quiet hours apply on every tick."""
+    import logging
+    from .scheduling_service import current_snapshot
+    from ..workflow_api import business_now
+    service = AlertDelivery(app.state.settings)
+    while True:
+        try:
+            await service.run(lambda: current_snapshot(app.state.database, business_now().date().isoformat()))
+        except Exception:
+            logging.getLogger(__name__).warning('Alert check failed; will check again.')
+        await asyncio.sleep(every_seconds)

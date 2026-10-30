@@ -125,6 +125,9 @@ class DialogState(StrictModel):
     slots: Slots = Field(default_factory=Slots)
     comparison_orders: list[str] = Field(default_factory=list)
     last_order_ids: list[str] = Field(default_factory=list)
+    # orders discussed in this conversation: first-mention order (for "the first one") and recency ("the other one")
+    discussed_orders: list[str] = Field(default_factory=list)
+    recent_orders: list[str] = Field(default_factory=list)
     draft: dict[str, str] | None = None
     chase_context: dict[str, Any] = Field(default_factory=dict)
     chase_drafts: list[dict[str, Any]] = Field(default_factory=list)

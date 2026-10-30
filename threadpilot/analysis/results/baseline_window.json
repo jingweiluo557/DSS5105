@@ -1,0 +1,201 @@
+{
+  "windows": [
+    4,
+    5,
+    6,
+    8,
+    10,
+    12
+  ],
+  "rules": {
+    "watch": "below the minimum of the previous K same weekdays (at least 3)",
+    "p1": "3 consecutive working days below that minimum, emailed once per episode"
+  },
+  "false_alerts": {
+    "4": {
+      "p1_alerts_per_month": 0.67,
+      "watch_days_per_month": 19.8,
+      "watch_share_of_days": 0.191,
+      "theory_watch_share": 0.2
+    },
+    "5": {
+      "p1_alerts_per_month": 0.37,
+      "watch_days_per_month": 16.6,
+      "watch_share_of_days": 0.159,
+      "theory_watch_share": 0.167
+    },
+    "6": {
+      "p1_alerts_per_month": 0.21,
+      "watch_days_per_month": 13.8,
+      "watch_share_of_days": 0.133,
+      "theory_watch_share": 0.143
+    },
+    "8": {
+      "p1_alerts_per_month": 0.1,
+      "watch_days_per_month": 10.6,
+      "watch_share_of_days": 0.102,
+      "theory_watch_share": 0.111
+    },
+    "10": {
+      "p1_alerts_per_month": 0.06,
+      "watch_days_per_month": 8.5,
+      "watch_share_of_days": 0.081,
+      "theory_watch_share": 0.091
+    },
+    "12": {
+      "p1_alerts_per_month": 0.03,
+      "watch_days_per_month": 7.0,
+      "watch_share_of_days": 0.068,
+      "theory_watch_share": 0.077
+    }
+  },
+  "detection": {
+    "0.2": {
+      "4": {
+        "caught_pct": 91,
+        "median_working_days_to_alert": 3
+      },
+      "5": {
+        "caught_pct": 87,
+        "median_working_days_to_alert": 3.0
+      },
+      "6": {
+        "caught_pct": 85,
+        "median_working_days_to_alert": 3.0
+      },
+      "8": {
+        "caught_pct": 83,
+        "median_working_days_to_alert": 3.0
+      },
+      "10": {
+        "caught_pct": 80,
+        "median_working_days_to_alert": 3.0
+      },
+      "12": {
+        "caught_pct": 74,
+        "median_working_days_to_alert": 3
+      }
+    },
+    "0.3": {
+      "4": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "5": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "6": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "8": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "10": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "12": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      }
+    },
+    "0.4": {
+      "4": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "5": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "6": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "8": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "10": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      },
+      "12": {
+        "caught_pct": 100,
+        "median_working_days_to_alert": 3.0
+      }
+    }
+  },
+  "excursion": {
+    "3.0": {
+      "false_alerts_per_month": 0.86,
+      "one_day_drop_caught_same_day_pct": {
+        "30%": 80,
+        "40%": 99,
+        "50%": 100
+      }
+    },
+    "3.5": {
+      "false_alerts_per_month": 0.47,
+      "one_day_drop_caught_same_day_pct": {
+        "30%": 61,
+        "40%": 94,
+        "50%": 100
+      }
+    },
+    "4.0": {
+      "false_alerts_per_month": 0.22,
+      "one_day_drop_caught_same_day_pct": {
+        "30%": 47,
+        "40%": 83,
+        "50%": 100
+      }
+    }
+  },
+  "real_log": {
+    "first_day": "2026-01-01",
+    "last_day": "2026-03-31",
+    "drop_starts": "2026-03-25",
+    "by_window": {
+      "4": {
+        "judged_stage_days": 236,
+        "full_baseline_stage_days": 212,
+        "false_p1_before_event": 1,
+        "first_alert_for_assembly_drop": "2026-03-27"
+      },
+      "5": {
+        "judged_stage_days": 236,
+        "full_baseline_stage_days": 188,
+        "false_p1_before_event": 1,
+        "first_alert_for_assembly_drop": "2026-03-27"
+      },
+      "6": {
+        "judged_stage_days": 236,
+        "full_baseline_stage_days": 164,
+        "false_p1_before_event": 0,
+        "first_alert_for_assembly_drop": "2026-03-27"
+      },
+      "8": {
+        "judged_stage_days": 236,
+        "full_baseline_stage_days": 116,
+        "false_p1_before_event": 0,
+        "first_alert_for_assembly_drop": "2026-03-27"
+      },
+      "10": {
+        "judged_stage_days": 236,
+        "full_baseline_stage_days": 68,
+        "false_p1_before_event": 0,
+        "first_alert_for_assembly_drop": "2026-03-27"
+      },
+      "12": {
+        "judged_stage_days": 236,
+        "full_baseline_stage_days": 20,
+        "false_p1_before_event": 0,
+        "first_alert_for_assembly_drop": "2026-03-27"
+      }
+    }
+  }
+}

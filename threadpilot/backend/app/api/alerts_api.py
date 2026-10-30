@@ -5,7 +5,9 @@ GET  /api/alerts/policy       the thresholds, tiers and caps
 GET  /api/alerts/kpis         emails per week, items per digest, usefulness ratings
 PUT  /api/alerts/shelve       mute a key or a kind until a date (X-Confirm-Write: true)
 POST /api/alerts/feedback     the manager rates an alert useful / not useful
-POST /api/internal/alerts/run scheduler tick (Bearer SCHEDULER_TOKEN); sends only when ALERT_EMAILS_ENABLED=true
+POST /api/alerts/test         send the manager a test of the alert email now (manager, X-Confirm-Write: true)
+POST /api/internal/alerts/run scheduler tick (Bearer SCHEDULER_TOKEN); sends only when ALERT_EMAILS_ENABLED=true or the
+                              manager turned alert emails on in Settings
 """
 from __future__ import annotations
 
@@ -39,7 +41,7 @@ def preview(request: Request):
     decisions = svc.evaluate(data, now)
     body = alert_policy.summarize(decisions)
     body['business_now'] = now.isoformat()
-    body['emails_enabled'] = bool(getattr(request.app.state.settings, 'alert_emails_enabled', False))
+    body['emails_enabled'] = svc.enabled()
     body['would_send'] = alert_policy.render_email(decisions, now) or None
     return body
 
@@ -94,6 +96,15 @@ class Feedback(BaseModel):
 def feedback(body: Feedback, request: Request):
     delivery(request).ledger.feedback(body.key, body.useful, body.note, business_now())
     return {'recorded': True}
+
+
+@router.post('/api/alerts/test')
+async def test_alert(request: Request, x_confirm_write: str = Header(default='')):
+    from .security import require_manager
+    require_manager(request)
+    if x_confirm_write.lower() != 'true':
+        raise HTTPException(409, 'Confirm before sending a test email.')
+    return await delivery(request).test(snapshot_loader(request), business_now())
 
 
 @router.post('/api/internal/alerts/run')

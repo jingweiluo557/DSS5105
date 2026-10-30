@@ -127,3 +127,19 @@
 .note.md code { font: 12px/1.5 Consolas, monospace; background: #eef2f5; padding: 1px 5px; border-radius: 5px; }
 .source-details.facts .md { color: var(--ink); font-size: 13px; margin-top: 8px; }
 .source-details a { white-space: nowrap; }
+
+/* How an answer was made: memory, planner, tool calls, narration (live while answering, then folded under the answer) */
+.tool-steps{margin:.25rem 0 .6rem;font-size:.82rem;line-height:1.45}
+.tool-steps ol,.tool-steps.live{margin:.35rem 0 0;padding-left:1.35rem}
+.tool-steps li{margin:.15rem 0}
+.tool-steps li::marker{color:#6a7d72}
+.tool-steps code{font-size:.8rem;background:#eef2ef;padding:0 .3rem;border-radius:4px}
+.tool-steps .muted{color:#6b7682}
+.tool-steps.live li.running{color:#1f3b2d;font-weight:600}
+.tool-steps.live li.running::after{content:' …';animation:tp-pulse 1s infinite}
+.tool-steps .step-memory{color:#2d5577}
+details.tool-steps summary{cursor:pointer;color:#4a5563}
+@keyframes tp-pulse{50%{opacity:.3}}
+.chat-orders{margin-top:.75rem}
+.chat-orders .actions{flex-wrap:wrap;gap:.35rem}
+.chat-orders small{display:block;margin-top:.35rem}
