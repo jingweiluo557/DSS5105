@@ -31,6 +31,9 @@ COOLDOWN_HOURS = {P1: 24, P2: 24 * 3, P3: 24 * 7}
 QUIET_HOURS = (22, 6)                 # local time; P2/P3 wait for the next digest, P1 passes
 DIGEST_HOURS = (7, 14)                # P2 digests
 SUSTAINED_DROP_DAYS = 3               # consecutive working days below the same-weekday minimum
+EXCURSION_SIGMA = 3.5                 # one working day this far under the same-weekday mean is an excursion (P1 the same day)
+EXCURSION_MIN_SAMPLES = 5             # analysis/baseline_window.py: ~0.47 false excursions a month over 4 stages;
+                                      # a one-day 40% drop caught the same day 94% of the time, 50% always
 STALLED_CUSTOMER_MIN_ORDERS = 2
 NEAR_DUE_WORKING_DAYS = 2
 LARGE_ORDER_PIECES = 1500
@@ -82,6 +85,35 @@ def detect(data: dict, now: datetime) -> list[Alert]:
                              detail='; '.join(f"{b['date']}: {b['output']} vs min {b['same_weekday_min']} (mean {b['mean']})" for b in below),
                              action='Ask the floor what changed; check which near-due orders sit at or after this stage.',
                              evidence=below, rule=f'{SUSTAINED_DROP_DAYS} consecutive working days below the previous-8-same-weekday minimum'))
+
+    # P1-a2: a sudden excursion: the latest working day far outside the stage's normal range (machine down, a stoppage).
+    # It shares the stage's key with the sustained drop, so one problem emails once: day 1 as an excursion, and on
+    # day 3 the sustained drop is only reminded in the digest (cooldown), unless it got materially worse.
+    for stage in STAGES:
+        if any(a.key == f'stage_drop:{stage}' for a in out):
+            continue
+        rows = [r for r in logs if r['stage'] == stage]
+        worked = [r for r in rows if date.fromisoformat(r['date']) < today and is_working(date.fromisoformat(r['date']))]
+        if not worked:
+            continue
+        r = worked[-1]
+        d = date.fromisoformat(r['date'])
+        if (today - d).days > 3:
+            continue   # stale data is not an excursion
+        base = [int(x['pieces_completed']) for x in rows if date.fromisoformat(x['date']) < d and date.fromisoformat(x['date']).weekday() == d.weekday()][-8:]
+        if len(base) < EXCURSION_MIN_SAMPLES:
+            continue
+        m = mean(base)
+        sd = (sum((b - m) ** 2 for b in base) / len(base)) ** 0.5
+        value = int(r['pieces_completed'])
+        if value < min(base) and value < m - EXCURSION_SIGMA * sd:
+            gap = round(100 * (1 - value / m)) if m else 100
+            out.append(Alert(key=f'stage_drop:{stage}', kind='stage_excursion', tier=P1, score=min(100, 55 + gap), entity=stage,
+                             title=f'{stage.title()} made {value} pieces on {r["date"]}, {gap}% under its usual {round(m)}: far outside its normal range',
+                             detail=f'{r["date"]}: {value} against the previous {len(base)} same weekdays (mean {round(m, 1)}, lowest {min(base)}, SD {round(sd, 1)})',
+                             action='Ask the floor what happened (a stoppage, absence or material); if it continues, near-due orders behind this stage slip.',
+                             evidence=[{'date': r['date'], 'output': value, 'same_weekday_mean': round(m, 1), 'same_weekday_min': min(base), 'sd': round(sd, 1)}],
+                             rule=f'one working day below the mean minus {EXCURSION_SIGMA} SD of the previous 8 same weekdays (at least {EXCURSION_MIN_SAMPLES}) and below their minimum'))
 
     # P1-b: a customer whose active orders have all stalled while later-due orders moved (shared cause, not the queue)
     by_customer: dict[str, list[dict]] = {}

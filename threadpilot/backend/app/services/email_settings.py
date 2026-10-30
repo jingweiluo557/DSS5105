@@ -35,6 +35,7 @@ class EmailPreferences(BaseModel):
     manager_email: str
     manager_name: str = Field(default='Manager', max_length=100)
     briefing_enabled: bool = False
+    alert_emails_enabled: bool = False   # the manager's switch for immediate alert emails (at most 3 a day)
     subject_prefix: str = Field(default='ThreadPilot morning briefing', min_length=1, max_length=120)
     customers: list[CustomerContact] = Field(default_factory=list, max_length=200)
     departments: dict[str, str] = Field(default_factory=dict)
@@ -67,7 +68,7 @@ class EmailSettings:
     def read_in(self, db):
         return self.outlook.get(db, 'email_preferences', {
             'version': 0, 'manager_email': '1098214258@qq.com', 'manager_name': 'Manager',
-            'briefing_enabled': False, 'subject_prefix': 'ThreadPilot morning briefing',
+            'briefing_enabled': False, 'alert_emails_enabled': False, 'subject_prefix': 'ThreadPilot morning briefing',
             'customers': [], 'start_day': None, 'updated_at': None,
             'time': '07:00', 'timezone': 'Asia/Shanghai'})
 
@@ -80,6 +81,8 @@ class EmailSettings:
                 raise HTTPException(409, 'Email settings changed. Reload before saving.')
             if body.briefing_enabled and not self.outlook.get(db, 'account'):
                 raise HTTPException(409, 'Connect Outlook before enabling automatic briefings.')
+            if body.alert_emails_enabled and not old.get('alert_emails_enabled') and not self.outlook.get(db, 'account'):
+                raise HTTPException(409, 'Connect Outlook before turning on alert emails.')
             start_day = old.get('start_day')
             clock = BusinessClock(self.outlook.settings).read() or {}
             if old.get('clock_run_id','') != clock.get('run_id',''):

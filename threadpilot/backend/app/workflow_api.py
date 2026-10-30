@@ -121,19 +121,20 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
         return {'status': 'completed'}
 
     @app.post('/api/v1/workflow/chat/stream', tags=['Workflow'], response_class=StreamingResponse,
-              responses={200: {'description': 'Validated workflow SSE: start, facts, delta, done',
+              responses={200: {'description': 'Validated workflow SSE: start, step (planner / memory / tool calls), facts, delta, done',
                                'content': {'text/event-stream': {'schema': {'type': 'string'}}}}})
     async def workflow_stream(body: ChatRequest, request: Request) -> StreamingResponse:
         """场景 1.1–3.3：完成规则验证后发送 SSE，避免未验证文本抢先展示。"""
         async def frames() -> AsyncIterator[str]:
             queue = asyncio.Queue(maxsize=32)
             emitted = False
-            async def emit(text, kind='delta'):
-                # 'facts': the server's own answer, sent before the model narrates so the first useful line lands early
+            async def emit(text, kind='delta', **detail):
+                # 'facts': the server's own answer, sent before the model narrates so the first useful line lands early;
+                # 'step': one step of how the answer is made (planner, memory, a tool call, narration), shown live in the chat
                 nonlocal emitted
                 if kind == 'delta':
                     emitted = True
-                await queue.put((kind, {'text':text}))
+                await queue.put((kind, {'text':text, **detail}))
             async def produce():
                 try:
                     result = await run(body, request, emit)

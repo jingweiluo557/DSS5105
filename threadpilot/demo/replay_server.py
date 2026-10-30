@@ -265,7 +265,7 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/morning': return {'business_date': data['today'], 'reports': [BRIEFING], 'current_fingerprint': 'replay', 'model_configured': False}
         if path == '/api/v1/health': return {'status': 'ok', 'configured': True, 'model': 'offline replay', 'streaming': True}
         if path == '/api/v1/whoami': return {'role': 'manager'}
-        if path == '/api/alerts/preview': return alerts
+        if path == '/api/alerts/preview': return {**alerts, 'emails_enabled': False}
         if path == '/api/predictions': return {'business_date': data['today'], 'imported_at': NOW.isoformat(), 'rows': []}
         if path == '/api/email/settings': return {'clock': {'now': NOW.isoformat(), 'mode': 'legacy', 'version': 1}, 'connection': {'connected': True, 'account': 'manager@example.com'},
                                                  'preferences': {'version': 1, 'manager_email': 'manager@example.com', 'manager_name': 'Manager', 'briefing_enabled': True, 'start_day': data['today'], 'customers': [],
@@ -292,7 +292,10 @@ class Handler(SimpleHTTPRequestHandler):
         ev('start', {'request_id': 'replay'})
         try:
             request = ChatRequest(**{k: v for k, v in body.items() if k in ('message', 'session_id', 'confirmation_id', 'selected_order_id', 'review_draft_id') and v})
-            response = asyncio.run(engine.chat(request, agent))
+            async def emit(text, kind='delta', **detail):
+                if kind == 'step':          # the tool-call steps stream live, as on the deployed site
+                    ev('step', {'text': text, **detail})
+            response = asyncio.run(engine.chat(request, agent, emit=emit))
             payload = response.model_dump(mode='json')
             payload['model'] = 'offline replay'
             ev('facts', {'text': payload['answer']})
