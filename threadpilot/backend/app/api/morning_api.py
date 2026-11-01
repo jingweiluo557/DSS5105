@@ -26,7 +26,7 @@ def briefing_page():
 def morning_list(request: Request, response: Response):
     response.headers['Cache-Control']='no-store'
     today=business_now().date().isoformat()
-    return {'business_date':today,'reports':MorningService(request.app.state.database).list(),
+    return {'business_date':today,'reports':MorningService(request.app.state.database).list(today),
             'current_fingerprint':fingerprint(current_snapshot(request.app.state.database,today)),
             'model_configured':request.app.state.client is not None}
 
