@@ -2,6 +2,7 @@
 import asyncio
 import json
 import re
+from time import perf_counter
 from contextlib import nullcontext
 from collections.abc import Callable
 from datetime import date, datetime, time, timedelta
@@ -157,10 +158,21 @@ class WorkflowEngine:
             if not names_something:
                 state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
         confirmed = self.confirmation_word(request.message)
+        original_message, memory_notes = request.message, []
+        if not confirmed:
+            # Several orders in one chat: "the first one", "the other one", "both of them", "the scarf one" become the
+            # explicit IDs of orders discussed earlier, before the planner sees the message (services/conversation_memory.py).
+            from .services.conversation_memory import recall
+            rewritten, memory_notes = recall(request.message, state, self.tools)
+            if memory_notes:
+                request = request.model_copy(update={'message': rewritten})
+                for n in memory_notes:
+                    await self.step(emit, 'memory', f"\u201c{n['phrase']}\u201d \u2192 {' and '.join(n['order_ids'])}", source=n['from'], order_ids=n['order_ids'])
         if confirmed and role != 'manager':
             # Sprint 2: a planner key can read, draft and preview; only the manager key confirms a write.
             response = self.response(state, Classification(intent=state.last_intent or Intent.UNKNOWN, confidence=1), now,
                                      'A manager key is required to confirm this action. The preview stays open for a manager to confirm.', [], [])
+            await self.tool_steps(emit, response)
             if emit: await emit(response.answer)
             state.revision += 1
             state.history = (state.history + [{'role': 'user', 'content': request.message}, {'role': 'assistant', 'content': response.answer}])[-16:]
@@ -178,6 +190,7 @@ class WorkflowEngine:
             if emit: await emit(response.answer)
         elif confirmed:
             response = await self.confirm(request, state, now)
+            await self.tool_steps(emit, response)
             if emit:
                 await emit(response.answer)
         elif hasattr(classifier, 'plan'):
@@ -192,15 +205,86 @@ class WorkflowEngine:
                 response = await self.review_reason_handler(request, classification, state, now)
             else:
                 response = self.route(request.message, classification, state, now)
+        if memory_notes:
+            from .services.conversation_memory import note_line
+            recall_calls = [ToolCall(name='recall_conversation', arguments={'phrase': n['phrase']}, result={'order_ids': n['order_ids'], 'from': n['from']})
+                            for n in memory_notes]
+            response = response.model_copy(update={'answer': note_line(memory_notes) + '\n\n' + response.answer,
+                                                    'tool_calls': recall_calls + list(response.tool_calls)})
+        self.remember_orders(request.message, response, state)
         state.revision += 1
-        state.history = (state.history + [{'role': 'user', 'content': request.message},
+        state.history = (state.history + [{'role': 'user', 'content': original_message},
                                          {'role': 'assistant', 'content': response.answer}])[-16:]
         self.store.save(state)
         return response.model_copy(update={'state': state.model_copy(deep=True)})
 
+    def remember_orders(self, message: str, response: ChatResponse, state: DialogState) -> None:
+        """Orders this turn was about: IDs the manager named (or memory resolved), the resolved order, a compared pair.
+        Candidate lists are not remembered: being listed is not being discussed."""
+        from .services.conversation_memory import remember
+        named = [i for i in dict.fromkeys(re.findall(r'\bORD-\d{3}\b', message.upper())) if i in set(response.order_ids) | {response.selected_order_id} | set(state.comparison_orders)]
+        ids = named + ([response.selected_order_id] if response.selected_order_id else []) + (state.comparison_orders if response.intent == Intent.ORDER_COMPARE else [])
+        remember(state, list(dict.fromkeys(i for i in ids if i)))
+
+    @staticmethod
+    async def step(emit, phase: str, label: str, **detail) -> None:
+        """Stream one step of how the answer is being made (planner, memory, a tool call, narration) to the UI."""
+        if not emit:
+            return
+        try:
+            await emit(label, kind='step', phase=phase, **detail)
+        except TypeError:      # an emitter that only takes text (tests, the offline replay): steps are optional
+            return
+
+    @staticmethod
+    def compact_arguments(arguments: dict) -> dict:
+        skip = {('reference', 'none'), ('action', 'read'), ('chase_mode', 'single')}
+        out = {}
+        for k, v in arguments.items():
+            if v in (None, [], '', {}, False) or (isinstance(v, str) and (k, v) in skip):
+                continue
+            text = v if isinstance(v, (int, float)) else ', '.join(map(str, v)) if isinstance(v, list) else str(v)
+            out[k] = text if not isinstance(text, str) or len(text) <= 60 else text[:57] + '...'
+            if len(out) == 6:
+                break
+        return out
+
+    @staticmethod
+    def result_summary(result: dict) -> str:
+        if not isinstance(result, dict) or not result:
+            return 'done'
+        for key, label in (('candidates', 'matching order'), ('records', 'record'), ('orders', 'order'), ('drafts', 'draft'), ('rows', 'row')):
+            if isinstance(result.get(key), list):
+                n = len(result[key])
+                return f'{n} {label}{"s" if n != 1 else ""}'
+        if result.get('declined'):
+            return 'declined: not in the data (' + str(result.get('reason', '')) + ')'
+        if 'order_id' in result and 'current_stage' in result:
+            return f"{result['order_id']}: {str(result['current_stage']).lower()}, due {result.get('due_date', '?')}"
+        for key in ('verdict', 'status', 'risk_level', 'preliminary'):
+            if isinstance(result.get(key), str):
+                return f'{key.replace("_", " ")}: {result[key]}'
+        if isinstance(result.get('risks'), dict):
+            return f"{len(result['risks'])} risk assessments"
+        return f'{len(result)} fields'
+
+    async def tool_steps(self, emit, response: ChatResponse, ms: float | None = None) -> None:
+        calls = list(response.tool_calls)
+        for i, call in enumerate(calls):
+            last = i == len(calls) - 1
+            await self.step(emit, 'tool', call.name, arguments=self.compact_arguments(call.arguments), summary=self.result_summary(call.result),
+                            executed=call.executed, ms=round(ms, 1) if (ms is not None and last) else None,
+                            rows=len(response.evidence) if last else None)
+
     async def converse(self, request, agent, state, now, emit):
         from .conversation import summary_response
+        started = perf_counter()
+        await self.step(emit, 'plan', 'Understanding the question', model=getattr(agent, 'model', None) or 'planner')
         plan = await agent.plan(request.message, state, now)
+        for task in plan.tasks:
+            c = task.classification
+            await self.step(emit, 'plan', c.intent.value, slots=self.compact_arguments(c.slots.model_dump()), confidence=round(c.confidence, 2),
+                            ms=round((perf_counter() - started) * 1000, 1))
         single_order_intents = {Intent.ORDER_LOOKUP, Intent.ORDER_REFRESH, Intent.ORDER_RISK, Intent.ORDER_EXPEDITE, Intent.ORDER_FORECAST}
         expanded = []
         human_ids = set(re.findall(r'\bORD-\d{3}\b', request.message.upper()))
@@ -227,8 +311,12 @@ class WorkflowEngine:
                 if emit: await emit(response.answer)
                 return response
             from .services.chase_chat import chase_chat
-            return await chase_chat(self, request.message, expanded[0].classification, state, now, agent, emit)
+            t0 = perf_counter()
+            response = await chase_chat(self, request.message, expanded[0].classification, state, now, agent, emit)
+            await self.tool_steps(emit, response, (perf_counter() - t0) * 1000)
+            return response
         for task in expanded:
+            t0 = perf_counter()
             result = task.classification
             if result.intent == Intent.GENERAL:
                 response = ChatResponse(answer='The model is unavailable. Please try your general question again later.', intent=Intent.GENERAL,
@@ -266,12 +354,14 @@ class WorkflowEngine:
                         route_message = request.message
                     response = self.route(route_message, result, state, now)
             responses.append(response)
+            await self.tool_steps(emit, response, (perf_counter() - t0) * 1000)
         queried = list(dict.fromkeys(i for r in responses if r.intent in single_order_intents for i in r.order_ids))
         if len(queried) > 1:
             state.comparison_orders = queried
             state.active_order = None
             state.last_order_ids = queried
             state.slots.order_ids = []
+        await self.step(emit, 'narrate', 'Writing the answer from these results', model=getattr(agent, 'model', None) or 'narrator')
         answer = await agent.narrate(request.message, state, responses, emit)
         last = responses[-1]
         evidence = list({(e.source,e.row):e for r in responses for e in r.evidence}.values())
@@ -339,6 +429,13 @@ class WorkflowEngine:
         state.pending_clarification = None
         calls: list[ToolCall] = []
         evidence: list[Evidence] = []
+        # Sprint 3: "why eight same weekdays?" / "why not the last 7 days?" gets the measured reasons, whatever the planner chose.
+        from .services import baseline_rationale
+        if baseline_rationale.asks_why(message) and not intent.value.startswith('execution.'):
+            state.pending_clarification = None
+            calls.append(ToolCall(name='explain_baseline_choice', arguments={'windows_compared': sorted(baseline_rationale.STUDY)},
+                                  result={'chosen': 8, 'study': {str(k): v for k, v in baseline_rationale.STUDY.items()}, 'source': 'analysis/baseline_window.py'}))
+            return self.response(state, result, now, baseline_rationale.answer(), calls, evidence)
         # Sprint 2: refusals come before clarifications. A request for money, people, causes, deletions, cancellations or
         # customer contact gets the stated non-goal, never "which order?".
         declined = refusal(message) if intent in (Intent.UNKNOWN, Intent.UNANSWERABLE, Intent.GENERAL) or result.confidence < 0.65 else None

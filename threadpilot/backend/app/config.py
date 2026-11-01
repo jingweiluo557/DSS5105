@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr = SecretStr('')
     openai_base_url: str | None = None
     openai_model: str = 'gpt-4.1'
+    transcribe_model: str = 'whisper-1'   # voice input when the browser has no speech recognition (POST /api/v1/voice/transcribe)
     intent_api_style: Literal['responses', 'chat_completions'] = 'responses'
     openai_timeout_seconds: float = 60
     data_api_token: SecretStr = SecretStr('')

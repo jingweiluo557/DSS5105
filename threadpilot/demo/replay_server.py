@@ -50,6 +50,7 @@ from app.workflow_engine import WorkflowEngine  # noqa: E402
 from app.workflow_store import WorkflowStore  # noqa: E402
 from app.workflow_tools import DataTools  # noqa: E402
 
+PACE = float(os.environ.get('REPLAY_STEP_PACE', '0') or 0)   # seconds between streamed steps; 0 = as fast as the server runs
 NOW = datetime.fromisoformat(os.environ.get('REPLAY_NOW', '2026-04-01T09:00:00+08:00'))
 tools = DataTools(ROOT / 'data')
 data, _ = tools.queue_snapshot(NOW)
@@ -265,7 +266,7 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/morning': return {'business_date': data['today'], 'reports': [BRIEFING], 'current_fingerprint': 'replay', 'model_configured': False}
         if path == '/api/v1/health': return {'status': 'ok', 'configured': True, 'model': 'offline replay', 'streaming': True}
         if path == '/api/v1/whoami': return {'role': 'manager'}
-        if path == '/api/alerts/preview': return alerts
+        if path == '/api/alerts/preview': return {**alerts, 'emails_enabled': False}
         if path == '/api/predictions': return {'business_date': data['today'], 'imported_at': NOW.isoformat(), 'rows': []}
         if path == '/api/email/settings': return {'clock': {'now': NOW.isoformat(), 'mode': 'legacy', 'version': 1}, 'connection': {'connected': True, 'account': 'manager@example.com'},
                                                  'preferences': {'version': 1, 'manager_email': 'manager@example.com', 'manager_name': 'Manager', 'briefing_enabled': True, 'start_day': data['today'], 'customers': [],
@@ -292,7 +293,11 @@ class Handler(SimpleHTTPRequestHandler):
         ev('start', {'request_id': 'replay'})
         try:
             request = ChatRequest(**{k: v for k, v in body.items() if k in ('message', 'session_id', 'confirmation_id', 'selected_order_id', 'review_draft_id') and v})
-            response = asyncio.run(engine.chat(request, agent))
+            async def emit(text, kind='delta', **detail):
+                if kind == 'step':          # the tool-call steps stream live, as on the deployed site
+                    ev('step', {'text': text, **detail})
+                    if PACE: await asyncio.sleep(PACE)   # the live model takes about this long per step; lets a viewer read the status line
+            response = asyncio.run(engine.chat(request, agent, emit=emit))
             payload = response.model_dump(mode='json')
             payload['model'] = 'offline replay'
             ev('facts', {'text': payload['answer']})

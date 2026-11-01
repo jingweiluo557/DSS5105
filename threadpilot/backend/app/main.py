@@ -49,9 +49,15 @@ def create_app() -> FastAPI:
         delivery = asyncio.create_task(delivery_loop(app)) if app.state.settings.email_scheduler_enabled else None
         from .services.scheduled_email import scheduled_email_loop
         email_queue = asyncio.create_task(scheduled_email_loop(app)) if app.state.settings.email_scheduler_enabled else None
+        from .services.alert_delivery import alert_loop
+        alerts = asyncio.create_task(alert_loop(app)) if app.state.settings.email_scheduler_enabled else None
         try:
             yield
         finally:
+            if alerts:
+                alerts.cancel()
+                with suppress(asyncio.CancelledError):
+                    await alerts
             if email_queue:
                 email_queue.cancel()
                 with suppress(asyncio.CancelledError):
@@ -143,8 +149,8 @@ def create_app() -> FastAPI:
         return {'role': getattr(request.state, 'role', 'manager'), 'manager_key_configured': bool(app.state.settings.manager_access_token.get_secret_value())}
 
     install_workflow_routes(app, DATA)
-    from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api, scheduling_api, morning_api, outlook_api, email_api, email_scheduler_api, alerts_api, feasibility_api
-    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router, dashboard_api.router, scheduling_api.router, morning_api.router, outlook_api.router, email_api.router, email_scheduler_api.router, alerts_api.router, feasibility_api.router):
+    from .api import data_api, sync_api, snapshot_api, ai_api, dashboard_api, scheduling_api, morning_api, outlook_api, email_api, email_scheduler_api, alerts_api, feasibility_api, voice_api
+    for router in (data_api.router, sync_api.router, snapshot_api.router, ai_api.router, dashboard_api.router, scheduling_api.router, morning_api.router, outlook_api.router, email_api.router, email_scheduler_api.router, alerts_api.router, feasibility_api.router, voice_api.router):
         app.include_router(router)
     if Settings().serve_frontend:
         app.mount('/', StaticFiles(directory=FRONTEND, html=True), name='frontend')

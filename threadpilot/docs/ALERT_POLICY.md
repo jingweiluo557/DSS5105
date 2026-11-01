@@ -25,6 +25,7 @@ The brief says it: "a co-pilot that pings ten times a day gets muted". Industria
 
 | Tier | Trigger | Rule | Why it earns the tier |
 |---|---|---|---|
+| P1 | Sudden excursion (Sprint 3) | the latest working day below the mean minus 3.5 SD of the previous 8 same weekdays (at least 5) and below their minimum | a machine down or a stoppage should not wait three days; measured at about 0.47 false alerts a month over four stages, a one-day 40% drop caught the same day 94% of the time (`docs/BASELINE_WINDOW.md`). Shares the stage's key with the sustained drop, so one problem emails once |
 | P1 | Sustained stage drop | 3 consecutive working days below the previous-8-same-weekday minimum | one low day is noise (P3); three is a line stopped or a machine down, and every near-due order behind it slips |
 | P1 | Customer stalled | every active order of a customer idle ≥ 5 working days while later-due orders at the same stage moved | the queue does not explain it; a hold, material or payment issue needs a phone call |
 | P1 | Will miss, no plan | due within 2 working days, best-case queue finish after the due date, no manager-approved priority | the only three options (expedite, outsource, new date) all need the GM today |
@@ -67,5 +68,12 @@ Through the chase flow: a chase-up can be addressed to a department (`KNITTING`/
 ## Turning it on
 
 1. Outlook connected in Settings, manager email set.
-2. `ALERT_EMAILS_ENABLED=true` on the cloud function; the existing minute timer (`/api/internal/email/run`) already calls the alert tick.
-3. Watch `GET /api/alerts/kpis` for a week; tune thresholds in `alert_policy.py` (all constants at the top) before widening.
+2. Either the manager ticks **"Email me at once when something needs me today"** in Settings (stored with the email preferences,
+   manager key required, Outlook must be connected) or the deployment sets `ALERT_EMAILS_ENABLED=true`. Either one turns sending on.
+3. Who runs the check: on CloudBase the minute timer (`/api/internal/email/run`) already calls the alert tick; a long-running
+   server with `EMAIL_SCHEDULER_ENABLED=true` runs it every 5 minutes (`alert_loop` in `alert_delivery.py`). Caps, cooldowns
+   and quiet hours apply on every tick, so running more often never sends more.
+4. **Send me a test alert now** in Settings (`POST /api/alerts/test`, manager key, `X-Confirm-Write: true`) emails the manager
+   the message the policy would send right now, marked [Test]. It is not recorded in the ledger, so it never uses up the
+   daily cap or a cooldown.
+5. Watch `GET /api/alerts/kpis` for a week; tune thresholds in `alert_policy.py` (all constants at the top) before widening.
