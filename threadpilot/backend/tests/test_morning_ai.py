@@ -13,6 +13,24 @@ from sqlalchemy import update
 NOW=datetime.fromisoformat('2026-10-14T08:00:00+08:00')
 
 
+def test_current_business_day_precedes_wall_clock_archives_before_limit(business_database):
+    from app.morning_store import reports
+    rows = [dict(id=f'old-{i:02}', day='2026-10-23', business_date='2026-04-01',
+                 generated_at=f'2026-10-23T14:38:{i:02}+08:00', fingerprint='old', payload='{}')
+            for i in range(31)]
+    rows += [dict(id=label, day=day, business_date=day, generated_at=stamp,
+                  fingerprint='current', payload='{}') for label, day, stamp in [
+        ('current-old', '2026-04-03', '2026-04-03T02:00:00+08:00'),
+        ('current-new', '2026-04-03', '2026-04-03T07:00:00+08:00'),
+        ('previous', '2026-04-02', '2026-04-02T07:00:00+08:00')]]
+    with business_database.sessions.begin() as session:
+        session.execute(reports.insert(), rows)
+    service = MorningService(business_database)
+    assert [r['id'] for r in service.list('2026-04-03')][:3] == ['current-new', 'current-old', 'previous']
+    assert service.list('2026-04-04')[0]['id'] == 'current-new'
+    assert service.list()[0]['id'] == 'old-30'
+
+
 @pytest.fixture(autouse=True)
 def dashboard_tables(business_database):
     from app.dashboard_store import metadata
