@@ -50,6 +50,7 @@ from app.workflow_engine import WorkflowEngine  # noqa: E402
 from app.workflow_store import WorkflowStore  # noqa: E402
 from app.workflow_tools import DataTools  # noqa: E402
 
+PACE = float(os.environ.get('REPLAY_STEP_PACE', '0') or 0)   # seconds between streamed steps; 0 = as fast as the server runs
 NOW = datetime.fromisoformat(os.environ.get('REPLAY_NOW', '2026-04-01T09:00:00+08:00'))
 tools = DataTools(ROOT / 'data')
 data, _ = tools.queue_snapshot(NOW)
@@ -295,6 +296,7 @@ class Handler(SimpleHTTPRequestHandler):
             async def emit(text, kind='delta', **detail):
                 if kind == 'step':          # the tool-call steps stream live, as on the deployed site
                     ev('step', {'text': text, **detail})
+                    if PACE: await asyncio.sleep(PACE)   # the live model takes about this long per step; lets a viewer read the status line
             response = asyncio.run(engine.chat(request, agent, emit=emit))
             payload = response.model_dump(mode='json')
             payload['model'] = 'offline replay'
