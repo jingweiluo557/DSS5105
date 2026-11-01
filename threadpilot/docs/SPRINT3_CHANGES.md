@@ -31,15 +31,28 @@ not rewritten: the system asks. The AI workspace lists "Orders in this chat"; ta
 ## 3. Tool calls shown while answering
 
 The chat stream now sends `step` events: the planner's reading (intent and details), memory, every tool call with its inputs, a
-one-line result, the source rows and the time, then "Writing the answer". They appear live above the answer and stay under it as
-"How I answered · N tool calls". Same tool names as `docs/TOOL_SPECIFICATION.md`.
+one-line result, the source rows and the time, then "Writing the answer". While the answer is being made the bubble shows one
+plain-words line saying what is happening right now ("Looking up the order record · ORD-005…"); "Show more" opens every step. Once
+done the line reads "2 tool calls · 1 source row · memory used · 0.7 s" with the detail folded under it. Same tool names as
+`docs/TOOL_SPECIFICATION.md`. `demo/replay_server.py` takes `REPLAY_STEP_PACE=<seconds>` to space the steps in a recording.
 
 ## 4. Why "normal" is the previous 8 same weekdays (`analysis/baseline_window.py`, `docs/BASELINE_WINDOW.md`)
 
 Measured on this factory's data with the product's own rules, for 4 to 12 weeks: 8 weeks cuts false alert emails from about 0.67 a
 month (4 weeks) to about 0.1, still catches every 30% drop on its third day and 83% of 5-day 20% drops; 10–12 weeks add little and
 leave few days with a full baseline in 90 days of data. The chat answers "why eight?" / "why not the last 7 days?" with these figures
-(`explain_baseline_choice`), and the home screen's production chart has a short "Why eight same weekdays?" note.
+(`explain_baseline_choice`), and one small-type sentence saying why sits under every stage calculation that uses the rule: the
+home pulse card, the feasibility capacity picture, the briefing's calculation basis, and any chat answer that quotes the band.
+
+## 5. An "i" button on every visualisation (`frontend/explain.js`)
+
+Every card, chart and calculation has an "i" button in its heading. It opens a short note in three parts: what it shows, how to
+read it, why it is done that way (thresholds, the study figures, the rule the server applies). Where it helps, the note ends with
+an "Ask ThreadPilot" button that puts the question to the chat. Covered: status line, decide-today cards, order health, production
+pulse and stage trend, morning briefing, to-dos, the chat itself and each answer's steps, capacity picture, the shared estimate and
+scenario cards, the local cross-check, priority ranking, risk orders and "why it is flagged", dispatch decision, workshop comparison,
+delivery history, alert emails, exception monitoring (which notes that its quick scan uses a 20-working-day mean, unlike the
+eight-same-weekday rule behind the pulse and the alerts), historical predictions, evidence. The wording follows the code it describes.
 
 ## Tests
 

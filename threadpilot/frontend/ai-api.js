@@ -44,7 +44,7 @@ function stepsHTML(steps,live){
  const items=steps.map((s,i)=>`<li class="${live&&i===steps.length-1?'running':'done'} step-${esc(s.phase||'')}">${stepDetail(s)}</li>`).join('');
  const tools=steps.filter(s=>s.phase==='tool'),rows=tools.map(s=>s.rows).find(r=>r),ms=steps.reduce((t,s)=>t+(s.ms||0),0);
  const now=live?esc(stepWords(steps[steps.length-1]))+'…':`${tools.length?`${tools.length} tool call${tools.length===1?'':'s'}`:'No tool calls'}${rows?` · ${rows} source row${rows===1?'':'s'}`:''}${steps.some(s=>s.phase==='memory')?' · memory used':''}${ms?` · ${ms>=1000?(ms/1000).toFixed(1)+' s':Math.round(ms)+' ms'}`:''}`;
- return `<details class="tool-steps${live?' live':''}"${live&&aiStepsOpen?' open':''}><summary><span class="tp-dot" aria-hidden="true"></span><span class="tp-now" ${live?'aria-live="polite"':''}>${now}</span><span class="tp-more"></span></summary><ol>${items}</ol></details>`;
+ return `<details class="tool-steps${live?' live':''}"${live&&aiStepsOpen?' open':''}><summary><span class="tp-dot" aria-hidden="true"></span><span class="tp-now" ${live?'aria-live="polite"':''}>${now}</span><span class="tp-more"></span>${infoButton('steps')}</summary><ol>${items}</ol></details>`;
 }
 function sourceSummary(m){
  const counts={};for(const e of (m.evidence||[]))counts[e.source]=(counts[e.source]||0)+1;

@@ -34,3 +34,15 @@
 
 /* One small line under any stage calculation that uses the previous eight same weekdays (home pulse, feasibility chart, briefing, chat) */
 .why-eight{display:block;margin:.3rem 0 0;font-size:.74rem;line-height:1.4;color:#6b7682}
+/* The "i" button beside every visualisation, and the explanation it opens (explain.js) */
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:1.15rem;height:1.15rem;margin-left:.4rem;border-radius:50%;border:1px solid #9aa7b3;background:#fff;color:#4a5563;font:600 .72rem/1 Georgia,serif;font-style:italic;cursor:pointer;vertical-align:middle;padding:0;flex:none}
+.info-btn:hover,.info-btn:focus-visible{border-color:#1f6f5a;color:#1f6f5a;background:#eef6f3}
+h2 .info-btn,h3 .info-btn,.eyebrow .info-btn{position:relative;top:-1px}
+.info-pop{position:fixed;z-index:60;background:#fff;color:#172335;border:1px solid #cfd6dc;border-radius:12px;box-shadow:0 12px 32px rgba(23,35,53,.18);padding:14px 16px;font-size:.86rem;line-height:1.5;max-height:min(70vh,560px);overflow:auto}
+.info-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:.95rem}
+.info-close{border:0;background:transparent;font-size:1.2rem;line-height:1;cursor:pointer;color:#6b7682;padding:2px 6px;border-radius:6px}
+.info-close:hover{background:#eef2f5;color:#172335}
+.info-pop dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px}
+.info-pop dt{font-weight:600;color:#6b7682;white-space:nowrap}
+.info-pop dd{margin:0}
+.info-pop .info-ask{margin-top:10px;width:100%;text-align:left}

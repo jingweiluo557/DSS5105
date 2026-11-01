@@ -28,7 +28,7 @@
   function alertsCard(){
     const p=model.preferences,a=model.alerts,on=a?a.emails_enabled:p.alert_emails_enabled;
     const now=(a?.email_now||[]),digest=(a?.digest||[]).length,watch=(a?.briefing_only||[]).length;
-    return `<section class="card ${on?'':'attention'}"><div class="section-heading"><div><div class="eyebrow">ALERT EMAILS</div><h2>Interrupt me only when it matters</h2></div><span class="badge ${on?'ok':'watch'}">${on?'On':'Off: decisions are recorded, nothing is sent'}</span></div>
+    return `<section class="card ${on?'':'attention'}"><div class="section-heading"><div><div class="eyebrow">ALERT EMAILS</div><h2>Interrupt me only when it matters${infoButton('alerts')}</h2></div><span class="badge ${on?'ok':'watch'}">${on?'On':'Off: decisions are recorded, nothing is sent'}</span></div>
       <p class="muted">Checked every few minutes. An email goes out at once only for a decision you must take today: a stage far outside its normal range, a stage below it three working days in a row, an order that will miss even in the best case, or a customer whose orders all stopped. At most 3 a day, never the same item twice in 24 hours; the rest waits for the 07:00 briefing or the 14:00 digest.</p>
       ${a?`<p><strong>Right now:</strong> ${now.length?now.length+' would email at once: '+now.map(x=>esc(x.title)).join('; '):'nothing needs an immediate email'}. ${digest} for the digest, ${watch} watch items for the briefing.</p>`:''}
       <div class="actions">${action('test-alert','Send me a test alert now')}<a href="#/messages">Watches &amp; receipts →</a></div>
