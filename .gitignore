@@ -1,0 +1,5 @@
+threadpilot/submission/fragments/
+threadpilot/submission/_*.built.html
+threadpilot/submission/docx/ref/
+threadpilot/submission/docx/ref.docx
+threadpilot/submission/docx/*.html

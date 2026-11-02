@@ -1,0 +1,44 @@
+<section id="architecture" data-transition="fade" style="background:#F6F4EF;color:#1C2733;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Architecture: the model routes, code computes</h2>
+<div style="display:flex;align-items:stretch;gap:12px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:2px solid #D5D9DE;border-radius:16px;padding:22px">
+<h3 style="font-size:30px;font-weight:600">Manager</h3>
+<p style="font-size:24px;color:#4A5563">Phone or laptop; types or speaks</p>
+</div>
+<x-connector head="end" style="width:44px;color:#3F6C94;border-width:4px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:2px solid #D5D9DE;border-radius:16px;padding:22px">
+<h3 style="font-size:30px;font-weight:600">Planner model</h3>
+<p style="font-size:24px;color:#4A5563">gpt-6-luna picks intent and details; never a number</p>
+</div>
+<x-connector head="end" style="width:44px;color:#3F6C94;border-width:4px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#1C2733;color:#F3F1EC;border-radius:16px;padding:22px">
+<h3 style="font-size:30px;font-weight:600">Workflow rules</h3>
+<p style="font-size:24px;color:#C9D3DD">Ask, don’t guess; keep context; gate every write</p>
+</div>
+<x-connector head="end" style="width:44px;color:#3F6C94;border-width:4px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:2px solid #3F6C94;border-radius:16px;padding:22px">
+<h3 style="font-size:30px;font-weight:600">32 typed tools</h3>
+<p style="font-size:24px;color:#4A5563">Every lookup and calculation, with source rows</p>
+</div>
+<x-connector head="end" style="width:44px;color:#3F6C94;border-width:4px"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:2px solid #D5D9DE;border-radius:16px;padding:22px">
+<h3 style="font-size:30px;font-weight:600">CloudBase MySQL</h3>
+<p style="font-size:24px;color:#4A5563">120 orders, 360 output rows, 8 workshops</p>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px;border-top:4px solid #3F6C94;padding:14px 0 0 0"><h3 style="font-size:26px;font-weight:600">Retrieval</h3><p style="font-size:24px;color:#4A5563">Asks when six orders match</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;border-top:4px solid #3F6C94;padding:14px 0 0 0"><h3 style="font-size:26px;font-weight:600">Judgement</h3><p style="font-size:24px;color:#4A5563">Normal = previous 8 same weekdays</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;border-top:4px solid #3F6C94;padding:14px 0 0 0"><h3 style="font-size:26px;font-weight:600">Tracing</h3><p style="font-size:24px;color:#4A5563">Rows behind every number</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;border-top:4px solid #3F6C94;padding:14px 0 0 0"><h3 style="font-size:26px;font-weight:600">Discovery</h3><p style="font-size:24px;color:#4A5563">Ranks what nobody asked</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;border-top:4px solid #3F6C94;padding:14px 0 0 0"><h3 style="font-size:26px;font-weight:600">Action</h3><p style="font-size:24px;color:#4A5563">Preview, confirm, log</p></div>
+</div>
+<table style="font-size:24px;color:#1C2733">
+<tr><th style="width:26%">We chose</th><th style="width:22%">Over</th><th style="width:52%">Why, and the cost we accept</th></tr>
+<tr><td>Typed tools</td><td>One run_sql tool</td><td>Every number traceable; new phrasings must be taught</td></tr>
+<tr><td>Queue simulation + lead-time model</td><td>A learned risk score</td><td>Dates you can inspect plus an on-time chance (AUC 0.90)</td></tr>
+<tr><td>Preview, then an exact “send now”</td><td>The model judging “yes”</td><td>15-minute single-use key, logged; one extra step</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#6A7179">ThreadPilot · Group 19 · 4 · Sprint 1 was a demo on GPT-4; Sprint 2 runs gpt-6-luna through the OpenAI API</p>
+<aside>[Kevin Royce Thomson] “The model works in two places only: it reads the question and it words the answer. Everything in between is our code: thirty-two typed tools, a queue simulation, and a gate on every action. We chose typed tools over a SQL tool so that every number can be traced, and we accept that new phrasings have to be taught.”</aside>
+</section>

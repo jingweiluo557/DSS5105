@@ -1,0 +1,414 @@
+{
+ "_comment": "Final demo video (Sprint 3): one general manager's day on the offline replay of the real engine: 07:00 briefing, 09:40 order questions across several orders with the tool calls shown, 11:15 feasibility (chat, then the Feasibility page), the 'i' explanations, 14:30 chase-up with the confirmation gate, 17:00 watch, alert settings, and a question the data cannot answer. Recorded with REPLAY_STEP_PACE so the live status line is readable.",
+ "viewport": {
+  "width": 1920,
+  "height": 972,
+  "scale": 1
+ },
+ "captions": "band",
+ "bandHeight": 108,
+ "steps": [
+  {
+   "at": 0.0,
+   "goto": "#/dashboard",
+   "say": "07:00 — before the manager asks anything, the day is already on one screen."
+  },
+  {
+   "at": 2.8,
+   "say": "RED: eight orders overdue, assembly 39% below its normal range for six days, three decisions."
+  },
+  {
+   "at": 3.4,
+   "scroll": {
+    "to": "article.decision >> nth=0"
+   }
+  },
+  {
+   "at": 7.2,
+   "say": "Each decision has one button. Nothing here was asked for: the discovery tool found it."
+  },
+  {
+   "at": 10.8,
+   "scroll": {
+    "to": "section.home-pulse"
+   },
+   "say": "Every chart has an “i”. Tap it and it says what it shows, how to read it, and why it is done this way."
+  },
+  {
+   "at": 12.0,
+   "click": "section.home-pulse [data-info=\"pulse\"]"
+  },
+  {
+   "at": 15.8,
+   "say": "Why eight same weekdays? Measured on this factory: false alerts fall from 0.67 to 0.1 a month, and more weeks add little."
+  },
+  {
+   "at": 20.0,
+   "press": "Escape"
+  },
+  {
+   "at": 20.6,
+   "scroll": {
+    "to": "section.home-briefing"
+   },
+   "say": "The 07:00 morning briefing, written on a schedule: yesterday’s output, what is at risk, what to decide today."
+  },
+  {
+   "at": 24.6,
+   "click": {
+    "text": "Open the full briefing"
+   }
+  },
+  {
+   "at": 25.6,
+   "say": "The full briefing: production, priorities and action items, each with its supporting records."
+  },
+  {
+   "at": 28.6,
+   "scroll": {
+    "by": 340
+   }
+  },
+  {
+   "at": 31.4,
+   "goto": "#/ai",
+   "say": "09:40 — on the floor. “How is the TrendCart order doing?”"
+  },
+  {
+   "at": 32.4,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "How is the TrendCart order doing?",
+    "cps": 40
+   }
+  },
+  {
+   "at": 33.6,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 33.699999999999996,
+   "waitAnswer": true
+  },
+  {
+   "at": 34.3,
+   "say": "TrendCart has six orders, so it asks instead of guessing."
+  },
+  {
+   "at": 37.0,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "The scarf one.",
+    "cps": 40
+   }
+  },
+  {
+   "at": 38.2,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 38.3,
+   "waitAnswer": true
+  },
+  {
+   "at": 38.9,
+   "say": "Now it knows which order: ORD-005, 500 scarves, at knitting, due 20 April. While it works, one line says what it is doing."
+  },
+  {
+   "at": 43.0,
+   "click": "details.tool-steps >> nth=-1 >> summary",
+   "optional": true
+  },
+  {
+   "at": 43.6,
+   "say": "“Show more”: every step behind the answer: the planner’s reading, each tool call with its inputs, result, source rows and time."
+  },
+  {
+   "at": 48.4,
+   "click": "details.tool-steps >> nth=-1 >> summary",
+   "optional": true
+  },
+  {
+   "at": 49.2,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "What about ORD-120?",
+    "cps": 40
+   }
+  },
+  {
+   "at": 50.400000000000006,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 50.5,
+   "waitAnswer": true
+  },
+  {
+   "at": 51.1,
+   "say": "A second order in the same chat: ORD-120, 1,500 vests, 15 days overdue at assembly."
+  },
+  {
+   "at": 54.4,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "Is the first one late?",
+    "cps": 40
+   }
+  },
+  {
+   "at": 55.6,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 55.699999999999996,
+   "waitAnswer": true
+  },
+  {
+   "at": 56.3,
+   "say": "It remembers the conversation: “the first one” is ORD-005, not late, due 20 April. The reading is stated, so a wrong pick would be visible."
+  },
+  {
+   "at": 60.4,
+   "say": "11:15 — “A customer wants 800 hoodies by the 25th. Can we take it?”"
+  },
+  {
+   "at": 61.0,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "Can we take 800 hoodies by the 25th?",
+    "cps": 40
+   }
+  },
+  {
+   "at": 62.2,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 62.3,
+   "waitAnswer": true
+  },
+  {
+   "at": 62.9,
+   "say": "It asks the one thing that changes the answer: ready at the factory, or delivered?"
+  },
+  {
+   "at": 65.6,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "Delivered to the customer.",
+    "cps": 40
+   }
+  },
+  {
+   "at": 66.8,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 66.9,
+   "waitAnswer": true
+  },
+  {
+   "at": 67.5,
+   "say": "An estimate with its assumptions: the queue’s finish date, the on-time chance, the bottleneck. Not a yes, not a no."
+  },
+  {
+   "at": 71.6,
+   "say": "Can the factory take on more orders? The Feasibility page runs the same tool over the whole queue."
+  },
+  {
+   "at": 72.2,
+   "click": "nav.workspace-tools a[href=\"#/feasibility\"]"
+  },
+  {
+   "at": 73.8,
+   "fill": {
+    "into": "#feasibility-form input[name=\"qty\"]",
+    "value": "800"
+   }
+  },
+  {
+   "at": 74.8,
+   "fill": {
+    "into": "#feasibility-form input[name=\"due\"]",
+    "value": "2026-04-25"
+   }
+  },
+  {
+   "at": 75.8,
+   "click": "#feasibility-form button[type=\"submit\"]"
+  },
+  {
+   "at": 76.4,
+   "waitFor": {
+    "text": "with usual new orders",
+    "timeout": 20000
+   }
+  },
+  {
+   "at": 77.0,
+   "say": "Our own queue finishes 30 April, after the 25th; an eligible outside workshop could make 10 April; a smaller order does not help, the queue ahead does."
+  },
+  {
+   "at": 82.8,
+   "scroll": {
+    "to": "#capacity-picture"
+   },
+   "say": "Why: the queued work plus this order is over capacity at assembly, washing and packing before the 25th."
+  },
+  {
+   "at": 87.8,
+   "click": "nav.workspace-tools a[href=\"#/ai\"]",
+   "say": "14:30 — “That order hasn’t moved in a week. Chase it up.”"
+  },
+  {
+   "at": 88.8,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "That order hasn’t moved in a week. Chase it up.",
+    "cps": 40
+   }
+  },
+  {
+   "at": 90.0,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 90.1,
+   "waitAnswer": true
+  },
+  {
+   "at": 90.7,
+   "say": "It checks the claim first: last activity 24 March, 8 days ago, then drafts to the knitting team. Nothing is sent."
+  },
+  {
+   "at": 94.6,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "Preview draft 1",
+    "cps": 40
+   }
+  },
+  {
+   "at": 95.8,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 95.9,
+   "waitAnswer": true
+  },
+  {
+   "at": 96.5,
+   "say": "Preview first. Sending needs the manager’s exact confirmation, and it is logged. A spoken “send now” would wait for a tap too."
+  },
+  {
+   "at": 100.0,
+   "click": {
+    "text": "Confirm send"
+   },
+   "optional": true,
+   "real": true
+  },
+  {
+   "at": 100.4,
+   "waitAnswer": true,
+   "optional": true,
+   "real": true
+  },
+  {
+   "at": 101.2,
+   "say": "Only after that confirmation does it send, from the manager’s own mailbox, and the activity log records who, when and what."
+  },
+  {
+   "at": 105.0,
+   "say": "17:00 — “Remind me tomorrow if packing is still behind.”"
+  },
+  {
+   "at": 105.6,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "Remind me tomorrow if packing is still behind.",
+    "cps": 40
+   }
+  },
+  {
+   "at": 106.8,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 106.9,
+   "waitAnswer": true
+  },
+  {
+   "at": 107.5,
+   "say": "A standing watch: the server checks packing against its normal range tomorrow and only speaks if it is still below."
+  },
+  {
+   "at": 111.4,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "Confirm.",
+    "cps": 40
+   },
+   "real": true
+  },
+  {
+   "at": 112.0,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]",
+   "real": true
+  },
+  {
+   "at": 112.1,
+   "waitAnswer": true,
+   "real": true
+  },
+  {
+   "at": 112.7,
+   "say": "Confirmed. And the system also speaks first: in Settings, the alert policy."
+  },
+  {
+   "at": 115.6,
+   "goto": "#/settings"
+  },
+  {
+   "at": 117.4,
+   "scroll": {
+    "to": "[data-email=\"test-alert\"]"
+   },
+   "say": "An email only for a decision needed today: a stage far outside its range, three days below it, an order that will miss. At most three a day. Off until the manager switches it on."
+  },
+  {
+   "at": 124.0,
+   "goto": "#/ai",
+   "say": "And when there is no answer in the data, it says so."
+  },
+  {
+   "at": 124.8,
+   "type": {
+    "into": "[data-form=\"chat\"] textarea",
+    "text": "What revenue did the TrendCart orders bring in this quarter?",
+    "cps": 40
+   }
+  },
+  {
+   "at": 126.0,
+   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+  },
+  {
+   "at": 126.1,
+   "waitAnswer": true
+  },
+  {
+   "at": 126.7,
+   "say": "No prices in the data, so no revenue figure. It never invents one. Every number you saw today has a source row behind it."
+  },
+  {
+   "at": 131.4,
+   "hold": 0.8
+  },
+  {
+   "at": 132.4,
+   "hide": true
+  }
+ ]
+}
