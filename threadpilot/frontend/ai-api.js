@@ -5,7 +5,7 @@ try { const history=JSON.parse(sessionStorage.getItem('threadpilot-llm-chat')||'
 function persistAI(){try{sessionStorage.setItem('threadpilot-llm-chat',JSON.stringify({chat:state.chat,ids:state.chatIds}))}catch{}save()}
 // Hide the backend's duplicate citation line in display only; keep raw answers for export.
 function answerConditions(text){const conditions=[];String(text??'').replace(/[（(]\s*(?:假设|假定|assuming\b|assumptions?\s*:)\s*([^()（）\r\n]*)[）)]/gi,(_,value)=>{conditions.push(value.trim());return ''});return conditions}
-function displayAnswer(text){return window.formatWorkspaceText(text).replace(/[（(]\s*(?:假设|假定|assuming\b|assumptions?\s*:)\s*[^()（）\r\n]*[）)]/gi,'').replace(/\r?\n\r?\nSource evidence:[^\r\n]*(?:\r?\n|$)/g,'\n\n').replace(/(?:^|\n)As of [^\n]*/g,'').replace(/[ \t]+([，。；,.])/g,'$1')}
+function displayAnswer(text){return window.formatWorkspaceText(text).replace(/[（(]\s*(?:假设|假定|assuming\b|assumptions?\s*:)\s*[^()（）\r\n]*[）)]/gi,'').replace(/\r?\n\r?\nSource evidence:[^\r\n]*(?:\r?\n|$)/g,'\n\n').replace(/(?:^|\n)As of [^\n;]*;[^\n]*(?:source|fixture|row|snapshot|record)[^\n]*/gi,'').replace(/[ \t]+([，。；,.])/g,'$1')}
 // Answers may carry light markdown (**order IDs**, numbered or dashed lists). Escape first, then shape; no raw HTML passes.
 function renderAnswer(text){
  const inline=line=>esc(line).replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/`([^`\n]+)`/g,'<code>$1</code>');

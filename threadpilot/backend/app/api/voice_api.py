@@ -17,18 +17,12 @@ from fastapi import APIRouter, HTTPException, Request
 router = APIRouter(tags=['Voice'])
 MAX_BYTES = 4 * 1024 * 1024
 EXTENSIONS = {'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'mp4', 'audio/mpeg': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav'}
-DIGITS = {'zero': '0', 'oh': '0', 'o': '0', 'one': '1', 'two': '2', 'to': '2', 'too': '2', 'three': '3', 'four': '4', 'for': '4',
-          'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'}
-ORDER_RE = re.compile(r"\b(?:o\.?\s*r\.?\s*d\.?|ord|or\s+d|order\s+(?:number|no\.?|id))[\s\-#:]*((?:\d|zero|oh|one|two|three|four|five|six|seven|eight|nine)(?:[\s\-]*(?:\d|zero|oh|one|two|three|four|five|six|seven|eight|nine)){0,2})\b", re.I)
+from ..services.order_refs import DIGITS, ORDER_RE, normalize_order_refs  # noqa: F401  (shared with typed messages)
 
 
 def normalize_spoken(text: str) -> str:
-    """Spoken order numbers into the form the system uses: "O R D zero zero five", "ord 5", "order number 120" -> ORD-005, ORD-120.
-    A bare "order 500" is left alone: it is as likely to be a quantity."""
-    def repl(m: re.Match) -> str:
-        digits = ''.join(DIGITS.get(t.lower(), t) for t in re.findall(r'\d+|[a-z]+', m.group(1), re.I))
-        return f'ORD-{int(digits):03d}' if digits.isdigit() and 0 < int(digits) < 1000 else m.group(0)
-    return ORDER_RE.sub(repl, text)
+    """Spoken order numbers into the form the system uses; see services/order_refs.py."""
+    return normalize_order_refs(text)
 
 
 def vocabulary(request: Request) -> str:

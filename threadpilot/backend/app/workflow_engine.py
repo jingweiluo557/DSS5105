@@ -148,6 +148,12 @@ class WorkflowEngine:
     async def _chat(self, request: ChatRequest, classifier: Classifier, emit=None, role: str = 'manager') -> ChatResponse:
         state = self.store.load(request.session_id) if request.session_id else DialogState()
         now = self.clock()
+        # "ORD 080", "order ID 080", "ord080" are the manager's explicit IDs too: normalise them before the explicit-ID rule,
+        # the memory and the planner see the message (services/order_refs.py). The history keeps the manager's own words.
+        from .services.order_refs import normalize_order_refs
+        raw_message = request.message
+        if (normalized := normalize_order_refs(request.message)) != request.message:
+            request = request.model_copy(update={'message': normalized})
         if request.selected_order_id and not state.active_order and not state.comparison_orders:
             # The order highlighted in the UI only stands in for "it" / "this order". A message that names a customer,
             # a product, an ID or describes an order ("the one that was late yesterday") must resolve on its own words.
@@ -159,7 +165,7 @@ class WorkflowEngine:
             if not names_something:
                 state.active_order = self.tools.refresh_order(request.selected_order_id).record['order_id']
         confirmed = self.confirmation_word(request.message)
-        original_message, memory_notes = request.message, []
+        original_message, memory_notes = raw_message, []
         if not confirmed:
             # Several orders in one chat: "the first one", "the other one", "both of them", "the scarf one" become the
             # explicit IDs of orders discussed earlier, before the planner sees the message (services/conversation_memory.py).
