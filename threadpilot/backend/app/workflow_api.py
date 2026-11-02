@@ -206,8 +206,17 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
         return workflow.order_records.save(action, 'manual', now)
 
     @app.get('/api/v1/management-records', tags=['Workflow'])
-    def management_records(order_id: str | None = None):
-        return {'records': app.state.workflow.order_records.list(order_id)}
+    def management_records(request: Request, order_id: str | None = None):
+        return {'records': app.state.workflow.order_records.list(order_id),
+                'can_delete': request.state.role == 'manager'}
+
+    @app.delete('/api/v1/management-records/{record_id}', tags=['Workflow'])
+    def delete_management_record(record_id: str, request: Request):
+        from .api.security import require_manager
+        require_manager(request)
+        if not app.state.workflow.order_records.delete(record_id):
+            raise HTTPException(404, 'Management record not found.')
+        return {'status': 'deleted'}
 
     @app.get('/api/v1/workflow/notifications/{session_id}', tags=['Workflow'])
     async def notifications(session_id: str) -> list[dict]:

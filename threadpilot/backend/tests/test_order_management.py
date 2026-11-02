@@ -84,3 +84,26 @@ def test_incomplete_day_is_not_reported_as_no_change(business_database):
         transaction.rollback()
     assert records.list('ORD-005')[0]['report_id'] is None
     assert records.briefing_due(tomorrow)
+
+
+def test_delete_is_manager_only_and_pending_watch_stays_cancelled(business_database, monkeypatch):
+    from app.schemas import PendingAction
+    monkeypatch.setenv('API_ACCESS_TOKEN', 'reader')
+    monkeypatch.setenv('MANAGER_ACCESS_TOKEN', 'manager')
+    records = OrderRecords(business_database)
+    url = '/api/v1/management-records'
+    watch = PendingAction(kind='reminder', order_id='ORD-005', created_at=DAY, preview='Watch order status',
+        payload=dict(observation_day='2026-04-02', report_day='2026-04-03', channel='morning_briefing'))
+    records.save(watch, 'test', DAY)
+    with TestClient(create_app()) as client:
+        client.headers['X-ThreadPilot-Token'] = 'reader'
+        assert not client.get(url).json()['can_delete']
+        assert client.delete(f'{url}/{watch.id}').status_code == 403
+        client.headers['X-ThreadPilot-Token'] = 'manager'
+        assert client.get(url).json()['can_delete']
+        assert client.delete(f'{url}/{watch.id}').status_code == 200
+        assert client.delete(f'{url}/{watch.id}').status_code == 200
+        records.save(watch, 'test', DAY)
+        records.evaluate(DAY + timedelta(days=1))
+        assert not records.briefing_due(DAY + timedelta(days=1))
+        assert not records.list('ORD-005')

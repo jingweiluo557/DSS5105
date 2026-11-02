@@ -46,3 +46,6 @@ h2 .info-btn,h3 .info-btn,.eyebrow .info-btn{position:relative;top:-1px}
 .info-pop dt{font-weight:600;color:#6b7682;white-space:nowrap}
 .info-pop dd{margin:0}
 .info-pop .info-ask{margin-top:10px;width:100%;text-align:left}
+
+[data-management-list] article { display: flow-root; }
+.record-delete { float: right; margin-inline-start: .5rem; min-width: 32px; min-height: 32px; font-size: 1.15rem; }

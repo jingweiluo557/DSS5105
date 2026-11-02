@@ -65,6 +65,18 @@ case 'reset-feasibility':feasibility={category:'TOPS',qty:800,due:'2026-04-25',o
 case 'save-assessment':modal('Save this assessment?',`<p>${feasibility.qty} ${feasibility.category}<br>Requested ${date(feasibility.due)}<br>Estimated ${date(estimate())}</p><p>This saves a scenario, without assigning a workshop.</p>`,'confirm-assessment');break;
 case 'confirm-assessment':state.assessments.unshift({...feasibility,estimate:estimate()});audit('Assessment saved','Saved a demo planning scenario',state.assessments[0]);closeOverlay();toast('Assessment saved to Messages & Watches.');break;
 case 'note':modal('Add an order note',`<label>Note for ${id}<textarea id="note-text" maxlength="2000" placeholder="Record a verified update…"></textarea></label>`,'confirm-note','Save note');pending=id;break;
+case 'delete-record': {
+  const followUp=b.dataset.label==='Morning briefing follow-up';
+  if(!window.confirm('Delete this '+b.dataset.label.toLowerCase()+' for '+b.dataset.order+'?'+(followUp?' Pending checks will stop. Previously generated briefings will be kept.':'')))break;
+  b.disabled=true;
+  try {
+    const r=await window.threadpilotFetch(window.THREADPILOT_API_BASE+'/api/v1/management-records/'+encodeURIComponent(id),{method:'DELETE'});
+    if(!r.ok && r.status!==404)throw Error(r.status===403?'Manager access required.':'Could not delete the record. Please try again.');
+    await loadManagementRecords();
+    toast('Record removed.');
+  } catch(error){toast(error.message);b.disabled=false}
+  break;
+}
 case 'confirm-note': await saveManagementNote(b); break;
 case 'watch':if(find(id||state.selected)?.status==='Complete'){toast('This order is complete. Choose an active order to create a watch.');break}modal('Review standing watch',`<p>Order ${id||state.selected}</p><label>Alert after inactivity reaches<select id="watch-threshold">${[1,2,3,5,7].map(n=>`<option ${String(n)===state.settings.idle?'selected':''} value="${n}">${n} calendar days</option>`).join('')}</select></label><p class="callout">Manual checks only. No background alerts or external messages.</p>`,'confirm-watch','Confirm watch');pending=id||state.selected;break;
 case 'confirm-watch':{const w={id:'W-'+Date.now(),order:pending,threshold:Number($('#watch-threshold').value),active:true};state.watches.unshift(w);audit('Watch created','Created a local standing watch',w);closeOverlay();if(route==='messages')render();toast('Watch created. Review it in Messages & Watches.');break}
@@ -94,7 +106,7 @@ async function loadManagementRecords() {
   try {
     const res=await window.threadpilotFetch(window.THREADPILOT_API_BASE+'/api/v1/management-records'+(order?'?order_id='+encodeURIComponent(order):''));
     if(!res.ok)throw Error();
-    const {records}=await res.json();
+    const {records,can_delete}=await res.json();
     for(const panel of panels){
       if(!panel.isConnected)continue;
       const kind=panel.dataset.managementList;
@@ -103,7 +115,8 @@ async function loadManagementRecords() {
         const label=item.kind==='note'?'Internal note':'Morning briefing follow-up';
         const status={pending:'Pending check',changed:'Checked · status or stage changed',no_change:'No change recorded',unverified:'Incomplete history'}[item.status]||'Saved';
         const summary=item.kind==='note'?item.text:'Observe '+item.observation_day+' · Report '+item.report_day;
-        return '<article><strong>'+esc(label)+'</strong> · '+link('order',item.order_id,item.order_id)+'<p class="note">'+esc(summary)+'</p><small>'+esc(status)+(item.report_id?' · <a href="briefing.html?report='+encodeURIComponent(item.report_id)+'">View briefing</a>':'')+' · '+esc(formatWorkspaceTime(item.created_at))+'</small></article>';
+        const remove=can_delete?'<button type="button" class="record-delete" data-action="delete-record" data-id="'+esc(item.id)+'" data-label="'+esc(label)+'" data-order="'+esc(item.order_id)+'" aria-label="Delete '+esc(label)+' for '+esc(item.order_id)+'" title="Delete record">×</button>':'';
+        return '<article>'+remove+'<strong>'+esc(label)+'</strong> · '+link('order',item.order_id,item.order_id)+'<p class="note">'+esc(summary)+'</p><small>'+esc(status)+(item.report_id?' · <a href="briefing.html?report='+encodeURIComponent(item.report_id)+'">View briefing</a>':'')+' · '+esc(formatWorkspaceTime(item.created_at))+'</small></article>';
       }).join('')||'<p class="muted">No shared records yet.</p>';
     }
   } catch { for(const panel of panels)if(panel.isConnected)panel.textContent='Could not load shared records. Refresh to retry.'; }

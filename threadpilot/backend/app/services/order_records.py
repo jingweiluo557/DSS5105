@@ -88,8 +88,19 @@ class OrderRecords:
                 actions.c.status.in_(['no_change', 'unverified']), actions.c.receipt.is_(None)))
             return any(json.loads(payload)['report_day'] == day.date().isoformat() for payload in payloads)
 
+    def delete(self, record_id):
+        # Keep the confirmation ID so replaying a saved action cannot recreate it.
+        with self.database.engine.begin() as db:
+            row = db.execute(sa.select(actions.c.status).where(actions.c.id == record_id,
+                actions.c.kind.in_(['note', 'briefing_watch'])).with_for_update()).first()
+            if row is None:
+                return False
+            if row.status != 'deleted':
+                db.execute(actions.update().where(actions.c.id == record_id).values(status='deleted'))
+            return True
+
     def list(self, order_id=None):
-        q = sa.select(actions).where(actions.c.kind.in_(['note', 'briefing_watch']))
+        q = sa.select(actions).where(actions.c.kind.in_(['note', 'briefing_watch']), actions.c.status != 'deleted')
         if order_id:
             q = q.where(actions.c.order_id == order_id)
         with self.database.engine.connect() as db:
