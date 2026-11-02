@@ -206,3 +206,16 @@ def test_transcribe_endpoint_uses_the_speech_model_and_never_stores_audio():
     assert client.post('/api/v1/voice/transcribe', content=b'x', headers={'Content-Type': 'text/plain'}).status_code == 415
     app.state.client = None
     assert client.post('/api/v1/voice/transcribe', content=b'x', headers={'Content-Type': 'audio/webm'}).status_code == 503
+
+
+# ---------------------------------------------------------------- typed order references ("ORD 080", "order ID 080")
+def test_typed_order_references_count_as_explicit_ids(tmp_path: Path):
+    engine, planner = make_engine(tmp_path), WordsPlanner()
+    r = talk(engine, planner, ['Draft a chase-up for ORD-107.', 'show me details of ORD 080', 'order ID 080', 'Show me ord001'])
+    assert r[1].selected_order_id == 'ORD-080' and not r[1].needs_clarification and 'ORD-080' in r[1].answer
+    assert r[2].selected_order_id == 'ORD-080' and not r[2].needs_clarification
+    assert r[3].selected_order_id == 'ORD-001'
+    assert planner.seen[1] == 'show me details of ORD-080', 'the planner sees the normalised ID'
+    assert r[3].state.history[-2]['content'] == 'Show me ord001', 'the history keeps the manager’s own words'
+    from app.services.order_refs import normalize_order_refs
+    assert normalize_order_refs('can we take order 500 hoodies') == 'can we take order 500 hoodies'
