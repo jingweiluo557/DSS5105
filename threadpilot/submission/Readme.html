@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Readme — ThreadPilot (Group 19)</title><link rel="stylesheet" href="style.css"></head><body>
+
+<div class="eyebrow">DSS5105 · Track 1 · Group 19 · Final submission · Readme</div>
+<h1>ThreadPilot — setup and how to run it</h1>
+<p class="sub meta">The General Manager's Co-Pilot for a quick-response knitwear factory: morning briefing, questions over the order and production records, alerts, feasibility checks and confirmed actions. Public code: <a href="https://github.com/jingweiluo557/DSS5105">github.com/jingweiluo557/DSS5105</a> (folder <code>threadpilot/</code>). Live demo: <a href="https://threadpilot-dss5105-track1-i7gxvcy5k7ef5ac9b.webapps.tcloudbase.com">threadpilot-dss5105-track1-i7gxvcy5k7ef5ac9b.webapps.tcloudbase.com</a> (the workspace access key is shared with the teaching team separately; it is never committed).</p>
+
+<h2>1. What is in the repository</h2>
+<table><tr><th style="width:30%">Path</th><th>What it holds</th></tr>
+<tr><td><code>threadpilot/backend/app</code></td><td>FastAPI backend: the conversation planner and narrator (<code>conversation.py</code>), the deterministic routing and dialogue rules (<code>workflow_engine.py</code>), the 32 typed tools (<code>workflow_tools.py</code>), the queue simulation, alert policy, morning briefing, Outlook sending, voice transcription (<code>services/</code>, <code>api/</code>).</td></tr>
+<tr><td><code>threadpilot/backend/tests</code></td><td>Regression tests (pytest; SQLite; no model key needed). More than 250 tests run on every push.</td></tr>
+<tr><td><code>threadpilot/frontend</code></td><td>Static web app (plain HTML, CSS, JavaScript; no build step): home screen, chat, orders, exceptions, risk, feasibility, settings, briefing page.</td></tr>
+<tr><td><code>threadpilot/data</code></td><td>The Track 1 files (<code>orders.csv</code>, <code>production_log.csv</code>, <code>workshops.csv</code>), the data dictionary and the Alembic migrations.</td></tr>
+<tr><td><code>threadpilot/evaluation</code></td><td>The evaluation set (88 questions / 116 turns, answers computed by code), the runners, the scorer, every saved transcript and report.</td></tr>
+<tr><td><code>threadpilot/analysis</code></td><td>The studies behind the rules: alert-rule trade-off, risk calibration, baseline-window length, lead-time model.</td></tr>
+<tr><td><code>threadpilot/demo</code></td><td>Offline replay server, scripted demo recorder, slide deck sources and the video assembly scripts.</td></tr>
+<tr><td><code>threadpilot/deploy</code>, <code>threadpilot/docs</code></td><td>Tencent CloudBase packaging and runbooks; the written guides (tool specification, alert policy, queue scheduling, Sprint 2 and Sprint 3 change notes).</td></tr>
+<tr><td><code>threadpilot/submission</code></td><td>The sources of the PDFs in this zip (HTML + a one-line renderer).</td></tr></table>
+
+<h2>2. Requirements</h2>
+<ul>
+<li><b>Python 3.11–3.13</b> and <a href="https://docs.astral.sh/uv/">uv</a> (or pip). Dependencies are pinned in <code>backend/pyproject.toml</code> / <code>uv.lock</code>: FastAPI, SQLAlchemy 2, Pydantic 2, the OpenAI SDK, LangChain-OpenAI (SQL assistant only), Alembic, msal/httpx (Outlook).</li>
+<li><b>Database:</b> SQLite is enough to run everything locally; MySQL 8 is the shared deployment database.</li>
+<li><b>A language-model key</b> (<code>OPENAI_API_KEY</code>, any OpenAI-compatible endpoint via <code>OPENAI_BASE_URL</code>) for the chat planner/narrator, the morning briefing and voice transcription. Without a key the server still answers through the keyword planner and every tool, briefing and alert rule works; only the wording is plainer.</li>
+<li><b>Node 18+</b> only for the browser tests and the demo recorder (Playwright + Chromium) and <b>ffmpeg</b> for the video assembly. Not needed to run the app.</li>
+<li><b>Optional:</b> a Microsoft Entra app registration to send chase-ups and alert emails from the manager's own Outlook (see <code>docs/OUTLOOK.md</code>).</li></ul>
+
+<h2>3. Run it locally</h2>
+<h3>3a. The fastest way: offline replay (no keys, no database, 30 seconds)</h3>
+<p>The real frontend and the real workflow engine over the CSV files, with a scripted planner standing in for the model. Every tool, the queue simulation, the alert policy, the home screen and the dialogue rules are real; nothing is sent.</p>
+<pre>git clone https://github.com/jingweiluo557/DSS5105.git
+cd DSS5105/threadpilot
+uv sync --project backend --frozen          # or: pip install -e backend
+backend/.venv/bin/python demo/replay_server.py 8765
+# open http://127.0.0.1:8765/index.html  — business date 1 April 2026</pre>
+
+<h3>3b. The full application with a model key (SQLite)</h3>
+<pre>cd DSS5105/threadpilot
+uv sync --project backend --frozen
+cp backend/.env.example backend/.env
+# edit backend/.env — the minimum:
+#   OPENAI_API_KEY=…            OPENAI_MODEL=gpt-6-luna      (or any chat model with JSON output)
+#   DATABASE_URL=sqlite:///./runtime/business.sqlite3
+#   AI_DATABASE_URL=sqlite:///./runtime/business.sqlite3
+#   BUSINESS_NOW=2026-04-01T12:00:00+08:00   (dataset replay clock; use "live" for real operation)
+cd backend
+uv run python -m scripts.init_db --seed-existing     # creates the schema and imports the three CSVs
+uv run python -m scripts.serve                       # http://127.0.0.1:8000</pre>
+<p>Then open the address, enter the workspace access key you set as <code>API_ACCESS_TOKEN</code> (any string locally), and start with the home screen. The 07:00 briefing is written when you press "Write it now" or when the business clock passes 07:00 (Settings → Business clock → Start demo clock).</p>
+
+<h3>3c. MySQL and Docker</h3>
+<pre>cp .env.example .env            # root of threadpilot/: set the passwords and tokens
+docker compose up --build -d    # provisions MySQL, migrates, starts the backend on :8000
+docker compose exec backend python -m scripts.init_db --seed-existing --skip-migrate</pre>
+<p>For a hand-provisioned MySQL: set <code>MYSQL_ROOT_PASSWORD</code>, run <code>python -m scripts.provision_mysql</code>, then the two commands of 3b. Never seed an existing production database; schema changes go through <code>python -m scripts.upgrade_cloud_schema --apply</code>.</p>
+
+<h2>4. Tests and the evaluation</h2>
+<pre>cd threadpilot/backend && uv run pytest -q                      # regression tests, SQLite, no model key
+cd ../evaluation
+../backend/.venv/bin/python build_eval_set.py --out /tmp/eval_set.json   # recomputes every gold answer from the CSVs
+../backend/.venv/bin/python run_annotated_eval.py --out /tmp/t.json      # the 88 questions through the server, planner annotated
+../backend/.venv/bin/python score.py --eval eval_set.json --transcript /tmp/t.json --out /tmp/r.json --report /tmp/REPORT.md --strict
+# live, against a running backend with a model key (writes a dated transcript; never overwrite a first pass):
+THREADPILOT_URL=http://127.0.0.1:8000 THREADPILOT_ACCESS_KEY=… ../backend/.venv/bin/python run_live_eval.py --out transcript_live_$(date +%Y%m%d).json</pre>
+<p>The GitHub workflow <code>threadpilot-backend.yml</code> runs the tests and the offline evaluation on every push; <code>demo-video.yml</code> records the demo on the offline replay and assembles the presentation video.</p>
+
+<h2>5. Configuration that matters</h2>
+<table><tr><th style="width:30%">Variable</th><th>Meaning</th></tr>
+<tr><td><code>OPENAI_API_KEY</code>, <code>OPENAI_MODEL</code>, <code>OPENAI_BASE_URL</code></td><td>The planner / narrator model. <code>INTENT_API_STYLE=chat_completions</code> for providers without the Responses API. <code>TRANSCRIBE_MODEL</code> (default <code>whisper-1</code>) for voice when the browser has no speech recognition.</td></tr>
+<tr><td><code>DATABASE_URL</code>, <code>AI_DATABASE_URL</code></td><td>Application and read-only (SQL assistant) connections. <code>WORKFLOW_STORAGE=database</code> keeps chat state, drafts, reminders and the alert ledger in MySQL instead of local SQLite.</td></tr>
+<tr><td><code>BUSINESS_NOW</code></td><td>The business clock for dataset replay (<code>2026-04-01T12:00:00+08:00</code>) or <code>live</code>. Settings can advance a demo clock.</td></tr>
+<tr><td><code>API_ACCESS_TOKEN</code>, <code>SCHEDULER_TOKEN</code>, <code>CORS_ORIGINS</code></td><td>The workspace access key the browser asks for; the token the minute timer uses; allowed frontend origins.</td></tr>
+<tr><td><code>OUTLOOK_CLIENT_ID</code>, <code>OUTLOOK_CLIENT_SECRET</code>, <code>OUTLOOK_ENCRYPTION_KEY</code>, <code>OUTLOOK_REDIRECT_URI</code></td><td>Sending from the manager's own mailbox. The encryption key must be kept across releases.</td></tr>
+<tr><td><code>ALERT_EMAILS_ENABLED</code></td><td>Deployment-level switch for alert emails (default false). The manager's own switch in Settings has the same effect.</td></tr></table>
+
+<h2>6. Where to look first</h2>
+<ul><li><code>docs/TOOL_SPECIFICATION.md</code> — the 32 tools: input, output, purpose, non-goals, failure mode.</li>
+<li><code>docs/ALERT_POLICY.md</code>, <code>docs/BASELINE_WINDOW.md</code>, <code>docs/QUEUE_SCHEDULING.md</code> — the rules and the studies behind them.</li>
+<li><code>evaluation/EVALUATION.md</code>, <code>evaluation/FAILURE_ANALYSIS.md</code> — the question set and every failure analysed.</li>
+<li><code>docs/SPRINT2_CHANGES.md</code>, <code>docs/SPRINT3_CHANGES.md</code> — what changed and why, sprint by sprint.</li>
+<li>In the app, every chart and calculation has an "i" button that explains what it shows, how to read it and why it is done that way.</li></ul>
+</body></html>
