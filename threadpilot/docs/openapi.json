@@ -263,6 +263,92 @@
         }
       }
     },
+    "/api/v1/management-records/notes": {
+      "post": {
+        "tags": [
+          "Workflow"
+        ],
+        "summary": "Save Management Note",
+        "operationId": "save_management_note_api_v1_management_records_notes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualNote"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/management-records": {
+      "get": {
+        "tags": [
+          "Workflow"
+        ],
+        "summary": "Management Records",
+        "operationId": "management_records_api_v1_management_records_get",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workflow/notifications/{session_id}": {
       "get": {
         "tags": [
@@ -3422,6 +3508,33 @@
         ],
         "title": "Intent"
       },
+      "ManualNote": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "pattern": "^ORD-\\d{3}$",
+            "title": "Order Id"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "request_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9-]{36}$",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "text",
+          "request_id"
+        ],
+        "title": "ManualNote"
+      },
       "NewTask": {
         "properties": {
           "id": {
@@ -4113,7 +4226,8 @@
                 "enum": [
                   "no_reply",
                   "no_activity",
-                  "stage_below_range"
+                  "stage_below_range",
+                  "no_status_change_briefing"
                 ]
               },
               {

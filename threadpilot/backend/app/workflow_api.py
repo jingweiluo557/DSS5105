@@ -38,6 +38,8 @@ def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
     store = (SQLWorkflowStore(app.state.database.engine) if app.state.settings.workflow_storage == 'database'
              else WorkflowStore(app.state.settings.workflow_db))
     app.state.workflow = WorkflowEngine(DatabaseDataTools(app.state.database), store, business_now, sender)
+    from .services.order_records import OrderRecords
+    app.state.workflow.order_records = OrderRecords(app.state.database)
     from .services.scheduled_email import ScheduledEmail
     app.state.workflow.email_scheduler = ScheduledEmail(app.state.settings)
     from .services.review_chat import review_reason_handler
@@ -49,6 +51,8 @@ def initialize_workflow(app: FastAPI, data: Path, backend: Path) -> None:
         state.last_intent=Intent.MORNING_BRIEFING
         state.pending_clarification=None
         answer='\n\n'.join(label+': '+report[key] for label,key in [('Production review','yesterday'),('Priority issue','top_issue'),('Manager decisions','decide'),('Calculation basis','production_note')])
+        if report.get('manager_followups'):
+            answer += '\n\nManager follow-ups:\n' + '\n'.join(item['text'] for item in report['manager_followups'])
         answer+='\n\nBusiness date: '+report['business_date']+'; Generated: '+report['generated_at']+'. Open the briefing page to view the supporting records.'
         return app.state.workflow.response(state,classification,now,answer,
             [ToolCall(name='generate_morning_briefing',result={'report_id':report['id'],'model':report['model']})],[])
@@ -61,10 +65,17 @@ async def monitor_loop(app: FastAPI) -> None:
         try:
             engine = app.state.workflow
             async with engine.lock:
+                engine.order_records.evaluate(engine.clock())
                 engine.store.evaluate_reminders(engine.clock(), engine.tools)
         except (OSError, ValueError, sqlite3.Error, SQLAlchemyError, WorkflowBusy):
             logging.getLogger(__name__).warning('Reminder source unavailable; pending checks retained')
         await asyncio.sleep(30)
+
+
+class ManualNote(BaseModel):
+    order_id: str = Field(pattern=r'^ORD-\d{3}$')
+    text: str = Field(min_length=1, max_length=2000)
+    request_id: str = Field(pattern=r'^[a-f0-9-]{36}$')
 
 
 class ReplyEvent(BaseModel):
@@ -115,6 +126,7 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
             raise HTTPException(401, {'code': 'UNAUTHORIZED', 'message': 'Scheduler authentication required.'})
         engine = app.state.workflow
         try:
+            engine.order_records.evaluate(engine.clock())
             engine.store.evaluate_reminders(engine.clock(), engine.tools)
         except WorkflowBusy:
             return {'status': 'already_running'}
@@ -174,6 +186,28 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
             return rows[row - 2]
         except (ValueError, OSError):
             raise HTTPException(404, {'code': 'UNKNOWN_SOURCE_ROW', 'message': 'Evidence row not found.'})
+
+    @app.post('/api/v1/management-records/notes', tags=['Workflow'])
+    def save_management_note(body: ManualNote, request: Request):
+        from .api.security import require_manager
+        from .schemas import PendingAction
+        require_manager(request)
+        workflow = app.state.workflow
+        try:
+            workflow.tools.refresh_order(body.order_id)
+        except (KeyError, ValueError):
+            raise HTTPException(404, 'Unknown order.')
+        text = body.text.strip()
+        if not text:
+            raise HTTPException(422, 'Enter a note.')
+        now = workflow.clock()
+        action = PendingAction(id='manual:' + body.request_id, kind='note', order_id=body.order_id,
+            payload={'text': text, 'visibility': 'internal'}, preview=text, created_at=now)
+        return workflow.order_records.save(action, 'manual', now)
+
+    @app.get('/api/v1/management-records', tags=['Workflow'])
+    def management_records(order_id: str | None = None):
+        return {'records': app.state.workflow.order_records.list(order_id)}
 
     @app.get('/api/v1/workflow/notifications/{session_id}', tags=['Workflow'])
     async def notifications(session_id: str) -> list[dict]:

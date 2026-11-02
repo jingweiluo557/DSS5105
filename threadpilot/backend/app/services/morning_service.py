@@ -11,7 +11,7 @@ from .scheduling_service import current_snapshot, read_locked, fingerprint, Queu
 from .dashboard_service import LOCAL
 from ..sql_workflow_store import SQLWorkflowStore
 
-GENERATION_VERSION = 'morning-v8-dashboard-actions-decisions'
+GENERATION_VERSION = 'morning-v9-manager-followups'
 
 
 class Section(BaseModel):
@@ -199,6 +199,8 @@ class MorningService:
         with self.database.sessions.begin() as session:
             if fingerprint(read_locked(session,today))!=fp:
                 raise MorningConflict('Database changed during generation. Retry with the current snapshot.')
+            from .order_records import attach_to_report
+            payload["manager_followups"] = attach_to_report(session.connection(), today, rid)
             SQLWorkflowStore(self.database.engine).upsert(session.connection(),reports,
                 {'id':rid,'day':day,'business_date':today,'generated_at':now.isoformat(),
                  'fingerprint':fp,'payload':json.dumps(payload,ensure_ascii=False)})

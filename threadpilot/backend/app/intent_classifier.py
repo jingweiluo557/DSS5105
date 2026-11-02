@@ -41,7 +41,7 @@ For delayed email such as 'send draft 1 in two minutes' or '两分钟后发送',
 execution.chase action=send and send_at='in 2 minutes'. send_at is the SEND time;
 deadline is the requested recipient reply deadline. Never confuse the two.
 Short mode/recipient/revision replies continue execution.chase. Do not invent recipients.),
-execution.note (3.2 INTERNAL decision note), execution.reminder (3.3 conditional monitoring),
+execution.note (3.2 INTERNAL decision note, preserve the manager's wording in slots.text. A note that demand changed does not require a new quantity), execution.reminder (3.3 conditional monitoring; if the user wants an order with unchanged status or production stage flagged in a morning briefing, set condition=no_status_change_briefing, target_date to the observation business date and deadline to the requested briefing date, both as ISO dates relative to business time. Ask for missing dates. Never substitute this condition for missing replies or other facts.),
 operations.output (recorded stage output on a date, stage + target_date, no comparison),
 order.rank (rank active orders: criterion idle_days | due_date, optional customer, window_days = list length; order.compare criterion may also be risk),
 data.workshops (outside workshops able to take a product/category or batch: product, quantity),

@@ -125,7 +125,8 @@ class BriefingDelivery:
             body = '\n\n'.join([f"Hello {job['manager_name'] or 'Manager'},",
                 f"Morning briefing — {job['day']}\nBusiness date: {report['business_date']}",
                 'Production\n' + report['yesterday'], 'Priorities\n' + report['top_issue'],
-                'Next steps\n' + report['decide'], self.alert_line(now), 'Best regards,\nThreadPilot'])
+                'Next steps\n' + report['decide'],
+                *(['Manager follow-ups\n' + '\n'.join(i['text'] for i in report['manager_followups'])] if report.get('manager_followups') else []), self.alert_line(now), 'Best regards,\nThreadPilot'])
         except Exception:
             await asyncio.to_thread(self.update, job, status='generation_failed',
                 retry_at=now.timestamp() + 300,

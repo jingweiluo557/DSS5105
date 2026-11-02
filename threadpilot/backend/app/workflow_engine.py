@@ -8,6 +8,7 @@ from collections.abc import Callable
 from datetime import date, datetime, time, timedelta
 from typing import Any, Literal, Protocol
 
+from .services.order_record_intent import preview as record_preview, propose_watch
 from .schemas import (ChatRequest, ChatResponse, Classification, DialogState, Evidence,
                       Intent, PendingAction, PendingClarification, Slots, ToolCall)
 from .workflow_store import Sender, WorkflowStore
@@ -193,6 +194,9 @@ class WorkflowEngine:
             await self.tool_steps(emit, response)
             if emit:
                 await emit(response.answer)
+        elif getattr(self, 'order_records', None) and (managed := record_preview(self, request.message, state, now, request.selected_order_id)) is not None:
+            response = managed
+            if emit: await emit(response.answer)
         elif hasattr(classifier, 'plan'):
             response = await self.converse(request, classifier, state, now, emit)
         else:
@@ -1203,6 +1207,17 @@ class WorkflowEngine:
             preview = f'{prefix}Internal note for {order_id}, business date {now.date()}:\n{slots.text}\nPlease confirm to save. It will not be sent externally.'
             self.propose('note', order_id, {'text': slots.text, 'visibility': 'internal'}, preview, state, now)
             answer = preview
+        elif result.intent == Intent.EXECUTION_REMINDER and slots.condition == 'no_status_change_briefing':
+            if not getattr(self, 'order_records', None):
+                return self.ask('The shared order record service is unavailable.', state, result, now, calls, evidence)
+            try:
+                day = date.fromisoformat(slots.target_date or '')
+                report_day = date.fromisoformat(slots.deadline or '')
+            except ValueError:
+                return self.ask('Which business day should I check, and which morning briefing should include the result?', state, result, now, calls, evidence)
+            if day < now.date() or report_day <= day:
+                return self.ask('Choose today or a future observation day, and a later briefing date.', state, result, now, calls, evidence)
+            answer = propose_watch(self, state, order_id, day, report_day, now, message)
         elif result.intent == Intent.EXECUTION_REMINDER:
             lowered = message.casefold()
             progress = re.search(r"(hasn.t|has not|still not|no new|not) (finished|moved|progress|advanced|left)|still (hasn.t|has not) finished|still at", lowered)
@@ -1247,6 +1262,10 @@ class WorkflowEngine:
         calls: list[ToolCall] = []
         evidence: list[Evidence] = []
         if request.confirmation_id:
+            if getattr(self, 'order_records', None) and self.order_records.confirmed(request.confirmation_id, state.session_id):
+                if action and action.id == request.confirmation_id:
+                    state.pending_action = None
+                return self.response(state, result, now, 'Already recorded. No duplicate record was created.', calls, evidence)
             prior = self.store.action_result(request.confirmation_id, state.session_id)
             if prior and prior['status'] in ('saved', 'sent'):
                 return self.response(state, result, now, f"Already recorded: {prior['kind']} {prior['status']}; no duplicate action.", calls, evidence)
@@ -1285,6 +1304,8 @@ class WorkflowEngine:
                     outcome = await scheduler.send_now(action,now)
             except ValueError:
                 outcome = {'status':'not_sent','reason':'Provide a valid recipient email address before scheduling.'}
+        elif getattr(self, 'order_records', None) and (action.kind == 'note' or action.payload.get('channel') == 'morning_briefing'):
+            outcome = self.order_records.save(action, state.session_id, now)
         else:
             outcome = await self.store.send(action, state.session_id, now, self.sender) if action.kind == 'send' else self.store.commit_local(action, state.session_id, now)
         calls.append(ToolCall(name={'send': 'send_chase', 'note': 'save_internal_note', 'reminder': 'upsert_reminder'}[action.kind],
@@ -1295,6 +1316,8 @@ class WorkflowEngine:
                 answer = 'Message sent; recipient, final text, send time and receipt recorded.'
             elif action.kind == 'note':
                 answer = f'Internal note saved to {action.order_id} with timestamp. It was not sent externally.'
+            elif action.payload.get('channel') == 'morning_briefing':
+                answer = f"Follow-up saved for {action.order_id}. Check day: {action.payload['observation_day']}. Morning briefing: {action.payload['report_day']}."
             elif action.payload.get('condition') == 'stage_below_range':
                 answer = (f"Watch {'updated' if 'Update' in action.preview else 'created'} on {action.payload['stage'].lower()}: at {action.payload['deadline']} you will be notified "
                           f"only if its output is still below the same-weekday range. Nothing is sent outside the system.")

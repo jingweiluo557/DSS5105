@@ -3,6 +3,6 @@ from .sync_log import SyncLog
 from .. import sql_workflow_store  # Register durable workflow tables in migration metadata.
 from .. import scheduling_store, morning_store
 from .. import cloud_state
-from ..services import sql_alert_ledger
+from ..services import sql_alert_ledger, order_records
 
 __all__ = ['Order', 'ProductionRecord', 'Workshop', 'SyncLock', 'Tombstone', 'SyncLog']

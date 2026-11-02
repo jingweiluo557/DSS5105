@@ -64,7 +64,7 @@ class Slots(StrictModel):
     reason: Literal['money', 'people', 'cause', 'delete', 'cancel', 'external', 'future', 'other'] | None = None
     deadline: str | None = None
     send_at: str | None = None
-    condition: Literal['no_reply', 'no_activity', 'stage_below_range'] | None = None
+    condition: Literal['no_reply', 'no_activity', 'stage_below_range', 'no_status_change_briefing'] | None = None
     action: Literal['read', 'draft', 'revise', 'send', 'save', 'create', 'update', 'explain', 'evidence', 'recommend', 'rank', 'confirm_target', 'adopt'] = 'read'
     reference: Literal['explicit', 'active', 'ambiguous', 'none'] = 'none'
 

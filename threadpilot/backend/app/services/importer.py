@@ -107,6 +107,14 @@ def import_bytes(database: Database, content: bytes, filename: str, dataset: str
                         log.inserted += 1
                 if additions:
                     session.execute(insert(model), additions)
+                    if name == 'orders':
+                        from .order_records import journal
+                        from ..business_clock import BusinessClock, LOCAL
+                        from uuid import uuid4
+                        day = BusinessClock().now().astimezone(LOCAL).date().isoformat()
+                        session.execute(journal.insert(), [
+                            dict(id=str(uuid4()), order_id=row['order_id'], business_day=day, event='created')
+                            for row in additions])
             session.add(log)
             session.flush()
             result = SyncRead.model_validate(log)
