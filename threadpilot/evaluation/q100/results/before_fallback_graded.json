@@ -1628,7 +1628,7 @@
    ]
   ],
   "answer": "Which TrendCart order should I chase? ORD-120 (TrendCart, 1500 Vest, assembly, 15 d overdue); ORD-020 (TrendCart, 1200 Vest, washing, 1 d overdue); ORD-096 (TrendCart, 1000 Beanie, knitting, due in 16 d); ORD-005 (TrendCart, 500 Scarf, knitting, due in 19 d, idle 8 d); ORD-017 (TrendCart, 800 Cardigan, knitting, due in 9 d); ORD-082 (TrendCart, 600 Beanie, knitting, due in 30 d). Give the order ID.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 76,
@@ -3620,7 +3620,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 68,
@@ -3788,7 +3788,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 76,
@@ -4002,7 +4002,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "PARTIAL"
+  "verdict": "FAIL"
  },
  {
   "no": 86,
@@ -5746,7 +5746,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 68,
@@ -5926,7 +5926,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 76,
@@ -6152,7 +6152,7 @@
    ]
   ],
   "answer": "(Reading “the other one” = ORD-083, from this conversation.)\n\nORD-083 — Maple & Co, 1000 Hoodie; status IN_PROGRESS, stage WASHING, due 2026-03-23, last recorded activity 2026-03-30.",
-  "verdict": "PARTIAL"
+  "verdict": "FAIL"
  },
  {
   "no": 86,

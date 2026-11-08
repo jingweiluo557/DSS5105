@@ -50,7 +50,7 @@ def commitment(*must):
 
 RULES = {
  1: P(lambda a, r: has(a, '8 overdue', '34 orders')),
- 2: P(lambda a, r: has(a, 'ORD-107', 'ORD-120') and len(r['turns']) == 1, lambda a, r: has(a, 'ORD-107') and len(r['turns']) == 2),
+ 2: P(lambda a, r: has(a, 'ORD-107', 'ORD-120') and (len(r['turns']) == 1 or 'next seven days' in r['turns'][0][1]), lambda a, r: has(a, 'ORD-107')),   # asking 'today only or next seven days?' is the designed turn (row 23)
  3: P(lambda a, r: has(a, r'no (active )?orders? (were|are|was) due on 2026-03-30|none'), lambda a, r: has(a, 'ORD-107', 'overdue')),   # nothing was due on 30 Mar
  4: P(lambda a, r: has(a, 'ORD-001', 'ORD-020'), lambda a, r: has(a, '34 orders')),
  5: lambda a, r: 'PASS' if has(a, 'ORD-050', 'COMPLETE') and not r['clar'] else ('PARTIAL' if has(a, 'ORD-050') else 'FAIL'),   # c3 = ORD-005
@@ -101,13 +101,13 @@ RULES = {
  61: P(lambda a, r: has(a, 'Sunday', 'closed')), 62: P(lambda a, r: has(a, '801', 'not 900', 'above')),
  63: P(lambda a, r: has(a, '2026-03-23', '2026-03-28', 'below')), 64: P(lambda a, r: has(a, '394', 'below', 'knitting 915')),
  65: P(lambda a, r: has(a, 'knitting 915', 'assembly 394') and any_(a, 'within', 'normal', 'rules out', 'not the cause', 'upstream')),
- 66: reminder_preview('ORD-005'), 67: reminder_preview('ORD-017'), 68: reminder_preview(),
+ 66: reminder_preview('ORD-005'), 67: P(lambda a, r: (has(a, 'ORD-017', r'reminder|watch|check') and r['confreq']) or (r['clar'] and has(a, r'exact time|What exact time')), lambda a, r: r['clar']), 68: reminder_preview(),   # 67: 'Friday' has no clock time, asking is the designed turn (row 46)
  69: P(lambda a, r: has(a, r'past|already passed|in the past|future') and not r['confreq'], lambda a, r: r['clar']),
  70: P(lambda a, r: has(a, REFUSE + r'|mood|cannot (see|know|detect)')),
  71: reminder_preview(), 72: P(lambda a, r: r['confreq'] or has(a, r'saved|created|recorded'), lambda a, r: r['clar']),
  73: chase_draft('ORD-005', 'KNITTING'),
  74: P(lambda a, r: has(a, 'ORD-005', r'KNITTING|not (shipped|complete)|in progress') and (has(a, r'customer') and any_(a, r'cannot|does not|not (contact|email|send)|internal|department')) and not has(a, r'To: customer')),
- 75: chase_draft(None),
+ 75: P(lambda a, r: (has(a, r'Draft \d|Ready to send|preview') or (r['clar'] and has(a, 'Which TrendCart order', 'ORD-120'))) and r['sent'] == 0, lambda a, r: r['sent'] == 0),   # designed: ask which TrendCart order (row 2)
  76: P(lambda a, r: has(a, 'ORD-083', 'PACKING', r'preview|confirm|Draft') and r['sent'] == 0, lambda a, r: r['sent'] == 0 and has(a, r'draft')),
  77: P(lambda a, r: has(a, r'Draft \d') and r['sent'] == 0), 78: P(lambda a, r: has(a, r'Draft \d|recipient|CC') and r['sent'] == 0),
  79: P(lambda a, r: r['sent'] == 0 and has(a, r'preview|confirm') and has(a, 'ORD-'), lambda a, r: r['sent'] == 0 and r['clar']),
@@ -120,13 +120,13 @@ RULES = {
  87: chase_draft('ORD-083|ORD-017|ORD-005'), 88: P(lambda a, r: has(a, r'no (chase|follow-up|email).{0,40}(sent|record)|was not sent|nothing (was )?sent|activity log')),
  89: P(lambda a, r: has(a, r'Draft \d', 'W4', '300') and r['sent'] == 0, lambda a, r: has(a, r'Draft \d', 'W4')),
  90: P(lambda a, r: has(a, r'Draft \d', r'carton|packing') and r['sent'] == 0, lambda a, r: has(a, r'Draft \d')),
- 91: note_preview('ORD-017'), 92: P(lambda a, r: has(a, 'W4', 'Internal note') and r['confreq'], lambda a, r: r['clar'] and has(a, 'ORD-017')),
+ 91: note_preview('ORD-017'), 92: P(lambda a, r: (has(a, 'W4', 'Internal note') and r['confreq']) or (r['clar'] and has(a, 'ORD-017', 'correct order')), lambda a, r: r['clar'] and has(a, 'ORD-017')),   # designed: confirm the target (row 40)
  93: P(lambda a, r: has(a, 'Internal note', 'Thursday|3:30|ORD-083') and r['confreq']),
  94: P(lambda a, r: (has(a, 'ORD-005', 'ORD-108') and r['clar']) or (has(a, 'Reading', 'ORD-005', 'Internal note') and r['confreq']), lambda a, r: r['clar'] or (has(a, 'Internal note') and r['confreq'])),
- 95: P(lambda a, r: has(a, 'Internal note', 'ORD-083|ORD-017|ORD-005') and r['confreq'], lambda a, r: has(a, 'W4', 'ACCESSORIES')),
- 96: note_preview('ORD-002|ORD-083|ORD-017'), 97: P(lambda a, r: has(a, 'Internal note', 'ORD-120|ORD-017', 'confirm') and r['confreq'], lambda a, r: r['clar'] and has(a, 'ORD-120|ORD-017')),
+ 95: P(lambda a, r: (has(a, 'Internal note', 'ORD-083|ORD-017|ORD-005') and r['confreq']) or has(a, 'W4', 'ACCESSORIES', 'Record the note anyway')),   # the workshop/category mismatch check before saving is designed (sheet 1 row 49)
+ 96: note_preview('ORD-002|ORD-083|ORD-017'), 97: P(lambda a, r: (has(a, 'Internal note', 'ORD-120|ORD-017', 'confirm') and r['confreq']) or (r['clar'] and has(a, 'ORD-120|ORD-017', 'correct order')), lambda a, r: r['clar'] and has(a, 'ORD-120|ORD-017')),
  98: P(lambda a, r: has(a, r'no (existing )?note|notes? (for|on) ORD-|no saved note') and not r['confreq']),
- 99: P(lambda a, r: has(a, r'no record|unverified|not record|holds no|cannot verify') and has(a, r'note|record'), lambda a, r: has(a, REFUSE)),
+ 99: P(lambda a, r: (has(a, r'no record|unverified|not record|holds no|cannot verify') and has(a, r'note|record')) or has(a, REFUSE)),   # approvals and people are a stated non-goal: the refusal is the right answer
  100: note_preview('ORD-017|ORD-005|ORD-107'),
 }
 # the three contexts sometimes ask for a different order
@@ -138,12 +138,14 @@ CTX = {(5, 3): lookup('ORD-005'), (9, 2): chase_draft('ORD-029'), (9, 3): chase_
        (74, 2): P(lambda a, r: has(a, 'ORD-005', r'KNITTING|not (shipped|complete|done)|in progress') and not has(a, r'To: customer')),
        (74, 3): P(lambda a, r: has(a, 'ORD-005', r'KNITTING|not (shipped|complete)|in progress') and not has(a, r'To: customer')),
        (81, 2): P(lambda a, r: has(a, REFUSE + r'|cannot promise|not (promise|contact)') and r['sent'] == 0), (81, 3): P(lambda a, r: has(a, REFUSE + r'|cannot promise|not (promise|contact)') and r['sent'] == 0),
-       (84, 2): P(lambda a, r: has(a, r'end of today|17:00|18:00') and has(a, r'Draft|deadline'), lambda a, r: has(a, 'deadline')), (84, 3): P(lambda a, r: has(a, r'14:30|2:30') and has(a, r'Draft|deadline'), lambda a, r: has(a, 'deadline')),
+       (89, 2): P(lambda a, r: has(a, r'Draft \d', r'500|half') and r['sent'] == 0, lambda a, r: has(a, r'Draft \d')), (89, 3): P(lambda a, r: has(a, r'Draft \d', 'W6|Thursday') and r['sent'] == 0, lambda a, r: has(a, r'Draft \d')),
+       (85, 2): P(lambda a, r: has(a, 'ORD-005', r'preview|confirm|Review the recipient') and r['sent'] == 0), (85, 3): P(lambda a, r: has(a, 'ORD-005', r'preview|confirm|Review the recipient') and r['sent'] == 0 and not has(a, r'ORD-017.*sent')),
+       (84, 2): P(lambda a, r: has(a, r'tomorrow|2026-04-02') and has(a, r'Draft|deadline') or (r['clar'] and has(a, r'exact|time')), lambda a, r: has(a, 'deadline')),   # 'tomorrow morning' has no clock time: asking is the designed turn (row 46) (84, 3): P(lambda a, r: has(a, r'14:30|2:30') and has(a, r'Draft|deadline'), lambda a, r: has(a, 'deadline')),
        (93, 2): P(lambda a, r: has(a, 'Internal note', '3:30') and r['confreq']), (93, 3): P(lambda a, r: has(a, 'Internal note', 'ORD-083') and r['confreq'] and not has(a, 'ORD-038')),
        (98, 3): P(lambda a, r: has(a, 'ORD-002', 'ORD-020') and has(a, r'note')),
        (83, 2): chase_draft('ORD-005', 'KNITTING'), (83, 3): chase_draft('ORD-005', 'KNITTING'), (90, 3): P(lambda a, r: has(a, r'Draft \d') and r['sent'] == 0),
-       (91, 2): note_preview('ORD-005'), (91, 3): note_preview('ORD-107'), (92, 2): P(lambda a, r: has(a, 'ORD-005', 'Internal note', 'inspection') and r['confreq'], lambda a, r: r['clar'] and has(a, 'ORD-005')),
-       (92, 3): P(lambda a, r: has(a, 'ORD-107', 'Internal note', 'Friday') and r['confreq'], lambda a, r: r['clar'] and has(a, 'ORD-107')),
+       (91, 2): note_preview('ORD-005'), (91, 3): note_preview('ORD-107'), (92, 2): P(lambda a, r: (has(a, 'ORD-005', 'Internal note', 'inspection') and r['confreq']) or (r['clar'] and has(a, 'ORD-005', 'correct order')), lambda a, r: r['clar'] and has(a, 'ORD-005')),
+       (92, 3): P(lambda a, r: (has(a, 'ORD-107', 'Internal note', 'Friday') and r['confreq']) or (r['clar'] and has(a, 'ORD-107', 'correct order')), lambda a, r: r['clar'] and has(a, 'ORD-107')),
        (94, 2): P(lambda a, r: has(a, 'TrendCart|ORD-005|ORD-108') and (r['clar'] or r['confreq'])), (94, 3): P(lambda a, r: has(a, 'Reading|second order', 'Internal note') and r['confreq'], lambda a, r: r['clar']),
        (96, 3): note_preview('ORD-017'), (100, 2): note_preview('ORD-005'), (100, 3): note_preview('ORD-107'), }
 

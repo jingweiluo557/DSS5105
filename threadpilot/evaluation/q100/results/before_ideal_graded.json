@@ -47,7 +47,7 @@
    ]
   ],
   "answer": "Top 14 of 14 for 2026-04-01 to 2026-04-08 (overdue active orders first; business date 2026-04-01). Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107 (Northwind Apparel, 2000 Cardigan): 16 days overdue; stage PACKING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-03. Action: confirm a new date with the customer; chase the stage if idle.\n2. ORD-120 (TrendCart, 1500 Vest): 15 days overdue; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-09. Action: confirm a new date with the customer; chase the stage if idle.\n3. ORD-083 (Maple & Co, 1000 Hoodie): 9 days overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-04. Action: confirm a new date with the customer; chase the stage if idle.\n4. ORD-114 (Northwind Apparel, 2000 Hoodie): 9 days overdue; stage PACKING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-06. Action: confirm a new date with the customer; chase the stage if idle.\n5. ORD-002 (Cotton Club, 1000 Crewneck sweater): 3 days overdue; stage WASHING; last activity 2026-03-23 (9 d ago, suspected stalled); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n6. ORD-093 (Maple & Co, 100 Beanie): 3 days overdue; stage WASHING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n7. ORD-020 (TrendCart, 1200 Vest): 1 day overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n8. ORD-055 (Cotton Club, 800 Crewneck sweater): 1 day overdue; stage ASSEMBLY; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n9. ORD-029 (Northwind Apparel, 1500 Beanie): due today; stage WASHING; last activity 2026-04-01 (0 d ago); queue high, best-case finish 2026-04-13. Action: expedite, outsource or re-date today.\n10. ORD-108 (Harbor Knits, 2000 Scarf): due in 2 days; stage ASSEMBLY; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-15. Action: expedite, outsource or re-date today.\n11. ORD-103 (Bright Basics, 2000 Scarf): due in 3 days; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-16. Action: expedite, outsource or re-date today.\n12. ORD-061 (Harbor Knits, 800 Scarf): due in 4 days; stage WASHING; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-17. Action: expedite, outsource or re-date today.\n13. ORD-099 (Northwind Apparel, 1500 Polo shirt): due in 4 days; stage WASHING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-20. Action: expedite, outsource or re-date today.\n14. ORD-062 (Bright Basics, 2000 Scarf): due in 7 days; stage KNITTING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-21. Action: expedite, outsource or re-date today.\nOwner and escalation time are not recorded; the department is the order’s current stage.\nRanking indicates review urgency, not a prediction of failure.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 3,
@@ -1533,7 +1533,7 @@
    ]
   ],
   "answer": "What exact time on that date (for example Friday at 9 a.m.) should I check?",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 68,
@@ -1713,7 +1713,7 @@
    ]
   ],
   "answer": "Which TrendCart order should I chase? ORD-120 (TrendCart, 1500 Vest, assembly, 15 d overdue); ORD-020 (TrendCart, 1200 Vest, washing, 1 d overdue); ORD-096 (TrendCart, 1000 Beanie, knitting, due in 16 d); ORD-005 (TrendCart, 500 Scarf, knitting, due in 19 d, idle 8 d); ORD-017 (TrendCart, 800 Cardigan, knitting, due in 9 d); ORD-082 (TrendCart, 600 Beanie, knitting, due in 30 d). Give the order ID.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 76,
@@ -2094,7 +2094,7 @@
    ]
   ],
   "answer": "Internal note target is ORD-017. Is that the correct order?",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 93,
@@ -2165,7 +2165,7 @@
    ]
   ],
   "answer": "Little Loom (W4) makes ACCESSORIES only; ORD-083 is TOPS (hoodie). Record the note anyway, or choose another workshop? Active workshops that make tops: W1 QuickStitch (300/day), W2 SteadyHands (170/day), W3 BudgetWorks (230/day), W5 GiantWeave (400/day), W6 Nimble Needle (130/day), W8 FreshStart (100/day).",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 96,
@@ -2257,7 +2257,7 @@
    ]
   ],
   "answer": "That is not something this system can answer from its data: it holds orders, daily stage output and workshop profiles only. Ask about an order, a customer, a stage or a new-order estimate.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 100,
@@ -2330,7 +2330,7 @@
    ]
   ],
   "answer": "Top 14 of 14 for 2026-04-01 to 2026-04-08 (overdue active orders first; business date 2026-04-01). Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107 (Northwind Apparel, 2000 Cardigan): 16 days overdue; stage PACKING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-03. Action: confirm a new date with the customer; chase the stage if idle.\n2. ORD-120 (TrendCart, 1500 Vest): 15 days overdue; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-09. Action: confirm a new date with the customer; chase the stage if idle.\n3. ORD-083 (Maple & Co, 1000 Hoodie): 9 days overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-04. Action: confirm a new date with the customer; chase the stage if idle.\n4. ORD-114 (Northwind Apparel, 2000 Hoodie): 9 days overdue; stage PACKING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-06. Action: confirm a new date with the customer; chase the stage if idle.\n5. ORD-002 (Cotton Club, 1000 Crewneck sweater): 3 days overdue; stage WASHING; last activity 2026-03-23 (9 d ago, suspected stalled); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n6. ORD-093 (Maple & Co, 100 Beanie): 3 days overdue; stage WASHING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n7. ORD-020 (TrendCart, 1200 Vest): 1 day overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n8. ORD-055 (Cotton Club, 800 Crewneck sweater): 1 day overdue; stage ASSEMBLY; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n9. ORD-029 (Northwind Apparel, 1500 Beanie): due today; stage WASHING; last activity 2026-04-01 (0 d ago); queue high, best-case finish 2026-04-13. Action: expedite, outsource or re-date today.\n10. ORD-108 (Harbor Knits, 2000 Scarf): due in 2 days; stage ASSEMBLY; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-15. Action: expedite, outsource or re-date today.\n11. ORD-103 (Bright Basics, 2000 Scarf): due in 3 days; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-16. Action: expedite, outsource or re-date today.\n12. ORD-061 (Harbor Knits, 800 Scarf): due in 4 days; stage WASHING; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-17. Action: expedite, outsource or re-date today.\n13. ORD-099 (Northwind Apparel, 1500 Polo shirt): due in 4 days; stage WASHING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-20. Action: expedite, outsource or re-date today.\n14. ORD-062 (Bright Basics, 2000 Scarf): due in 7 days; stage KNITTING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-21. Action: expedite, outsource or re-date today.\nOwner and escalation time are not recorded; the department is the order’s current stage.\nRanking indicates review urgency, not a prediction of failure.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 3,
@@ -3790,7 +3790,7 @@
    ]
   ],
   "answer": "Which order should I use? Please give its ID or customer.",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 68,
@@ -3962,7 +3962,7 @@
    ]
   ],
   "answer": "Which order should I draft for? Please give its ID, or choose a summary draft.",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 76,
@@ -4153,7 +4153,7 @@
    ]
   ],
   "answer": "Choose an exact future business date and time for the reply deadline.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 85,
@@ -4174,7 +4174,7 @@
    ]
   ],
   "answer": "Which draft should I preview? Choose a draft number. Each draft is confirmed separately.",
-  "verdict": "PARTIAL"
+  "verdict": "FAIL"
  },
  {
   "no": 86,
@@ -4474,7 +4474,7 @@
    ]
   ],
   "answer": "That is not something this system can answer from its data: it holds orders, daily stage output and workshop profiles only. Ask about an order, a customer, a stage or a new-order estimate.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 100,
@@ -4547,7 +4547,7 @@
    ]
   ],
   "answer": "Top 14 of 14 for 2026-04-01 to 2026-04-08 (overdue active orders first; business date 2026-04-01). Earlier due date first; ties: older last activity, then order ID. Includes overdue active orders. No opaque score.\n1. ORD-107 (Northwind Apparel, 2000 Cardigan): 16 days overdue; stage PACKING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-03. Action: confirm a new date with the customer; chase the stage if idle.\n2. ORD-120 (TrendCart, 1500 Vest): 15 days overdue; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-09. Action: confirm a new date with the customer; chase the stage if idle.\n3. ORD-083 (Maple & Co, 1000 Hoodie): 9 days overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-04. Action: confirm a new date with the customer; chase the stage if idle.\n4. ORD-114 (Northwind Apparel, 2000 Hoodie): 9 days overdue; stage PACKING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-06. Action: confirm a new date with the customer; chase the stage if idle.\n5. ORD-002 (Cotton Club, 1000 Crewneck sweater): 3 days overdue; stage WASHING; last activity 2026-03-23 (9 d ago, suspected stalled); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n6. ORD-093 (Maple & Co, 100 Beanie): 3 days overdue; stage WASHING; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-07. Action: confirm a new date with the customer; chase the stage if idle.\n7. ORD-020 (TrendCart, 1200 Vest): 1 day overdue; stage WASHING; last activity 2026-03-30 (2 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n8. ORD-055 (Cotton Club, 800 Crewneck sweater): 1 day overdue; stage ASSEMBLY; last activity 2026-04-01 (0 d ago); queue overdue, best-case finish 2026-04-10. Action: confirm a new date with the customer; chase the stage if idle.\n9. ORD-029 (Northwind Apparel, 1500 Beanie): due today; stage WASHING; last activity 2026-04-01 (0 d ago); queue high, best-case finish 2026-04-13. Action: expedite, outsource or re-date today.\n10. ORD-108 (Harbor Knits, 2000 Scarf): due in 2 days; stage ASSEMBLY; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-15. Action: expedite, outsource or re-date today.\n11. ORD-103 (Bright Basics, 2000 Scarf): due in 3 days; stage ASSEMBLY; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-16. Action: expedite, outsource or re-date today.\n12. ORD-061 (Harbor Knits, 800 Scarf): due in 4 days; stage WASHING; last activity 2026-03-30 (2 d ago); queue high, best-case finish 2026-04-17. Action: expedite, outsource or re-date today.\n13. ORD-099 (Northwind Apparel, 1500 Polo shirt): due in 4 days; stage WASHING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-20. Action: expedite, outsource or re-date today.\n14. ORD-062 (Bright Basics, 2000 Scarf): due in 7 days; stage KNITTING; last activity 2026-03-31 (1 d ago); queue high, best-case finish 2026-04-21. Action: expedite, outsource or re-date today.\nOwner and escalation time are not recorded; the department is the order’s current stage.\nRanking indicates review urgency, not a prediction of failure.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 3,
@@ -6033,7 +6033,7 @@
    ]
   ],
   "answer": "What exact time on that date (for example Friday at 9 a.m.) should I check?",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 68,
@@ -6213,7 +6213,7 @@
    ]
   ],
   "answer": "Which TrendCart order should I chase? ORD-120 (TrendCart, 1500 Vest, assembly, 15 d overdue); ORD-020 (TrendCart, 1200 Vest, washing, 1 d overdue); ORD-096 (TrendCart, 1000 Beanie, knitting, due in 16 d); ORD-005 (TrendCart, 500 Scarf, knitting, due in 19 d, idle 8 d); ORD-017 (TrendCart, 800 Cardigan, knitting, due in 9 d); ORD-082 (TrendCart, 600 Beanie, knitting, due in 30 d). Give the order ID.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 76,
@@ -6433,7 +6433,7 @@
    ]
   ],
   "answer": "To: knitting@example.com\nDepartment: KNITTING\nSubject: ThreadPilot chase-up | ORD-005\n\nPlease check the current status and confirm the next steps for ORD-005. Thank you.\n\nReview the recipient and text, then confirm to send this email.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 86,
@@ -6594,7 +6594,7 @@
    ]
   ],
   "answer": "Internal note target is ORD-107. Is that the correct order?",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 93,
@@ -6708,7 +6708,7 @@
    ]
   ],
   "answer": "Internal note target is ORD-017. Is that the correct order?",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 98,
@@ -6752,7 +6752,7 @@
    ]
   ],
   "answer": "That is not something this system can answer from its data: it holds orders, daily stage output and workshop profiles only. Ask about an order, a customer, a stage or a new-order estimate.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 100,

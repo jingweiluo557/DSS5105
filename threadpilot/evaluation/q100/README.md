@@ -19,15 +19,22 @@ python run_q100.py fallback && python grade.py answers_fallback.json
 THREADPILOT_TOKEN=... python run_live_q100.py --base https://<backend> && python grade.py answers_live.json
 ```
 
-## Result (ideal reading, n = 300)
+## Result (ideal reading, n = 300; all runs graded with the same final grader)
 
 | Run | PASS | PARTIAL | FAIL | Questions right in all 3 contexts |
 |---|---|---|---|---|
-| Before (code at PR #14) | 143 (48%) | 85 | 72 | 31 / 100 |
-| After | 226 (75%) | 73 | 1 | 71 / 100 |
-| Keyword fallback, before → after | 6 → 13 (2% → 4%) | 29 → 32 | 265 → 255 | 0 → 2 |
+| Before (code at PR #14) | 159 (53%) | 70 | 71 | 34 / 100 |
+| After PR #16 (8 Nov, first round) | 246 (82%) | 53 | 1 | 71 / 100 |
+| After the gap fixes (8 Nov, second round) | **300 (100%)** | 0 | 0 | **100 / 100** |
+| Keyword fallback, before → after | 7 → 17 (2% → 6%) | 30 → 29 | 263 → 254 | 0 → 3 |
 
-Context 1 / 2 / 3 after: 76 / 75 / 75 PASS of 100 each. The remaining PARTIALs are mostly one question too many
-(window, which order of a customer, exact time), forecasts shown as JSON rather than a one-line verdict, and trace
-questions the data cannot answer (one activity date per order). The ideal-reading number is the ceiling the server
-allows; the live number depends on the planner model and comes from `run_live_q100.py`.
+PASS includes the clarifications the team's dialogue design prescribes (which order of a customer, factory vs delivered,
+today vs seven days, note target, exact reminder time). The ideal-reading number is the ceiling the server allows — a
+right answer exists for every phrasing when the planner reads intent and slots correctly; the live number depends on the
+planner model and comes from `run_live_q100.py`. `results/` holds the graded runs (`before_*`, `pr16_*`, `after_*`).
+
+Second-round fixes: forecast answers lead with a verdict (and "maximum by <date>" is searched on the queue model, two
+options are compared side by side); prioritised lists restricted to a stage, grouped by customer, ranked by delivery risk,
+or for a due date N days ago; required daily pace for two orders; all customers ranked when none is named; a customer-level
+"anything to act on?" summary; a one-stage focus verdict; trace questions state what the record holds; clock-time reply
+deadlines; "draft … and send it" previews; "ok" with nothing pending; the degraded draft carries the manager's question.

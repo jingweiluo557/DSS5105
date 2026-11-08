@@ -107,8 +107,13 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         notes.append('I will not put a delivery promise in writing on your behalf: the draft asks the workshop for its expected completion date instead, and you decide what to tell the customer.')
         slots = slots.model_copy(update={'text': None})
         result = result.model_copy(update={'slots': slots})
+    # "Draft a chase-up to packing for ORD-083 and send it": no draft exists for that order yet, so draft it and show the preview.
+    if slots.action == 'send' and explicit and not any(d.get('order_ids') == explicit and not d.get('sent') for d in state.chase_drafts) and re.search(r'\b(draft|write|chase|email|ask)\b', lower) and not re.search(r'straight away|right away|immediately|no need to show|without showing|don.t show|no preview|skip the preview', lower):
+        slots = slots.model_copy(update={'action': 'draft', 'draft_number': None})
+        result = result.model_copy(update={'slots': slots})
+        notes.append('Nothing is sent without a preview and your confirmation. Here is the draft:')
     # "Send it" / "send it straight away, no need to show me" with nothing drafted yet: the preview cannot be skipped, so draft and show it.
-    if slots.action == 'send' and not state.chase_drafts and (explicit or state.active_order):
+    if slots.action == 'send' and not any(not d.get('sent') and (d.get('order_ids') == (explicit or [state.active_order])) for d in state.chase_drafts) and (explicit or state.active_order) and not slots.draft_number:
         slots = slots.model_copy(update={'action': 'draft', 'draft_number': None})
         result = result.model_copy(update={'slots': slots})
         notes.append('Nothing is sent without a preview and your confirmation. Here is the draft:' if not re.search(r'straight away|right away|immediately|no need to show|without showing|don.t show|no preview|skip the preview', lower)
@@ -203,6 +208,13 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         if supplied:
             previous = resolve_datetime(context[key], now) if context.get(key) and key == 'deadline' else None
             resolved = resolve_datetime(supplied, now, previous)
+            if resolved is not None and resolved <= now and key == 'deadline' and not re.search(r'\d{4}-\d{2}-\d{2}|today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday', supplied.lower()):
+                # "reply by 11:30" said at noon: that clock time has passed today, so the next working day at that time, and say so
+                from datetime import timedelta as _td
+                nxt = resolved + _td(days=1)
+                while nxt.weekday() == 6: nxt += _td(days=1)
+                notes.append(f"{supplied} has already passed today (business time {now.strftime('%H:%M')}), so the deadline is set to {nxt.strftime('%A %d %b %H:%M')}; say another time to change it.")
+                resolved = nxt
             if resolved is None or resolved <= now:
                 context.pop(key, None)
                 return await reply('Choose an exact future business date and time for ' + ('sending' if key == 'send_at' else 'the reply deadline') + '.', True)
@@ -289,6 +301,12 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         facts = [r.record for r in rows if r.record['order_id'] in group]
         previous = next((d['text'] for d in state.chase_drafts if d['order_ids'] == group), None) if slots.action == 'revise' else None
         fallback = 'Please check the current status and confirm the next steps' + (' for ' + ', '.join(group) if group else '') + '. Thank you.'
+        if slots.text and slots.action != 'revise':
+            # no model: the manager's own question still goes into the draft, so the degraded draft is not an empty chase
+            ask = slots.text.strip().rstrip('.?!')
+            fallback = 'Please check the current status' + (' of ' + ', '.join(group) if group else '') + f' and let us know: {ask[0].lower() + ask[1:]}? Thank you.'
+        elif slots.text and previous:
+            fallback = previous.rstrip() + '\n' + slots.text.strip().rstrip('.') + '.'
         deadline = context.get('deadline')
         revision = message
         if slots.deadline and deadline:
