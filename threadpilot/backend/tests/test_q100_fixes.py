@@ -116,3 +116,84 @@ def test_row98_which_order_holds_the_note_is_a_read_of_both(tmp_path: Path):
     r = chat(make_engine(tmp_path), ScriptedPlanner(('execution.note', {'action': 'read', 'order_ids': ['ORD-002', 'ORD-020'], 'text': 'customer colour approval'})),
              'Is the note about customer colour approval on ORD-002 or ORD-020?')
     assert not r.confirmation_required and 'ORD-002: no saved note' in r.answer and 'ORD-020: no saved note' in r.answer and 'Nothing was changed' in r.answer
+
+
+# ---------------------------------------------------------------- 8 Nov gap fixes: answers instead of JSON or an extra question
+def test_row39_41_forecast_leads_with_a_verdict_and_two_options_are_compared(tmp_path: Path):
+    engine = make_engine(tmp_path)
+    r = chat(engine, ScriptedPlanner(('order.commitment', {'quantity': 600, 'product': 'scarves', 'due_date': '2026-04-06', 'delivery_point': 'factory'})), 'Can we finish 600 scarves by April 6?')
+    assert r.answer.startswith('600 scarves by 2026-04-06 (ready at the factory): ') and 'working day' in r.answer and 'Conditional forecast, not a promise' in r.answer
+    r = chat(engine, ScriptedPlanner(('order.commitment', {'product': 'beanies', 'due_date': '2026-04-07'})), 'Maximum beanies by 2026-04-07?')
+    assert not r.needs_clarification and ('No new beanies order of any size' in r.answer or 'Up to about' in r.answer)
+    assert any(c.name == 'estimate_capacity' and 'max_quantity' in c.result for c in r.tool_calls)
+
+
+def test_row28_required_daily_pace_compares_two_orders(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('order.compare', {'order_ids': ['ORD-029', 'ORD-108'], 'reference': 'explicit'})), '29 versus 108: tougher production pace?')
+    assert not r.needs_clarification and 'pieces per working day needed' in r.answer and 'needs the tougher pace' in r.answer
+    assert any(c.name == 'compare_orders' and c.arguments.get('criterion') == 'required_daily_pace' for c in r.tool_calls)
+
+
+def test_row29_unnamed_customers_are_all_ranked(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('order.compare', {})), 'Which customer has the greater share of in-progress orders without recent verified movement?')
+    assert not r.needs_clarification and 'has the greater share of in-progress orders without recent recorded activity' in r.answer and 'Cotton Club' in r.answer
+
+
+def test_row54_customer_level_question_is_a_summary_not_which_order(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('order.lookup', {'customer': 'TrendCart'})), 'Is there anything on TrendCart’s orders I need to act on today?')
+    assert not r.needs_clarification and r.answer.startswith('TrendCart: 6 active orders') and 'ORD-120' in r.answer and 'overdue' in r.answer
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('order.lookup', {'customer': 'TrendCart'})), 'Show me the TrendCart order.')
+    assert r.needs_clarification   # dialogue design row 2: a single "the order" still asks which
+
+
+def test_rows48_30_27_prioritise_by_customer_stage_and_risk(tmp_path: Path):
+    engine = make_engine(tmp_path)
+    r = chat(engine, ScriptedPlanner(('order.prioritize', {'window_days': 0})), 'Which customer needs an update first, based on their in-progress overdue orders?')
+    assert r.answer.startswith('By customer') and 'Northwind Apparel: 2 overdue' in r.answer and 'first:' in r.answer
+    r = chat(engine, ScriptedPlanner(('order.prioritize', {'window_days': 7, 'stage': 'WASHING'})), 'Among orders currently in washing, which should move to packing first?')
+    assert 'Only orders at washing' in r.answer and 'ORD-002' in r.answer and 'ORD-107' not in r.answer
+    r = chat(engine, ScriptedPlanner(('order.prioritize', {'criterion': 'risk'})), 'Rank active orders by their risk of missing the promised dispatch date.')
+    assert not r.needs_clarification and 'Ranked by delivery risk' in r.answer and 'will miss even in the best case:' in r.answer and 'ORD-029' in r.answer
+
+
+def test_row3_orders_due_n_days_ago(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('order.prioritize', {'window_days': 0})), 'Status of orders overdued 2 days ago')
+    assert 'Orders due on 2026-03-30' in r.answer and 'ORD-079' in r.answer and not r.needs_clarification
+
+
+def test_row50_one_stage_focus_verdict(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('operations.discovery', {})), 'If we focus on one stage today, which stage would reduce delivery risk most?')
+    assert r.answer.startswith('Focus on assembly today') and any(c.name == 'stage_focus' for c in r.tool_calls)
+
+
+def test_rows19_24_trace_questions_state_what_the_record_holds(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('order.risk', {'order_ids': ['ORD-120'], 'reference': 'explicit', 'action': 'explain'})), 'ORD-120: upstream delay or assembly dwell?')
+    assert 'no stage-entry or hand-off dates' in r.answer and 'ORD-120' in r.answer
+
+
+def test_row25_idle_ranking_filtered_to_orders_due_soon(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('order.rank', {'criterion': 'idle_days', 'window_days': 7})), 'Near due and no fresh update: which orders?')
+    assert 'Only active orders due between 2026-04-01 and 2026-04-08' in r.answer and 'ORD-108' in r.answer and 'ORD-002' not in r.answer
+
+
+def test_row80_acknowledgement_with_nothing_pending(tmp_path: Path):
+    r = chat(make_engine(tmp_path), ScriptedPlanner(('unknown', {})), 'ok')
+    assert not r.needs_clarification and r.answer.startswith('Nothing is waiting for confirmation')
+
+
+def test_row84_clock_times_resolve_in_the_factory_day():
+    from datetime import datetime
+    from app.workflow_tools import resolve_datetime
+    now = datetime.fromisoformat('2026-04-01T12:00:00+08:00')
+    assert resolve_datetime('2:30', now).hour == 14 and resolve_datetime('11:30', now).hour == 11
+    assert resolve_datetime('end of today', now).hour == 18
+    assert resolve_datetime('Friday morning', now) is None    # dialogue design row 46: a vague time is asked, not guessed
+
+
+def test_row76_draft_and_send_in_one_breath_shows_the_preview(tmp_path: Path):
+    engine = make_engine(tmp_path)
+    planner = ScriptedPlanner(('execution.chase', {'action': 'draft', 'order_ids': ['ORD-017'], 'reference': 'explicit'}),
+                              ('execution.chase', {'action': 'send', 'order_ids': ['ORD-083'], 'reference': 'explicit', 'department': 'PACKING', 'recipient': 'packing'}))
+    r = chat(engine, planner, 'Draft a chase-up for ORD-017.')
+    r = chat(engine, planner, 'Draft a chase-up to the packing workshop for ORD-083 and send it.', r.state)
+    assert 'Nothing is sent without a preview' in r.answer and 'ORD-083' in r.answer and not any(c.name == 'send_chase' and c.executed for c in r.tool_calls)

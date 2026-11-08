@@ -385,6 +385,8 @@ class WorkflowEngine:
                     response = self.route(route_message, result, state, now)
             responses.append(response)
             await self.tool_steps(emit, response, (perf_counter() - t0) * 1000)
+        if len(responses) > 1 and all(r.intent == Intent.ORDER_COMMITMENT and not r.needs_clarification for r in responses):
+            responses.insert(0, self.commitment_comparison(responses, state, now))
         queried = list(dict.fromkeys(i for r in responses if r.intent in single_order_intents for i in r.order_ids))
         if len(queried) > 1:
             state.comparison_orders = queried
@@ -539,6 +541,15 @@ class WorkflowEngine:
                 return self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, result, now, calls, evidence)
             state.comparison_orders = []   # the new question does not point at the compared orders at all
         if result.confidence < 0.65 or intent == Intent.UNKNOWN:
+            if re.fullmatch(r'\W*(ok|okay|k|yep|yes|yeah|sure|fine|sounds good|great|thanks|thank you|noted|got it|alright|cool)\W*', message.casefold()):
+                unsent = [d for d in state.chase_drafts if not d.get('sent')]
+                if unsent:
+                    d = unsent[-1]
+                    text = (f"Nothing is waiting for confirmation. Draft {len(state.chase_drafts)} for {', '.join(d.get('order_ids', []))} is still unsent; "
+                            f"say \"preview draft {len(state.chase_drafts)}\" to review it and then \"send now\" to send it, or ask about another order.")
+                else:
+                    text = 'Nothing is waiting for confirmation and nothing was changed. Ask about an order, a stage, or say what to draft, note or watch.'
+                return self.response(state, result, now, text, calls, evidence)
             return self.ask(result.clarification_question or 'Which order or operation would you like to check?', state, result, now, calls, evidence)
         comparative_ranking = intent == Intent.ORDER_COMPARE and (slots.action == 'rank' or slots.criterion is not None)
         # "The order is at which stage now?" / "has it moved?" after any turn that put one order in focus: the order in focus,
@@ -546,7 +557,7 @@ class WorkflowEngine:
         if (state.active_order and not explicit_ids and not slots.order_ids and not slots.customer and not slots.product and not slots.quantity
                 and not state.comparison_orders and intent not in entity_free and intent not in (Intent.ORDER_FORECAST,)
                 and (slots.reference == 'active' or re.search(r'\b(this|that|the) (order|one)\b|\bit\b|^\W*order (at|status|stage|progress|where)', message.casefold()))
-                and not re.search(r'\borders\b|\b(with|of) \d|\b(order|orders) (with|from|at|for|that|which|due)\b', message.casefold())):
+                and not re.search(r'\borders\b|\b(with|of) \d|\b(order|orders) (with|from|for|that|which|due)\b|\border at (knitting|assembly|washing|packing)\b', message.casefold())):
             slots.order_ids = [state.active_order]
             slots.reference = 'active'
             state.slots = slots
@@ -604,12 +615,16 @@ class WorkflowEngine:
                 state.active_order = None
                 options = '; '.join(f"{e.record['order_id']}: {e.record['product']}, {e.record['pieces']} pieces, due {e.record['due_date']}" for e in matches)
                 state.last_order_ids = [e.record['order_id'] for e in matches]
+                if matches and slots.customer and re.search(r'anything|any (issue|problem|trouble)|is?sues?|problems?|trouble|act on|attention|in trouble|worr|need to (do|act|know)', message.casefold()) and not slots.product and not slots.quantity:
+                    return self.customer_summary(slots.customer, matches, state, result, now, calls, evidence)
                 return self.ask(('Several matching orders. Which order ID, quantity or due date? ' + options) if matches else 'No matching order. Please check the order ID, quantity or due date.', state, result, now, calls, evidence, state.last_order_ids)
             order = self.select(matches[0].record['order_id'], state, calls, evidence)
             answer = self.order_facts(order)
         elif intent == Intent.ORDER_COMPARE:
             customers = self.customers_named(message)
-            if len(customers) == 2 and not explicit_ids:
+            if not customers and not explicit_ids and not result.slots.order_ids and re.search(r'which customer|whose|customers?\b.*(share|most|more|greater|worst)|(share|most|more|greater|worst).*\bcustomers?\b', message.casefold()):
+                customers = sorted({e.record['customer'] for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS'})   # no names given: rank them all
+            if len(customers) >= 2 and not explicit_ids:
                 state.comparison_orders = []
                 state.pending_clarification = None
                 answer, call, rows = self.compare_customers(customers, now, message)
@@ -639,6 +654,11 @@ class WorkflowEngine:
                     slots.criterion = 'due_date'
                 elif re.search(r'recent|update|activity|quiet|idle|moved', lowered):
                     slots.criterion = 'last_activity_date'
+            if re.search(r'pace|per (available )?(working )?day|daily (completion )?rate|workload|higher rate|tighter|tougher|pressure', lowered) and not wants_risk:
+                answer, call, rows = self.compare_pace(ids, now)
+                calls.append(call)
+                evidence.extend(rows)
+                return self.response(state, result, now, answer, calls, evidence)
             if not slots.comparison_fields:
                 return self.ask('Which aspect matters: due date, stage, latest activity, status, pieces or overall delivery risk?', state, result, now, calls, evidence)
             rows = [self.tools.refresh_order(i) for i in ids]
@@ -684,15 +704,64 @@ class WorkflowEngine:
                 calls.append(ToolCall(name='explain_no_data', arguments={'reason': 'history'}, result={'declined': True, 'reason': 'history'}, executed=False))
                 return self.response(state, result, now, history[1], calls, evidence)
             lowered = message.casefold()
+            # "orders overdue 2 days ago" / "due two days ago": the orders whose due date was that day
+            ago = re.search(r'\b(\d+|one|two|three|four|five|six|seven)\s*(?:days?|d)\s+ago\b', lowered)
+            if ago and re.search(r'due|overdue|overdued|late', lowered):
+                n = int(ago[1]) if ago[1].isdigit() else {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7}[ago[1]]
+                day = (now.date() - timedelta(days=n)).isoformat()
+                due_rows = [e for e in self.tools.rows('orders.csv') if e.record['due_date'] == day]
+                calls.append(ToolCall(name='search_orders', arguments={'due_date': day}, result={'candidates': [e.record for e in due_rows]}))
+                evidence.extend(due_rows)
+                active = [e for e in due_rows if e.record['status'] == 'IN_PROGRESS']
+                if not due_rows:
+                    overdue = sorted([e for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS' and e.record['due_date'] < now.date().isoformat()], key=lambda e: e.record['due_date'])
+                    text = f'No orders were due on {day} ({n} days ago), so none is overdue from that day. Overdue active orders as of {now.date().isoformat()}: ' + ', '.join(f"{e.record['order_id']} (due {e.record['due_date']})" for e in overdue) + '.'
+                else:
+                    text = f'Orders due on {day}: ' + '; '.join(f"{e.record['order_id']} ({e.record['customer']}, {e.record['pieces']} {e.record['product']}) {e.record['status']} at {e.record['current_stage']}" for e in due_rows) + '.' + (' None is still in progress.' if not active else '')
+                state.last_order_ids = [e.record['order_id'] for e in due_rows]
+                return self.response(state, result, now, text, calls, evidence)
             if slots.window_days is None:
                 if re.search(r'this week|next (seven|7) days|7 days', lowered):
                     slots.window_days = 7
+                elif re.search(r'\b(hidden|beyond|after accounting|risk of missing|will miss|on schedule today)\b', lowered) or slots.criterion == 'risk':
+                    slots.window_days = 7   # a risk ranking looks at the coming week, not only today
                 else:   # the dialogue design asks "today only or the next seven days?" rather than guessing
                     return self.ask('Due today only, or include the next seven days? Overdue active orders will be included.', state, result, now, calls, evidence)
             data, rows = self.tools.prioritize(slots, now)
             evidence.extend(rows)
             calls.append(ToolCall(name='prioritize_orders', arguments={'window_days': slots.window_days, 'customer': slots.customer}, result=data))
+            stage_filter = (slots.stage or '').upper() if slots.stage else None
+            if not stage_filter:
+                st = re.search(r'\b(?:in|at|currently in|from) (knitting|assembly|washing|packing)\b', lowered)
+                stage_filter = st[1].upper() if st else None
+            if stage_filter:
+                rows = [e for e in rows if e.record['current_stage'] == stage_filter] or [e for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS' and e.record['current_stage'] == stage_filter]
+                rows = sorted(rows, key=lambda e: (e.record['due_date'], e.record['last_activity_date'], e.record['order_id']))
+                data = dict(data, rule=f"Only orders at {stage_filter.lower()}. " + data['rule'], window_start=data['window_start'], window_end=data['window_end'])
+                calls.append(ToolCall(name='search_orders', arguments={'current_stage': stage_filter, 'status': 'IN_PROGRESS'}, result={'candidates': [e.record for e in rows]}))
             state.last_order_ids = [e.record['order_id'] for e in rows]
+            if re.search(r'which customer|whose|per customer|by customer|customer (needs|should|first)', lowered) and not slots.customer:
+                groups: dict[str, list] = {}
+                for e in rows: groups.setdefault(e.record['customer'], []).append(e)
+                today = now.date()
+                def worst(es): return max((today - datetime.fromisoformat(e.record['due_date'] + 'T00:00:00').date()).days for e in es)
+                order = sorted(groups, key=lambda c: (-sum(1 for e in groups[c] if e.record['due_date'] < today.isoformat()), -worst(groups[c]), c))
+                lines = []
+                for c in order:
+                    es = groups[c]; late = [e for e in es if e.record['due_date'] < today.isoformat()]
+                    lines.append(f"{c}: {len(late)} overdue of {len(es)} in the window" + (f" (worst {worst(late)} days: " + ', '.join(f"{e.record['order_id']} {e.record['pieces']} {e.record['product']} at {e.record['current_stage'].lower()}" for e in late) + ')' if late else ''))
+                verdict = f"{order[0]} first: " + ('the most overdue orders and the longest overdue.' if len(order) > 1 else 'the only customer with orders in the window.') if order else 'No customer has orders in the window.'
+                calls.append(ToolCall(name='prioritize_orders', arguments={'group_by': 'customer', 'window_days': slots.window_days}, result={'order': order, 'lines': lines}))
+                text = f"By customer, {data['window_start']} to {data['window_end']} (overdue active orders first; business date {today.isoformat()}):\n" + '\n'.join(lines) + '\n' + verdict + ' Owner and escalation time are not recorded.'
+                return self.response(state, result, now, text, calls, evidence)
+            if slots.criterion == 'risk' or re.search(r'risk of missing|hidden (delivery )?risk|will miss|too little remaining time|on schedule today', lowered):
+                risks = {e.record['order_id']: self.tools.assess_risk(e, now) for e in rows}
+                rank = {'overdue': 0, 'high': 1, 'medium': 2, 'unknown': 3, 'low': 4}
+                rows = sorted(rows, key=lambda e: (rank.get(risks[e.record['order_id']]['risk_level'], 5), -(risks[e.record['order_id']].get('late_days_best') or 0), e.record['due_date']))
+                hidden = [e for e in rows if risks[e.record['order_id']]['risk_level'] == 'high' and e.record['due_date'] >= now.date().isoformat()]
+                data = dict(data, rule='Ranked by delivery risk: overdue first, then orders whose best-case finish is already after the due date (late days, most first), then due date. ' + (('Not yet overdue but will miss even in the best case: ' + ', '.join(e.record['order_id'] for e in hidden) + '. ') if hidden else ''))
+                calls.append(ToolCall(name='assess_order_risk', arguments={'order_ids': [e.record['order_id'] for e in rows]}, result={'risks': {k: {'risk_level': v['risk_level'], 'late_days_best': v.get('late_days_best')} for k, v in risks.items()}}))
+                state.last_order_ids = [e.record['order_id'] for e in rows]
             words = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10}
             # "top 3 orders", "which three production exceptions", "the five most urgent items"
             limit_re = r'\b(?:top|first|which|the)?\s*(\d{1,2}|' + '|'.join(words) + r')\s+(?:(?:most |biggest |largest )?[a-z-]+\s+)?(?:orders?|exceptions?|items?|issues?|things?|problems?|priorit(?:y|ies)|risks?)\b'
@@ -728,21 +797,47 @@ class WorkflowEngine:
                 answer += self.order_facts(inspected)
             answer += '\nRanking indicates review urgency, not a prediction of failure.'
         elif intent == Intent.ORDER_COMMITMENT:
+            lowered_c = message.casefold()
+            assumed_point = None
             if not slots.delivery_point:
-                return self.ask('Does the deadline mean ready at our factory or delivered to the customer?', state, result, now, calls, evidence)
-            if not slots.quantity or not slots.product or not slots.due_date:
+                if re.search(r'\b(deliver(ed|y)?|arrive|at the customer|to the customer|ship(ped)? to)\b', lowered_c):
+                    slots.delivery_point = 'customer'
+                elif re.search(r'\b(ready|finish(ed)?|produce|complete[d]?|make|maximum|max|how many|can we (do|handle))\b', lowered_c):
+                    slots.delivery_point, assumed_point = 'factory', 'ready at the factory (say "delivered" if the date is a customer delivery date)'
+                else:
+                    return self.ask('Does the deadline mean ready at our factory or delivered to the customer?', state, result, now, calls, evidence)
+            wants_max = not result.slots.quantity and bool(re.search(r'maximum|\bmax\b|how many|how much|at most|up to', lowered_c))
+            if wants_max:
+                slots.quantity = None   # a carried quantity from an earlier question is not the one being asked about
+            if (not slots.quantity and not wants_max) or not slots.product or not slots.due_date:
                 return self.ask('What product, quantity and explicit due date should I estimate?', state, result, now, calls, evidence)
             if resolve_date(slots.due_date, now) <= now.date():
                 return self.ask('That date is not in the future. What new delivery date should I assess?', state, result, now, calls, evidence)
-            data, rows = self.tools.capacity(slots, now)
-            evidence.extend(rows)
-            calls.append(ToolCall(name='estimate_capacity', arguments=slots.model_dump(), result=data))
-            answer = 'Conditional forecast, not a promise:\n' + json.dumps(data, ensure_ascii=False, indent=2)
+            if wants_max:
+                best_q, probe, rows = self.max_quantity_by(slots, now)
+                evidence.extend(rows)
+                calls.append(ToolCall(name='estimate_capacity', arguments={**slots.model_dump(), 'search': 'largest quantity whose best-case finish is on or before the due date'}, result={'max_quantity': best_q, 'probe': probe}))
+                due = resolve_date(slots.due_date, now).isoformat()
+                if best_q == 0:
+                    bc = probe['queue_projection']['best_case'] if probe.get('queue_projection') else {}
+                    lead = (f"No new {slots.product.lower()} order of any size is ready by {due} in the queue model: {probe['queue_projection']['orders_ahead'] if probe.get('queue_projection') else 'the'} active orders due earlier occupy every stage, "
+                            f"so even a 1-piece order finishes {bc.get('finish_date', 'later')} best case ({bc.get('working_days')} working days). It could only be met by giving it manager priority ahead of overdue orders, which the expedite check can quantify.")
+                else:
+                    lead = f"Up to about {best_q:,} {slots.product.lower()} by {due} ({slots.delivery_point}): the largest quantity whose best-case queue finish is on or before the due date, current orders only, no new arrivals. Conditional forecast, not a promise."
+                answer = lead + ('\nAssumed ' + assumed_point + '.' if assumed_point else '') + '\nProbe at that quantity:\n' + json.dumps(probe, ensure_ascii=False, indent=2)
+            else:
+                data, rows = self.tools.capacity(slots, now)
+                evidence.extend(rows)
+                calls.append(ToolCall(name='estimate_capacity', arguments=slots.model_dump(), result=data))
+                answer = self.commitment_lead(slots, data, now) + ('\nAssumed ' + assumed_point + '.' if assumed_point else '') + '\nConditional forecast, not a promise:\n' + json.dumps(data, ensure_ascii=False, indent=2)
         elif intent in (Intent.OPERATIONS_NORMALITY, Intent.OPERATIONS_DEVIATION, Intent.OPERATIONS_OUTPUT):
             return self.production(message, intent, result, slots, state, now, calls, evidence, previous_clarification)
         elif intent == Intent.OPERATIONS_DISCOVERY:
             data, rows = self.tools.find_anomalies(slots, now)
             evidence.extend(rows)
+            focus = self.stage_focus(now) if re.search(r'one stage|which stage|where should i move|focus', message.casefold()) else None
+            if focus:
+                calls.append(ToolCall(name='stage_focus', arguments={}, result=focus))
             calls.append(ToolCall(name='find_anomalies', arguments={'customer': slots.customer, 'stage': slots.stage, 'limit': data['shown']}, result=data))
             state.last_order_ids = [f['entity'] for f in data['findings'] if f['entity'].startswith('ORD-')][:10]
             state.active_order = None
@@ -750,11 +845,22 @@ class WorkflowEngine:
                 answer = f"Nothing unusual in the recorded data as of {data['business_date']}: no sustained stage drop, no stalled customer, no overdue or near-due miss, no idle order."
             else:
                 kind_summary = ', '.join(f"{v} {k.replace('_', ' ')}" for k, v in data['by_kind'].items())
-                answer = (f"{data['total']} finding{'s' if data['total'] != 1 else ''} as of {data['business_date']} ({kind_summary}); top {data['shown']} by tier and score:\n" +
+                answer = ((f"Focus on {focus['stage'].lower()} today: {focus['why']}; that is where one stage's effort would reduce delivery risk most.\n" if focus else '') +
+                          f"{data['total']} finding{'s' if data['total'] != 1 else ''} as of {data['business_date']} ({kind_summary}); top {data['shown']} by tier and score:\n" +
                           '\n'.join(f"{i}. [{f['tier']}] {f['title']}. {f['action']} (rule: {f['rule']})" for i, f in enumerate(data['findings'], 1)) +
                           '\n' + data['limits'])
         elif intent == Intent.ORDER_RANK:
             data, rows = self.tools.rank_active_orders(slots, now)
+            lowered_r = message.casefold()
+            near = re.search(r'near[- ]term|soon[- ]due|due soon|near due\b|near-due|ship(ping)? date|next (seven|7) days|this week', lowered_r)
+            if near and data['criterion'] == 'idle_days':
+                horizon = (now.date() + timedelta(days=slots.window_days or 7)).isoformat()
+                full, full_rows = self.tools.rank_active_orders(Slots(criterion='idle_days', window_days=34, customer=slots.customer), now)
+                keep = [o for o in full['orders'] if now.date().isoformat() <= o['due_date'] <= horizon][:10]
+                data = dict(data, orders=keep, rule=f"Only active orders due between {now.date().isoformat()} and {horizon} (not yet overdue), most idle first. " + data['rule'])
+                rows = [e for e in full_rows if e.record['order_id'] in {o['order_id'] for o in keep}] or rows
+            if re.search(r'quantity|piece[- ]?count|movement|handoff|hand-off|bottleneck|progressing inside', lowered_r):
+                data = dict(data, rule=data['rule'] + ' The log records no piece counts per order and no stage hand-off dates: only the current stage and the last activity date, so movement inside a stage cannot be seen; idle days are the only signal.')
             evidence.extend(rows)
             calls.append(ToolCall(name='rank_active_orders', arguments={'criterion': data['criterion'], 'customer': slots.customer, 'limit': len(data['orders'])}, result=data))
             state.last_order_ids = [o['order_id'] for o in data['orders']]
@@ -891,6 +997,9 @@ class WorkflowEngine:
                             status_line += f" It is still at {order.record['current_stage'].lower()}, before {st.lower()}, so {article(st)} {st.lower()} problem cannot have affected it yet."
                         else:
                             status_line += f" It has already passed {st.lower()}; {article(st)} {st.lower()} problem would only matter if work were sent back."
+                if re.search(r'trace|handoff|hand-off|originat|accumulat|diverge|timeline|history|first delayed|dwell|upstream delay|arrive[d]? (late )?into|build up|built up|while (in|at|it)|before (assembly|washing|packing|knitting)|stage[- ]by[- ]stage|evidence', message.casefold()):
+                    status_line += (f" Stage-by-stage trace is not recorded: the order record holds only the current stage ({order.record['current_stage']}), the last activity date and the due date, "
+                                    "with no stage-entry or hand-off dates, so where the delay first arose cannot be traced from this data; the stage event log would be needed.")
                 answer = self.order_facts(order) + '\n' + status_line + '\nFacts and risk interpretation:\n' + json.dumps(risk, indent=2)
                 answer += '\nA risk pattern does not establish that it will be late. Request a status update if needed.'
             else:
@@ -1229,13 +1338,17 @@ class WorkflowEngine:
                         'worst_overdue_days': max([(today - datetime.fromisoformat(e.record['due_date'] + 'T00:00:00').date()).days for e in overdue], default=0)}
         stale = bool(re.search(r'stale|idle|quiet|activity|update|movement|reliable', message.casefold()))
         key = (lambda c: (facts[c]['idle_5d'] / max(facts[c]['active'], 1), facts[c]['overdue'])) if stale else (lambda c: (facts[c]['overdue'], facts[c]['worst_overdue_days'], facts[c]['idle_5d']))
-        worse = max(customers, key=key)
-        other = next(c for c in customers if c != worse)
-        tie = key(worse) == key(other)
+        ranked = sorted(customers, key=key, reverse=True)
+        worse = ranked[0]
+        other = ranked[1] if len(ranked) > 1 else worse
+        tie = len(ranked) > 1 and key(worse) == key(other)
         lines = [f"{c}: {f['active']} active orders ({f['pieces']:,} pieces); {f['overdue']} overdue" + (f" ({', '.join(f['overdue_ids'])}; worst {f['worst_overdue_days']} days)" if f['overdue'] else '')
                  + f"; {f['idle_5d']} with no recorded activity for 5+ days" + (f" ({', '.join(f['idle_ids'])})" if f['idle_5d'] else '') + '.' for c, f in facts.items()]
         if tie:
             verdict = f"Neither looks worse on {'stale updates' if stale else 'overdue orders'}: the counts are equal. Overdue first, then idle, is how the orders are ranked."
+        elif stale and len(customers) > 2:
+            verdict = (f"{worse} has the greater share of in-progress orders without recent recorded activity ({facts[worse]['idle_5d']} of {facts[worse]['active']}); next "
+                       + ', '.join(f"{c} ({facts[c]['idle_5d']} of {facts[c]['active']})" for c in ranked[1:4]) + '. Every customer with active orders is included.')
         elif stale:
             verdict = f"{worse} has the greater share of in-progress orders without recent recorded activity ({facts[worse]['idle_5d']} of {facts[worse]['active']} vs {facts[other]['idle_5d']} of {facts[other]['active']})."
         else:
@@ -1249,6 +1362,148 @@ class WorkflowEngine:
     def known_products(self) -> set[str]:
         return {e.record['product'].split()[0] for e in self.tools.rows('orders.csv')} | {e.record['product'] for e in self.tools.rows('orders.csv')}
 
+    def compare_pace(self, ids: list[str], now: datetime):
+        """Required daily completion rate for two orders: pieces still to make (full quantity, no WIP data) over the working
+        days left to the due date (Sundays closed; today counts), with the queue's best-case finish beside it."""
+        from .services.queue_engine import working_days_inclusive
+        rows = [self.tools.refresh_order(i) for i in ids]
+        facts = []
+        for e in rows:
+            r = e.record
+            due = datetime.fromisoformat(r['due_date'] + 'T00:00:00').date()
+            days = working_days_inclusive(now.date(), due) if due >= now.date() else 0
+            risk = self.tools.assess_risk(e, now) if r['status'] == 'IN_PROGRESS' else {}
+            facts.append({'order_id': r['order_id'], 'pieces': int(r['pieces']), 'stage': r['current_stage'], 'due_date': r['due_date'], 'working_days_left': days,
+                          'pieces_per_working_day_needed': round(int(r['pieces']) / days) if days else None, 'best_case_finish': risk.get('best_date'), 'risk_level': risk.get('risk_level'),
+                          'stages_left': (len(STAGE_ORDER) - STAGE_ORDER.index(r['current_stage'])) if r['current_stage'] in STAGE_ORDER else None})
+        def pressure(f): return (0 if f['working_days_left'] == 0 else 1, -(f['pieces_per_working_day_needed'] or 10 ** 9), f['due_date'])
+        tighter = min(facts, key=pressure)
+        lines = []
+        for f in facts:
+            lines.append(f"{f['order_id']}: {f['pieces']:,} pieces at {f['stage'].lower()} ({f['stages_left']} stages left), due {f['due_date']}, "
+                         + (f"{f['working_days_left']} working day{'s' if f['working_days_left'] != 1 else ''} left → about {f['pieces_per_working_day_needed']:,} pieces per working day needed" if f['working_days_left'] else 'due date passed, so no daily rate reaches it')
+                         + (f"; queue best-case finish {f['best_case_finish']} ({f['risk_level']})" if f['best_case_finish'] else '') + '.')
+        verdict = (f"{tighter['order_id']} needs the tougher pace" + (': its due date has passed.' if tighter['working_days_left'] == 0 else
+                   f": {tighter['pieces_per_working_day_needed']:,} pieces per working day against " + ', '.join(f"{f['pieces_per_working_day_needed']:,} for {f['order_id']}" for f in facts if f is not tighter) + '.'))
+        text = '\n'.join(lines) + '\n' + verdict + ' Remaining quantity is the full order because per-order WIP is not recorded; the rate compares pressure, not a schedule.'
+        return text, ToolCall(name='compare_orders', arguments={'order_ids': ids, 'criterion': 'required_daily_pace'}, result={'orders': facts, 'tighter': tighter['order_id']}), rows
+
+    def customer_summary(self, customer: str, matches: list, state: DialogState, result: Classification, now: datetime, calls: list, evidence: list) -> ChatResponse:
+        """'Anything on TrendCart's orders I need to act on?': every active order of the customer with its risk, acted-on ones first."""
+        risks = {e.record['order_id']: self.tools.assess_risk(e, now) for e in matches if e.record['status'] == 'IN_PROGRESS'}
+        rank = {'overdue': 0, 'high': 1, 'medium': 2, 'unknown': 3, 'low': 4}
+        ordered = sorted(risks, key=lambda i: (rank.get(risks[i]['risk_level'], 5), risks[i]['days_to_due'], i))
+        recs = {e.record['order_id']: e.record for e in matches}
+        act, watch = [], []
+        for i in ordered:
+            r, k = recs[i], risks[i]
+            days = k['days_to_due']
+            when = f"{-days} d overdue" if days < 0 else 'due today' if days == 0 else f"due in {days} d"
+            line = f"{i} ({r['pieces']} {r['product']}, {r['current_stage'].lower()}, {when}, idle {k['idle_days']} d" + (', stalled' if k.get('stalled') else '') + f", {k['risk_level']})"
+            (act if k['risk_level'] in ('overdue', 'high') or k.get('stalled') or k['idle_days'] >= 5 else watch).append(line)
+        text = (f"{customer}: {len(risks)} active orders as of {now.date().isoformat()}. "
+                + (f"Act today on {len(act)}: " + '; '.join(act) + '.' if act else 'Nothing needs action today.')
+                + (f" Watch: " + '; '.join(watch) + '.' if watch else '')
+                + ' Overdue and best-case-late orders need a new date or an expedite decision; idle ones a chase. Say an order ID for its detail or draft.')
+        calls.append(ToolCall(name='assess_order_risk', arguments={'customer': customer, 'order_ids': ordered}, result={'risks': {i: {'risk_level': risks[i]['risk_level'], 'days_to_due': risks[i]['days_to_due'], 'idle_days': risks[i]['idle_days']} for i in ordered}}))
+        evidence.extend(matches)
+        state.comparison_orders = []
+        state.active_order = None
+        state.active_customer = customer
+        state.last_order_ids = ordered
+        return self.response(state, result, now, text, calls, evidence)
+
+    @staticmethod
+    def commitment_lead(slots: Slots, data: dict, now: datetime) -> str:
+        """One sentence a manager can act on, ahead of the labelled forecast."""
+        q = data.get('queue_projection') or {}
+        best, exp = q.get('best_case') or {}, q.get('expected_case') or {}
+        verdict = data.get('preliminary') or data.get('verdict')
+        text = f"{slots.quantity:,} {slots.product.lower()} by {data['due_date']} ({'ready at the factory' if slots.delivery_point == 'factory' else 'delivered to the customer'}): {verdict}. "
+        text += f"{data['available_workdays']} working day{'s' if data['available_workdays'] != 1 else ''} available"
+        if best.get('finish_date'):
+            text += f"; the shared queue puts the finish at {best['finish_date']} best case ({best['working_days']} working days, {q.get('orders_ahead')} active orders ahead)"
+            if exp.get('finish_date') and exp['finish_date'] != best['finish_date']:
+                text += f" and {exp['finish_date']} if new orders keep arriving"
+        text += '.'
+        aft = data.get('historical_lead_time_model') or {}
+        if isinstance(aft, dict) and aft.get('p_on_time') is not None:
+            text += f" Historically, orders of this size finished within {aft['promised_lead_days']} days {aft['p_on_time']:.0%} of the time (typical {aft['typical_lead_days']} days)."
+        wc = data.get('worst_case_serial_backlog') or {}
+        if wc.get('limiting_stage'):
+            text += f" Limiting stage in the serial worst case: {wc['limiting_stage'].lower()}."
+        return text
+
+    def commitment_comparison(self, responses: list[ChatResponse], state: DialogState, now: datetime) -> ChatResponse:
+        """Two or more new-order options side by side: available days, best-case finish, slack, verdict, and which is safer."""
+        opts = []
+        for r in responses:
+            call = next((c for c in r.tool_calls if c.name == 'estimate_capacity'), None)
+            if not call: continue
+            d = call.result; a = call.arguments
+            q = d.get('queue_projection') or {}; bc = q.get('best_case') or {}
+            slack = (d.get('available_workdays') or 0) - (bc.get('working_days') or 0) if bc.get('working_days') else None
+            opts.append({'option': f"{a.get('quantity'):,} {str(a.get('product', '')).lower()} by {d['due_date']}", 'available_workdays': d.get('available_workdays'),
+                         'best_case_finish': bc.get('finish_date'), 'best_case_working_days': bc.get('working_days'), 'slack_working_days': slack, 'verdict': d.get('preliminary') or d.get('verdict')})
+        if len(opts) < 2:
+            return responses[0]
+        rank = {'likely': 0, 'tight': 1, 'unlikely': 2}
+        safer = min(opts, key=lambda o: (rank.get(str(o['verdict']).split(' ')[0].rstrip(':'), 3), -(o['slack_working_days'] if o['slack_working_days'] is not None else -10 ** 6)))
+        table = '| Option | Working days available | Best-case finish | Slack (working days) | Verdict |\n| --- | --- | --- | --- | --- |\n' + '\n'.join(
+            f"| {o['option']} | {o['available_workdays']} | {o['best_case_finish'] or 'n/a'} ({o['best_case_working_days']} wd) | {o['slack_working_days'] if o['slack_working_days'] is not None else 'n/a'} | {o['verdict']} |" for o in opts)
+        both_unlikely = all(str(o['verdict']).startswith('unlikely') for o in opts)
+        verdict = (f"Safer: {safer['option']} — the smaller shortfall ({safer['slack_working_days']} working days of slack), but neither is met on current orders without a priority decision; promise neither date unconditionally."
+                   if both_unlikely else f"Safer: {safer['option']} ({safer['verdict']}, slack {safer['slack_working_days']} working days).")
+        text = 'Side by side (same queue, same assumptions):\n' + table + '\n' + verdict
+        call = ToolCall(name='estimate_capacity', arguments={'compare': [o['option'] for o in opts]}, result={'options': opts, 'safer': safer['option']})
+        return ChatResponse(answer=text, intent=Intent.ORDER_COMMITMENT, slots=state.slots, confidence=responses[0].confidence, state=state, tool_calls=[call], evidence=[],
+                            source_details=responses[0].source_details, business_date=now.date().isoformat())
+
+    def max_quantity_by(self, slots: Slots, now: datetime):
+        """Largest quantity whose best-case queue finish is on or before the due date (bisection on the queue simulation)."""
+        due = resolve_date(slots.due_date, now)
+        def fits(q: int):
+            data, rows = self.tools.capacity(slots.model_copy(update={'quantity': q}), now)
+            bc = (data.get('queue_projection') or {}).get('best_case') or {}
+            return bool(bc.get('finish_date')) and bc['finish_date'] <= due.isoformat(), data, rows
+        ok, probe, rows = fits(1)
+        if not ok:
+            return 0, probe, rows
+        lo, hi = 1, 50000
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            good, d, r = fits(mid)
+            if good:
+                lo, probe, rows = mid, d, r
+            else:
+                hi = mid - 1
+        return lo, probe, rows
+
+    def stage_focus(self, now: datetime) -> dict | None:
+        """Which single stage to focus on today: the stage below its range, weighed with where the at-risk orders sit."""
+        active = [e for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS']
+        at_risk = {}
+        for e in active:
+            k = self.tools.assess_risk(e, now)
+            if k['risk_level'] in ('overdue', 'high'):
+                at_risk[e.record['order_id']] = e.record['current_stage']
+        counts = {s: sum(1 for st in at_risk.values() if st == s) for s in STAGE_ORDER}
+        drop = None
+        try:
+            data, _ = self.tools.find_anomalies(Slots(window_days=20), now)
+            drop = next((f for f in data['findings'] if f['kind'] == 'stage_drop'), None)
+        except Exception:
+            drop = None
+        drop_stage = (drop or {}).get('entity')
+        if drop_stage in STAGE_ORDER:
+            downstream = sum(counts[s] for s in STAGE_ORDER[STAGE_ORDER.index(drop_stage):])
+            why = f"{drop_stage.lower()} is the stage below its normal range ({drop['title'].split('(')[-1].rstrip(')')}) and {downstream} of the {len(at_risk)} overdue or high-risk orders are at or after it"
+            return {'stage': drop_stage, 'why': why, 'at_risk_by_stage': counts}
+        if at_risk:
+            best = max(counts, key=lambda s: counts[s])
+            return {'stage': best, 'why': f"{counts[best]} of the {len(at_risk)} overdue or high-risk orders are waiting at {best.lower()}", 'at_risk_by_stage': counts}
+        return None
+
     def describe_candidates(self, message: str, now: datetime):
         """'the order that was late yesterday', 'the overdue order', 'the stalled order' -> the real candidates and a label."""
         lowered = message.casefold()
@@ -1256,7 +1511,7 @@ class WorkflowEngine:
         active = [e for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS']
         if re.search(r'\b(late|overdue|overdued|past due|missed)\b', lowered):
             rows = sorted([e for e in active if e.record['due_date'] < today.isoformat()], key=lambda e: e.record['due_date'])
-            m = re.search(r'(?:more than|over|>|>=|at least|beyond)\s*(\d+)\s*(days?|d\b|hours?|h\b)', lowered)
+            m = re.search(r'(?:more than|over|>|>=|at least|beyond)\s*(\d+)\s*(days?|d\b|hours?|h\b)', lowered) or re.search(r'(?:overdue|overdued|late|past due)\w*\s*(?:by|for)?\s*(\d+)\s*(days?|d\b|hours?|h\b)', lowered)
             if m:
                 threshold = int(m[1]) // 24 if m[2].startswith('h') else int(m[1])
                 rows = [e for e in rows if (today - datetime.fromisoformat(e.record['due_date'] + 'T00:00:00').date()).days > threshold]

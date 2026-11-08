@@ -1634,7 +1634,7 @@
    ]
   ],
   "answer": "Which TrendCart order should I chase? ORD-120 (TrendCart, 1500 Vest, assembly, 15 d overdue); ORD-020 (TrendCart, 1200 Vest, washing, 1 d overdue); ORD-096 (TrendCart, 1000 Beanie, knitting, due in 16 d); ORD-005 (TrendCart, 500 Scarf, knitting, due in 19 d, idle 8 d); ORD-017 (TrendCart, 800 Cardigan, knitting, due in 9 d); ORD-082 (TrendCart, 600 Beanie, knitting, due in 30 d). Give the order ID.",
-  "verdict": "PARTIAL"
+  "verdict": "PASS"
  },
  {
   "no": 76,
@@ -1732,7 +1732,7 @@
   "q": "ok",
   "normalized": "ok",
   "intent": "unknown",
-  "clar": true,
+  "clar": false,
   "confreq": false,
   "selected": "ORD-017",
   "tools": [],
@@ -1740,11 +1740,11 @@
   "turns": [
    [
     "ok",
-    "Which order or operation would you like to check?"
+    "Nothing is waiting for confirmation. Draft 1 for ORD-083 is still unsent; say \"preview draft 1\" to review it and then \"send now\" to send it, or ask about another order."
    ]
   ],
-  "answer": "Which order or operation would you like to check?",
-  "verdict": "PARTIAL"
+  "answer": "Nothing is waiting for confirmation. Draft 1 for ORD-083 is still unsent; say \"preview draft 1\" to review it and then \"send now\" to send it, or ask about another order.",
+  "verdict": "PASS"
  },
  {
   "no": 81,
@@ -3835,7 +3835,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 76,
@@ -3931,7 +3931,7 @@
   "q": "sounds good",
   "normalized": "sounds good",
   "intent": "unknown",
-  "clar": true,
+  "clar": false,
   "confreq": false,
   "selected": "ORD-083",
   "tools": [],
@@ -3939,11 +3939,11 @@
   "turns": [
    [
     "sounds good",
-    "Which order or operation would you like to check?"
+    "Nothing is waiting for confirmation and nothing was changed. Ask about an order, a stage, or say what to draft, note or watch."
    ]
   ],
-  "answer": "Which order or operation would you like to check?",
-  "verdict": "PARTIAL"
+  "answer": "Nothing is waiting for confirmation and nothing was changed. Ask about an order, a stage, or say what to draft, note or watch.",
+  "verdict": "PASS"
  },
  {
   "no": 81,
@@ -4055,7 +4055,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "PARTIAL"
+  "verdict": "FAIL"
  },
  {
   "no": 86,
@@ -5839,7 +5839,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 68,
@@ -6019,7 +6019,7 @@
    ]
   ],
   "answer": "Which order or operation would you like to check?",
-  "verdict": "FAIL"
+  "verdict": "PARTIAL"
  },
  {
   "no": 76,
@@ -6115,7 +6115,7 @@
   "q": "yep",
   "normalized": "yep",
   "intent": "unknown",
-  "clar": true,
+  "clar": false,
   "confreq": false,
   "selected": "ORD-083",
   "tools": [],
@@ -6123,11 +6123,11 @@
   "turns": [
    [
     "yep",
-    "Which order or operation would you like to check?"
+    "Nothing is waiting for confirmation and nothing was changed. Ask about an order, a stage, or say what to draft, note or watch."
    ]
   ],
-  "answer": "Which order or operation would you like to check?",
-  "verdict": "PARTIAL"
+  "answer": "Nothing is waiting for confirmation and nothing was changed. Ask about an order, a stage, or say what to draft, note or watch.",
+  "verdict": "PASS"
  },
  {
   "no": 81,
@@ -6244,7 +6244,7 @@
    ]
   ],
   "answer": "ORD-005 — TrendCart, 500 Scarf; status IN_PROGRESS, stage KNITTING, due 2026-04-20, last recorded activity 2026-03-24.",
-  "verdict": "PARTIAL"
+  "verdict": "FAIL"
  },
  {
   "no": 86,

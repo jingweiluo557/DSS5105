@@ -44,8 +44,16 @@ def resolve_datetime(value: str, now: datetime, previous: datetime | None = None
             day = now.date() + timedelta(days=(index - now.weekday()) % 7 or 7)
     if 'noon' in value or '中午' in value:
         return datetime.combine(day, time(12), tzinfo=now.tzinfo)
+    if re.search(r'end of (the )?(day|today|business)|close of business|\bcob\b|\beod\b|by tonight', value):
+        return datetime.combine(day, time(18), tzinfo=now.tzinfo)
     match = re.search(r'\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b', value)
     if not match:
+        clock = re.search(r'\b(\d{1,2}):(\d{2})\b', value)
+        if clock and 0 <= int(clock[1]) <= 23 and int(clock[2]) <= 59:
+            hour, minute = int(clock[1]), int(clock[2])
+            if 1 <= hour <= 6:
+                hour += 12      # "2:30" in a factory day is the afternoon
+            return datetime.combine(day, time(hour, minute), tzinfo=now.tzinfo)
         return None
     hour, minute = int(match[1]), int(match[2] or 0)
     if not 1 <= hour <= 12 or minute > 59:
