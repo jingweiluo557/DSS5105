@@ -71,7 +71,19 @@ def detect_customer(message: str, tools: DataTools) -> str | None:
     """A customer named in the manager's own words (never from planner prose)."""
     lowered = message.casefold()
     hits = [c for c in known_customers(tools) if c.casefold() in lowered or c.casefold().replace(' & ', ' and ') in lowered]
-    return hits[0] if len(hits) == 1 else None
+    if len(hits) == 1:
+        return hits[0]
+    if not hits:
+        # "Trend Cart", "trendcart", "cotonclub": compare on letters only, allowing one or two typos
+        import difflib
+        compact = re.sub(r'[^a-z0-9]', '', lowered)
+        for c in known_customers(tools):
+            key = re.sub(r'[^a-z0-9]', '', c.casefold())
+            for i in range(0, max(1, len(compact) - len(key) + 3)):
+                window = compact[i:i + len(key)]
+                if window and difflib.SequenceMatcher(None, window, key).ratio() >= 0.88:
+                    hits.append(c); break
+    return hits[0] if len(set(hits)) == 1 else None
 
 
 def detect_workshop(message: str, tools: DataTools) -> dict | None:
@@ -85,7 +97,14 @@ def detect_workshop(message: str, tools: DataTools) -> dict | None:
 
 def stages_in(message: str) -> list[str]:
     lowered = message.casefold()
-    return list(dict.fromkeys(code for word, code in STAGE_WORDS.items() if re.search(r'\b' + word + r'\b', lowered)))
+    found = list(dict.fromkeys(code for word, code in STAGE_WORDS.items() if re.search(r'\b' + word + r'\b', lowered)))
+    # a one-letter slip in a stage name ("knittng", "assembely", "pakcing") still names the stage
+    import difflib
+    for token in re.findall(r'[a-z]{6,}', lowered):
+        for word, code in STAGE_WORDS.items():
+            if len(word) >= 6 and code not in found and difflib.SequenceMatcher(None, token, word).ratio() >= 0.85:
+                found.append(code)
+    return found
 
 
 def article(word: str) -> str:
@@ -150,9 +169,10 @@ class WorkflowEngine:
         now = self.clock()
         # "ORD 080", "order ID 080", "ord080" are the manager's explicit IDs too: normalise them before the explicit-ID rule,
         # the memory and the planner see the message (services/order_refs.py). The history keeps the manager's own words.
-        from .services.order_refs import normalize_order_refs
+        from .services.order_refs import expand_shorthand, normalize_order_numbers, normalize_order_refs
         raw_message = request.message
-        if (normalized := normalize_order_refs(request.message)) != request.message:
+        normalized = normalize_order_numbers(normalize_order_refs(expand_shorthand(request.message)), self.known_order_numbers(), self.known_products())
+        if normalized != request.message:
             request = request.model_copy(update={'message': normalized})
         if request.selected_order_id and not state.active_order and not state.comparison_orders:
             # The order highlighted in the UI only stands in for "it" / "this order". A message that names a customer,
@@ -316,7 +336,7 @@ class WorkflowEngine:
             return self.ask('Please prepare one action at a time for preview and confirmation. You can combine other queries.',
                 state, plan.tasks[0].classification, now, [], [])
         if all(t.classification.intent == Intent.EXECUTION_CHASE for t in expanded):
-            if state.comparison_orders and not human_ids and not expanded[0].classification.slots.draft_number:
+            if state.comparison_orders and not human_ids and not expanded[0].classification.slots.draft_number and not self.describe_candidates(request.message, now):
                 response = self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, expanded[0].classification, now, [], [], state.comparison_orders)
                 if emit: await emit(response.answer)
                 return response
@@ -459,6 +479,38 @@ class WorkflowEngine:
             state.last_intent = Intent.UNANSWERABLE
             calls.append(ToolCall(name='explain_no_data', arguments={'reason': reason}, result={'declined': True, 'reason': reason, 'answer': answer}, executed=False))
             return self.response(state, result, now, answer, calls, evidence)
+        # A description instead of an ID ("the order with 1500 tops", "the scarves", "orders stuck at washing", "orders overdue more
+        # than 2 days", "the largest customer's orders") names its own candidates: one match is taken and stated, several are listed.
+        describable = intent in (Intent.ORDER_LOOKUP, Intent.ORDER_REFRESH, Intent.ORDER_RISK, Intent.ORDER_EXPEDITE, Intent.EXECUTION_CHASE, Intent.EXECUTION_NOTE, Intent.EXECUTION_REMINDER, Intent.ORDER_FORECAST) \
+            and not (intent == Intent.ORDER_FORECAST and re.search(r'lead time|how long|similar|past orders|typical|usually take|took', message.casefold()))
+        if (describable and not explicit_ids and not slots.order_ids and slots.action not in ('send', 'revise', 'confirm_target', 'update') and not slots.draft_number
+
+                and not re.search(r'\b(this order|that order|this one|that one|\bit\b|the first|the second|the other)\b|\bthe order\b(?! (with|of|for|that|which|from))', message.casefold())
+                and not slots.department
+                and re.search(r'\b(with|of|for|at|in|stuck|pending|phase|stage|overdue|overdued|late|largest|biggest|main|scar|beanie|vest|hood|cardigan|polo|sweater|crewneck|tops|accessor)\w*', message.casefold())):
+            described = self.describe_candidates(message, now)
+            open_ids = set((previous_clarification.candidates if previous_clarification else []) or []) | set(state.comparison_orders)
+            reply_like = len(message.split()) <= 6 or re.match(r'^\W*(the|that|this)\b', message.casefold())
+            if described and open_ids and reply_like and described[1] and {e.record['order_id'] for e in described[1]} & open_ids:
+                described = None    # "the scarf order" after a candidate list narrows that list; the narrowing step below handles it
+            if described and not described[0].startswith('reading ') and not (described[0].endswith('are overdue as of ' + now.date().isoformat()) and not re.search(r'\b(late|overdue|overdued)\b', message.casefold())):
+                label, rows = described
+                if len(rows) == 1 and not re.search(r'\ball\b', message.casefold()):
+                    slots.order_ids = [rows[0].record['order_id']]
+                    slots.reference = 'explicit'
+                    state.comparison_orders = []
+                    calls.append(self.candidate_call(rows, now, description=label))
+                elif rows:
+                    evidence.extend(rows)
+                    calls.append(self.candidate_call(rows, now, description=label))
+                    state.active_order = None
+                    state.chase_context = {}
+                    state.last_order_ids = [e.record['order_id'] for e in rows]
+                    options = '; '.join(self.candidate_hint(e.record, now) for e in rows)
+                    return self.ask(f'Which one? {label}: {options}. Give the order ID' + (', or say "all of them" for a summary draft.' if intent == Intent.EXECUTION_CHASE else '.'), state, result, now, calls, evidence, state.last_order_ids)
+                else:
+                    calls.append(self.candidate_call(rows, now, description=label))
+                    return self.response(state, result, now, label[0].upper() + label[1:] + '.', calls, evidence)
         # Sprint 2 (cause B): after a candidate list, narrow deterministically on the words the manager used
         # ("the scarf order", "the 500-piece one", "due 20 April") instead of depending on the planner's slots.
         candidates = previous_clarification.candidates if previous_clarification and previous_clarification.intent == Intent.ORDER_LOOKUP else []
@@ -489,14 +541,37 @@ class WorkflowEngine:
         if result.confidence < 0.65 or intent == Intent.UNKNOWN:
             return self.ask(result.clarification_question or 'Which order or operation would you like to check?', state, result, now, calls, evidence)
         comparative_ranking = intent == Intent.ORDER_COMPARE and (slots.action == 'rank' or slots.criterion is not None)
+        # "The order is at which stage now?" / "has it moved?" after any turn that put one order in focus: the order in focus,
+        # whatever the planner labelled the reference, unless a candidate list is still open or the words describe something else.
+        if (state.active_order and not explicit_ids and not slots.order_ids and not slots.customer and not slots.product and not slots.quantity
+                and not state.comparison_orders and intent not in entity_free and intent not in (Intent.ORDER_FORECAST,)
+                and (slots.reference == 'active' or re.search(r'\b(this|that|the) (order|one)\b|\bit\b|^\W*order (at|status|stage|progress|where)', message.casefold()))
+                and not re.search(r'\borders\b|\b(with|of) \d|\b(order|orders) (with|from|at|for|that|which|due)\b', message.casefold())):
+            slots.order_ids = [state.active_order]
+            slots.reference = 'active'
+            state.slots = slots
         if (slots.reference == 'ambiguous' and not comparative_ranking) or (state.comparison_orders and slots.reference == 'active' and not slots.order_ids and intent != Intent.ORDER_COMPARE):
-            if state.comparison_orders:
+            described = self.describe_candidates(message, now) if not explicit_ids and not slots.customer and not slots.product and not (slots.order_ids and slots.reference == 'active') else None
+            if described and len(described[1]) == 1 and described[0].startswith('reading '):
+                # "55 status" / "show me status of 55": the only reading is ORD-055; take it and say so
+                slots.order_ids = [described[1][0].record['order_id']]
+                slots.reference = 'explicit'
+                state.comparison_orders = []
+                calls.append(self.candidate_call(described[1], now, description=described[0]))
+                described = None
+            elif state.comparison_orders and (mentions_order_reference(message) and not described):
                 return self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, result, now, calls, evidence)
-            if intent not in entity_free and not explicit_ids and not slots.customer and not slots.product:
+            elif state.comparison_orders and not described:
+                state.comparison_orders = []   # the new question does not pick from the compared or listed orders
+            if slots.order_ids and slots.reference == 'explicit':
+                pass
+            elif intent not in entity_free and not explicit_ids and not slots.customer and not slots.product:
                 # "the order that was late yesterday": nothing is being compared, so the description itself names the candidates
-                described = self.describe_candidates(message, now)
                 if described:
                     label, rows = described
+                    if not rows:
+                        calls.append(self.candidate_call(rows, now, description=label))
+                        return self.response(state, result, now, label[0].upper() + label[1:] + '.', calls, evidence)
                     evidence.extend(rows)
                     calls.append(self.candidate_call(rows, now, description=label))
                     state.active_order = None
@@ -533,6 +608,14 @@ class WorkflowEngine:
             order = self.select(matches[0].record['order_id'], state, calls, evidence)
             answer = self.order_facts(order)
         elif intent == Intent.ORDER_COMPARE:
+            customers = self.customers_named(message)
+            if len(customers) == 2 and not explicit_ids:
+                state.comparison_orders = []
+                state.pending_clarification = None
+                answer, call, rows = self.compare_customers(customers, now, message)
+                calls.append(call)
+                evidence.extend(rows)
+                return self.response(state, result, now, answer, calls, evidence)
             ids = slots.order_ids or state.comparison_orders
             if len(set(ids)) != 2:
                 return self.ask('Which two distinct order IDs should I compare?', state, result, now, calls, evidence)
@@ -565,6 +648,11 @@ class WorkflowEngine:
                 return self.ask('Should I rank by overall delivery risk, due-date pressure or update recency?', state, result, now, calls, evidence)
             answer = '| Order | ' + ' | '.join(slots.comparison_fields) + ' |\n| --- | ' + ' | '.join('---' for _ in slots.comparison_fields) + ' |\n'
             answer += '\n'.join('| ' + e.record['order_id'] + ' | ' + ' | '.join(e.record[f] for f in slots.comparison_fields) + ' |' for e in rows)
+            if slots.criterion != 'risk' and 'due_date' in slots.comparison_fields and rows[0].record['due_date'] != rows[1].record['due_date']:
+                first = min(rows, key=lambda e: e.record['due_date'])
+                other = next(e for e in rows if e is not first)
+                answer += (f"\n{first.record['order_id']} first: its due date {first.record['due_date']} is earlier than {other.record['order_id']}'s {other.record['due_date']}"
+                           + (f" ({(datetime.fromisoformat(now.date().isoformat()).date() - datetime.fromisoformat(first.record['due_date']).date()).days} days overdue)." if first.record['due_date'] < now.date().isoformat() else '.'))
             if slots.criterion == 'risk':
                 risks = {e.record['order_id']: self.tools.assess_risk(e, now) for e in rows if e.record['status'] == 'IN_PROGRESS'}
                 calls.append(ToolCall(name='assess_order_risk', arguments={'order_ids': list(risks)}, result={'risks': risks}))
@@ -685,8 +773,10 @@ class WorkflowEngine:
             if len(ids) > 1:
                 return self.ask('Which order should I forecast: ' + ', '.join(ids) + '?', state, result, now, calls, evidence, ids)
             order_id = ids[0] if ids else state.active_order
+            if not order_id and slots.quantity:
+                return self.lead_time_for_size(slots, state, result, now, calls, evidence)
             if not order_id:
-                return self.ask('Which order should I forecast? Please give its ID.', state, result, now, calls, evidence)
+                return self.ask('Which order should I forecast? Please give its ID, or a size (for example "1,000 hoodies") for the typical lead time.', state, result, now, calls, evidence)
             try:
                 order = self.select(order_id, state, calls, evidence)
             except ValueError:
@@ -726,6 +816,18 @@ class WorkflowEngine:
             answer = preview
         else:
             ids = slots.order_ids
+            correction = re.search(r'(ORD-\d{3})\b[^.]{0,12}\bnot (ORD-\d{3})', message, re.I)
+            if correction and len(ids) > 1:
+                ids = [correction[1]]          # "was for ORD-083, not ORD-038"
+                slots.order_ids = ids
+            note_read = bool(re.search(r"\b(is|are) (the|that|there a) note|already (have|has|got)|has anyone noted|what did (i|we) note|any note (on|for|about)|logged (it )?against|which order (has|holds|carries) the note", message.casefold()))
+            if len(ids) > 1 and intent == Intent.EXECUTION_NOTE and ((not slots.text and '?' in message) or note_read):
+                parts = []
+                for oid in ids:
+                    saved = self.saved_notes(oid)
+                    parts.append(f"{oid}: " + ('; '.join(n.get('text', '') for n in saved[:5]) if saved else 'no saved note'))
+                calls.append(ToolCall(name='save_internal_note', arguments={'order_ids': ids, 'action': 'read'}, result={'notes': parts}, executed=False))
+                return self.response(state, result, now, 'Saved notes: ' + ' | '.join(parts) + '. Nothing was changed.', calls, evidence)
             if len(ids) > 1:
                 return self.ask('Which order should I use: ' + ', '.join(ids) + '?', state, result, now, calls, evidence, ids)
             customer = detect_customer(message, self.tools) if not explicit_ids else None
@@ -864,6 +966,9 @@ class WorkflowEngine:
         if not target_text:
             m = re.search(r'\b(\d{4}-\d{2}-\d{2})\b|\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december)\b|\b(yesterday|today|tomorrow)\b', lowered)
             target_text = m[0] if m else None
+        hypothetical = slots.observed_output is not None and bool(re.search(r'\bif\b|would (that|it) be|\bis \d[\d,]* ?(pieces|pcs)? ?(a )?normal|normal day for|normal for', lowered)) and not re.search(r'\d{4}-\d{2}-\d{2}|\b\d{1,2}(st|nd|rd|th)? (march|april|february|january)|\bon (the )?\d{1,2}(st|nd|rd|th)\b|yesterday', lowered)
+        if hypothetical:
+            target_text = 'today'
         if not target_text and slots.observed_output is not None and not repeated:
             return self.ask(f'Which date is the {slots.observed_output}-piece {(slots.stage or "").lower()} figure for? ("today", "yesterday" or a date; I compare it with the same weekday in recent working weeks.)'.replace('  ', ' '), state, result, now, calls, evidence)
         if not target_text:
@@ -944,6 +1049,11 @@ class WorkflowEngine:
                     f"{abs(comparison['change_pct'])}% {'below' if comparison['change_pct'] < 0 else 'above'} the mean.")
             if comparison.get('user_observation') is not None and comparison.get('observation_source') == 'production_log.csv' and comparison['user_observation'] != comparison['output']:
                 lead = f"The record shows {comparison['output']} pieces on {comparison['date']}, not {comparison['user_observation']}. " + lead
+            elif hypothetical and comparison.get('observation_source') != 'production_log.csv':
+                weekday = datetime.fromisoformat(comparison['date'] + 'T00:00:00').strftime('%A')
+                lead = (f"{comparison['output']} pieces would be {verdict} for {slots.stage.lower()} on a {weekday}: the previous eight {weekday}s ran "
+                        f"{comparison['minimum']}\u2013{comparison['maximum']} (mean {comparison['mean']}), so it would be {abs(comparison['change_pct'])}% {'below' if comparison['change_pct'] < 0 else 'above'} the mean. "
+                        f"A figure you give me is compared as stated, not verified against the log.")
             if intent == Intent.OPERATIONS_DEVIATION:
                 others = [r for r in data['facts'] if r['stage'] != slots.stage]
                 upstream = STAGE_ORDER[STAGE_ORDER.index(slots.stage) - 1] if slots.stage in STAGE_ORDER and STAGE_ORDER.index(slots.stage) > 0 else None
@@ -1056,14 +1166,135 @@ class WorkflowEngine:
                 ", with no suspension date and no field linking any workshop to the factory\u2019s own stage output, so the data cannot confirm or rule out a link. "
                 "Worth checking on the floor: did this workshop do assembly work for us, and when exactly was it suspended?")
 
+    def lead_time_for_size(self, slots: Slots, state: DialogState, result: Classification, now: datetime, calls: list[ToolCall], evidence: list[Evidence]) -> ChatResponse:
+        """Typical lead time for an order size: the completed orders of that product near that size, and the lead-time model."""
+        from .prediction.aft import LeadTimeModel
+        qty = int(slots.quantity)
+        product = (slots.product or '').lower().rstrip('s')
+        done = [e for e in self.tools.rows('orders.csv') if e.record['status'] == 'COMPLETE' and e.record.get('completed_date')]
+        same = [e for e in done if (not product or product[:5] in e.record['product'].lower()) and 0.7 * qty <= int(e.record['pieces']) <= 1.3 * qty]
+        days = sorted((datetime.fromisoformat(e.record['completed_date']).date() - datetime.fromisoformat(e.record['order_date']).date()).days for e in same)
+        model = LeadTimeModel()
+        typical = round(model.typical_lead_days(float(qty)), 1)
+        stats = {'quantity': qty, 'product': slots.product, 'similar_completed_orders': [e.record['order_id'] for e in same], 'lead_days': days,
+                 'median_days': days[len(days) // 2] if days else None, 'min_days': days[0] if days else None, 'max_days': days[-1] if days else None, 'model_typical_lead_days': typical}
+        calls.append(ToolCall(name='predict_order_delay', arguments={'quantity': qty, 'product': slots.product}, result=stats))
+        evidence.extend(same)
+        label = f"{qty:,}-piece {product} orders" if product else f'{qty:,}-piece orders'
+        if days:
+            answer = (f"{len(same)} completed {label} within 30% of that size took {days[0]}\u2013{days[-1]} calendar days from order to completion (median {stats['median_days']}): "
+                      + ', '.join(f"{e.record['order_id']} {e.record['pieces']} pcs {d} d" for e, d in zip(same, [(datetime.fromisoformat(e.record['completed_date']).date() - datetime.fromisoformat(e.record['order_date']).date()).days for e in same]))
+                      + f". The lead-time model's typical lead time for {qty:,} pieces is {typical} days. Past durations, not a promise for a new order; ask \u201ccan we take \u2026 by \u2026\u201d for the queue-based estimate.")
+        else:
+            answer = f"No completed {label} close to that size in the records. The lead-time model's typical lead time for {qty:,} pieces is {typical} days; ask \u201ccan we take \u2026 by \u2026\u201d for the queue-based estimate."
+        return self.response(state, result, now, answer, calls, evidence)
+
+    def saved_notes(self, order_id: str) -> list[dict]:
+        """Internal notes already saved for an order, from the shared records when present, else the local store."""
+        try:
+            if getattr(self, 'order_records', None):
+                return [n for n in self.order_records.list(order_id) if n.get('kind') == 'note']
+            return self.store.actions_for(order_id, ('note',))
+        except Exception:
+            return []
+
+    def customers_named(self, message: str) -> list[str]:
+        """Every known customer named in the message (spacing and small typos tolerated), in order of appearance."""
+        lowered = message.casefold()
+        found = []
+        for c in known_customers(self.tools):
+            key = re.sub(r'[^a-z0-9]', '', c.casefold())
+            compact = re.sub(r'[^a-z0-9]', '', lowered)
+            pos = compact.find(key)
+            if pos < 0:
+                import difflib
+                for i in range(0, max(1, len(compact) - len(key) + 3)):
+                    if difflib.SequenceMatcher(None, compact[i:i + len(key)], key).ratio() >= 0.88:
+                        pos = i; break
+            if pos >= 0:
+                found.append((pos, c))
+        return [c for _, c in sorted(found)]
+
+    def compare_customers(self, customers: list[str], now: datetime, message: str):
+        """Two customers side by side on their active orders: count, overdue, idle, pieces; a stated verdict."""
+        today = now.date()
+        rows_all = [e for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS' and e.record['customer'] in customers]
+        facts = {}
+        for c in customers:
+            rows = [e for e in rows_all if e.record['customer'] == c]
+            overdue = [e for e in rows if e.record['due_date'] < today.isoformat()]
+            idle = [e for e in rows if (today - datetime.fromisoformat(e.record['last_activity_date'] + 'T00:00:00').date()).days >= 5]
+            facts[c] = {'active': len(rows), 'overdue': len(overdue), 'overdue_ids': [e.record['order_id'] for e in overdue],
+                        'idle_5d': len(idle), 'idle_ids': [e.record['order_id'] for e in idle], 'pieces': sum(int(e.record['pieces']) for e in rows),
+                        'worst_overdue_days': max([(today - datetime.fromisoformat(e.record['due_date'] + 'T00:00:00').date()).days for e in overdue], default=0)}
+        stale = bool(re.search(r'stale|idle|quiet|activity|update|movement|reliable', message.casefold()))
+        key = (lambda c: (facts[c]['idle_5d'] / max(facts[c]['active'], 1), facts[c]['overdue'])) if stale else (lambda c: (facts[c]['overdue'], facts[c]['worst_overdue_days'], facts[c]['idle_5d']))
+        worse = max(customers, key=key)
+        other = next(c for c in customers if c != worse)
+        tie = key(worse) == key(other)
+        lines = [f"{c}: {f['active']} active orders ({f['pieces']:,} pieces); {f['overdue']} overdue" + (f" ({', '.join(f['overdue_ids'])}; worst {f['worst_overdue_days']} days)" if f['overdue'] else '')
+                 + f"; {f['idle_5d']} with no recorded activity for 5+ days" + (f" ({', '.join(f['idle_ids'])})" if f['idle_5d'] else '') + '.' for c, f in facts.items()]
+        if tie:
+            verdict = f"Neither looks worse on {'stale updates' if stale else 'overdue orders'}: the counts are equal. Overdue first, then idle, is how the orders are ranked."
+        elif stale:
+            verdict = f"{worse} has the greater share of in-progress orders without recent recorded activity ({facts[worse]['idle_5d']} of {facts[worse]['active']} vs {facts[other]['idle_5d']} of {facts[other]['active']})."
+        else:
+            verdict = f"{worse} needs attention first: {facts[worse]['overdue']} overdue vs {facts[other]['overdue']}" + (f", worst {facts[worse]['worst_overdue_days']} days late" if facts[worse]['overdue'] else '') + '.'
+        call = ToolCall(name='compare_orders', arguments={'customers': customers, 'as_of': today.isoformat()}, result={'customers': facts, 'verdict': verdict})
+        return '\n'.join(lines) + '\n' + verdict, call, rows_all
+
+    def known_order_numbers(self) -> set[int]:
+        return {int(e.record['order_id'][4:]) for e in self.tools.rows('orders.csv') if e.record['order_id'][4:].isdigit()}
+
+    def known_products(self) -> set[str]:
+        return {e.record['product'].split()[0] for e in self.tools.rows('orders.csv')} | {e.record['product'] for e in self.tools.rows('orders.csv')}
+
     def describe_candidates(self, message: str, now: datetime):
         """'the order that was late yesterday', 'the overdue order', 'the stalled order' -> the real candidates and a label."""
         lowered = message.casefold()
         today = now.date()
         active = [e for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS']
-        if re.search(r'\b(late|overdue|past due|missed)\b', lowered):
+        if re.search(r'\b(late|overdue|overdued|past due|missed)\b', lowered):
             rows = sorted([e for e in active if e.record['due_date'] < today.isoformat()], key=lambda e: e.record['due_date'])
+            m = re.search(r'(?:more than|over|>|>=|at least|beyond)\s*(\d+)\s*(days?|d\b|hours?|h\b)', lowered)
+            if m:
+                threshold = int(m[1]) // 24 if m[2].startswith('h') else int(m[1])
+                rows = [e for e in rows if (today - datetime.fromisoformat(e.record['due_date'] + 'T00:00:00').date()).days > threshold]
+                return (f'{len(rows)} active orders are more than {threshold} days overdue as of {today.isoformat()}', rows) if rows else (f'no active order is more than {threshold} days overdue', [])
             return (f'{len(rows)} active orders are overdue as of {today.isoformat()}', rows) if rows else None
+        stage = re.search(r'\b(knitting|assembly|washing|packing)\b', lowered)
+        if stage and re.search(r'\b(at|in|stuck|pending|phase|stage|queue|waiting)\b', lowered):
+            rows = sorted([e for e in active if e.record['current_stage'] == stage[1].upper()], key=lambda e: e.record['due_date'])
+            return (f'{len(rows)} active orders are at {stage[1]}', rows) if rows else (f'no active order is at {stage[1]}', [])
+        if re.search(r'\b(largest|biggest|main|top|most important) (customer|client|account)\b', lowered):
+            counts: dict[str, list] = {}
+            for e in active: counts.setdefault(e.record['customer'], []).append(e)
+            best = max(len(v) for v in counts.values())
+            leaders = sorted(c for c, v in counts.items() if len(v) == best)
+            rows = sorted([e for c in leaders for e in counts[c]], key=lambda e: (e.record['customer'], e.record['due_date']))
+            label = ' and '.join(leaders) + f' {"each have" if len(leaders) > 1 else "has"} the most active orders ({best})'
+            return (label, rows)
+        products = {e.record['product'] for e in self.tools.rows('orders.csv')}
+        words = {p.lower().split()[0]: p for p in products} | {'scarves': 'Scarf', 'beanies': 'Beanie', 'vests': 'Vest', 'hoodies': 'Hoodie', 'cardigans': 'Cardigan', 'polos': 'Polo shirt', 'sweaters': 'Crewneck sweater', 'crewnecks': 'Crewneck sweater'}
+        categories = {'tops': 'TOPS', 'top': 'TOPS', 'accessories': 'ACCESSORIES', 'accessory': 'ACCESSORIES'}
+        qty = re.search(r'\b(\d{2,5})\s*(?:-?\s*(?:piece|pieces|pcs|pc))?\s+(' + '|'.join(sorted(set(words) | set(categories), key=len, reverse=True)) + r')\b', lowered)
+        prod = re.search(r'\b(' + '|'.join(sorted(words, key=len, reverse=True)) + r')\b', lowered)
+        if qty or prod:
+            n = int(qty[1]) if qty else None
+            word = (qty[2] if qty else prod[1])
+            if word in categories:
+                rows = [e for e in active if e.record['category'] == categories[word] and (n is None or int(e.record['pieces']) == n)]
+                label = f"{len(rows)} active {categories[word].lower()} orders" + (f" of {n} pieces" if n else '')
+            else:
+                rows = [e for e in active if e.record['product'] == words[word] and (n is None or int(e.record['pieces']) == n)]
+                label = f"{len(rows)} active {words[word].lower()} orders" + (f" of {n} pieces" if n else '')
+            rows = sorted(rows, key=lambda e: e.record['due_date'])
+            if rows:
+                return (label, rows)
+        bare = re.fullmatch(r'\W*(?:show me |what is |the |status of |status for |order )*(\d{1,3})\W*(?:status|is in which production phase now|stage|progress)?\W*', lowered)
+        if bare and int(bare[1]) in self.known_order_numbers():
+            rows = [e for e in self.tools.rows('orders.csv') if e.record['order_id'] == f'ORD-{int(bare[1]):03d}']
+            return (f'reading {bare[1]} as ORD-{int(bare[1]):03d}', rows)
         if re.search(r'\b(stalled|stuck|not moving|idle|quiet|no activity)\b', lowered):
             rows = sorted([e for e in active if (today - datetime.fromisoformat(e.record['last_activity_date'] + 'T00:00:00').date()).days >= 5], key=lambda e: e.record['last_activity_date'])
             return (f'{len(rows)} active orders have had no recorded activity for 5 days or more', rows) if rows else None
@@ -1185,6 +1416,24 @@ class WorkflowEngine:
             calls.append(ToolCall(name='draft_chase', arguments={'order_id': order_id}, result=state.draft))
             answer = f"Unsent draft to {recipient} ({state.draft['tone']}):\n{text}\nDraft only; nothing has been sent."
         elif result.intent == Intent.EXECUTION_NOTE:
+            lowered_q = message.casefold()
+            pending_note = state.pending_action if state.pending_action and state.pending_action.kind == 'note' else None
+            if pending_note and (slots.action == 'update' or re.match(r'^\s*(add|also|and|append|change|correct|make it|update)\b', lowered_q)) and slots.text:
+                merged = slots.text if re.match(r'^\s*(change|correct|make it|update)\b', lowered_q) else (pending_note.payload.get('text', '') + '; ' + slots.text).strip('; ')
+                target = pending_note.order_id
+                preview = f'Internal note for {target}, business date {now.date()}:\n{merged}\nPlease confirm to save. It will not be sent externally.'
+                self.propose('note', target, {'text': merged, 'visibility': 'internal'}, preview, state, now)
+                calls.append(ToolCall(name='save_internal_note', arguments={'order_id': target, 'action': 'amend_pending'}, result={'text': merged}, executed=False))
+                return self.response(state, result, now, preview, calls, evidence)
+            asks_existing = (not slots.text and '?' in message) or bool(re.search(r'\b(already have|has anyone noted|is there (a|any) note|does .* have a note|which order (is|was) the note|show me the (original|existing)|was it logged|did (i|we) (log|note)|skip it if)\b', lowered_q))
+            if asks_existing:
+                saved = self.saved_notes(order_id)
+                calls.append(ToolCall(name='save_internal_note', arguments={'order_id': order_id, 'action': 'read'}, result={'notes': saved}, executed=False))
+                state.pending_action = None
+                if saved:
+                    listed = '\n'.join(f"- {n.get('created_at', '')[:16]}: {n.get('text', '')}" for n in saved[:8])
+                    return self.response(state, result, now, f"{order_id} has {len(saved)} saved note{'s' if len(saved) != 1 else ''}:\n{listed}\nNothing was added. Say what to add if it is missing.", calls, evidence)
+                return self.response(state, result, now, f'No saved note on {order_id} in this workspace. Nothing was added; tell me the wording if you want one recorded.', calls, evidence)
             if not slots.text:
                 return self.ask('What exact internal note should I attach?', state, result, now, calls, evidence)
             target_is_explicit = order_id in message.upper()

@@ -103,6 +103,16 @@ class WorkflowStore:
             row = db.execute('SELECT * FROM actions WHERE id=? AND session_id=?', (action_id, session_id)).fetchone()
         return dict(row) if row else None
 
+    def actions_for(self, order_id: str, kinds: tuple[str, ...] = ('note',)) -> list[dict[str, Any]]:
+        """Saved actions for one order (notes, sends), newest first; read-only, for "does it already have a note?"."""
+        with self.connection() as db:
+            rows = db.execute('SELECT * FROM actions WHERE order_id=? AND kind IN (%s) ORDER BY created_at DESC' % ','.join('?' * len(kinds)), (order_id, *kinds)).fetchall()
+        out = []
+        for r in rows:
+            d = dict(r); payload = json.loads(d.get('payload') or '{}')
+            out.append({'id': d['id'], 'kind': d['kind'], 'order_id': d['order_id'], 'status': d['status'], 'created_at': d['created_at'], **payload})
+        return out
+
     def commit_local(self, action: PendingAction, session_id: str, now: datetime) -> dict[str, Any]:
         """场景 3.2/3.3：备注和提醒在一个事务内落库；同条件提醒原位更新。"""
         with self.connection() as db:
