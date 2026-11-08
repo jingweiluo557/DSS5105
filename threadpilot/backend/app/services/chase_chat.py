@@ -39,11 +39,80 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
             response = engine.ask(text, state, result, now, found, matches, state.last_order_ids) if matches else engine.response(state, result, now, text, found, [])
             if emit: await emit(text)
             return response
-    # "Send it straight away, no need to show me": the preview cannot be skipped, so draft and show it.
-    if slots.action == 'send' and not state.chase_drafts and (explicit or state.active_order) and re.search(r'straight away|right away|immediately|no need to show|without showing|don.t show', lower):
+    # "Chase the order with 1500 tops" / "chase orders overdue more than 2 days" / "chase all orders from the largest customer":
+    # the description names the candidates; one match is taken and stated, several are listed (or all drafted when asked for all).
+    pronoun = re.search(r'\b(this|that) (order|one)\b|\bthe order\b(?! (with|of|for|that|which|at|in|from))|\bit\b|\bthis\b$', lower)
+    if (not explicit and not customer and not slots.department and slots.action not in ('send', 'revise') and not slots.draft_number and not mode and not pronoun
+            and re.search(r'\b(with|of|for|at|in|stuck|pending|phase|stage|overdue|overdued|late|largest|biggest|main|scar|beanie|vest|hood|cardigan|polo|sweater|crewneck|tops|accessor|idle|stalled)\w*', lower)):
+        described = engine.describe_candidates(message, now)
+        if described and not described[0].startswith('reading '):
+            label, matches = described
+            found = [engine.candidate_call(matches, now, description=label)]
+            if not matches:
+                response = engine.response(state, result, now, label[0].upper() + label[1:] + '.', found, [])
+                if emit: await emit(response.answer)
+                return response
+            if len(matches) == 1 or (re.search(r'\ball\b', lower) and len(matches) <= 10):
+                explicit = [e.record['order_id'] for e in matches]
+                notes.append(f'(Reading "{message.strip()}" as {label}: ' + ', '.join(explicit) + '.)')
+                if len(explicit) > 1 and not mode:
+                    mode = 'separate'
+            else:
+                state.active_order = None
+                state.chase_context = {}
+                state.last_order_ids = [e.record['order_id'] for e in matches]
+                text = f'Which one should I chase? {label}: ' + '; '.join(engine.candidate_hint(e.record, now) for e in matches) + '. Give the order ID, or say "all of them" for one draft per order.'
+                response = engine.ask(text, state, result, now, found, matches, state.last_order_ids)
+                if emit: await emit(text)
+                return response
+    # A claim that the order is finished is checked against the record before anything is drafted ("since ORD-005 has
+    # already shipped", "order 5 is done and delivered, right?"), and the customer is never a recipient: the chat writes to
+    # departments and workshops only; customer contact is a stated non-goal.
+    target_ids = explicit or ([state.active_order] if state.active_order else [])
+    if len(target_ids) == 1 and re.search(r'\b(already )?(shipped|delivered|dispatched|done and delivered|is done|completed|complete)\b', lower) and slots.action not in ('send', 'revise'):
+        rec = engine.tools.refresh_order(target_ids[0]).record
+        if rec['status'] == 'IN_PROGRESS':
+            text = (f"{target_ids[0]} has not shipped: the record shows it in progress at {rec['current_stage'].lower()}, due {rec['due_date']}, last recorded activity {rec['last_activity_date']}. "
+                    + ('I also do not write to customers: chase-ups go to our departments and workshops. ' if re.search(r'\bcustomer|client\b', lower) else '')
+                    + f"Do you want a chase-up to the {rec['current_stage'].lower()} team instead?")
+            response = engine.ask(text, state, result, now, [ToolCall(name='refresh_order', arguments={'order_id': target_ids[0]}, result={'status': rec['status'], 'current_stage': rec['current_stage'], 'premise': 'not shipped'})], [engine.tools.refresh_order(target_ids[0])])
+            if emit: await emit(text)
+            return response
+    if (slots.recipient and re.search(r'^(the )?(customer|client|buyer)s?$', slots.recipient.strip(), re.I)) or re.search(r'\b(write|draft|send|email|chase)\b[^.]{0,40}\b(to )?the customer\b|\bcustomer a follow-up\b|\btell the customer\b|\bpromise the customer\b', lower):
+        text = ('I do not write to customers: chase-ups go to our departments and outside workshops, and delivery promises are the manager\u2019s to make. '
+                + (f"I can draft an internal chase-up on {target_ids[0]} asking for the expected completion date, if you want it." if target_ids else 'Name the order and I can draft an internal chase-up asking for the expected completion date.'))
+        response = engine.response(state, result, now, text, [ToolCall(name='explain_no_data', arguments={'reason': 'external'}, result={'declined': True, 'reason': 'external', 'answer': text}, executed=False)], [])
+        if emit: await emit(text)
+        return response
+    if slots.action == 'read' or re.search(r'\b(did (we|i) send|was (it|that) sent|is it still a draft|who received|what did we send|have we (sent|chased)|sent yet)\b', lower):
+        sent = []
+        oid = target_ids[0] if target_ids else None
+        try:
+            if oid: sent = engine.store.actions_for(oid, ('send',))
+        except Exception:
+            sent = []
+        drafts = [d for d in state.chase_drafts if not oid or oid in d.get('order_ids', [])]
+        if sent:
+            lines = '; '.join(f"{s.get('created_at', '')[:16]} to {s.get('recipient')} ({s.get('status')})" for s in sent[:5])
+            text = f"Yes: {len(sent)} chase-up{'s' if len(sent) != 1 else ''} recorded for {oid}: {lines}. The activity log has the full text."
+        elif drafts:
+            text = f"No chase-up for {oid or 'that order'} has been sent from this workspace. {len(drafts)} draft{'s' if len(drafts) != 1 else ''} exist{'s' if len(drafts) == 1 else ''} unsent" + (f" (to {drafts[-1].get('recipient') or 'no recipient yet'})" if drafts else '') + '; ask to preview a draft by number to send it.'
+        else:
+            text = f"No chase-up for {oid} has been sent or drafted from this workspace." if oid else 'Which order? No order is in focus, so I cannot check its chase-up record.'
+        response = engine.response(state, result, now, text, [ToolCall(name='send_chase', arguments={'order_id': oid, 'action': 'read'}, result={'sent': sent, 'drafts': len(drafts)}, executed=False)], [])
+        if emit: await emit(text)
+        return response
+    promise = re.search(r'\b(promise|guarantee|assure|commit to|definitely|will arrive|will be delivered)\b', lower)
+    if promise and slots.action not in ('send', 'revise'):
+        notes.append('I will not put a delivery promise in writing on your behalf: the draft asks the workshop for its expected completion date instead, and you decide what to tell the customer.')
+        slots = slots.model_copy(update={'text': None})
+        result = result.model_copy(update={'slots': slots})
+    # "Send it" / "send it straight away, no need to show me" with nothing drafted yet: the preview cannot be skipped, so draft and show it.
+    if slots.action == 'send' and not state.chase_drafts and (explicit or state.active_order):
         slots = slots.model_copy(update={'action': 'draft', 'draft_number': None})
         result = result.model_copy(update={'slots': slots})
-        notes.append('I cannot send without showing you the draft first: every send needs a preview and your confirmation. Here is the draft:')
+        notes.append('Nothing is sent without a preview and your confirmation. Here is the draft:' if not re.search(r'straight away|right away|immediately|no need to show|without showing|don.t show|no preview|skip the preview', lower)
+                     else 'I cannot send without showing you the draft first: every send needs a preview and your confirmation. Here is the draft:')
     fresh = bool(explicit and slots.action not in ('send', 'revise')) or 'based on these recommendations' in lower or 'for this action' in lower
     # A new chase request follows the resolved current order, not an older draft topic.
     switched = (state.last_intent != Intent.EXECUTION_CHASE and state.active_order
@@ -83,7 +152,7 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
     if slots.department: context['department'] = slots.department
     if requested_time: context['send_at'] = requested_time
     ids = explicit or context.get('order_ids', [])
-    if not ids and not fresh and not mode and not context and state.active_order:
+    if not ids and not fresh and not mode and state.active_order and (not context or re.search(r'\b(this order|the order|this one|this|it)\b', lower)):
         ids = [state.active_order]
     mode = mode or context.get('mode')
     mail_settings = None

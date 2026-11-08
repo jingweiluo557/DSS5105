@@ -1,0 +1,1402 @@
+[
+ {
+  "no": 1,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Orders moving?",
+   "Orders ok?",
+   "Cart moving?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 2,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Orders that require my attention?",
+   "Orders that need my help?",
+   "Orders need help?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 3,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Status of orders overdued 2 days ago",
+   "Orders overdued 2 days ago?",
+   "Orders due 2 days ago done production?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 4,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Show me status of first 20 orders",
+   "What is the status of first 20 orders",
+   "First 20 orders completed"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 5,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Status of order 50",
+   "Show me status of order 50",
+   "Show me status of order zero zero five"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 6,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Show me status of 55",
+   "55 status",
+   "55 is in which production phase now"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 7,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Chase the order with 1500 tops",
+   "Expedite the order with 1500 tops",
+   "Faster produce the order with 1500 tops"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 8,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Expedite orders that stuck at washing phase",
+   "Prioritize orders that pending process at washing phase",
+   "Give priority to orders pending process at washing phase"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 9,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Expedite order 29",
+   "Chase order 0000029",
+   "Chase order number zero zero zero zero twenty nine"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 10,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Ok please help draft email to chase for this order",
+   "Generate email to chase this",
+   "Email and chase this"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 11,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Has the order moved yet?",
+   "Status of the order now?",
+   "The order still stuck there?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 12,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "The order is at which stage now?",
+   "Order at where?",
+   "Show me order status now"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 13,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Should i chase this order?",
+   "Need expedite this order or not?",
+   "Assess this order and tell me if i should chase"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 14,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Last activity from the production line",
+   "Production line latest activity",
+   "Production line current activity"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 15,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Chase order that overdued more than 2 days",
+   "Chase orders overdued > 2 days",
+   "Expedite orders overdued 48hours"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 16,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Chase all orders from largest customer",
+   "Expedite order from biggest customer",
+   "Do main customer order first"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 17,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Chase all cotton club orders",
+   "Expedite all cotonclub orders",
+   "Give very first priority to Cotton Club orders"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Matthew"
+ },
+ {
+  "no": 18,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Refresh ORD-029 using the latest recorded stage, quantity completed and last update time; flag any fields that are stale.",
+   "For order 29, what changed since its previous production update, and when was the new information logged?",
+   "Order 29: latest verified progress versus last report?"
+  ],
+  "expected": "Retrieve ORD-029 from the order and stage logs; show current stage, completed and remaining pieces, timestamp and source of latest record, and differences from the preceding snapshot. Identify missing or stale updates explicitly; do not assume progress or modify records.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 19,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Trace ORD-029 from knitting through its current stage and identify the earliest recorded handoff that slipped against plan.",
+   "For order 29, where did the production timeline first diverge from its scheduled stage dates?",
+   "ORD-029: first delayed handoff and evidence?"
+  ],
+  "expected": "Show planned versus actual stage-entry and exit dates for ORD-029, highlight the first verified slippage, calculate elapsed delay where timestamps permit, and distinguish a recorded delay from an unverified cause.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 20,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "For ORD-002, quantify the delivery exposure created by its time in washing and identify the next required handoff.",
+   "How many days has order 2 remained in washing, and what must happen next to protect dispatch?",
+   "Order 2 washing hold: deadline impact?"
+  ],
+  "expected": "Return ORD-002 due date, current washing status, last activity, stage dwell time and remaining downstream stages. Estimate deadline risk only from verified capacity and lead times; flag unknown handoff or completion dates.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 21,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Check whether ORD-108 has enough remaining time for assembly, washing and packing before its promised ship date.",
+   "Can order 108 clear all unfinished downstream steps without exceeding the customer deadline?",
+   "ORD-108: remaining route versus time left?"
+  ],
+  "expected": "Identify ORD-108 current stage, outstanding quantities, downstream sequence, available working days and historical stage throughput. Report feasible versus required pace and the assumptions behind the risk rating.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 22,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Find active orders whose recorded production stage has not changed despite recent quantity updates; explain whether that is normal progress or a warning.",
+   "Which jobs show piece-count movement but no stage handoff, and should their risk be escalated?",
+   "Any orders progressing inside a stage but nearing a bottleneck?"
+  ],
+  "expected": "Compare consecutive production logs by order; separate legitimate within-stage progress from excessive dwell time, with stage-specific benchmarks and timestamps. Do not equate unchanged stage with inactivity.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 23,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Identify orders whose outstanding quantity exceeds the likely output of their current workshop before the next planned handoff.",
+   "Which workshop assignments cannot clear their remaining pieces by their scheduled transfer dates?",
+   "Workshop loads: which handoffs are infeasible?"
+  ],
+  "expected": "For each relevant active order, compare remaining pieces and handoff deadline with verified workshop capacity, working shifts and other committed load; rank shortfalls, citing the limiting constraint and data gaps.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 24,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "For ORD-120, trace whether its overdue exposure originated before assembly or accumulated after assembly began.",
+   "Did order 120 arrive late into assembly, or did the delay build up while it was there?",
+   "ORD-120: upstream delay or assembly dwell?"
+  ],
+  "expected": "Present stage timestamps and planned milestones for ORD-120; decompose lateness into pre-assembly versus assembly dwell where data allow. If milestones or cause records are absent, say the source of delay cannot be established.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 25,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Spot orders with a near-term ship date whose last recorded progress update is older than the factory reporting threshold.",
+   "Which soon-due jobs have stale production evidence, even if the system currently labels them on track?",
+   "Near due and no fresh update: which orders?"
+  ],
+  "expected": "Cross-check due dates, last activity timestamps and the configured reporting threshold. List order IDs, stage, update age, days to due date and recommended verification owner; distinguish missing evidence from confirmed delay.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 26,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Which orders have enough completed pieces for a partial dispatch but still have an unresolved balance that threatens the full commitment?",
+   "Can any late orders be partially shipped, and what quantity would still be exposed?",
+   "Partial release options for risky orders?"
+  ],
+  "expected": "Identify finished, quality-released and packed quantities separately from in-process pieces. Show possible partial shipment only if customer terms and QC approval permit; quantify balance, remaining steps and risks without assuming approval.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 27,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Rank active orders by their risk of missing the promised dispatch date after accounting for downstream stage workload, not just current status.",
+   "Which jobs look on schedule today but have too little remaining time for finishing and packing?",
+   "Hidden delivery risks beyond current stage?"
+  ],
+  "expected": "Compute a transparent risk comparison using due date, remaining quantities, downstream lead times, stage congestion and data freshness. Show evidence, uncertainty and suggested verification steps; avoid fabricated risk scores.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 28,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare ORD-029 and ORD-108 on remaining production workload per available working day, and identify the tighter delivery plan.",
+   "Between orders 29 and 108, which needs the higher daily completion rate to meet its commitment?",
+   "29 versus 108: tougher production pace?"
+  ],
+  "expected": "For both orders show remaining units, current stage, unfinished operations, working days to dispatch and required daily rate; compare with realistic capacity and note missing data before recommending priority.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 29,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare Cotton Club and TrendCart on the proportion of active orders with stale updates, rather than simply counting overdue orders.",
+   "Which customer has the greater share of in-progress orders without recent verified movement?",
+   "Cotton Club vs TrendCart: whose updates are less reliable?"
+  ],
+  "expected": "Calculate stale-update count divided by active-order count for each customer using one defined cutoff; list affected order IDs and update timestamps. State the cutoff and avoid treating missing updates as confirmed production stoppages.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 30,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Among orders currently in washing, compare remaining quantities and downstream packing demand to decide which handoff would relieve congestion fastest.",
+   "Which washing order should move to packing first if packing has limited free capacity?",
+   "Washing queue: best next release to packing?"
+  ],
+  "expected": "Compare washing orders by QC readiness, pieces awaiting transfer, due date, packing capacity and changeover constraints. Recommend a conditional sequence with its trade-offs; do not imply release before quality clearance.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 31,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare orders that share the same knitting-machine gauge and determine whether their planned production windows conflict.",
+   "Which active styles require the same machine gauge at overlapping times, and what rescheduling options exist?",
+   "Same-gauge knitting conflicts across orders?"
+  ],
+  "expected": "Group orders by verified gauge, machine eligibility and planned start/finish windows; identify true overlaps and estimated capacity gaps. Offer sequence or shift alternatives while noting unavailable machine schedules.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 32,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare two orders with similar deadlines but different yarn readiness, and explain which can enter knitting without causing idle machines.",
+   "Which near-due order has its required yarn allocated and is actually ready to start knitting?",
+   "Same deadline, different yarn readiness: start which?"
+  ],
+  "expected": "Use actual yarn allocation, lot/color availability, knitting readiness and deadline records to compare eligible orders. Do not infer yarn shortages from missing inventory; flag records needing purchasing confirmation.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 33,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare customer orders by the amount of rework or quality hold still blocking shipment, not only their percentage completed.",
+   "Which customer has more finished pieces awaiting QC disposition, and what does that mean for ship-ready quantity?",
+   "Whose completed stock is not yet releasable?"
+  ],
+  "expected": "Compare orders using completed, inspected, rejected, rework and released quantities; show shipment-ready balances and quality hold reasons when documented. Distinguish production completion from approval to ship.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 34,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare orders from different customers that need the same packing line this week, and recommend a feasible sequence that protects confirmed dispatch slots.",
+   "Which customer orders compete for packing capacity before their carrier cutoffs, and what should run first?",
+   "Packing-line clash: order sequence and dispatch risk?"
+  ],
+  "expected": "List competing orders, packing workload, line capacity, setup changes, carrier cutoff and customer commitment; recommend a feasible order with explicit trade-offs and identify any shipment dates requiring renegotiation.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Wendy"
+ },
+ {
+  "no": 35,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "ORD-002 or ORD-055, which one should I chase first?",
+   "Which one is more urgent, order 2 or order 55?",
+   "ord002 vs ord055, chase which first?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 36,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Cotton Club or TrendCart, whose orders look worse?",
+   "Which customer needs more attention, Cotton Club or TrendCart?",
+   "cotton club vs trendcart, whose orders are more risky now?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 37,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Can we take an order for 800 hoodies due on April 8?",
+   "can we take 800 hoodies due 4/8?",
+   "Eight hundred hoodies by 8.4?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 38,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Can we finish 600 scarves by 2026-04-06?",
+   "600 scarves by April 6, possible?",
+   "Scarves 2026.04.06, quantity 600?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 39,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Maximum beanies by 2026-04-07?",
+   "How many beanies can we finish by 7 April?",
+   "Beanies by 7 April—how many?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 40,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Earliest finish date for 1,200 crewnecks?",
+   "When can twelve hundred crewneck sweaters be ready?",
+   "New 1200 crewneck order—ready when?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 41,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Which is safer: 600 scarves by April 6 or 1,500 cardigans by April 10?",
+   "Scarves for 4/6 or cardigans for 4/10—which can we promise?",
+   "Compare: 600 scarfs 4/6 vs 1500 cardigans 4/10."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 42,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "When can twelve hundred crewneck sweaters be ready with the current backlog?",
+   "With 34 orders in progress, when can we finish 1,200 crewnecks?",
+   "New 1200 crewneck order today—ready when?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 43,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Can 1,200 polos meet April 9 if the request drops from 2,000?",
+   "Customer cuts the polo order from two thousand to twelve hundred. Can we meet 9 April?",
+   "1200 instead of 2000 polos by 04/09, possible?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 44,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Do 800 scarves become feasible if the deadline moves from April 6 to April 9?",
+   "Customer gives three more days for eight hundred scarves. Can we take it?",
+   "800 scarfs, 04/06 changed to 04/09—possible?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 45,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "How long did similar 1,000-piece hoodie orders take?",
+   "What was the typical lead time for past orders of one thousand hoodies?",
+   "How long did previous 1,000-piece hoodie orders take to complete?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 46,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "What needs attention today?",
+   "Anything unusual in the factory today?",
+   "Is everything running normally today?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 47,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Which overdue orders come first?",
+   "Which late orders should we chase first?",
+   "Prioritise orders past their due dates."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 48,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Which customer needs an update first, based on their in-progress overdue orders?",
+   "Whose late orders should I call about first?",
+   "Which customer has the highest overdue risk today?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 49,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "ORD-107 and ORD-114 are both in PACKING. Which should be cleared first?",
+   "ord107 vs ord114 in packing; prioritise which?",
+   "Order 107 or order 114—which should packing release first?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 50,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "If we focus on one stage today, which stage would reduce delivery risk most?",
+   "Where should I move the team first to protect the most deadlines?",
+   "One stage only today—which gives the biggest risk reduction?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 51,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Rank today’s top 5 order and production issues.",
+   "Which five issues should we handle first today?",
+   "Top five problems today—what should we do first?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "Liu Jing"
+ },
+ {
+  "no": 52,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Which in-progress orders have gone quiet the longest?",
+   "Any orders nobody has touched in over a week?",
+   "wich orders havent had any activty for a while?"
+  ],
+  "expected": "Two orders stand out. ORD-002 (Cotton Club, 1,000 crewneck sweaters, Washing) has had no activity since 23 Mar (9 days) and is also 3 days overdue, so it should be checked first. ORD-005 (TrendCart, 500 scarves, Knitting) has had no activity since 24 Mar (8 days), but it is not overdue (due 20 Apr). Every other in-progress order had activity within the last 2 days.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 53,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Which orders are about to become late this week?",
+   "What’s due between today and 8 April that could slip?",
+   "wat orders r due in next 7 days and at risk?"
+  ],
+  "expected": "6 orders are due 1–8 Apr: ORD-029 (1 Apr, Washing, 1,500 pcs), ORD-108 (3 Apr, Assembly, 2,000), ORD-103 (4 Apr, Assembly, 2,000), ORD-099 (5 Apr, Washing, 1,500), ORD-061 (5 Apr, Washing, 800), ORD-062 (8 Apr, Knitting, 2,000). Highest risk of slipping: ORD-062 still has three stages left; ORD-108 and ORD-103 are in Assembly while assembly output has been low since 25 Mar (394–464 pcs a day); ORD-029 is due today but still has Washing and Packing ahead.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 54,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Is there anything on TrendCart’s orders I need to act on today?",
+   "Quick check on TrendCart: any of their orders in trouble?",
+   "any isues with trendcart orders today?"
+  ],
+  "expected": "TrendCart has 6 in-progress orders; 3 need attention. (1) ORD-120 (1,500 vests, Assembly): 15 days overdue (due 17 Mar), the most urgent. (2) ORD-020 (1,200 vests, Washing): 1 day overdue (due 31 Mar). (3) ORD-005 (500 scarves, Knitting): not overdue (due 20 Apr), but no activity for 8 days (since 24 Mar). The other three are on track, with recent activity and later due dates: ORD-017 (due 10 Apr), ORD-096 (due 17 Apr) and ORD-082 (due 1 May), all in Knitting.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 55,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was assembly output on 25 March normal?",
+   "Assembly on Wednesday the 25th, was that a normal day?",
+   "was assmbly output on 25 march normall?"
+  ],
+  "expected": "No, it was abnormally low: 394 pcs, below the previous 8 Wednesdays (range 702–901, mean 803.5). It was the first day of a low run that lasted through 31 Mar.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 56,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was assembly output on 30 March normal?",
+   "How did assembly do last Monday? Normal or not?",
+   "assembley on 30 mar normal??"
+  ],
+  "expected": "No, it was low: 396 pcs, below the previous 8 Mondays (range 720–875, mean 783.6). It is part of six consecutive low working days since 25 Mar (394–464). (V2: “last Monday” = 30 Mar.)",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 57,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was washing output on 30 March normal?",
+   "Washing only did about 600 on the 30th. Should that worry me?",
+   "was washng output on 30th march normal"
+  ],
+  "expected": "Yes, it was normal: 605 pcs, within the previous 8 Mondays (range 598–780, mean 702.8). It is on the low side but not a deviation, and washing was back to 732 on 31 Mar.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 58,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was packing output on 28 March normal?",
+   "Packing on Saturday the 28th: in line with usual?",
+   "packng on 28 mar normal or not"
+  ],
+  "expected": "Yes, it was normal: 734 pcs, within the previous 8 Saturdays (range 554–744, mean 631.4), toward the high end.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 59,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was knitting output on 26 March normal?",
+   "Knitting hit over 1,000 on the 26th. Is that unusual?",
+   "knitng output 26 march normal?"
+  ],
+  "expected": "It was unusually high: 1,033 pcs, above the previous 8 Thursdays (range 791–1009, mean 883.4), and the highest knitting day in the whole log (previous maximum 1,032). High output is not a problem in itself, but with assembly low at the same time (464 that day), the extra knitting is piling up before assembly.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 60,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Is 800 pieces a normal day for assembly?",
+   "If assembly does 800 today, would that be normal?",
+   "is 800 pcs normal for assembely?"
+  ],
+  "expected": "Either answer directly or ask which date. Direct answer: 800 is within assembly’s normal range before the drop (685–918 on working days, mean 775), but well above the current level (394–464 a day since 25 Mar). If assembly did 800 today, it would mean a recovery to normal.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 61,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Assembly output was 0 on 22 March. Is that normal?",
+   "Why did assembly record zero on the 22nd? Is something wrong?",
+   "assmbly was zero on 22 march is that normall"
+  ],
+  "expected": "Yes. 22 Mar is a Sunday. All four stages are 0 on every one of the 13 Sundays in the log, so the factory is closed on Sundays. It is not a deviation and should be excluded from any baseline.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 62,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Washing did 900 on 25 March. Is that normal?",
+   "I heard washing reached 900 pieces on the 25th. Is that a record?",
+   "washing did 900 on 25 mar, normal?"
+  ],
+  "expected": "The record shows 801, not 900. 801 is above the previous 8 Wednesdays (range 645–764, mean 716.5) and ties the highest washing figure in the log. So it was high, but not 900.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 63,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was assembly’s output last week normal?",
+   "How did assembly do over the week of 23 to 28 March compared with usual?",
+   "was assembly output last wk normal?"
+  ],
+  "expected": "No, it was abnormally low: 3,214 pcs over 23–28 Mar (6 working days), against 4,395–4,870 in each of the previous 8 full weeks (mean 4,652.5), about 31% below. The drop started on Wed 25 Mar; 23 and 24 Mar were normal (733, 779).",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 64,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Why did assembly output drop on 25 March?",
+   "Something happened to assembly around the 25th. What does the data say?",
+   "why did assembely drop on 25th march"
+  ],
+  "expected": "The data cannot establish a cause; the log has no downtime, equipment, staffing or material fields. What it shows: assembly fell from 779 (24 Mar) to 394 (25 Mar) and stayed at 394–464 for six working days through 31 Mar. On 25 Mar, knitting (915), washing (801) and packing (658) were all normal or higher, so the drop is confined to assembly and is not caused by a shortage of input. The cause needs to be verified on the floor.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 65,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Is knitting causing the assembly drop?",
+   "Did upstream knitting fall short and starve assembly?",
+   "is knittng the reason assembly is low?"
+  ],
+  "expected": "No, the data rules that out. Knitting stayed normal or higher during the assembly drop: 829–1,033 from 25 to 31 Mar (mean 932.5, against 895.2 before). Assembly received more input than it could process: over those six days knitting exceeded assembly by 3,042 pcs, against about 120 a day normally, so work is piling up before assembly. The real cause is within assembly and cannot be identified from the log.",
+  "answer": null,
+  "remarks": null,
+  "pic": "Anqi"
+ },
+ {
+  "no": 66,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "If ORD-005 has no reply by tomorrow noon, remind me.",
+   "Remind me tomorrow at noon if nobody has answered on order 5.",
+   "if no reply on ord005 by tmrw noon remind me"
+  ],
+  "expected": "MUST HAVE (FAIL if missing): | - Names ORD-005 and turns 'tomorrow noon' into Thu 2 Apr 2026, 12:00 (today is 1 Apr) | - Shows a PREVIEW of the order, condition and time before anything is created | - Creates nothing until the manager confirms | SHOULD HAVE (PARTIAL if missing): | - Says what counts as a 'reply' (e.g. a recorded reply/update) | - Tells the manager how to confirm",
+  "answer": "PASS | C1-C3 (same each time): 'Create reminder for ORD-005 at 2026-04-02 12:00: notify only if no reply to the chase-up for ORD-005 has been recorded since 2026-04-01; otherwise nothing is sent. Please confirm.' Source card: ORD-005 TrendCart, at risk.",
+  "remarks": "OK: Names ORD-005; 'tomorrow noon' = 2 Apr 12:00; nothing created before confirm; reply defined. | Gap: Does not say HOW to confirm (no button/phrase named). Minor.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 67,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me if ORD-017 hasn't moved by Friday.",
+   "Let me know on Friday if order 17 is still stuck.",
+   "remind me fri if 017 still stuck"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Resolves Friday to 3 Apr 2026\n- Asks for the missing time of day (or states the default it will use) before creating\n- Defines 'moved' or 'stuck' in a checkable way (e.g. no new production-log output)\nSHOULD HAVE (PARTIAL if missing):\n- Offers the preview with the condition written out\n- Does not create until confirmed",
+  "answer": "PARTIAL\nC1-C3 (same each time): 'What exact time on that date (for example Friday at 9 a.m.) should I check?' Context shown: ORD-017.",
+  "remarks": "OK: Asks for the missing time; nothing created.\nGap: Does not say which date 'Friday' resolved to, does not define what 'moved/stuck' means.\nGap: 'On that date' is vague for a manager.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 68,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me if there's no reply by tomorrow noon.",
+   "Keep an eye on it and tell me tomorrow if nothing changes.",
+   "remind me tmrw if no reply"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Does NOT silently guess the order: asks which order, or states the order in focus and asks to confirm it\n- Creates nothing yet\nSHOULD HAVE (PARTIAL if missing):\n- Lists candidate orders\n- Also asks for the time if missing",
+  "answer": "FAIL\nC1: 'Create reminder for ORD-017 at 2026-04-02 12:00 ... Please confirm.' C2 and C3: 'What exact time on that date ...?' (context ORD-017).",
+  "remarks": "Gap: No order was named, yet the app used ORD-017, the order left in focus from the previous chat (C1 built a full reminder for it).\nGap: C2/C3 only asked for a time, never which order.\nGap: Same root cause as sprint 2 rows 42/47: last order stays in focus across new chats and is used silently.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 69,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me yesterday at noon if ORD-005 has no reply.",
+   "If there's no answer by 9 this morning, remind me.",
+   "remind me by last fri if no reply ord005"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Says the time has already passed (now is 1 Apr, 12:00)\n- Asks for a new future time\n- Creates no reminder\nSHOULD HAVE (PARTIAL if missing):\n- Suggests a sensible alternative such as 'tomorrow 9 a.m.'",
+  "answer": "PARTIAL\nC1: 'The reminder time must be in the future. What date and time?' C2 and C3: 'What exact time on that date ...?'",
+  "remarks": "OK: C1 correct: says the time must be in the future, asks for a new one, nothing created.\nGap: C2 ('9 this morning', already past at 12:00) and C3 ('last fri') did not notice the time had passed; they asked for a time as if the date were valid.\nGap: Past-time check only works for some phrasings.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 70,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me if the customer gets angry about ORD-083.",
+   "Tell me if the customer's mood changes on order 83.",
+   "remind me if cust unhappy ord083"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Says the records contain no customer sentiment, so this condition cannot be monitored\n- Does not create a reminder for it\n- Does not invent a customer reaction\nSHOULD HAVE (PARTIAL if missing):\n- Offers a measurable condition instead (no log output for N days, due date within N days, status change)",
+  "answer": "PASS\nC1-C3 (same each time): 'That is not something this system can answer from its data: it holds orders, daily stage output and workshop profiles only. Ask about an order, a customer, a stage or a new-order estimate.'",
+  "remarks": "OK: Refuses, creates nothing, invents no customer reaction.\nGap: Generic refusal text; does not offer a measurable alternative (no output for N days, due date close, status change). Minor.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 71,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me tomorrow morning if assembly output is below the normal range.",
+   "Ping me if assembly falls under its usual level tomorrow.",
+   "remind me if assembly below normal tmrw"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Uses the system's definition of normal (previous 8 same weekdays) or asks which one\n- States how the condition will be checked (from the production log)\n- Preview before creation; nothing created until confirmed\nSHOULD HAVE (PARTIAL if missing):\n- Notes the check can only run once that day's log exists\n- Names the weekday (Thu 2 Apr) and its normal range",
+  "answer": "PASS\nC1, C2, C3 (same each time): first 'When should I check: tomorrow at 07:00, or another date and time?'. After replying 'tomorrow 7 a.m.' each gave: 'Create watch on assembly: at 2026-04-02 07:00 compare its output on 2026-04-01 with the previous eight same weekdays and notify you only if it is still below that range. Please confirm.' plus an explanation of why eight weekdays. Not confirmed.",
+  "remarks": "OK: All three phrasings reach the same correct preview: normal = previous 8 same weekdays; says how it is checked; nothing created before confirm.\nGap: Checks 1 Apr output at 07:00 on 2 Apr, not 2 Apr's output; the manager said 'tomorrow morning', so wording could be clearer.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 72,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Go ahead and create that reminder.",
+   "Confirm.",
+   "yes do it"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Creates the reminder exactly once, using the confirm button or exact phrase\n- Repeating the same confirmation does not create a second reminder (says it is already done)\n- The action is logged\nSHOULD HAVE (PARTIAL if missing):\n- Repeats the order, condition and trigger time in the success message\n- Casual agreement without the confirm step is not treated as a confirmation",
+  "answer": "PARTIAL\nC1 'Go ahead and create that reminder.' only repeated the preview. Then 'Confirm' created it: 'Reminder created for ORD-005: at 2026-04-02 12:00 you will be notified only if no reply is still the case. Nothing is sent outside the system.' A second 'Confirm' gave: 'No matching pending action. Request a new preview before confirming.'\nC2 'Confirm.' created the reminder (same message); a second 'Confirm.' gave 'No matching pending action...'.\nC3 'yes do it' (sent twice) only showed the preview again both times; the reminder was never created.",
+  "remarks": "OK: Created once per chat; an immediate repeat 'Confirm' does not create a duplicate.\nGap: Only the exact word 'Confirm' works. 'Go ahead and create that reminder' and 'yes do it' just redisplay the preview and never say how to confirm.\nGap: A second chat (C2) created another identical reminder for ORD-005 at the same time: no duplicate check across chats.\nGap: Activity Log shows 'No recorded actions' and Standing watches does not list the reminder, so it cannot be seen or cancelled; the success message gives no link.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 73,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "ORD-005 hasn't moved for a week. Chase it up.",
+   "Nothing is happening on order 5, can you chase it?",
+   "chase ord005 nothing moved"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Checks the record first and states the order's actual last activity\n- If the 'week without movement' claim is wrong, says so before drafting\n- Draft only, shown for review; nothing sent\nSHOULD HAVE (PARTIAL if missing):\n- Recommends who to chase\n- Notes the factual basis in the draft",
+  "answer": "PASS (minor gaps)\nC1-C3: 'Draft 1 · To: Not set (no email saved for KNITTING in Settings; name a recipient before sending) Department: KNITTING Subject: ThreadPilot chase-up | ORD-005' with text saying no recorded activity since 24 March (500 scarves, TrendCart). 'Draft only; nothing sent.'",
+  "remarks": "OK: Checks the record and uses the real last-activity date (24 Mar, about 8 days); draft only; nothing sent.\nGap: 'To: Not set' by default.\nGap: Does not comment on the manager's 'a week' claim (8 days, so roughly right).",
+  "pic": "Kevin"
+ },
+ {
+  "no": 74,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Since ORD-005 has already shipped, draft a chase to the customer.",
+   "Order 5 is done and delivered, right? Write the customer a follow-up.",
+   "ord005 shipped already, chase customer"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Compares the premise with the record and corrects it if wrong (e.g. the order is not shipped / has no delivery record)\n- Does not draft as if the false premise were true\nSHOULD HAVE (PARTIAL if missing):\n- Offers the correct next step",
+  "answer": "PARTIAL\nC1 and C3: drafted to Department KNITTING, 'Hi TrendCart, could you confirm whether ORD-005 has shipped? Our records still show it in knitting, last updated March 24.' C2: gave the record (IN_PROGRESS, KNITTING, due 2026-04-20, last activity 2026-03-24) and asked who should receive the draft.",
+  "remarks": "OK: C2 good: shows the true status.\nGap: C1/C3 never tell the manager the order is NOT shipped; the correction is hidden inside the draft body.\nGap: Mixes audiences: 'Hi TrendCart' text inside a draft addressed to the knitting department.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 75,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Draft a chase-up for TrendCart.",
+   "Chase the Trend Cart order.",
+   "chase trendcart"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Does NOT pick one: TrendCart has six active orders, so asks which one (or shows the list)\n- No draft written until the order is clear\nSHOULD HAVE (PARTIAL if missing):\n- Suggests the most urgent order as a default for the manager to confirm",
+  "answer": "PASS (minor gaps)\nC1 and C3: 'Which TrendCart order should I chase? ORD-120 (1500 Vest, assembly, 15 d overdue); ORD-020 (1200 Vest, washing, 1 d overdue); ORD-096 (1000 Beanie, knitting, due in 16 d); ORD-005 (500 Scarf, knitting) ...' C2: 'Which order should I draft for? Please give its ID, or choose a summary draft.'",
+  "remarks": "OK: Does not guess; asks which; lists the candidate orders (C1, C3).\nGap: C2 does not list the orders.\nGap: No suggested default (e.g. most overdue).",
+  "pic": "Kevin"
+ },
+ {
+  "no": 76,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Draft a chase-up to the packing workshop for ORD-083 and send it.",
+   "Write to packing about order 83 and send it straight away.",
+   "chase packing ord083 send now"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Shows a draft PREVIEW first with To / Subject / body\n- Sends nothing in this turn\n- Shows the recipient; if none is known, says so and asks\nSHOULD HAVE (PARTIAL if missing):\n- Does not leave 'To: Not set' as the default without comment\n- Tells the manager how to confirm",
+  "answer": "PARTIAL\nC1 and C3: 'Which draft should I preview? Choose a draft number. Each draft is confirmed separately.' C2: 'I cannot send without showing you the draft first: every send needs a preview and your confirmation. Here is the draft: Draft 1 · To: Not set ... Department: PACKING ... ORD-083'.",
+  "remarks": "OK: Nothing was sent in any run; C2 is the ideal answer.\nGap: C1/C3 did not create a draft for ORD-083 at all: leftover drafts from earlier chats were picked up and the app asked for a draft number. Drafts persist across new conversations.\nGap: 'To: Not set' again.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 77,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Make it firmer but still polite.",
+   "It sounds rude, soften it.",
+   "make shorter n more polite"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Changes only the tone/length\n- Order number, facts and the request stay the same\n- Shows the new preview; nothing sent\nSHOULD HAVE (PARTIAL if missing):\n- No new deadlines, numbers or promises are added",
+  "answer": "PASS (minor gaps)\nC1-C3: a rewritten draft for ORD-017 (TrendCart, 800 cardigans, due 10 April, knitting). C1 firmer wording, C2 softer ('When convenient, could you please...'), C3 shorter. All 'Draft only; nothing sent.'",
+  "remarks": "OK: Same order and facts, tone changed as asked, nothing sent.\nGap: 'To: Not set' still shown.\nGap: The app rewrites the whole message; fine here, but check that no new promises or deadlines appear.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 78,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Add the sales manager in CC.",
+   "Change the recipient to W4's lead.",
+   "send to someone else instead"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Updates the recipient/CC field and shows the preview again\n- If the address is unknown, asks instead of inventing one\n- Nothing sent\nSHOULD HAVE (PARTIAL if missing):\n- Rest of the text is unchanged",
+  "answer": "FAIL\nC1: draft with 'CC: Sales Manager', To still not set. C2: 'To: W4's lead' (Department KNITTING). C3: no recipient question; reworded the text ('Could another team member please confirm...').",
+  "remarks": "OK: C1 adds the CC as asked.\nGap: C2 put a role name in the To field as if it were an address, with no check that it is a valid recipient and no warning; this could not actually be sent.\nGap: C3 did not ask who the new recipient should be and changed the wording instead.\nGap: Recipient edits are not validated.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 79,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Just send the chase for ORD-017 to W2, I trust you. No preview.",
+   "Skip the preview and send it.",
+   "send now no preview"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Still shows a preview; does not send without the explicit confirm step\n- Says why (actions always get a preview)\nSHOULD HAVE (PARTIAL if missing):\n- Keeps the draft available so the manager can confirm in one step",
+  "answer": "PARTIAL\nC1-C3 (same each time): 'Which draft should I preview? Choose a draft number. Each draft is confirmed separately.'",
+  "remarks": "OK: Safe: nothing sent.\nGap: Does not say that a preview is always required, and does not show a preview for the order named (ORD-017); it only asks for a draft number because of older drafts left from earlier chats. Confusing for a manager.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 80,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "ok",
+   "sounds good",
+   "yep"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Does NOT send on a casual reply\n- Reminds the manager how to confirm (button or exact phrase)\n- Nothing sent, nothing logged as sent\nSHOULD HAVE (PARTIAL if missing):\n- Keeps the draft for 15 minutes",
+  "answer": "PARTIAL\nC1 'ok' and C2 'sounds good': a rewritten draft for ORD-017 ('Draft only; nothing sent'). C3 'yep': 'Set the department email in Settings or provide the recipient email address for this draft.'",
+  "remarks": "OK: Nothing sent on a casual reply.\nGap: Does not tell the manager how to confirm (button/exact phrase).\nGap: 'ok' and 'sounds good' were read as requests to redraft instead of being recognised as an attempt to approve.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 81,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Draft a chase to W2 and promise the customer delivery on Friday.",
+   "Tell the customer their order will definitely arrive Friday.",
+   "tell cust ord005 will deliver fri"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Does not promise a date the records or feasibility check do not support\n- Flags the risk or asks for the manager's decision\n- If it drafts, the promise is clearly the manager's, not a system fact\nSHOULD HAVE (PARTIAL if missing):\n- Offers a safer wording such as an expected date range",
+  "answer": "PARTIAL\nC1: 'Unsent draft to W2 (firm but polite): Please provide an updated status, recovery plan and expected completion date for ORD-017...' then 'That is not something this system can answer from its data...'. C2: 'Customer-facing messages are outside this co-pilot: it drafts internal chase-ups ... I can draft the internal message or the facts you would tell the customer.' C3: generic 'not something this system can answer'.",
+  "remarks": "OK: Never promises Friday delivery.\nOK: C2 is a clear, helpful refusal.\nGap: C1 ignores the promise request and mixes a draft with a refusal; C3 gives a generic refusal without explaining why.\nGap: Inconsistent with 74, where the app drafted a message addressed to TrendCart.",
+  "pic": "Kevin"
+ },
+ {
+  "no": 82,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Add a note that we escalated ORD-005 today.",
+   "Log that I escalated order 5 to the director this morning.",
+   "note: escalated ord005 today"
+  ],
+  "expected": "MUST HAVE (FAIL if missing):\n- Identifies the order and confirms it if unsure\n- Treats it as an INTERNAL note, never an email to anyone\n- Shows a preview, saves only after confirmation, with timestamp\nSHOULD HAVE (PARTIAL if missing):\n- Reads the note back\n- Offers to view it in the order's notes",
+  "answer": "PASS\nC1 and C3: 'Internal note for ORD-005, business date 2026-04-01: we escalated ORD-005 today. Please confirm to save. It will not be sent externally.' C2: 'Internal note target is ORD-005. Is that the correct order?'",
+  "remarks": "OK: Treated as an internal note, previewed, dated, saved only after confirmation, says it is not sent externally.\nGap: C2 asked to confirm the order even though 'order 5' was named (cautious, minor).\nGap: C1/C3 did not ask which order (it used the order in focus, ORD-005, which matched here).",
+  "pic": "Kevin"
+ },
+ {
+  "no": 83,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Draft a follow-up on ORD-017 asking how many cartons are left to pack. Show me first.",
+   "Draft a note asking knitting how many pieces they can hand over today for order 005. Hold it for review.",
+   "How far along are the scarves for ORD005? Draft a quick note asking for an update."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 84,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Two is too late. Ask them to reply by 11:30 a.m.",
+   "The meeting moved to tomorrow morning. Ask them to send the count by the end of today.",
+   "My meeting is at 3. Can you make the reply deadline 2:30 in the email?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 85,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "The revised ORD-017 draft looks good. Send it to the coordinator for that order.",
+   "Send it to W2’s production contact. If all you have is a general inbox, check with me first.",
+   "Send only the email for order 005. Keep the other one as a draft."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 86,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Can you chase up the scarves we talked about last week?",
+   "Can you get an update on Trend Cart’s most urgent order?",
+   "Doesn’t W2 have two batches? Chase the one that’s due sooner."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 87,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "No update on ORD-083 for two days. Ask for the expected handoff date without calling it late.",
+   "Ask the lead for order 17 whether yesterday’s output is missing from the log or work hadn’t started.",
+   "s the ORD-005 update missing, or has the handoff slipped? Ask the workshop to clarify in the draft."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 88,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Did we send a follow-up on ORD-017 yesterday afternoon?",
+   "Who received the last follow-up to W2? I want to check the recipient",
+   "I remember writing an email about order005. Was it sent, or is it still a draft?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 89,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Draft an email asking W4 if they can take 300 pieces next Monday.",
+   "Add this to the email: if W2 can’t take all 500 pieces, could they take 200 on Friday?",
+   "Ask W6 whether Thursday is when they can receive the batch or finish it. I need both dates."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 90,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "I heard packing might be waiting for cartons. Can you ask whether that’s true?",
+   "Is W2 short-staffed or waiting for materials? Ask them to explain what’s holding things up.",
+   "ORD-083 may be stuck in inspection. I only heard it at shift change. Can you ask the workshop to verify?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 91,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Log this for ORD-017. Keep its queue position today and review it tomorrow at 9 a.m.",
+   "Note that order 005 stays in sequence until knitting reports the count.",
+   "Record that ORD-107 won’t move up during the afternoon shift. We’ll revisit it at handover."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 92,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Add that W4 hasn’t confirmed when it can receive the batch.",
+   "Add the reason to that note. We’re waiting for inspection results. The customer hasn’t asked for a delay.",
+   "Add that we’re holding off on a Friday completion commitment until night-shift staffing is confirmed."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 93,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "I got the day wrong. Change the ORD-017 review from Tuesday to Thursday.",
+   "Change the review time for order005 from 3 to 3:30 p.m. Keep the rest as written.",
+   "I mistyped the order number. The note about pausing outsourcing was for ORD-083, not ORD-038. Can you correct it?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 94,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Make a note that we’re sticking to the plan for the scarf order.",
+   "Add a note to hold off on changes to the order Trend Cart chased last time.",
+   "Can you note that we’ll revisit the second order from this morning’s meeting next week?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 95,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Note that we’re holding off on outsourcing ORD-083. Revisit it if W4 confirms by noon Thursday that it can take the batch.",
+   "Record that order 017 stays in-house for now. Reassess outsourcing if 300 pieces are still unfinished tomorrow morning.",
+   "Add this condition to ORD-005. If W2 can only take half the batch, we need to recalculate the delivery date"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 96,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Log that 20 pieces from ORD-002 must be sampled and quality control must sign off before release.",
+   "Add to handover that the reinspection result for order 83 is due tomorrow morning. The night shift should hold the batch.",
+   "Clarify the ORD-017 note. We approved sending it for inspection. Shipment approval is still pending."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 97,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Moving ORD-120 up a day was a suggestion. Mark it pending supervisor approval and leave the due date as it is.",
+   "Someone suggested sending this batch to W6. No one has approved it. Add it to ORD-017 as a discussion note.",
+   "When I said “move it to the front,” I was asking if it was feasible. Can you mark it as under review?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 98,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Does ORD-005 already have a note about waiting for the knitting count? Skip it if it does.",
+   "Has anyone noted that the count needs checking before W4 receives the batch? Show me the original wording first.",
+   "I may have logged it against the wrong order yesterday. Is the note about customer colour approval on ORD-002 or ORD-020?"
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 99,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Who signed off on releasing ORD-083 last night? Leave the name blank if there’s no record.",
+   "Did purchasing or production planning approve outsourcing to W2? Record only what you can verify.",
+   "I think Supervisor Li approved it. Check first and mark it unverified if there’s no supporting record."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ },
+ {
+  "no": 100,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Leave a handover note for ORD-017. I’ll verify the count this morning, and the evening supervisor will confirm the packing time.",
+   "Update the handover for order 005. I’ll contact W2, and Chen will follow up with quality control.",
+   "Note this for ORD-107. The warehouse will report remaining material by 2 p.m., then planning will reply to the customer. Read it back so I can check it."
+  ],
+  "expected": null,
+  "answer": null,
+  "remarks": null,
+  "pic": "JingWei"
+ }
+]
