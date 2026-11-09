@@ -153,6 +153,11 @@ SCRIPT = {
     'what about ord120': dict(intent='order.lookup', order_ids=['ORD-120'], reference='explicit'),
     'did anything go wrong yesterday': dict(intent='operations.discovery'),
     'was yesterdays assembly output normal': dict(intent='operations.normality', stage='ASSEMBLY', target_date='yesterday'),
+    # the full demo (demo/make_timeline_demo.py)
+    'is the first one late': dict(intent='order.risk', reference='active'),
+    'is ord005 late': dict(intent='order.risk', order_ids=['ORD-005'], reference='explicit'),   # after memory reads "the scarf one"
+    'what was the factorys total output yesterday': dict(intent='operations.output', target_date='yesterday'),
+    'which order has gone the longest without any activity': dict(intent='order.rank', criterion='idle_days'),
 }
 
 
@@ -258,7 +263,7 @@ class ReplayMailbox:
     sent = []
 
     async def send_now(self, action, now):
-        self.sent.append({'recipient': action.payload.get('recipient'), 'subject': action.payload.get('subject'), 'at': now.isoformat(),
+        self.sent.append({'recipient': action.payload.get('recipient'), 'subject': action.payload.get('subject'), 'at': now.isoformat(), 'department': action.payload.get('department'),
                           'order_ids': action.payload.get('order_ids') or [action.order_id], 'status': 'sent', 'scheduled_at': now.isoformat()})
         return {'status': 'sent', 'receipt': 'replay-receipt', 'note': 'offline replay: recorded, not delivered'}
 
@@ -291,7 +296,10 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/email/settings': return {'clock': {'now': NOW.isoformat(), 'mode': 'legacy', 'version': 1}, 'connection': {'connected': True, 'account': 'manager@example.com'},
                                                  'preferences': {'version': 1, 'manager_email': 'manager@example.com', 'manager_name': 'Manager', 'briefing_enabled': True, 'start_day': data['today'], 'customers': [],
                                                                  'departments': {d: d.lower() + '@example.com' for d in ('KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING')}}}
-        if path == '/api/email/activity': return {'entries': []}
+        if path == '/api/email/activity':   # the live server's row shape; status says plainly that nothing was delivered
+            return {'entries': [{'day': e['at'][:10], 'kind': 'chase_email', 'recipient': e['recipient'], 'status': 'Recorded, not delivered (replay)',
+                                 'scheduled_at': e['at'][:16].replace('T', ' '), 'updated_at': e['at'][:16].replace('T', ' '), 'department': e.get('department'),
+                                 'order_ids': e.get('order_ids') or [], 'subject': e['subject'], 'created_at': e['at']} for e in reversed(ReplayMailbox.sent)]}
         if path.startswith('/api/scheduling/history'): return []
         if path.startswith('/api/v1/workflow/reminders'): return {'reminders': [r for r in engine.store.list_reminders()] if hasattr(engine.store, 'list_reminders') else []}
         return None
