@@ -49,6 +49,9 @@ render = function() {
     if (previous) window.scrollTo(0, pageY);
   }
 };
+// Arriving at the workspace from another page lands on the latest message, not the first one (the router repaints
+// without the wrapper above, and answers are still laying out on the first frame).
+window.addEventListener('hashchange', () => { if (location.hash.startsWith('#/ai')) setTimeout(() => { const c = document.querySelector('.copilot-chat .conversation'); if (c) c.scrollTop = c.scrollHeight; }, 300); });
 openAIDrawer = function() { closeOverlay(); if(route!=='ai')go('ai'); else document.querySelector('[name="visible-question"]')?.focus(); };
 document.addEventListener('click', e=>{
   const button=e.target.closest('[data-action]');

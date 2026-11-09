@@ -47,36 +47,36 @@
    "say": "Moving ORD-029 up saves it 5 days but makes 6 other orders 11 days later in total, so it recommends keeping the current order."
   },
   {
-   "at": 15.6,
+   "at": 15.0,
    "click": {
     "text": "Close"
    }
   },
   {
-   "at": 16.2,
+   "at": 15.6,
    "goto": "#/dashboard"
   },
   {
-   "at": 17.0,
+   "at": 16.4,
    "scroll": {
     "to": "section.ready-drafts"
    },
    "say": "It also drafts before she asks: both stalled orders already have a chase-up, written from the records."
   },
   {
-   "at": 20.6,
+   "at": 20.0,
    "click": "section.ready-drafts [data-action=\"ready-draft\"] >> nth=0"
   },
   {
-   "at": 20.7,
+   "at": 20.1,
    "waitAnswer": true
   },
   {
-   "at": 21.1,
+   "at": 20.5,
    "say": "“Review & send” opens the preview: to washing, 9 days idle, 3 days overdue. She checks it and confirms."
   },
   {
-   "at": 25.5,
+   "at": 24.9,
    "click": {
     "text": "Confirm send"
    },
@@ -84,68 +84,68 @@
    "real": true
   },
   {
-   "at": 25.9,
+   "at": 25.3,
    "waitAnswer": true,
    "optional": true,
    "real": true
   },
   {
-   "at": 26.3,
+   "at": 25.7,
    "say": "Sent and logged; ORD-002 leaves the list. Nothing went out before her click."
   },
   {
-   "at": 28.7,
+   "at": 28.1,
    "click": "[aria-label=\"Close AI drawer\"]",
    "optional": true
   },
   {
-   "at": 30.9,
+   "at": 30.3,
    "scroll": {
     "to": "section.home-pulse"
    }
   },
   {
-   "at": 31.1,
+   "at": 30.5,
    "say": "Every chart has an “i”: what it shows and why it is computed that way."
   },
   {
-   "at": 31.9,
+   "at": 31.3,
    "click": "section.home-pulse [data-info=\"pulse\"]"
   },
   {
-   "at": 32.9,
+   "at": 32.3,
    "say": "“Normal” = the previous 8 same weekdays: on this factory that cut false alerts from 0.67 to 0.1 a month."
   },
   {
-   "at": 36.3,
+   "at": 35.7,
    "press": "Escape"
   },
   {
-   "at": 36.7,
+   "at": 36.1,
    "scroll": {
     "to": "section.home-briefing"
    },
    "say": "The morning briefing, written at 07:00, each point with its supporting records."
   },
   {
-   "at": 39.7,
+   "at": 39.1,
    "click": {
     "text": "Open the full briefing"
    }
   },
   {
-   "at": 41.9,
+   "at": 41.3,
    "scroll": {
     "by": 340
    }
   },
   {
-   "at": 43.9,
+   "at": 43.3,
    "goto": "#/ai",
    "say": "09:40 — on the floor, she asks in her own words."
   },
   {
-   "at": 44.7,
+   "at": 44.1,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "How is the TrendCart order doing?",
@@ -153,19 +153,19 @@
    }
   },
   {
-   "at": 45.8,
+   "at": 45.2,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 45.9,
+   "at": 45.3,
    "waitAnswer": true
   },
   {
-   "at": 46.5,
+   "at": 45.9,
    "say": "TrendCart has six active orders, so it asks instead of guessing."
   },
   {
-   "at": 49.3,
+   "at": 48.7,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "The scarf one.",
@@ -173,37 +173,37 @@
    }
   },
   {
-   "at": 49.9,
+   "at": 49.4,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 50.0,
+   "at": 49.5,
    "waitAnswer": true
   },
   {
-   "at": 50.6,
+   "at": 50.1,
    "say": "ORD-005: 500 scarves at knitting, due 20 April. Each answer shows the tool calls behind it."
   },
   {
-   "at": 53.4,
+   "at": 52.9,
    "click": "details.tool-steps >> nth=-1 >> summary",
    "optional": true
   },
   {
-   "at": 54.0,
+   "at": 53.5,
    "say": "“Show more”: the planner’s reading, each tool with its arguments, and the records it used."
   },
   {
-   "at": 57.8,
+   "at": 57.3,
    "click": "details.tool-steps >> nth=-1 >> summary",
    "optional": true
   },
   {
-   "at": 58.4,
+   "at": 57.9,
    "say": "11:15 — a customer asks for 800 hoodies by the 25th."
   },
   {
-   "at": 59.0,
+   "at": 58.5,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Can we take 800 hoodies by the 25th?",
@@ -211,19 +211,19 @@
    }
   },
   {
-   "at": 60.2,
+   "at": 59.7,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 60.3,
+   "at": 59.8,
    "waitAnswer": true
   },
   {
-   "at": 60.9,
+   "at": 60.4,
    "say": "It asks the one thing that changes the answer: ready at the factory, or delivered?"
   },
   {
-   "at": 63.7,
+   "at": 63.2,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Delivered to the customer.",
@@ -231,23 +231,23 @@
    }
   },
   {
-   "at": 64.7,
+   "at": 64.2,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 64.8,
+   "at": 64.3,
    "waitAnswer": true
   },
   {
-   "at": 65.4,
-   "say": "An estimate with its assumptions — the queue’s finish date, the on-time chance, the bottleneck. Not a promise."
+   "at": 64.9,
+   "say": "An estimate with its assumptions: the queue’s finish date, the on-time chance, the bottleneck, outside workshops that could take it. Not a promise."
   },
   {
-   "at": 70.0,
-   "say": "Core task, end to end. 14:30 — chase a stalled order, typed the way it is said on the floor."
+   "at": 70.3,
+   "say": "Core task, end to end. 14:30 — the same chase in her own words, typed the way it is said on the floor."
   },
   {
-   "at": 71.0,
+   "at": 71.3,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "ORD 5 hasn’t moved in a week, chase knitting",
@@ -255,19 +255,19 @@
    }
   },
   {
-   "at": 72.6,
+   "at": 72.9,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 72.7,
+   "at": 73.0,
    "waitAnswer": true
   },
   {
-   "at": 73.3,
+   "at": 73.6,
    "say": "It checks the claim against the record first — last activity 24 March, 8 days: true — then drafts to knitting."
   },
   {
-   "at": 77.5,
+   "at": 77.8,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Preview draft 1",
@@ -275,19 +275,19 @@
    }
   },
   {
-   "at": 78.2,
+   "at": 78.5,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 78.3,
+   "at": 78.6,
    "waitAnswer": true
   },
   {
-   "at": 78.9,
+   "at": 79.2,
    "say": "Preview first. Nothing is sent until the manager confirms this exact draft."
   },
   {
-   "at": 82.3,
+   "at": 82.6,
    "click": {
     "text": "Confirm send"
    },
@@ -295,17 +295,17 @@
    "real": true
   },
   {
-   "at": 82.7,
+   "at": 83.0,
    "waitAnswer": true,
    "optional": true,
    "real": true
   },
   {
-   "at": 83.3,
+   "at": 83.6,
    "say": "Sent from the manager’s mailbox, and logged."
   },
   {
-   "at": 85.7,
+   "at": 86.0,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Remind me tmrw 10am if knitting doesn’t reply",
@@ -313,19 +313,19 @@
    }
   },
   {
-   "at": 87.3,
+   "at": 87.6,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 87.4,
+   "at": 87.7,
    "waitAnswer": true
   },
   {
-   "at": 88.0,
+   "at": 88.3,
    "say": "A conditional watch: at 10:00 tomorrow it notifies only if no reply has been recorded."
   },
   {
-   "at": 91.6,
+   "at": 91.9,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Confirm.",
@@ -334,36 +334,36 @@
    "real": true
   },
   {
-   "at": 92.1,
+   "at": 92.4,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]",
    "real": true
   },
   {
-   "at": 92.2,
+   "at": 92.5,
    "waitAnswer": true,
    "real": true
   },
   {
-   "at": 93.0,
+   "at": 93.3,
    "goto": "#/settings",
    "say": "It also speaks first: an alert email only for a decision needed today — at most 3 a day, never the same item twice in 24 hours."
   },
   {
-   "at": 94.0,
+   "at": 94.3,
    "scroll": {
     "to": "[data-email=\"test-alert\"]"
    }
   },
   {
-   "at": 98.6,
+   "at": 98.3,
    "goto": "#/ai"
   },
   {
-   "at": 99.6,
+   "at": 99.3,
    "say": "Hard case 1 — a wrong premise: ORD-029 “stuck since last week”."
   },
   {
-   "at": 100.4,
+   "at": 100.1,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Chase ord 29, stuck at washing since last wk",
@@ -371,23 +371,23 @@
    }
   },
   {
-   "at": 102.0,
+   "at": 101.7,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 102.1,
+   "at": 101.8,
    "waitAnswer": true
   },
   {
-   "at": 102.7,
+   "at": 102.4,
    "say": "The record says it moved today. It says so, and asks before writing anything."
   },
   {
-   "at": 107.1,
+   "at": 106.8,
    "say": "Hard case 2 — no order ID, only a description."
   },
   {
-   "at": 107.7,
+   "at": 107.4,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Chase the order with 1500 tops",
@@ -395,19 +395,19 @@
    }
   },
   {
-   "at": 108.9,
+   "at": 108.6,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 109.0,
+   "at": 108.7,
    "waitAnswer": true
   },
   {
-   "at": 109.6,
+   "at": 109.3,
    "say": "Three orders match, so it lists them instead of picking one."
   },
   {
-   "at": 112.6,
+   "at": 112.3,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "The vest one.",
@@ -415,23 +415,23 @@
    }
   },
   {
-   "at": 113.2,
+   "at": 112.9,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 113.3,
+   "at": 113.0,
    "waitAnswer": true
   },
   {
-   "at": 113.9,
+   "at": 113.6,
    "say": "“The vest one” narrows that list to ORD-120 and drafts to assembly. Nothing sent."
   },
   {
-   "at": 118.1,
+   "at": 117.8,
    "say": "Hard case 3 — an order that does not exist."
   },
   {
-   "at": 118.7,
+   "at": 118.4,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Is ORD-218 shipped?",
@@ -439,19 +439,19 @@
    }
   },
   {
-   "at": 119.5,
+   "at": 119.2,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 119.6,
+   "at": 119.3,
    "waitAnswer": true
   },
   {
-   "at": 120.2,
+   "at": 119.9,
    "say": "Not in the records — and it says so. It does not invent an order, a stage or a number."
   },
   {
-   "at": 124.4,
+   "at": 124.1,
    "hold": 0.8
   }
  ]

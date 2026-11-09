@@ -207,7 +207,7 @@ def test_refresh_and_multiple_candidates(tmp_path: Path) -> None:
             writer.writeheader()
             writer.writerows(rows)
         response = await engine.chat(ChatRequest(message='Has it moved?', session_id=session), FixedClassifier('order.refresh', reference='active'))
-        assert 'ASSEMBLY' in response.answer and '2026-04-01' in response.answer
+        assert 'stage assembly' in response.answer and '2026-04-01' in response.answer
         assert response.state.active_order == 'ORD-005'
     asyncio.run(run())
 

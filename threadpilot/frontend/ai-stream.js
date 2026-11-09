@@ -36,4 +36,4 @@ const seenWorkflowNotifications=new Set();
 setInterval(async()=>{if(!workflowSession||document.hidden)return;try{const session=workflowSession;const response=await window.threadpilotFetch(API_BASE+'/api/v1/workflow/notifications/'+session);if(!response.ok||session!==workflowSession)return;for(const item of await response.json()){if(!seenWorkflowNotifications.has(item.id)){seenWorkflowNotifications.add(item.id);toast(item.order_id+': '+item.message)}}}catch{}},30000);
 render();
 
-document.addEventListener('click', e=>{const b=e.target.closest('[data-confirm-chase]');if(b&&!aiBusy&&b.dataset.confirmChase===workflowConfirmation)ask('send now')});
+document.addEventListener('click', e=>{const b=e.target.closest('[data-confirm-chase]');if(b&&!aiBusy&&b.dataset.confirmChase===workflowConfirmation)ask('Confirm send')});
