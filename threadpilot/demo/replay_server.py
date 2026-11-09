@@ -142,6 +142,14 @@ SCRIPT = {
     'remind me tomorrow if packing is still behind': dict(intent='execution.reminder', stage='PACKING', deadline='tomorrow', condition='stage_below_range'),
     'what revenue did the trendcart orders bring in this quarter': dict(intent='general.unanswerable', reason='money'),
     'which orders are most at risk': dict(intent='order.summary'),
+    # Sprint 3: the core task end to end, typed the way it is said on the floor, and the hard cases
+    'ord005 hasnt moved in a week chase knitting': dict(intent='execution.chase', action='draft', order_ids=['ORD-005'], reference='explicit', department='KNITTING'),
+    'remind me tomorrow 10am if knitting doesnt reply': dict(intent='execution.reminder', action='create', reference='active', condition='no_reply', deadline='2026-04-02T10:00'),
+    'chase the order with 1500 tops': dict(intent='execution.chase', action='draft', quantity=1500, product='tops'),
+    'the vest one': dict(intent='execution.chase', action='draft', product='Vest'),
+    'chase ord029 stuck at washing since last week': dict(intent='execution.chase', action='draft', order_ids=['ORD-029'], reference='explicit', department='WASHING'),
+    'is ord218 shipped': dict(intent='order.lookup', reference='ambiguous'),
+    'what about ord120': dict(intent='order.lookup', order_ids=['ORD-120'], reference='explicit'),
     'did anything go wrong yesterday': dict(intent='operations.discovery'),
     'was yesterdays assembly output normal': dict(intent='operations.normality', stage='ASSEMBLY', target_date='yesterday'),
 }

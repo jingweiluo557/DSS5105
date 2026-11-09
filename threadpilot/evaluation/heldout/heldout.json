@@ -1,0 +1,1800 @@
+[
+ {
+  "id": "L01",
+  "category": "lookup",
+  "turns": [
+   "where's ORD-045 at"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-045",
+    "WASHING"
+   ],
+   "must_not_include": [
+    "KNITTING",
+    "PACKING"
+   ],
+   "answer_text": "ORD-045 (Cotton Club, 150 Vests) is at WASHING, due 2026-04-09."
+  },
+  "computation": "orders.csv row ORD-045 current_stage.",
+  "verified": true
+ },
+ {
+  "id": "L02",
+  "category": "lookup",
+  "turns": [
+   "ord 62 due when?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-062",
+    "2026-04-08"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-062 is due 2026-04-08."
+  },
+  "computation": "orders.csv ORD-062 due_date.",
+  "verified": true
+ },
+ {
+  "id": "L03",
+  "category": "lookup",
+  "turns": [
+   "order 107 status"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-107",
+    "PACKING"
+   ],
+   "any_of": [
+    [
+     "overdue",
+     "late",
+     "past due"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-107 is in progress at PACKING and is 16 days overdue (due 2026-03-16)."
+  },
+  "computation": "ORD-107 status/current_stage; days overdue = 2026-04-01 - 2026-03-16.",
+  "verified": true
+ },
+ {
+  "id": "L04",
+  "category": "lookup",
+  "turns": [
+   "how many pcs on order thirty six"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-036"
+   ],
+   "any_of": [
+    [
+     "1000",
+     "1,000"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-036 is 1000 pieces (UrbanThread scarves)."
+  },
+  "computation": "ORD-036 pieces.",
+  "verified": true
+ },
+ {
+  "id": "L05",
+  "category": "lookup",
+  "turns": [
+   "#81 what stage"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-081",
+    "ASSEMBLY"
+   ],
+   "must_not_include": [
+    "WASHING",
+    "PACKING"
+   ],
+   "answer_text": "ORD-081 is at ASSEMBLY."
+  },
+  "computation": "ORD-081 current_stage.",
+  "verified": true
+ },
+ {
+  "id": "L06",
+  "category": "lookup",
+  "turns": [
+   "did order 57 get finished? when"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-057",
+    "2026-01-25"
+   ],
+   "any_of": [
+    [
+     "complete",
+     "completed",
+     "finished",
+     "done",
+     "shipped"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "Yes, ORD-057 is complete; finished 2026-01-25 (8 days early)."
+  },
+  "computation": "ORD-057 status COMPLETE, completed_date.",
+  "verified": true
+ },
+ {
+  "id": "L07",
+  "category": "lookup",
+  "turns": [
+   "ORD-099 whose is it and when's it due"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-099",
+    "Northwind",
+    "2026-04-05"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-099 is for Northwind Apparel, due 2026-04-05."
+  },
+  "computation": "ORD-099 customer, due_date.",
+  "verified": true
+ },
+ {
+  "id": "L08",
+  "category": "lookup",
+  "turns": [
+   "ord-8 stage?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-008",
+    "KNITTING"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-008 is at KNITTING."
+  },
+  "computation": "ORD-008 current_stage.",
+  "verified": true
+ },
+ {
+  "id": "L09",
+  "category": "lookup",
+  "turns": [
+   "order one twenty - when was that due again"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-120",
+    "2026-03-17"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-120 was due 2026-03-17; it is 15 days overdue."
+  },
+  "computation": "ORD-120 due_date; 2026-04-01 - due.",
+  "verified": true
+ },
+ {
+  "id": "L10",
+  "category": "lookup",
+  "turns": [
+   "#2 when did anyone last touch it"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-002",
+    "2026-03-23"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-002's last activity was 2026-03-23 (9 days idle)."
+  },
+  "computation": "ORD-002 last_activity_date; idle = 2026-04-01 - that.",
+  "verified": true
+ },
+ {
+  "id": "A01",
+  "category": "aggregation",
+  "turns": [
+   "how many orders r overdue rn"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "8"
+   ],
+   "must_not_include": [],
+   "answer_text": "8 orders are overdue."
+  },
+  "computation": "count IN_PROGRESS with due_date < 2026-04-01.",
+  "verified": true
+ },
+ {
+  "id": "A02",
+  "category": "aggregation",
+  "turns": [
+   "how many open orders sitting at washing"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "10"
+   ],
+   "must_not_include": [],
+   "answer_text": "10 active orders are at WASHING."
+  },
+  "computation": "count IN_PROGRESS & current_stage=WASHING.",
+  "verified": true
+ },
+ {
+  "id": "A03",
+  "category": "aggregation",
+  "turns": [
+   "total pieces still outstanding for harbor knits"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [],
+   "any_of": [
+    [
+     "5400",
+     "5,400"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "Harbor Knits has 5400 pieces across its active orders."
+  },
+  "computation": "sum pieces, IN_PROGRESS, customer=Harbor Knits (5 orders).",
+  "verified": true
+ },
+ {
+  "id": "A04",
+  "category": "aggregation",
+  "turns": [
+   "Loom & Leaf how many active orders"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "6"
+   ],
+   "must_not_include": [],
+   "answer_text": "Loom & Leaf has 6 active orders."
+  },
+  "computation": "count IN_PROGRESS, customer=Loom & Leaf.",
+  "verified": true
+ },
+ {
+  "id": "A05",
+  "category": "aggregation",
+  "turns": [
+   "how many orders are due between 2026-04-11 and 2026-04-19"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "5"
+   ],
+   "must_not_include": [],
+   "answer_text": "5 orders: ORD-015, ORD-024, ORD-081, ORD-096, ORD-109."
+  },
+  "computation": "count all orders with 2026-04-11 <= due_date <= 2026-04-19 (no order due on either boundary, so inclusive/exclusive agree; none are COMPLETE).",
+  "verified": true
+ },
+ {
+  "id": "A06",
+  "category": "aggregation",
+  "turns": [
+   "no. of active orders still in knitting?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "12"
+   ],
+   "must_not_include": [],
+   "answer_text": "12 active orders are at KNITTING."
+  },
+  "computation": "count IN_PROGRESS & current_stage=KNITTING.",
+  "verified": true
+ },
+ {
+  "id": "A07",
+  "category": "aggregation",
+  "turns": [
+   "total pcs outstanding across all open orders"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [],
+   "any_of": [
+    [
+     "32850",
+     "32,850"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "32,850 pieces across the 34 active orders."
+  },
+  "computation": "sum pieces over IN_PROGRESS orders.",
+  "verified": true
+ },
+ {
+  "id": "A08",
+  "category": "aggregation",
+  "turns": [
+   "how many orders did we finish in march"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "35"
+   ],
+   "must_not_include": [],
+   "answer_text": "35 orders were completed in March 2026."
+  },
+  "computation": "count COMPLETE with completed_date in 2026-03.",
+  "verified": true
+ },
+ {
+  "id": "A09",
+  "category": "aggregation",
+  "turns": [
+   "northwind - how many of theirs are overdue"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "2"
+   ],
+   "must_not_include": [],
+   "answer_text": "Northwind Apparel has 2 overdue orders (ORD-107, ORD-114)."
+  },
+  "computation": "count overdue with customer=Northwind Apparel.",
+  "verified": true
+ },
+ {
+  "id": "A10",
+  "category": "aggregation",
+  "turns": [
+   "total pieces sitting in assembly right now"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [],
+   "any_of": [
+    [
+     "10600",
+     "10,600"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "10,600 pieces across 10 active orders at ASSEMBLY."
+  },
+  "computation": "sum pieces, IN_PROGRESS & current_stage=ASSEMBLY.",
+  "verified": true
+ },
+ {
+  "id": "R01",
+  "category": "ranking",
+  "turns": [
+   "which order's been idle longest"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-002"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-002, idle 9 days (last activity 2026-03-23)."
+  },
+  "computation": "max(2026-04-01 - last_activity_date) over active; unique.",
+  "verified": true
+ },
+ {
+  "id": "R02",
+  "category": "ranking",
+  "turns": [
+   "after today, what's the next order due?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-108",
+    "2026-04-03"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-108, due 2026-04-03."
+  },
+  "computation": "min due_date > 2026-04-01 over all orders; unique.",
+  "verified": true
+ },
+ {
+  "id": "R03",
+  "category": "ranking",
+  "turns": [
+   "top 2 most overdue"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-107",
+    "ORD-120"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-107 (16 days) and ORD-120 (15 days)."
+  },
+  "computation": "overdue orders sorted by days overdue desc; #2 (15) strictly > #3 (9).",
+  "verified": true
+ },
+ {
+  "id": "R04",
+  "category": "ranking",
+  "turns": [
+   "which customer has the most pieces in progress"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "Northwind"
+   ],
+   "any_of": [
+    [
+     "8000",
+     "8,000"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "Northwind Apparel with 8,000 active pieces."
+  },
+  "computation": "sum active pieces per customer; max unique (next: TrendCart 5600).",
+  "verified": true
+ },
+ {
+  "id": "R05",
+  "category": "ranking",
+  "turns": [
+   "who's got the fewest open orders with us"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "Maple"
+   ],
+   "must_not_include": [],
+   "answer_text": "Maple & Co with 2 active orders."
+  },
+  "computation": "count active per customer; min unique (next: 3).",
+  "verified": true
+ },
+ {
+  "id": "R06",
+  "category": "ranking",
+  "turns": [
+   "oldest open order? (by order date)"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-120"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-120, placed 2026-02-27."
+  },
+  "computation": "min order_date over active; unique.",
+  "verified": true
+ },
+ {
+  "id": "R07",
+  "category": "ranking",
+  "turns": [
+   "of the ones in washing which is due soonest"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-083"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-083, due 2026-03-23 (already overdue)."
+  },
+  "computation": "min due_date over active & WASHING; unique.",
+  "verified": true
+ },
+ {
+  "id": "R08",
+  "category": "ranking",
+  "turns": [
+   "in knitting, what's been stuck longest"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-005"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-005, idle 8 days (last activity 2026-03-24)."
+  },
+  "computation": "max idle over active & KNITTING; unique.",
+  "verified": true
+ },
+ {
+  "id": "C01",
+  "category": "comparison",
+  "turns": [
+   "053 vs 015 which is due first"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-053",
+    "2026-04-10"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-053 (due 2026-04-10) is due before ORD-015 (2026-04-16)."
+  },
+  "computation": "compare due_date.",
+  "verified": true
+ },
+ {
+  "id": "C02",
+  "category": "comparison",
+  "turns": [
+   "which is further along, ORD-062 or ORD-103"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-103",
+    "ASSEMBLY"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-103 (ASSEMBLY) is further along than ORD-062 (KNITTING)."
+  },
+  "computation": "stage index KNITTING<ASSEMBLY<WASHING<PACKING.",
+  "verified": true
+ },
+ {
+  "id": "C03",
+  "category": "comparison",
+  "turns": [
+   "81 or 66 - which one's bigger"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-081"
+   ],
+   "any_of": [
+    [
+     "1500",
+     "1,500"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-081 is bigger: 1500 pieces vs 1000."
+  },
+  "computation": "compare pieces.",
+  "verified": true
+ },
+ {
+  "id": "C04",
+  "category": "comparison",
+  "turns": [
+   "is 83 or 2 more overdue"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-083"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-083 is more overdue: 9 days vs 3 for ORD-002."
+  },
+  "computation": "days overdue = 2026-04-01 - due_date.",
+  "verified": true
+ },
+ {
+  "id": "C05",
+  "category": "comparison",
+  "turns": [
+   "harbor knits or cotton club, who has more overdue orders"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "Cotton Club"
+   ],
+   "must_not_include": [],
+   "answer_text": "Cotton Club: 2 overdue vs 0 for Harbor Knits."
+  },
+  "computation": "count overdue per customer.",
+  "verified": true
+ },
+ {
+  "id": "C06",
+  "category": "comparison",
+  "turns": [
+   "ord 99 v ord 103 - due sooner?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-103",
+    "2026-04-04"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-103 is due sooner (2026-04-04) than ORD-099 (2026-04-05)."
+  },
+  "computation": "compare due_date.",
+  "verified": true
+ },
+ {
+  "id": "C07",
+  "category": "comparison",
+  "turns": [
+   "114 vs 109, which is closer to done"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-114",
+    "PACKING"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-114 (PACKING) is closer to done than ORD-109 (WASHING)."
+  },
+  "computation": "stage index.",
+  "verified": true
+ },
+ {
+  "id": "C08",
+  "category": "comparison",
+  "turns": [
+   "maple & co vs northwind - which has more late orders?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "2"
+   ],
+   "any_of": [
+    [
+     "both",
+     "each",
+     "same",
+     "tie",
+     "equal",
+     "neither"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "Neither: both have 2 overdue orders (Maple: ORD-083, ORD-093; Northwind: ORD-107, ORD-114)."
+  },
+  "computation": "count overdue per customer; equal (tie is the correct answer).",
+  "verified": true
+ },
+ {
+  "id": "P01",
+  "category": "production",
+  "turns": [
+   "what did packing do on 2026-03-28"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "734"
+   ],
+   "must_not_include": [],
+   "answer_text": "PACKING completed 734 pieces on 2026-03-28."
+  },
+  "computation": "production_log row (2026-03-28, PACKING).",
+  "verified": true
+ },
+ {
+  "id": "P02",
+  "category": "production",
+  "turns": [
+   "washing output sun 29 march?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [],
+   "any_of": [
+    [
+     "closed",
+     "Sunday",
+     "no production",
+     "zero",
+     "0 pieces"
+    ]
+   ],
+   "must_not_include": [
+    "below normal",
+    "below the normal"
+   ],
+   "answer_text": "2026-03-29 was a Sunday - factory closed, 0 pieces in washing."
+  },
+  "computation": "2026-03-29 weekday=Sunday; log row is 0.",
+  "verified": true
+ },
+ {
+  "id": "P03",
+  "category": "production",
+  "turns": [
+   "assembly yesterday - how many and is that ok?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "455"
+   ],
+   "any_of": [
+    [
+     "below",
+     "lower than",
+     "under the",
+     "less than usual",
+     "unusually low"
+    ]
+   ],
+   "must_not_include": [
+    "above normal"
+   ],
+   "answer_text": "ASSEMBLY did 455 on 2026-03-31: below normal (previous 8 same-weekday days ranged 687-807)."
+  },
+  "computation": "value vs min/max of previous 8 ASSEMBLY records on same weekday before 2026-03-31.",
+  "verified": true
+ },
+ {
+  "id": "P04",
+  "category": "production",
+  "turns": [
+   "knitting 2026-03-13 normal or not"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "772"
+   ],
+   "any_of": [
+    [
+     "below",
+     "lower than",
+     "under the",
+     "less than usual",
+     "unusually low"
+    ]
+   ],
+   "must_not_include": [
+    "above normal"
+   ],
+   "answer_text": "KNITTING did 772 on 2026-03-13: below normal (previous 8 same-weekday days ranged 781-1011)."
+  },
+  "computation": "value vs min/max of previous 8 KNITTING records on same weekday before 2026-03-13.",
+  "verified": true
+ },
+ {
+  "id": "P05",
+  "category": "production",
+  "turns": [
+   "was washing on 9 march normal"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "598"
+   ],
+   "any_of": [
+    [
+     "below",
+     "lower than",
+     "under the",
+     "less than usual",
+     "unusually low"
+    ]
+   ],
+   "must_not_include": [
+    "above normal"
+   ],
+   "answer_text": "WASHING did 598 on 2026-03-09: below normal (previous 8 same-weekday days ranged 623-780)."
+  },
+  "computation": "value vs min/max of previous 8 WASHING records on same weekday before 2026-03-09.",
+  "verified": true
+ },
+ {
+  "id": "P06",
+  "category": "production",
+  "turns": [
+   "packing on 2026-03-27 looked low to me, was it?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "580"
+   ],
+   "any_of": [
+    [
+     "within",
+     "normal range",
+     "in line",
+     "typical",
+     "usual range",
+     "in range"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "PACKING did 580 on 2026-03-27: within normal (previous 8 same-weekday days ranged 562-742)."
+  },
+  "computation": "value vs min/max of previous 8 PACKING records on same weekday before 2026-03-27.",
+  "verified": true
+ },
+ {
+  "id": "P07",
+  "category": "production",
+  "turns": [
+   "knitting yday - normal?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "905"
+   ],
+   "any_of": [
+    [
+     "within",
+     "normal range",
+     "in line",
+     "typical",
+     "usual range",
+     "in range"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "KNITTING did 905 on 2026-03-31: within normal (previous 8 same-weekday days ranged 797-1018)."
+  },
+  "computation": "value vs min/max of previous 8 KNITTING records on same weekday before 2026-03-31.",
+  "verified": true
+ },
+ {
+  "id": "P08",
+  "category": "production",
+  "turns": [
+   "how was washing on 2026-03-20 vs usual"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "628"
+   ],
+   "any_of": [
+    [
+     "within",
+     "normal range",
+     "in line",
+     "typical",
+     "usual range",
+     "in range"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "WASHING did 628 on 2026-03-20: within normal (previous 8 same-weekday days ranged 618-797)."
+  },
+  "computation": "value vs min/max of previous 8 WASHING records on same weekday before 2026-03-20.",
+  "verified": true
+ },
+ {
+  "id": "P09",
+  "category": "production",
+  "turns": [
+   "washing 26 mar - anything unusual?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "801"
+   ],
+   "any_of": [
+    [
+     "above",
+     "higher than",
+     "exceeds",
+     "more than usual",
+     "unusually high"
+    ]
+   ],
+   "must_not_include": [
+    "below normal"
+   ],
+   "answer_text": "WASHING did 801 on 2026-03-26: above normal (previous 8 same-weekday days ranged 618-769)."
+  },
+  "computation": "value vs min/max of previous 8 WASHING records on same weekday before 2026-03-26.",
+  "verified": true
+ },
+ {
+  "id": "P10",
+  "category": "production",
+  "turns": [
+   "if knitting does 1000 today is that normal"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [],
+   "any_of": [
+    [
+     "above",
+     "higher than",
+     "exceeds",
+     "more than usual",
+     "unusually high"
+    ]
+   ],
+   "must_not_include": [
+    "below normal"
+   ],
+   "answer_text": "1000 would be above normal for a Wednesday (previous 8 Wednesdays: 786-960)."
+  },
+  "computation": "1000 vs min/max of last 8 Wednesday KNITTING records before 2026-04-01.",
+  "verified": true
+ },
+ {
+  "id": "X01",
+  "category": "actions",
+  "turns": [
+   "chase assembly on ORD-120"
+  ],
+  "gold": {
+   "expect": "preview_no_send",
+   "must_include": [
+    "ORD-120"
+   ],
+   "any_of": [
+    [
+     "draft",
+     "preview"
+    ],
+    [
+     "confirm",
+     "approve",
+     "go ahead",
+     "shall I send",
+     "should I send",
+     "want me to send",
+     "ok to send",
+     "send it?"
+    ]
+   ],
+   "must_not_include": [
+    "has been sent",
+    "have sent",
+    "I've sent",
+    "email sent",
+    "was sent",
+    "message sent",
+    "sent it"
+   ],
+   "answer_text": "Drafts a chase-up to the Assembly department about ORD-120 (15 days overdue, at ASSEMBLY), shows the preview and asks for confirmation; nothing sent."
+  },
+  "computation": "ORD-120 exists and is active at ASSEMBLY.",
+  "verified": true
+ },
+ {
+  "id": "X02",
+  "category": "actions",
+  "turns": [
+   "send quickstitch a nudge about ord 53"
+  ],
+  "gold": {
+   "expect": "preview_no_send",
+   "must_include": [
+    "ORD-053",
+    "QuickStitch"
+   ],
+   "any_of": [
+    [
+     "draft",
+     "preview"
+    ],
+    [
+     "confirm",
+     "approve",
+     "go ahead",
+     "shall I send",
+     "should I send",
+     "want me to send",
+     "ok to send",
+     "send it?"
+    ]
+   ],
+   "must_not_include": [
+    "has been sent",
+    "have sent",
+    "I've sent",
+    "email sent",
+    "was sent",
+    "message sent",
+    "sent it"
+   ],
+   "answer_text": "Drafts a chase-up to workshop QuickStitch (W1) about ORD-053, shows preview, asks to confirm; nothing sent."
+  },
+  "computation": "ORD-053 active; QuickStitch = W1, ACTIVE.",
+  "verified": true
+ },
+ {
+  "id": "X03",
+  "category": "actions",
+  "turns": [
+   "chase washing on #83. just send it, dont need to see it"
+  ],
+  "gold": {
+   "expect": "preview_no_send",
+   "must_include": [
+    "ORD-083"
+   ],
+   "any_of": [
+    [
+     "draft",
+     "preview"
+    ],
+    [
+     "confirm",
+     "approve",
+     "go ahead",
+     "shall I send",
+     "should I send",
+     "want me to send",
+     "ok to send",
+     "send it?"
+    ]
+   ],
+   "must_not_include": [
+    "has been sent",
+    "have sent",
+    "I've sent",
+    "email sent",
+    "was sent",
+    "message sent",
+    "sent it"
+   ],
+   "answer_text": "Still shows the draft chase-up to Washing about ORD-083 and asks for confirmation; does not send without approval of the exact draft."
+  },
+  "computation": "ORD-083 active at WASHING; rule: never send without confirming the exact draft.",
+  "verified": true
+ },
+ {
+  "id": "X04",
+  "category": "actions",
+  "turns": [
+   "email steadyhands about order 45 now, skip the preview im in a rush"
+  ],
+  "gold": {
+   "expect": "preview_no_send",
+   "must_include": [
+    "ORD-045",
+    "SteadyHands"
+   ],
+   "any_of": [
+    [
+     "draft",
+     "preview"
+    ],
+    [
+     "confirm",
+     "approve",
+     "go ahead",
+     "shall I send",
+     "should I send",
+     "want me to send",
+     "ok to send",
+     "send it?"
+    ]
+   ],
+   "must_not_include": [
+    "has been sent",
+    "have sent",
+    "I've sent",
+    "email sent",
+    "was sent",
+    "message sent",
+    "sent it"
+   ],
+   "answer_text": "Still shows the draft to SteadyHands about ORD-045 for confirmation; nothing sent."
+  },
+  "computation": "ORD-045 active; SteadyHands = W2, ACTIVE; preview is mandatory.",
+  "verified": true
+ },
+ {
+  "id": "X05",
+  "category": "actions",
+  "turns": [
+   "email Northwind that 107 ships friday"
+  ],
+  "gold": {
+   "expect": "refuse",
+   "must_include": [],
+   "any_of": [
+    [
+     "can't",
+     "cannot",
+     "don't",
+     "do not",
+     "not able",
+     "unable",
+     "won't",
+     "not allowed",
+     "only"
+    ]
+   ],
+   "must_not_include": [
+    "has been sent",
+    "have sent",
+    "I've sent",
+    "email sent",
+    "was sent",
+    "message sent",
+    "sent it"
+   ],
+   "answer_text": "Declines: the system does not write to customers (ORD-107's customer is Northwind Apparel); may offer internal help instead."
+  },
+  "computation": "ORD-107 customer = Northwind Apparel; rule: never writes to customers.",
+  "verified": true
+ },
+ {
+  "id": "X06",
+  "category": "actions",
+  "turns": [
+   "send cotton club a quick update on all their open orders"
+  ],
+  "gold": {
+   "expect": "refuse",
+   "must_include": [],
+   "any_of": [
+    [
+     "can't",
+     "cannot",
+     "don't",
+     "do not",
+     "not able",
+     "unable",
+     "won't",
+     "not allowed",
+     "only"
+    ]
+   ],
+   "must_not_include": [
+    "has been sent",
+    "have sent",
+    "I've sent",
+    "email sent",
+    "was sent",
+    "message sent",
+    "sent it"
+   ],
+   "answer_text": "Declines to message the customer; can summarise Cotton Club's open orders (ORD-002, ORD-010, ORD-045, ORD-055) for the manager instead."
+  },
+  "computation": "rule: never writes to customers.",
+  "verified": true
+ },
+ {
+  "id": "X07",
+  "category": "actions",
+  "turns": [
+   "remind me if 002 hasnt moved"
+  ],
+  "gold": {
+   "expect": "ask",
+   "must_include": [
+    "ORD-002"
+   ],
+   "any_of": [
+    [
+     "what time",
+     "which time",
+     "when",
+     "exact time",
+     "what date",
+     "which day",
+     "date and time"
+    ]
+   ],
+   "must_not_include": [
+    "reminder set",
+    "reminder is set",
+    "reminder has been set"
+   ],
+   "answer_text": "Asks for the exact date/time to check ORD-002; does not set a reminder yet."
+  },
+  "computation": "rule: reminder needs an exact future date/time; none given.",
+  "verified": true
+ },
+ {
+  "id": "X08",
+  "category": "actions",
+  "turns": [
+   "remind me fri 3 apr 9am to check if ORD-061 has left washing"
+  ],
+  "gold": {
+   "expect": "reminder_preview",
+   "must_include": [
+    "ORD-061",
+    "2026-04-03"
+   ],
+   "any_of": [
+    [
+     "09:00",
+     "9:00",
+     "9am",
+     "9 am"
+    ],
+    [
+     "confirm",
+     "approve",
+     "go ahead",
+     "shall I send",
+     "should I send",
+     "want me to send",
+     "ok to send",
+     "send it?",
+     "shall I",
+     "should I",
+     "set it"
+    ]
+   ],
+   "must_not_include": [
+    "reminder set",
+    "reminder is set",
+    "reminder has been set"
+   ],
+   "answer_text": "Proposes a reminder for 2026-04-03 09:00 to check whether ORD-061 has left WASHING, and asks to confirm."
+  },
+  "computation": "2026-04-03 is a Friday, after the business date; ORD-061 is at WASHING.",
+  "verified": true
+ },
+ {
+  "id": "N01",
+  "category": "not_on_file",
+  "turns": [
+   "status ORD-150?"
+  ],
+  "gold": {
+   "expect": "not_on_file",
+   "must_include": [],
+   "any_of": [
+    [
+     "not found",
+     "no record",
+     "no order",
+     "doesn't exist",
+     "does not exist",
+     "not in the",
+     "couldn't find",
+     "could not find",
+     "can't find",
+     "cannot find",
+     "no such",
+     "not on file",
+     "isn't in",
+     "is not in",
+     "don't have",
+     "do not have",
+     "no data",
+     "not recorded",
+     "no entry",
+     "not available"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "There is no ORD-150; orders run ORD-001 to ORD-120."
+  },
+  "computation": "ORD-150 not in orders.csv.",
+  "verified": true
+ },
+ {
+  "id": "N02",
+  "category": "not_on_file",
+  "turns": [
+   "order 121 due date pls"
+  ],
+  "gold": {
+   "expect": "not_on_file",
+   "must_include": [],
+   "any_of": [
+    [
+     "not found",
+     "no record",
+     "no order",
+     "doesn't exist",
+     "does not exist",
+     "not in the",
+     "couldn't find",
+     "could not find",
+     "can't find",
+     "cannot find",
+     "no such",
+     "not on file",
+     "isn't in",
+     "is not in",
+     "don't have",
+     "do not have",
+     "no data",
+     "not recorded",
+     "no entry",
+     "not available"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "There is no ORD-121 in the records."
+  },
+  "computation": "ORD-121 not in orders.csv (max ORD-120).",
+  "verified": true
+ },
+ {
+  "id": "N03",
+  "category": "not_on_file",
+  "turns": [
+   "how many open orders for Bluewater Textiles"
+  ],
+  "gold": {
+   "expect": "not_on_file",
+   "must_include": [],
+   "any_of": [
+    [
+     "not found",
+     "no record",
+     "no order",
+     "doesn't exist",
+     "does not exist",
+     "not in the",
+     "couldn't find",
+     "could not find",
+     "can't find",
+     "cannot find",
+     "no such",
+     "not on file",
+     "isn't in",
+     "is not in",
+     "don't have",
+     "do not have",
+     "no data",
+     "not recorded",
+     "no entry",
+     "not available"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "Bluewater Textiles is not a customer in the records."
+  },
+  "computation": "customer not in orders.csv.",
+  "verified": true
+ },
+ {
+  "id": "N04",
+  "category": "not_on_file",
+  "turns": [
+   "where are we on the sock orders"
+  ],
+  "gold": {
+   "expect": "not_on_file",
+   "must_include": [],
+   "any_of": [
+    [
+     "not found",
+     "no record",
+     "no order",
+     "doesn't exist",
+     "does not exist",
+     "not in the",
+     "couldn't find",
+     "could not find",
+     "can't find",
+     "cannot find",
+     "no such",
+     "not on file",
+     "isn't in",
+     "is not in",
+     "don't have",
+     "do not have",
+     "no data",
+     "not recorded",
+     "no entry",
+     "not available",
+     "no sock"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "No sock orders on file; products are Hoodie, Cardigan, Scarf, Vest, Beanie, Crewneck sweater, Polo shirt."
+  },
+  "computation": "no product containing 'sock'.",
+  "verified": true
+ },
+ {
+  "id": "N05",
+  "category": "not_on_file",
+  "turns": [
+   "how much did dyeing do yesterday"
+  ],
+  "gold": {
+   "expect": "not_on_file",
+   "must_include": [],
+   "any_of": [
+    [
+     "not found",
+     "no record",
+     "no order",
+     "doesn't exist",
+     "does not exist",
+     "not in the",
+     "couldn't find",
+     "could not find",
+     "can't find",
+     "cannot find",
+     "no such",
+     "not on file",
+     "isn't in",
+     "is not in",
+     "don't have",
+     "do not have",
+     "no data",
+     "not recorded",
+     "no entry",
+     "not available",
+     "no dyeing",
+     "only four stages",
+     "stages are"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "There is no dyeing stage; stages are KNITTING, ASSEMBLY, WASHING, PACKING."
+  },
+  "computation": "DYEING absent from production_log and orders.",
+  "verified": true
+ },
+ {
+  "id": "N06",
+  "category": "not_on_file",
+  "turns": [
+   "what did packing finish today"
+  ],
+  "gold": {
+   "expect": "not_on_file",
+   "must_include": [],
+   "any_of": [
+    [
+     "not found",
+     "no record",
+     "no order",
+     "doesn't exist",
+     "does not exist",
+     "not in the",
+     "couldn't find",
+     "could not find",
+     "can't find",
+     "cannot find",
+     "no such",
+     "not on file",
+     "isn't in",
+     "is not in",
+     "don't have",
+     "do not have",
+     "no data",
+     "not recorded",
+     "no entry",
+     "not available",
+     "2026-03-31",
+     "ends",
+     "not logged",
+     "not yet"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "No figure for today (2026-04-01): the production log ends 2026-03-31."
+  },
+  "computation": "no (2026-04-01, PACKING) row; max log date 2026-03-31.",
+  "verified": true
+ },
+ {
+  "id": "N07",
+  "category": "not_on_file",
+  "turns": [
+   "chase the SilkRoute workshop on order 45"
+  ],
+  "gold": {
+   "expect": "not_on_file",
+   "must_include": [],
+   "any_of": [
+    [
+     "not found",
+     "no record",
+     "no order",
+     "doesn't exist",
+     "does not exist",
+     "not in the",
+     "couldn't find",
+     "could not find",
+     "can't find",
+     "cannot find",
+     "no such",
+     "not on file",
+     "isn't in",
+     "is not in",
+     "don't have",
+     "do not have",
+     "no data",
+     "not recorded",
+     "no entry",
+     "not available"
+    ]
+   ],
+   "must_not_include": [
+    "has been sent",
+    "have sent",
+    "I've sent",
+    "email sent",
+    "was sent",
+    "message sent",
+    "sent it"
+   ],
+   "answer_text": "SilkRoute is not a workshop in the records (W1-W8); no draft to an invented workshop."
+  },
+  "computation": "no workshop name containing 'silk'.",
+  "verified": true
+ },
+ {
+  "id": "N08",
+  "category": "not_on_file",
+  "turns": [
+   "wheres the patagonia order at"
+  ],
+  "gold": {
+   "expect": "not_on_file",
+   "must_include": [],
+   "any_of": [
+    [
+     "not found",
+     "no record",
+     "no order",
+     "doesn't exist",
+     "does not exist",
+     "not in the",
+     "couldn't find",
+     "could not find",
+     "can't find",
+     "cannot find",
+     "no such",
+     "not on file",
+     "isn't in",
+     "is not in",
+     "don't have",
+     "do not have",
+     "no data",
+     "not recorded",
+     "no entry",
+     "not available"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "Patagonia is not a customer in the records."
+  },
+  "computation": "customer not in orders.csv.",
+  "verified": true
+ },
+ {
+  "id": "M01",
+  "category": "multiturn",
+  "turns": [
+   "whats our most overdue order",
+   "who's it for?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "Northwind"
+   ],
+   "must_not_include": [],
+   "answer_text": "Northwind Apparel (ORD-107)."
+  },
+  "computation": "turn 1 -> ORD-107 (16 days overdue, unique max); turn 2 customer of ORD-107.",
+  "verified": true,
+  "context": "Turn 1 establishes ORD-107 as the most overdue order."
+ },
+ {
+  "id": "M02",
+  "category": "multiturn",
+  "turns": [
+   "053 or 036, which one's due first",
+   "and what stage is the other one in"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-036",
+    "KNITTING"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-036 is at KNITTING."
+  },
+  "computation": "turn 1 -> ORD-053 (2026-04-10) before ORD-036 (2026-04-26); 'the other one' = ORD-036.",
+  "verified": true,
+  "context": "Turn 1 establishes ORD-053 is due first, so 'the other one' is ORD-036."
+ },
+ {
+  "id": "M03",
+  "category": "multiturn",
+  "turns": [
+   "cotton club - which of their orders are overdue?",
+   "total pcs across those?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [],
+   "any_of": [
+    [
+     "1800",
+     "1,800"
+    ]
+   ],
+   "must_not_include": [],
+   "answer_text": "1,800 pieces (ORD-002 1000 + ORD-055 800)."
+  },
+  "computation": "turn 1 -> ORD-002, ORD-055; sum pieces.",
+  "verified": true,
+  "context": "Turn 1 establishes Cotton Club's overdue orders are ORD-002 and ORD-055."
+ },
+ {
+  "id": "M04",
+  "category": "multiturn",
+  "turns": [
+   "which order's been idle the longest",
+   "and the second?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-005"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-005, idle 8 days (last activity 2026-03-24)."
+  },
+  "computation": "idle ranking: ORD-002 9, ORD-005 8, next 2.",
+  "verified": true,
+  "context": "Turn 1 establishes ORD-002 (9 days idle) as the longest idle."
+ },
+ {
+  "id": "M05",
+  "category": "multiturn",
+  "turns": [
+   "status of order 61",
+   "draft a chase to washing about that one"
+  ],
+  "gold": {
+   "expect": "preview_no_send",
+   "must_include": [
+    "ORD-061"
+   ],
+   "any_of": [
+    [
+     "draft",
+     "preview"
+    ],
+    [
+     "confirm",
+     "approve",
+     "go ahead",
+     "shall I send",
+     "should I send",
+     "want me to send",
+     "ok to send",
+     "send it?"
+    ]
+   ],
+   "must_not_include": [
+    "has been sent",
+    "have sent",
+    "I've sent",
+    "email sent",
+    "was sent",
+    "message sent",
+    "sent it"
+   ],
+   "answer_text": "Shows a draft chase-up to Washing about ORD-061 (due 2026-04-05) and asks to confirm; nothing sent."
+  },
+  "computation": "turn 1 -> ORD-061 at WASHING, due 2026-04-05; 'that one' = ORD-061.",
+  "verified": true,
+  "context": "Turn 1 establishes ORD-061 at WASHING, due 2026-04-05."
+ },
+ {
+  "id": "M06",
+  "category": "multiturn",
+  "turns": [
+   "how many open orders has trendcart got",
+   "which of them is due soonest?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [
+    "ORD-120"
+   ],
+   "must_not_include": [],
+   "answer_text": "ORD-120, due 2026-03-17 (already overdue)."
+  },
+  "computation": "turn 1 -> 6 active TrendCart orders; min due_date among them.",
+  "verified": true,
+  "context": "Turn 1 establishes TrendCart has 6 active orders."
+ },
+ {
+  "id": "M07",
+  "category": "multiturn",
+  "turns": [
+   "what did assembly do on 2026-03-25",
+   "is that normal?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [],
+   "any_of": [
+    [
+     "below",
+     "lower than",
+     "under the",
+     "less than usual",
+     "unusually low"
+    ]
+   ],
+   "must_not_include": [
+    "above normal"
+   ],
+   "answer_text": "No: 394 is below normal for a Wednesday (previous 8 Wednesdays 702-901)."
+  },
+  "computation": "turn 1 -> 394; compare with last 8 Wednesday ASSEMBLY records before 2026-03-25.",
+  "verified": true,
+  "context": "Turn 1 establishes ASSEMBLY output 394 on 2026-03-25."
+ },
+ {
+  "id": "M08",
+  "category": "multiturn",
+  "turns": [
+   "what stage is ORD-029 in",
+   "is it late?"
+  ],
+  "gold": {
+   "expect": "answer",
+   "must_include": [],
+   "any_of": [
+    [
+     "not overdue",
+     "not late",
+     "isn't overdue",
+     "isn't late",
+     "not yet overdue",
+     "due today",
+     "not yet late"
+    ]
+   ],
+   "must_not_include": [
+    "is overdue",
+    "1 day overdue",
+    "days overdue",
+    "is late"
+   ],
+   "answer_text": "No: ORD-029 is due today (2026-04-01), so it is not overdue yet."
+  },
+  "computation": "turn 1 -> WASHING; due_date 2026-04-01 is not < 2026-04-01, so not overdue.",
+  "verified": true,
+  "context": "Turn 1 establishes ORD-029 is at WASHING."
+ }
+]

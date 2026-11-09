@@ -1,0 +1,22 @@
+<section id="failures" data-transition="fade" style="background:#F6F4EF;color:#1C2733;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 120px;display:flex;flex-direction:column;gap:28px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:58px;font-weight:600;line-height:1.1">What breaks it: the 22 questions it missed</h2>
+<div style="display:grid;grid-template-columns:110px 1fr 1.25fr;gap:0;font-size:25px;border-top:3px solid #1C2733">
+<b style="padding:14px 0;border-bottom:1px solid #CFC8BA">Missed</b><b style="padding:14px 0;border-bottom:1px solid #CFC8BA">Failure</b><b style="padding:14px 0;border-bottom:1px solid #CFC8BA">Example input → what happened</b>
+<span style="padding:14px 0;border-bottom:1px solid #CFC8BA;font-size:34px;font-weight:600;color:#A2483A">9</span><span style="padding:14px 18px 14px 0;border-bottom:1px solid #CFC8BA">A ranking or filter the tools don’t have</span><span style="padding:14px 0;border-bottom:1px solid #CFC8BA;color:#4A5563">“oldest open order (by order date)” → ranked by due date; “in knitting, stuck longest” → stage ignored; “finished in March?” → no count</span>
+<span style="padding:14px 0;border-bottom:1px solid #CFC8BA;font-size:34px;font-weight:600;color:#A2483A">7</span><span style="padding:14px 18px 14px 0;border-bottom:1px solid #CFC8BA">Order numbers it can’t read</span><span style="padding:14px 0;border-bottom:1px solid #CFC8BA;color:#4A5563">“#81 what stage”, “is 83 or 2 more overdue”, “remind me if 002 hasn’t moved” → asks which order</span>
+<span style="padding:14px 0;border-bottom:1px solid #CFC8BA;font-size:34px;font-weight:600;color:#A2483A">3</span><span style="padding:14px 18px 14px 0;border-bottom:1px solid #CFC8BA">Comparison without a verdict</span><span style="padding:14px 0;border-bottom:1px solid #CFC8BA;color:#4A5563">“which is further along, ORD-062 or ORD-103” → a table of stages, no answer</span>
+<span style="padding:14px 0;border-bottom:1px solid #CFC8BA;font-size:34px;font-weight:600;color:#A2483A">3</span><span style="padding:14px 18px 14px 0;border-bottom:1px solid #CFC8BA">Other</span><span style="padding:14px 0;border-bottom:1px solid #CFC8BA;color:#4A5563">“who’s it for?” after a list; due date given but not “overdue”; a workshop not on file (SilkRoute) drafted to — nothing sent</span>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:40px">
+<div style="display:flex;flex-direction:column;gap:10px;border-left:6px solid #A2483A;padding:0 0 0 24px">
+<h3 style="font-size:31px;font-weight:600">Pattern</h3>
+<p style="font-size:25px;color:#4A5563">It is right when the question maps to one tool — a lookup, a normal-range check, an action. It breaks when the question needs a sort or filter we never built, or refers to a number or a list item in a way the parser doesn’t know.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;border-left:6px solid #3F6C94;padding:0 0 0 24px">
+<h3 style="font-size:31px;font-weight:600">What we would fix next</h3>
+<p style="font-size:25px;color:#4A5563"><b>1</b> one sort-and-filter tool over any order field (9 misses) · <b>2</b> “#81”, “83 or 2”, bare “002” as IDs (7) · <b>3</b> a verdict line on every comparison (3) · <b>4</b> the same 70 on the live model, to measure the planner itself. Every answer, gold and verdict: <i>evaluation/heldout/</i> on GitHub.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:48px;font-size:22px;color:#6A7179">ThreadPilot · Group 19 · 4</p>
+<aside>0:00–0:30 · [Foo Toon Ming] “What breaks it? Nine misses need a ranking or filter we never built, like oldest by order date. Seven are order numbers it can't read, like hash eighty-one, or eighty-three or two. Three comparisons give a table but no verdict. The pattern: one question, one tool, it is right; otherwise it breaks. Next we build one sort-and-filter tool, fix the number parsing, and run these seventy on the live model.”</aside>
+</section>
