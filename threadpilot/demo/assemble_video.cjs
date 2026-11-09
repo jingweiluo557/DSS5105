@@ -13,7 +13,8 @@
    --voice DIR voice-over clips (default demo/voice): one clip per slide named after the slide id (cover.m4a,
                problem.m4a, … .m4a/.mp3/.wav/.aac/.ogg) — each slide then lasts as long as its clip plus a short pause,
                instead of the time in its notes; or one clip slides.* laid over all the slides at the notes' timing;
-               and demo.* laid over the demo. Slides without a clip keep their notes' timing, silent.
+               and demo.* laid over the demo (or demo@<seconds>.* parts, one per voice, each starting that many seconds into
+               the demo). Slides without a clip keep their notes' timing, silent.
 
  Slides listed in deck.json "afterDemo" (marked after: true in slides.json) close the video after the demo, with a fade.
  Inputs: <slides>/slides.json from render_slides.cjs; <demo>/demo_final.mp4 (+ demo_cut.srt) from record_demo.cjs.
@@ -47,11 +48,23 @@ for (const s of meta.slides) {
 const closing = meta.slides.filter(s => s.after);          // shown after the demo
 meta.slides = meta.slides.filter(s => !s.after);
 const slidesVoice = !perSlideVoice ? clipFor('slides') : null;
-const demoVoice = clipFor('demo');
+const run = a => execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-threads', '2', ...a], { stdio: 'inherit' });
+let demoVoice = clipFor('demo');
+// several voices over the demo: demo@<seconds into the demo>.m4a, e.g. demo@0.m4a (first voice) + demo@69.m4a (second voice)
+const demoParts = fs.existsSync(voiceDir) ? fs.readdirSync(voiceDir).map(f => f.match(/^demo@(\d+(?:\.\d+)?)\.(m4a|mp3|wav|aac|ogg)$/)).filter(Boolean)
+  .map(m => ({ file: path.join(voiceDir, m[0]), at: Number(m[1]) })).sort((a, b) => a.at - b.at) : [];
+if (!demoVoice && demoParts.length) {
+  const mixed = path.join(outDir, 'demo_voice.m4a');
+  const ins = demoParts.flatMap(p => ['-i', p.file]);
+  const graph = demoParts.map((p, i) => `[${i}:a]aresample=48000,aformat=channel_layouts=stereo,adelay=${Math.round(p.at * 1000)}|${Math.round(p.at * 1000)}[d${i}]`).join(';')
+    + ';' + demoParts.map((_, i) => `[d${i}]`).join('') + `amix=inputs=${demoParts.length}:normalize=0[v]`;
+  run([...ins, '-filter_complex', graph, '-map', '[v]', '-c:a', 'aac', '-b:a', '160k', mixed]);
+  demoVoice = mixed;
+  console.log(`voice-over: ${demoParts.length} demo parts at ${demoParts.map(p => p.at + ' s').join(', ')}`);
+}
 if (perSlideVoice) console.log(`voice-over: ${meta.slides.filter(s => s.clip).length} of ${meta.slides.length} slides have a clip; those slides last as long as their clip`);
 else if (slidesVoice) console.log(`voice-over: ${path.basename(slidesVoice)} over the slides`);
 const srtTime = s => { const ms = Math.round(s * 1000); const h = Math.floor(ms / 3.6e6), m = Math.floor(ms / 6e4) % 60, sec = Math.floor(ms / 1e3) % 60, f = ms % 1000; return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')},${String(f).padStart(3, '0')}`; };
-const run = a => execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-threads', '2', ...a], { stdio: 'inherit' });
 
 // ---------------------------------------------------------------- slides → slides.mp4 (one input per slide, cross-faded)
 const inputs = [], filters = [];
