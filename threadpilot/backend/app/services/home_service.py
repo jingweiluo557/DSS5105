@@ -177,7 +177,9 @@ def status_line(alerts: list[alert_policy.Alert], counts: dict, pulse: list[dict
             'facts': facts, 'meaning': COLOUR_MEANING[colour]}
 
 
-def home(data: dict, now: datetime) -> dict:
+def home(data: dict, now: datetime, chased=frozenset()) -> dict:
+    """`chased`: order IDs chased in the last few days (from the email ledger); their drafts are not offered again."""
+    from . import ready_drafts
     today = now.date()
     engine = QueueAnalysis(data)
     alerts = alert_policy.detect(data, now)
@@ -192,6 +194,7 @@ def home(data: dict, now: datetime) -> dict:
     return {'business_date': today.isoformat(), 'as_of': now.isoformat(),
             'status': status_line(alerts, counts, pulse, cards, today),
             'decisions': cards, 'more_waiting': waiting,
+            'ready_drafts': ready_drafts.prepare(engine.active, today, set(chased)),
             'alerts': {t: sum(a.tier == t for a in alerts) for t in (alert_policy.P1, alert_policy.P2, alert_policy.P3)},
             'counts': counts, 'health': health(engine, data, today), 'pulse': pulse,
             'basis': 'Decisions come from the alert policy (docs/ALERT_POLICY.md); health from the shared queue projection; '

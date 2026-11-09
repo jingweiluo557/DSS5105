@@ -45,6 +45,7 @@ from app.conversation import ConversationAgent, Plan, Task  # noqa: E402
 from app.prediction.aft import LeadTimeModel  # noqa: E402
 from app.schemas import ChatRequest, Classification, Intent, Slots  # noqa: E402
 from app.services import alert_policy, home_service  # noqa: E402
+from app.services.ready_drafts import recently_chased  # noqa: E402
 from app.services.queue_engine import QueueAnalysis  # noqa: E402
 from app.workflow_engine import WorkflowEngine  # noqa: E402
 from app.workflow_store import WorkflowStore  # noqa: E402
@@ -248,7 +249,8 @@ class ReplayMailbox:
     sent = []
 
     async def send_now(self, action, now):
-        self.sent.append({'recipient': action.payload.get('recipient'), 'subject': action.payload.get('subject'), 'at': now.isoformat()})
+        self.sent.append({'recipient': action.payload.get('recipient'), 'subject': action.payload.get('subject'), 'at': now.isoformat(),
+                          'order_ids': action.payload.get('order_ids') or [action.order_id], 'status': 'sent', 'scheduled_at': now.isoformat()})
         return {'status': 'sent', 'receipt': 'replay-receipt', 'note': 'offline replay: recorded, not delivered'}
 
 
@@ -269,7 +271,8 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/snapshot': return snapshot
         if path == '/api/email/clock': return {'now': NOW.isoformat(), 'mode': 'legacy', 'version': 1, 'schedule_start_day': data['today']}
         if path == '/api/scheduling/risk': return risk
-        if path == '/api/dashboard/home': return home
+        if path == '/api/dashboard/home':   # recomputed, so a chase sent from "Drafted for you" leaves the list, as live
+            return home_service.home(data, NOW, recently_chased(ReplayMailbox.sent, NOW.date()))
         if path == '/api/dashboard': return DASHBOARD
         if path == '/api/morning': return {'business_date': data['today'], 'reports': [BRIEFING], 'current_fingerprint': 'replay', 'model_configured': False}
         if path == '/api/v1/health': return {'status': 'ok', 'configured': True, 'model': 'offline replay', 'streaming': True}

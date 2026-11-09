@@ -1,7 +1,7 @@
 """Writes demo/demo_timeline_sprint3.json: the Sprint 3 video demo (about 3 minutes).
 
 Order (the brief): the user journey first, the way a general manager uses ThreadPilot through the day (including the
-expedite decision on a home card and the alert policy); then the core task
+expedite decision on a home card, the chase-ups drafted before she asks, and the alert policy); then the core task
 end to end on realistic input (chase a stalled order: claim checked against the record, draft, preview, confirm,
 conditional reminder); then three hard cases (a false premise, a description with no order ID, an order not on file).
 
@@ -49,17 +49,25 @@ do(1.2, click='article.decision >> nth=1 >> text=Review options')
 do(1.6, click='aside.risk-detail button >> nth=0')
 do(0.4, waitFor={'text': 'Expedite review', 'timeout': 20000})
 say(0.4, 'Moving ORD-029 up saves it 5 days but makes 6 other orders 11 days later in total, so it recommends keeping the current order.')
-do(5.4, click={'text': 'Close'})
+do(5.0, click={'text': 'Close'})
 do(0.6, goto='#/dashboard')
-say(1.2, 'Every chart has an “i”: what it shows and why it is computed that way.')
-do(0.6, scroll={'to': 'section.home-pulse'})
+do(0.8, 'It also drafts before she asks: both stalled orders already have a chase-up, written from the records.', scroll={'to': 'section.ready-drafts'})
+do(3.6, click='section.ready-drafts [data-action="ready-draft"] >> nth=0')
+do(0.1, waitAnswer=True)
+say(0.4, '“Review & send” opens the preview: to washing, 9 days idle, 3 days overdue. She checks it and confirms.')
+do(4.4, click={'text': 'Confirm send'}, optional=True, real=True)
+do(0.4, waitAnswer=True, optional=True, real=True)
+say(0.4, 'Sent and logged; ORD-002 leaves the list. Nothing went out before her click.')
+do(2.4, click='[aria-label="Close AI drawer"]', optional=True)
+do(2.2, scroll={'to': 'section.home-pulse'})
+say(0.2, 'Every chart has an “i”: what it shows and why it is computed that way.')
 do(0.8, click='section.home-pulse [data-info="pulse"]')
 say(1.0, '“Normal” = the previous 8 same weekdays: on this factory that cut false alerts from 0.67 to 0.1 a month.')
 do(3.4, press='Escape')
 do(0.4, 'The morning briefing, written at 07:00, each point with its supporting records.', scroll={'to': 'section.home-briefing'})
 do(3.0, click={'text': 'Open the full briefing'})
-do(2.4, scroll={'by': 340})
-do(2.2, '09:40 — on the floor, she asks in her own words.', goto='#/ai')
+do(2.2, scroll={'by': 340})
+do(2.0, '09:40 — on the floor, she asks in her own words.', goto='#/ai')
 ask(0.8, 'How is the TrendCart order doing?')
 say(0.6, 'TrendCart has six active orders, so it asks instead of guessing.')
 ask(2.8, 'The scarf one.')
@@ -67,9 +75,7 @@ say(0.6, 'ORD-005: 500 scarves at knitting, due 20 April. Each answer shows the 
 do(2.8, click='details.tool-steps >> nth=-1 >> summary', optional=True)
 say(0.6, '“Show more”: the planner’s reading, each tool with its arguments, and the records it used.')
 do(3.8, click='details.tool-steps >> nth=-1 >> summary', optional=True)
-ask(0.6, 'What about ORD-120?')
-say(0.6, 'A second order in the same chat: ORD-120, 1,500 vests, 15 days overdue at assembly.')
-say(3.4, '11:15 — a customer asks for 800 hoodies by the 25th.')
+say(0.6, '11:15 — a customer asks for 800 hoodies by the 25th.')
 ask(0.6, 'Can we take 800 hoodies by the 25th?')
 say(0.6, 'It asks the one thing that changes the answer: ready at the factory, or delivered?')
 ask(2.8, 'Delivered to the customer.')

@@ -220,6 +220,9 @@ class WorkflowEngine:
             await self.tool_steps(emit, response)
             if emit:
                 await emit(response.answer)
+        elif (drafted := re.match(r'^\s*review the drafted chase-up for (ORD-\d{3})\s*\.?\s*$', request.message, re.I)):
+            # "Review & send" on a home-screen draft (services/ready_drafts.py): the button's own words, not the planner's reading.
+            response = await self.drafted_chase(drafted[1].upper(), classifier, state, now, emit)
         elif getattr(self, 'order_records', None) and (managed := record_preview(self, request.message, state, now, request.selected_order_id)) is not None:
             response = managed
             if emit: await emit(response.answer)
@@ -247,6 +250,41 @@ class WorkflowEngine:
                                          {'role': 'assistant', 'content': response.answer}])[-16:]
         self.store.save(state)
         return response.model_copy(update={'state': state.model_copy(deep=True)})
+
+    async def drafted_chase(self, order_id: str, agent, state: DialogState, now: datetime, emit=None) -> ChatResponse:
+        """A chase-up drafted before the manager asked (home screen, "Drafted for you"): the same text, rebuilt from the
+        current record, goes through the typed chase-up's preview, so the manager confirms that exact email and the usual
+        gates apply (recipient from Settings, record unchanged since the preview, 15-minute expiry). Nothing is sent here."""
+        from .services import ready_drafts
+        from .services.chase_chat import chase_chat
+        result = Classification(intent=Intent.EXECUTION_CHASE, confidence=1, slots=Slots(order_ids=[order_id], action='send', draft_number=1))
+        state.pending_action = None
+        state.pending_clarification = None
+        try:
+            row = self.tools.refresh_order(order_id)
+        except Exception:  # noqa: BLE001  (an ID not on file)
+            row = None
+        record = row.record if row else None
+        if not record or record.get('status') != 'IN_PROGRESS':
+            text = f"{order_id} is {'no longer in progress' if record else 'not in the records'}, so there is nothing to chase. Nothing was sent."
+            response = self.response(state, result, now, text, [], [row] if row else [])
+            if emit: await emit(text)
+            return response
+        draft = ready_drafts.compose(record, now.date())
+        state.chase_drafts = [{'order_ids': [order_id], 'recipient': None, 'department': draft['department'], 'subject': draft['subject'],
+                               'text': draft['text'], 'sent': False, 'reply_deadline': None, 'business_now': now.isoformat(),
+                               'source_snapshots': {order_id: record}}]
+        state.chase_context = {'order_ids': [order_id], 'request': f'Drafted chase-up for {order_id}'}
+        state.last_intent = Intent.EXECUTION_CHASE
+        state.active_order = order_id
+        response = await chase_chat(self, 'Preview draft 1', result, state, now, agent, None)
+        call = ToolCall(name='draft_chase', arguments={'order_id': order_id, 'source': f'drafted for you: in progress, no activity for {ready_drafts.STALLED_DAYS}+ days'},
+                        result={'drafts': state.chase_drafts}, executed=False)
+        lead = f"Drafted for you from the record: {order_id} has had no recorded activity for {draft['idle_days']} days." + ('' if state.pending_action else ' Nothing was sent.')
+        response = response.model_copy(update={'answer': lead + '\n\n' + response.answer, 'tool_calls': [call] + list(response.tool_calls)})
+        await self.tool_steps(emit, response)
+        if emit: await emit(response.answer)
+        return response
 
     def remember_orders(self, message: str, response: ChatResponse, state: DialogState) -> None:
         """Orders this turn was about: IDs the manager named (or memory resolved), the resolved order, a compared pair.
