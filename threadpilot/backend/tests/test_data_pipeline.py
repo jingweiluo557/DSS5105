@@ -66,7 +66,7 @@ def test_api_refresh_confirmation_version_and_tombstone(client, business_databas
     assert next(r for r in client.get('/api/snapshot').json()['orders'] if r['order_id'] == 'ORD-005')['current_stage'] == 'ASSEMBLY'
     client.app.state.intent_classifier = FixedClassifier('order.refresh', reference='active')
     refreshed = client.post('/chat', json={'message': 'Has it moved?', 'session_id': chat['state']['session_id']}).json()
-    assert 'ASSEMBLY' in refreshed['answer']
+    assert 'stage assembly' in refreshed['answer']
     assert 'CSV snapshot' not in refreshed['answer']
     assert client.delete(url + '?expected_version=2', headers=AUTH).status_code == 204
     assert import_bytes(business_database, order_csv(row['data']), 'orders.csv').skipped == 1

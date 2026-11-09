@@ -92,7 +92,7 @@
   ],
   "gold": "Yes, ORD-057 is complete; finished 2026-01-25 (8 days early).",
   "error": null,
-  "answer": "ORD-057 — UrbanThread, 600 Cardigan: complete, stage complete, due 2026-02-02; last recorded activity 2026-01-25. Completed 2026-01-25; recorded days late: -8.",
+  "answer": "ORD-057 — UrbanThread, 600 Cardigan: complete, due 2026-02-02; last recorded activity 2026-01-25. Completed 2026-01-25; recorded days late: -8.",
   "intent": "order.lookup",
   "clar": false,
   "confreq": false,

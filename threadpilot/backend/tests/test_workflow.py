@@ -168,7 +168,7 @@ def test_workbook_multiturn_scenario(scenario: str, tmp_path: Path, storage: str
                 assert phrase in response.sources or phrase.removesuffix('.csv') in response.sources
                 assert 'Source evidence:' not in response.answer
             else:
-                assert phrase in response.answer, (row, response.answer)
+                assert phrase.casefold() in response.answer.casefold(), (row, response.answer)   # a stage or status, however cased
             writes = [c for c in response.tool_calls if c.requires_confirmation]
             assert not writes or engine.confirmation_word(text)
             if response.evidence:

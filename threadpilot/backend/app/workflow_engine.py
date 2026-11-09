@@ -1926,7 +1926,7 @@ class WorkflowEngine:
         row = order.record
         status = {'IN_PROGRESS': 'in progress', 'COMPLETE': 'complete'}.get(row['status'], str(row['status']).lower().replace('_', ' '))
         return (f"{row['order_id']} — {row['customer']}, {row['pieces']} {row['product']}: "
-                f"{status}, stage {str(row['current_stage']).lower()}, due {row['due_date']}; "
+                f"{status}" + ('' if row['status'] == 'COMPLETE' else f", stage {str(row['current_stage']).lower()}") + f", due {row['due_date']}; "
                 f"last recorded activity {row['last_activity_date']}." +
                 (f" Completed {row['completed_date']}; recorded days late: {row['days_late']}." if row['status'] == 'COMPLETE' else ''))
 
