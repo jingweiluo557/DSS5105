@@ -19,9 +19,16 @@ Wendy 101 s · Matthew 101 s · Kevin 87 s (total 4:49).
 5:00 (the workflow warns past 4:55).
 
 **Demo clips** are laid over the fixed demo recording: `demo@0` starts with the demo and `demo@71` starts 71 seconds
-into it (video 1:41, the caption "11:15 — a customer asks for 800 hoodies by the 25th"). Easiest way to stay in sync: play
-the current `Presentation_Group19.mp4` muted, start recording at the clip's start time, and read each caption as it
-appears. A clip longer than its window runs over the next part, so keep `demo@0` under 71 s.
+into it (video 1:41, the caption "11:15 — a customer asks for 800 hoodies by the 25th"). A clip longer than its window
+runs over the next part, so keep `demo@0` under 71 s.
+
+**Pace with the teleprompter, not the captions.** The burned-in captions are written to be read and many run at
+200–570 words a minute, too fast to say. `Presentation_Group19_prompter.mp4` (and `ThreadPilot_Demo_prompter.mp4` for the
+product demo) is a silent, text-only video timed to the real one: the whole line to say is on screen, the words fill in at
+speaking pace (about 145 words a minute), and it shows who speaks, the clock, the caption the viewer sees, the next line
+and a handover warning three seconds before the speaker changes. Start it, start recording at the clip's start time,
+and keep up with the fill. The lines are in `demo/prompter_lines.py`; rebuild with `demo/make_prompter.py`
+(see its docstring), which also writes the lines as a text script and warns when a line is too fast for its window.
 
 Lines: the "Sprint 3 video script" doc, or each slide's speaker notes. `.m4a`, `.mp3`, `.wav`, `.aac` or `.ogg` all
 work. Record with the phone's voice memo app or QuickTime, export, rename exactly as above, commit, push, run the
