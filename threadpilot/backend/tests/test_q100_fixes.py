@@ -77,7 +77,7 @@ def test_rows10_13_the_order_in_focus_survives_a_change_of_intent(tmp_path: Path
     r = chat(engine, planner, 'Has the order moved yet?', state)
     assert not r.needs_clarification and r.answer.startswith('ORD-029')
     r = chat(engine, planner, 'The order is at which stage now?', r.state)
-    assert not r.needs_clarification and 'stage WASHING' in r.answer
+    assert not r.needs_clarification and 'stage washing' in r.answer
     r = chat(engine, planner, 'Should i chase this order?', r.state)
     assert not r.needs_clarification and 'ORD-029' in r.answer
 

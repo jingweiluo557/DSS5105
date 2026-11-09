@@ -90,8 +90,11 @@ def detect(data: dict, now: datetime) -> list[Alert]:
                     streak, since = streak + 1, r['date']
                 else:
                     break
+            # the latest day's gap against the same-weekday mean: the number the home screen shows (home_service pulse change_pct)
+            latest = max(below, key=lambda b: b['date'])
+            latest_gap = round(100 * (1 - latest['output'] / latest['mean']))
             out.append(Alert(key=f'stage_drop:{stage}', kind='stage_drop', tier=P1, score=min(100, 60 + gap), entity=stage,
-                             title=f'{stage.title()} has been below its normal range for {streak} working days, since {since} ({gap}% under over the last {SUSTAINED_DROP_DAYS})',
+                             title=f'{stage.title()} has been below its normal range for {streak} working days, since {since}; {latest["date"]}: {latest_gap}% under its usual level',
                              detail='; '.join(f"{b['date']}: {b['output']} vs min {b['same_weekday_min']} (mean {b['mean']})" for b in below),
                              action='Ask the floor what changed; check which near-due orders sit at or after this stage.',
                              evidence=below, rule=f'{SUSTAINED_DROP_DAYS} consecutive working days below the previous-8-same-weekday minimum'))

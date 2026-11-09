@@ -184,8 +184,11 @@ class ScriptedAgent:
         o = facts[0]
         idle = (NOW.date() - datetime.fromisoformat(o['last_activity_date'] + 'T00:00:00').date()).days
         stage = o['current_stage'].lower()
+        to_due = (datetime.fromisoformat(o['due_date'] + 'T00:00:00').date() - NOW.date()).days
+        due = (f"It was due {o['due_date']}, {-to_due} days ago." if to_due < -1 else f"It was due {o['due_date']}, yesterday." if to_due == -1
+               else f"It is due today." if to_due == 0 else f"It is due {o['due_date']}.")
         text = (f"Hi {stage} team,\n\n{o['order_id']} ({o['customer']}, {int(float(o['pieces'])):,} {o['product'].lower()}) is at {stage} and has shown no recorded activity since "
-                f"{o['last_activity_date']} ({idle} days). It is due {o['due_date']}.\n\nPlease confirm by tomorrow noon: the current status, what is holding it, and the date {stage} will finish.\n\nThank you.")
+                f"{o['last_activity_date']} ({idle} days). {due}\n\nPlease confirm by tomorrow noon: the current status, what is holding it, and the date {stage} will finish.\n\nThank you.")
         if emit:
             await emit(text)
         return text
@@ -206,6 +209,12 @@ def readable(response) -> str:
             lines.append(f"Lead-time model: {int(round(100 * h['p_on_time']))}% on-time chance for {h['pieces']} pieces (typically {h['typical_lead_days']} days; 80% done within {h['lead_days_80pct_confidence']}).")
         if bottleneck:
             lines.append(f"Bottleneck stage: {bottleneck.lower()} at {cap[bottleneck]:,.0f} pieces a day. Packing loss assumed: {data.get('packing_loss_days', 0)} day(s); delivery buffer {data.get('delivery_buffer_days', 0)} days.")
+        fits = sorted((w for w in data.get('workshop_options') or [] if w.get('batch_fits')), key=lambda w: w['estimated_batch_days'])[:3]
+        if fits:   # the tool's own options and advice, which the live model words from the same result
+            lines.append('Outside workshops that could take the batch (availability to confirm): ' + '; '.join(
+                f"{w['workshop_id']} about {w['estimated_batch_days']:.0f} days, {round(100 * w['defect_batch_probability'])}% defect-batch risk, cost ×{w['unit_cost']}" for w in fits) + '.')
+        if data.get('recommendation'):
+            lines.append(data['recommendation'])
         lines.append('An estimate with stated assumptions, not a promise.')
         return '\n'.join(lines)
     # drop the labelled JSON blocks the model would otherwise word

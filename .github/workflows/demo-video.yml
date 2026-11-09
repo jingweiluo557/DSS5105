@@ -77,7 +77,7 @@ jobs:
         run: |
           code=$(curl -s -o /tmp/index.html -w "%{http_code}" "${{ inputs.site_url }}/")
           echo "site HTTP $code"
-          if grep -q "20261109-drafts" /tmp/index.html; then echo "::notice title=build::the site serves the 9 Nov frontend (Drafted for you)";
+          if grep -q "20261109-review2" /tmp/index.html; then echo "::notice title=build::the site serves the 9 Nov frontend (Drafted for you)";
           else echo "::warning title=build::the site does not serve the 9 Nov frontend yet; the Drafted-for-you and home-screen steps may differ or fail"; fi
       - name: Record the demo
         if: ${{ inputs.include_demo }}

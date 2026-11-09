@@ -452,7 +452,7 @@ class WorkflowEngine:
     @staticmethod
     def confirmation_word(message: str) -> bool:
         """场景 3.1–3.3：确认只认明确命令，不信任模型生成的布尔值。"""
-        return message.strip().casefold().rstrip('.!。！') in {'send now', 'save it', 'confirm', 'confirm save', 'confirm create', 'confirm update', '确认', '确认发送', '确认保存', '确认创建', '确认更新'}
+        return message.strip().casefold().rstrip('.!。！') in {'send now', 'confirm send', 'save it', 'confirm', 'confirm save', 'confirm create', 'confirm update', '确认', '确认发送', '确认保存', '确认创建', '确认更新'}
 
     def response(self, state: DialogState, result: Classification, now: datetime, answer: str,
                  calls: list[ToolCall], evidence: list[Evidence], question: str | None = None) -> ChatResponse:
@@ -1924,8 +1924,9 @@ class WorkflowEngine:
     def order_facts(order: Evidence) -> str:
         """场景 1.1–1.4：只展示正式订单记录，不生成虚构活动描述。"""
         row = order.record
-        return (f"{row['order_id']} — {row['customer']}, {row['pieces']} {row['product']}; "
-                f"status {row['status']}, stage {row['current_stage']}, due {row['due_date']}, "
+        status = {'IN_PROGRESS': 'in progress', 'COMPLETE': 'complete'}.get(row['status'], str(row['status']).lower().replace('_', ' '))
+        return (f"{row['order_id']} — {row['customer']}, {row['pieces']} {row['product']}: "
+                f"{status}" + ('' if row['status'] == 'COMPLETE' else f", stage {str(row['current_stage']).lower()}") + f", due {row['due_date']}; "
                 f"last recorded activity {row['last_activity_date']}." +
                 (f" Completed {row['completed_date']}; recorded days late: {row['days_late']}." if row['status'] == 'COMPLETE' else ''))
 
