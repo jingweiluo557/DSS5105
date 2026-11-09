@@ -88,7 +88,7 @@ jobs:
         run: |
           if [ "${{ inputs.mode }}" = "live" ] && [ -z "$THREADPILOT_ACCESS_KEY" ]; then echo "::error title=secret::THREADPILOT_ACCESS_KEY is not set in the repository secrets"; exit 1; fi
           # offline: nothing is sent, so the confirm steps stay in; live: dry_run decides
-          if [ "${{ inputs.mode }}" = "offline" ]; then BADGE="Real interface and engine on the factory records · model’s reading of each message scripted (offline replay) · no real email"; else BADGE=""; fi
+          if [ "${{ inputs.mode }}" = "offline" ]; then BADGE="Offline replay · real interface and engine on the factory records · the model’s reading of each message is scripted · no real email"; else BADGE=""; fi
           node demo/record_demo.cjs --timeline "${{ inputs.timeline }}" --out dist/demo --compress-waits "${{ inputs.compress_waits }}" ${{ inputs.mode == 'live' && inputs.dry_run && '--dry-run' || '' }} ${BADGE:+--badge "$BADGE"}
       - name: Assemble the presentation
         if: always()

@@ -12,7 +12,7 @@ const orders=TRACK1_DATA.orders.map((r,index)=>{
 });
 const defaults={notes:[],watches:[],messages:[],audit:[],assessments:[],settings:{time:'07:00',idle:'3',voice:false,briefing:true},chat:[],chatIds:[],selected:'ORD-002'};
 let state;try{state={...JSON.parse(JSON.stringify(defaults)),...JSON.parse(localStorage.getItem('threadpilot-track1-v2')||'{}')}}catch{state=JSON.parse(JSON.stringify(defaults))}
-let route,params,drawerOpen=false,exception='production',riskId='ORD-002',messageTab='records',feasibility=state.request||{category:'TOPS',qty:800,due:'2026-04-25',outside:true},pending=null;
+let route,params,drawerOpen=false,exception='production',riskId='ORD-002',riskUrlSeen=null,messageTab='records',feasibility=state.request||{category:'TOPS',qty:800,due:'2026-04-25',outside:true},pending=null;
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const find=id=>orders.find(o=>o.id===id);
