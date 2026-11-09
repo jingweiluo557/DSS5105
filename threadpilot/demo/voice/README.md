@@ -1,19 +1,20 @@
-# Voice-over clips
+# Voice-over clips (Sprint 3 video)
 
-Drop the recorded narration here and run the "Record the presentation video" workflow; the video adapts to the clips.
+Drop the recorded narration here and run the "Record the presentation video" workflow (Actions tab); the video adapts to
+the clips. Without clips the narration is burned in as captions, which is how the delivered video was made.
 
-| File | Slide | Voice | Target length |
+| File | Part | Voice | Target length |
 |---|---|---|---|
-| `cover.m4a` | 1 · Title | Liu Jing | 6 s |
-| `problem.m4a` | 2 · Objective: who it serves, the problem | Liu Jing | 28 s |
-| `roadmap.m4a` | 3 · Sprint 1 to-dos: owner and status | Kevin Royce Thomson | 24 s |
-| `architecture.m4a` | 4 · Architecture | Kevin Royce Thomson | 24 s |
-| `features.m4a` | 5 · Features: owner and status | Le Wenni (Wendy) | 30 s |
-| `validation.m4a` | 6 · Validation, then the demo | Le Wenni (Wendy) | 28 s |
-| `end.m4a` | 7 · Closing slide, after the demo (optional) | Liu Jing | 6 s |
-| `slides.m4a` | one take for all six slides instead, laid over them at the notes' timing (0:00–2:20) | | |
-| `demo.m4a` | optional narration over the demo (the subtitles stay burned in) | | |
+| `cover.m4a` | 1 · Title (before the demo) | Liu Jing | 6 s |
+| `objective.m4a` | 2 · Objective: users, problem, why it matters | Liu Jing | 24 s |
+| `demo.m4a` | the demo, one take over all of it, following the burned-in captions (timings in the Sprint 3 script) | Kevin Royce Thomson · Lin Anqi | 2:35 |
+| `evaluation.m4a` | 3 · Ground-truth results (after the demo) | Le Wenni | 36 s |
+| `failures.m4a` | 4 · What breaks it, what we fix next | Foo Toon Ming | 30 s |
+| `conclusion.m4a` | 5 · Achieved and learned | Luo Jingwei | 24 s |
 
-Each slide stays on screen for as long as its clip plus a 0.7 s pause, so the times in the notes are targets, not limits. The demo runs 2:22 and the closing slide 6 s, so keep the six slide clips to about 2:25 in total and the video stays under 5:00 (the workflow warns past 4:55).
+Each slide stays on screen for as long as its clip plus a 0.7 s pause. The demo is 2:35 and the slides 2:00 at their
+targets, so the total is 4:35; keep the five slide clips within about 20 s of their targets so the video stays under
+5:00 (the workflow warns past 4:55). With clips, set "burn slide captions" off in the workflow if you want clean slides.
 
-`.m4a`, `.mp3`, `.wav`, `.aac` or `.ogg` all work. A slide without a clip keeps its notes' timing, silent. Three voices: Liu Jing opens (slides 1–2) and closes (slide 7), Kevin takes slides 3–4, Wendy slides 5–6; each hand-off is written into the lines. Read them from the "Sprint 2 video script" doc (or each slide's speaker notes). Record with the phone's voice memo app or QuickTime, export, rename, commit, push.
+`.m4a`, `.mp3`, `.wav`, `.aac` or `.ogg` all work. Read the lines from the "Sprint 3 video script" doc (or each slide's
+speaker notes). Record with the phone's voice memo app or QuickTime, export, rename, commit, push.

@@ -1,0 +1,27 @@
+<section id="evaluation" data-transition="fade" style="background:#24476A;color:#F3F1EC;font-family:'IBM Plex Sans', Arial, sans-serif;padding:96px 128px 120px;display:flex;flex-direction:column;gap:30px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:58px;font-weight:600;line-height:1.1">Tested against ground truth: 70 held-out questions, run once</h2>
+<p style="font-size:25px;color:#C9D3DD;max-width:1640px">Written from the data files only, never seen by the code; every correct answer computed twice (Python and SQL, both agree). Graded by script against the gold, plus a listed audit of 10 verdicts. No fixes between writing and running.</p>
+<div style="display:grid;grid-template-columns:7fr 5fr;gap:44px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#1C2733;padding:30px 36px;border-radius:16px">
+<p style="font-size:22px;letter-spacing:3px;text-transform:uppercase;color:#9DB8D3;font-weight:600">Fully correct, by question type</p>
+<div style="display:grid;grid-template-columns:300px 1fr 120px;gap:9px 18px;align-items:center;font-size:26px">
+<span>Production &amp; normal range</span><span style="height:22px;background:#7FB89A;width:100%;border-radius:4px"></span><b>10/10</b>
+<span>Not in the records</span><span style="height:22px;background:#7FB89A;width:88%;border-radius:4px"></span><b>7/8</b>
+<span>Counts &amp; totals</span><span style="height:22px;background:#7FB89A;width:80%;border-radius:4px"></span><b>8/10</b>
+<span>Actions (chase, remind)</span><span style="height:22px;background:#7FB89A;width:75%;border-radius:4px"></span><b>6/8</b>
+<span>Order lookup</span><span style="height:22px;background:#9DB8D3;width:70%;border-radius:4px"></span><b>7/10</b>
+<span>Follow-ups (2–3 turns)</span><span style="height:22px;background:#E3C27A;width:50%;border-radius:4px"></span><b>4/8</b>
+<span>Rankings</span><span style="height:22px;background:#D98B7A;width:38%;border-radius:4px"></span><b>3/8</b>
+<span>Comparisons</span><span style="height:22px;background:#D98B7A;width:38%;border-radius:4px"></span><b>3/8</b>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="background:#F3F1EC;color:#1C2733;padding:22px 30px;border-radius:16px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:76px;font-weight:600;line-height:1">69%</p><p style="font-size:24px;color:#3A4A5C">48 of 70 fully correct (14 partial, 8 wrong), with the planner reading each question correctly</p></div>
+<div style="background:#1C2733;padding:20px 30px;border-radius:16px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1">21%</p><p style="font-size:24px;color:#C9D3DD">15 of 70 with no language model (keyword fallback)</p></div>
+<div style="background:#1C2733;padding:20px 30px;border-radius:16px"><p style="font-family:'Source Serif 4', Georgia, serif;font-size:60px;font-weight:600;line-height:1">0</p><p style="font-size:24px;color:#C9D3DD">emails sent without a confirmed preview, in 1,340 graded runs</p></div>
+</div>
+</div>
+<p style="font-size:23px;color:#C9D3DD">Also measured: the team’s two 300-turn sheets scored 53% and 38% on first contact (fixed since: those now test regressions, not accuracy) · live model, Sprint 2: 62% first pass · risk labels in simulated futures: “high” finished late 96% of the time, “low” 4%. These are measured with the planner’s reading correct; the live planner’s own error is not in these numbers.</p>
+<p style="position:absolute;left:128px;bottom:48px;font-size:22px;color:#B7C7D8">ThreadPilot · Group 19 · 3</p>
+<aside>0:00–0:36 · [Le Wenni] “We tested against ground truth: seventy new questions written from the data files only, every answer computed twice and checked, run once with no fixes. Sixty-nine percent fully correct. Production and normal-range questions: ten of ten. Not-in-the-records: seven of eight. But rankings and comparisons: three of eight each. Without the language model, twenty-one percent. In thirteen hundred graded runs, no email went out without a confirmed preview.”</aside>
+</section>

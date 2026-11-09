@@ -133,7 +133,20 @@ if (withDemo) {
 let srtOut = fs.existsSync(path.join(outDir, 'presentation.srt')) && withDemo ? fs.readFileSync(path.join(outDir, 'presentation.srt'), 'utf8').trim() : slidesSrt.trim();
 for (const [i, s] of closing.entries()) {
   const part = path.join(outDir, `closing_${i + 1}.mp4`);
-  const vf = `scale=${W}:${H},format=yuv420p,fps=30,setsar=1,fade=t=in:st=0:d=0.6`;
+  let vf = `scale=${W}:${H},format=yuv420p,fps=30,setsar=1,fade=t=in:st=0:d=0.6`;
+  if (burn && (s.narration || '').trim()) {
+    // the same 2-line caption cues as the opening slides, timed across this slide (no voice-over: the narration is read on screen)
+    const text = s.narration.replace(/^[“"]|[”"]$/g, '').trim();
+    const sentences = text.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g).map(x => x.trim()).filter(Boolean);
+    const chars = sentences.reduce((a, x) => a + x.length, 0) || 1;
+    let at = 0; const lines = [];
+    sentences.forEach((sent, j) => { const d = j === sentences.length - 1 ? s.seconds - at : s.seconds * (sent.length / chars); lines.push(`${j + 1}\n${srtTime(at)} --> ${srtTime(at + d)}\n${sent}\n`); at += d; });
+    const srtFile = path.join(outDir, `closing_${i + 1}.srt`);
+    fs.writeFileSync(srtFile, lines.join('\n'));
+    const k = 288 / H, fontPx = 34;
+    const style = `FontName=DejaVu Sans,FontSize=${Math.round(fontPx * k)},Bold=1,PrimaryColour=&H00F6F4EF,BackColour=&H66000000,BorderStyle=4,Outline=0,Shadow=0,Alignment=2,MarginV=${Math.round(28 * k)},MarginL=${Math.round(160 * 384 / W)},MarginR=${Math.round(160 * 384 / W)}`;
+    vf += `,subtitles='${srtFile.replace(/:/g, '\\:')}':force_style='${style}'`;
+  }
   const audio = s.clip ? ['-i', s.clip] : ['-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo'];
   run(['-loop', '1', '-t', String(s.seconds), '-i', s.file, ...audio, '-filter_complex', `[1:a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=${s.seconds},atrim=0:${s.seconds}[a]`,
        '-map', '0:v', '-map', '[a]', '-vf', vf, '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', '-c:a', 'aac', '-b:a', '160k', '-t', String(s.seconds), part]);

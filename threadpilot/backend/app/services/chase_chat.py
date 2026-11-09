@@ -45,6 +45,16 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
     if (not explicit and not customer and not slots.department and slots.action not in ('send', 'revise') and not slots.draft_number and not mode and not pronoun
             and re.search(r'\b(with|of|for|at|in|stuck|pending|phase|stage|overdue|overdued|late|largest|biggest|main|scar|beanie|vest|hood|cardigan|polo|sweater|crewneck|tops|accessor|idle|stalled)\w*', lower)):
         described = engine.describe_candidates(message, now)
+        # "The vest one" right after a candidate list narrows that list (ORD-120 of the three 1,500-piece tops orders), not
+        # every vest order on file: found while recording the Sprint 3 demo.
+        open_ids = list((state.pending_clarification.candidates if state.pending_clarification else []) or [])
+        if described and open_ids and described[1] and len(message.split()) <= 6 and not re.search(r'\ball\b|\bevery\b|largest|biggest|overdue|late\b', lower):
+            narrowed = [e for e in described[1] if e.record['order_id'] in open_ids]
+            if narrowed and len(narrowed) < len(described[1]):
+                product = narrowed[0].record['product'].lower()
+                named = product.split()[0] in lower
+                described = ((f"the {product} order among the {len(open_ids)} listed" if named else f"{narrowed[0].record['order_id']}, the one among the {len(open_ids)} listed")
+                             if len(narrowed) == 1 else f"{len(narrowed)} of the {len(open_ids)} listed", narrowed)
         if described and not described[0].startswith('reading '):
             label, matches = described
             found = [engine.candidate_call(matches, now, description=label)]
@@ -127,8 +137,12 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         fresh = True
     # A claim about idle time is checked against the record before any draft ("hasn't moved in a week" vs 2 days).
     claim = re.search(r"(?:hasn.t|has not|not) (?:moved|progressed|changed|had (?:any )?activity)[^.]*?(?:in|for) (?:over |more than |about |almost )?(a|an|\d+|one|two|three|four|five|six|seven) (week|weeks|day|days|fortnight)", lower)
+    # ... and the same for "stuck at washing since last week", "idle for 10 days", "no movement since last wk" (Sprint 3 demo: ORD-029 moved today)
+    stuck = None if claim else re.search(r"(?:stuck|idle|sitting|parked|stalled|no (?:movement|activity|progress|update)|not moving)[^.]*?(?:since|for) (?:the )?(?:(last) (week|wk|fortnight)|(a|an|\d+|one|two|three|four|five|six|seven|ten) (weeks?|wks?|days?|d\b|fortnight))", lower)
+    if stuck:
+        claim = (stuck[0], stuck[1] or stuck[3], (stuck[2] or stuck[4]).replace('wks', 'weeks').replace('wk', 'week').replace('d', 'days') if (stuck[2] or stuck[4]) in ('wk', 'wks', 'd') else (stuck[2] or stuck[4]))
     if claim and len(explicit) == 1 and slots.action not in ('send', 'revise') and not prior.get('premise_checked') == explicit[0]:
-        words = {'a': 1, 'an': 1, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7}
+        words = {'a': 1, 'an': 1, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'ten': 10, 'last': 1}
         n = int(claim[1]) if claim[1].isdigit() else words[claim[1]]
         claimed = n * (7 if claim[2].startswith('week') else 14 if claim[2] == 'fortnight' else 1)
         record = engine.tools.refresh_order(explicit[0]).record
@@ -137,7 +151,8 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         if claimed - idle >= 2:
             due = _date.fromisoformat(record['due_date'])
             to_due = (due - now.date()).days
-            text = (f"{explicit[0]} was last active {record['last_activity_date']}, {idle} day{'s' if idle != 1 else ''} ago, not {claim[1]} {claim[2]}. "
+            when = 'today' if idle == 0 else f"{idle} day{'s' if idle != 1 else ''} ago"
+            text = (f"{explicit[0]} was last active {record['last_activity_date']}, {when}, not {'since ' if claim[1] == 'last' else ''}{claim[1]} {claim[2]}. "
                     f"It is {record['customer']}, {record['pieces']} {record['product']}, at {record['current_stage'].lower()}, " +
                     (f"due in {to_due} days" if to_due > 0 else 'due today' if to_due == 0 else f"{-to_due} days overdue") +
                     ", so it is not stalled by the 5-day rule. Do you still want me to draft the chase-up?")
