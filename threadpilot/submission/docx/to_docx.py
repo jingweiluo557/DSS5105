@@ -12,6 +12,11 @@ def prep(html):
     for svg in soup.find_all('svg'):
         img = soup.new_tag('img', src=str(SUB / 'docx/arch.png'), alt='Figure 1. ThreadPilot architecture', style='width:16cm')
         svg.replace_with(img)
+    # relative image paths -> absolute, so pandoc finds them from any working directory
+    for img in soup.find_all('img'):
+        src = img.get('src') or ''
+        if src and not src.startswith(('/', 'http', 'data:')): img['src'] = str(SUB / src)
+        img['style'] = 'width:16cm'
     # KPI tiles -> a two-column table
     for box in soup.select('div.kpis'):
         tbl = soup.new_tag('table'); tr = soup.new_tag('tr'); tbl.append(tr)

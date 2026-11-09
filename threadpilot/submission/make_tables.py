@@ -61,3 +61,21 @@ def qlist(path, title):
 
 frag, n = qlist('evaluation/heldout_questions.json', 'held-out'); (OUT / 'heldout.html').write_text(frag, encoding='utf-8'); print('heldout:', n)
 frag, n = qlist('evaluation/bait_questions.json', 'bait'); (OUT / 'bait.html').write_text(frag, encoding='utf-8'); print('bait:', n)
+
+# Appendix D: the 70 held-out questions (Sprint 3) with the gold answer and the verdict of the single audited run
+def heldout70():
+    items = json.loads((ROOT / 'evaluation/heldout/heldout.json').read_text(encoding='utf-8'))
+    res = {r['id']: r for r in json.loads((ROOT / 'evaluation/heldout/results/heldout_ideal.json').read_text(encoding='utf-8'))}
+    cat = {'lookup': 'Order lookup', 'aggregation': 'Counts & totals', 'production': 'Production & normal range', 'ranking': 'Rankings',
+           'comparison': 'Comparisons', 'actions': 'Actions', 'not_on_file': 'Not in the records', 'multiturn': 'Follow-ups'}
+    h = ['<table><thead><tr><th>#</th><th>Type</th><th>Question (turns separated by →)</th><th>Gold answer (computed twice)</th><th>Verdict</th></tr></thead><tbody>']
+    n = Counter()
+    for x in items:
+        r = res[x['id']]; v = r['verdict']; n[v] += 1
+        h.append(f"<tr><td>{x['id']}</td><td>{cat.get(x['category'], x['category'])}</td><td>{html.escape(' → '.join(x['turns']))}</td>"
+                 f"<td class=\"small\">{html.escape(x['gold']['answer_text'])}</td><td class=\"n\">{v}</td></tr>")
+    h.append('</tbody></table>')
+    return '\n'.join(h), n
+
+from collections import Counter
+frag, n = heldout70(); (OUT / 'heldout70.html').write_text(frag, encoding='utf-8'); print('heldout70:', dict(n))

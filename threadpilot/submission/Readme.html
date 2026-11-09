@@ -60,7 +60,7 @@ cd ../evaluation
 ../backend/.venv/bin/python run_annotated_eval.py --out /tmp/t.json      # the 88 questions through the server, planner annotated
 ../backend/.venv/bin/python score.py --eval eval_set.json --transcript /tmp/t.json --out /tmp/r.json --report /tmp/REPORT.md --strict
 # live, against a running backend with a model key (writes a dated transcript; never overwrite a first pass):
-THREADPILOT_URL=http://127.0.0.1:8000 THREADPILOT_ACCESS_KEY=… ../backend/.venv/bin/python run_live_eval.py --out transcript_live_$(date +%Y%m%d).json
+THREADPILOT_TOKEN=… ../backend/.venv/bin/python run_live_eval.py --base http://127.0.0.1:8000 --eval eval_set.json --out transcript_live_$(date +%Y%m%d).json
 
 # held-out ground truth (70 questions written from the data files only; Sprint 3)
 cd heldout

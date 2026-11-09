@@ -26,6 +26,7 @@ table.tools th:nth-child(1){width:2%} table.tools th:nth-child(2){width:11%} tab
 <table><tr><th>Document</th><th>Where the raw material is</th></tr>
 <tr><td>Question set, gold answers, scorer, runners</td><td><code>threadpilot/evaluation/</code> (<code>eval_set.json</code>, <code>build_eval_set.py</code>, <code>score.py</code>, <code>run_live_eval.py</code>, <code>run_annotated_eval.py</code>)</td></tr>
 <tr><td>Transcripts and reports of every run</td><td><code>transcript_live_20261024.json</code>, <code>REPORT_live_20261024.md</code>, <code>FAILURE_ANALYSIS.md</code>, <code>results/</code>, <code>REPORT_annotated.md</code></td></tr>
+<tr><td>Held-out ground truth (Sprint 3)</td><td><code>threadpilot/evaluation/heldout/</code> (<code>heldout.json</code>, <code>gold/build.py</code>, <code>compute_a.py</code>, <code>compute_b.py</code>, <code>run_heldout.py</code> with the audit, <code>results/</code>; reproduced in Appendix D)</td></tr>
 <tr><td>Tool specification</td><td><code>threadpilot/docs/TOOL_SPECIFICATION.md</code> v2.3 (reproduced in Appendix A)</td></tr>
 <tr><td>Studies behind the judgement rules</td><td><code>threadpilot/analysis/</code> (alert-rule trade-off, risk calibration, baseline window), <code>docs/BASELINE_WINDOW.md</code>, <code>docs/calibration.md</code></td></tr></table>
 <p class="meta">Business date for every run: 1 April 2026, 12:00 (+08:00). Data: the Track 1 files as provided (120 orders, 360 production rows, 8 workshops). Model in the live runs: <code>gpt-6-luna</code> through the OpenAI-compatible endpoint configured on the deployed site.</p></div>
@@ -113,7 +114,7 @@ table.tools th:nth-child(1){width:2%} table.tools th:nth-child(2){width:11%} tab
 
 <h3>4.3 Development set versus held-out</h3>
 <div class="callout"><p><b>Used for development:</b> the 36 Sprint 1 questions, the 47 Sprint 2 questions and the 32 sheet-1 questions. All scores on them after their first pass are regression checks and are labelled "tuned" above.</p>
-<p><b>Held out, October:</b> the 21 differently worded questions (Appendix C), written after the Sprint 1 fixes and run once: 18/21 (86%), rule-based chat. They too became development material afterwards (21/21 tuned).</p>
+<p><b>Held out, October:</b> the 21 differently worded questions (Appendix C.1), written after the Sprint 1 fixes and run once: 18/21 (86%), rule-based chat. They too became development material afterwards (21/21 tuned).</p>
 <p><b>Held out, November (the Sprint 3 ground truth):</b> 70 questions written by an author who read only the three data files (never the code, the earlier question sets or the demo), the way a manager types them: "ord 62 due when?", "#81 what stage", "is 83 or 2 more overdue". Every gold answer was computed twice by independent code (plain Python over the CSVs, and SQL over SQLite), and the build refuses to write the set unless both agree; it reproduces byte for byte from the repository. Feasibility questions were left out because their correct answer needs our own simulation. The set was run once with no fixes in between, with a correct planner reading supplied, so it measures the server: routing, tools, answers. A script graded every answer; we then audited 10 verdicts by hand and list each change with its reason in <code>run_heldout.py</code>: 7 automatic passes were too generous (one matched a stray "5" in a generic summary), 2 misses were correct wording the phrase list lacked. Result: <b>48/70 (69%; Wilson 95% interval 57–78%)</b>, 14 partial, 8 wrong; 15/70 with no model. Section 5.2 analyses every miss.</p>
 <p><b>Still not measured:</b> the live model on these 70. The 69% is a ceiling for the full system, because the planner's own misreadings are not in it; our last live measurement of the planner was 62% first pass in Sprint 2. The runner (<code>run_live_heldout.py</code>) applies the same grader to the deployed model.</p></div>
 
@@ -311,6 +312,7 @@ table.tools th:nth-child(1){width:2%} table.tools th:nth-child(2){width:11%} tab
 <li><b>Briefing faithfulness.</b> The briefing's number check and audit pass are automatic; a human read of 20 briefings against their fact packets, scored for unsupported claims, would validate the auditor.</li>
 <li><b>Time and cost.</b> Answer latency per question class and model tokens per question were logged but not analysed; a manager on the floor cares about the first.</li></ol>
 
+<div class="landscape">
 <h2 class="pb">Appendix A — Tool specification (32 tools)</h2>
 <p class="small muted">Reproduced from <code>docs/TOOL_SPECIFICATION.md</code> v2.3 (30 Oct 2026). Every tool is deterministic Python over the current snapshot; the model picks tools and words answers, it never computes. Business date = the shared business clock.</p>
 <!--TOOLS-->
@@ -319,9 +321,13 @@ table.tools th:nth-child(1){width:2%} table.tools th:nth-child(2){width:11%} tab
 <p class="small muted">Reproduced from <code>evaluation/EVALUATION.md</code> (version 2026-10-26b). The last column is the 24 Oct live first pass; questions added after that run are marked "not in that run". Gold answers are recomputed from the CSVs by <code>build_eval_set.py</code> on every push.</p>
 <!--EVALSET-->
 
-<h2 class="pb">Appendix C — Held-out and hallucination-bait questions</h2>
+<h2 class="pb">Appendix C — October held-out and hallucination-bait questions</h2>
 <h3>C.1 Held-out set (21 questions, written after the first fixes; 18/21 on first run)</h3>
 <!--HELDOUT-->
 <h3>C.2 Hallucination-bait set (16 questions, written 11 Oct before the system was run on any of them; 10/16 on first run)</h3>
 <!--BAIT-->
+<h2 class="pb">Appendix D — The Sprint 3 held-out ground truth (70 questions, run once)</h2>
+<p class="small">Reproduced from <code>evaluation/heldout/heldout.json</code> and <code>results/heldout_ideal.json</code>. Written from the data files only by an author who never saw the code; every gold answer computed twice by independent code (Python and SQL), which must agree. Verdicts are from the single run with the planner's reading supplied, after the 10-verdict audit listed in <code>run_heldout.py</code>: 48 PASS, 14 PARTIAL, 8 FAIL. Section 5.2 analyses every PARTIAL and FAIL.</p>
+<!--HELDOUT70-->
+</div>
 </body></html>

@@ -39,8 +39,14 @@ figure{margin:8pt 0 12pt;break-inside:avoid}
 figure svg{width:100%;height:auto;display:block}
 figcaption{font-size:8.8pt;color:var(--muted);margin-top:4pt}
 .pb{break-before:page}
+@page land{size:A4 landscape;margin:16mm 17mm 18mm 17mm}
+.landscape{page:land}
+.landscape table{font-size:8.2pt}
+.landscape td,.landscape th{padding:3px 5px}
 .ok{color:var(--teal);font-weight:600}.bad{color:var(--red);font-weight:600}.part{color:var(--amber);font-weight:600}
 a{color:var(--accent);text-decoration:none}
 .refs li{margin-bottom:4pt;font-size:9.4pt}
 .sig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10pt;margin-top:14pt}
 .sig div{border-top:.8pt solid var(--ink);padding-top:4pt;font-size:9pt;color:var(--muted)}
+
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:8pt 12pt}.shots figure{margin:0;break-inside:avoid}.shots img{width:100%;height:auto;display:block;border:1px solid #d7dde3;border-radius:4px}
