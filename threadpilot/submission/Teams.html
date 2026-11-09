@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Teams — ThreadPilot (Group 19)</title><link rel="stylesheet" href="style.css"></head><body>
+
+<div class="eyebrow">DSS5105 · Track 1 · Group 19 · Final submission · Teams</div>
+<h1>Team roles and contributions</h1>
+<p class="meta">Six members, one product, three sprints (September – November 2026). Roles below are the ones each member owned on the sprint roadmaps and in the repository history; every member also wrote blind test questions, reviewed others' work and presented.</p>
+
+<h2>1. Members and contribution shares</h2>
+<table><tr><th>Member</th><th>Student ID</th><th>Primary role</th><th class="n">Share</th></tr>
+<tr><td>Luo Jingwei</td><td>A0356402L</td><td>Backend and cloud lead: conversation engine, queue simulation, Tencent CloudBase deployment, MySQL, Outlook integration, release management</td><td class="n">16.7%</td></tr>
+<tr><td>Le Wenni (Wendy)</td><td>A0297530Y</td><td>Lead data scientist: evaluation design and scoring, feasibility method (queue + lead-time model), calibration and baseline studies, Sprint 3 features, home-screen review</td><td class="n">16.7%</td></tr>
+<tr><td>Foo Toon Ming (Matthew)</td><td>A0333225N</td><td>Morning briefing on the cloud, alert email pipeline, dashboard data, video and slides production</td><td class="n">16.7%</td></tr>
+<tr><td>Kevin Royce Thomson</td><td>A0333470L</td><td>Actions (chase-up drafts, notes, reminders, confirmation gate), blind question set, voice chatbot, Sprint 2 presenter</td><td class="n">16.7%</td></tr>
+<tr><td>Lin Anqi</td><td>A0333635E</td><td>Home screen and interface design, video and slides, voice chatbot, user testing</td><td class="n">16.7%</td></tr>
+<tr><td>Liu Jing</td><td>A0355756N</td><td>Blind question set and live second-pass evaluation, problem framing, Sprint 2 presenter, Q&amp;A preparation</td><td class="n">16.7%</td></tr></table>
+<div class="callout"><b>Note on the shares.</b> Shown as an equal split: every member carried a feature end to end, wrote blind questions, and took part in the reviews and presentations. [TEAM: confirm or adjust these percentages together before submission, and check your own paragraph in section 2; this draft was compiled from the sprint roadmaps and the repository history.]</div>
+
+<h2>2. Specific tasks completed, by member</h2>
+<h3>Luo Jingwei</h3>
+<ul><li>Built the FastAPI backend, the intent workflow (<code>workflow_engine.py</code>), the typed tools and the SSE streaming contract; the shared queue simulation used for risk, expedite and feasibility.</li>
+<li>Deployed to Tencent CloudBase (HTTP cloud function, static hosting, minute timer), provisioned MySQL, wrote the Alembic migrations (0001–0010) and the release runbooks; moved the alert ledger to MySQL with a named lock (28 Oct release).</li>
+<li>Connected the manager's Outlook (OAuth, encrypted token store), the briefing and alert delivery, and the Activity Log.</li></ul>
+<h3>Le Wenni (Wendy)</h3>
+<ul><li>Designed the evaluation: 88 questions with answers computed from the CSVs by code, the automatic scorer with the untraced-number check, the first-pass rule, the live and offline runners; wrote the failure analysis of the 24 Oct live run and drove the Sprint 2 fixes.</li>
+<li>One feasibility method: the queue simulation with the new order inserted plus the log-normal lead-time model (AUC 0.90); the risk-label calibration study (high 96% late, low 4%) and the widened feasibility ranges.</li>
+<li>Sprint 3: multi-order conversation memory, live tool-call display, the automatic excursion alert (3.5 SD) and its false-alarm study, the eight-same-weekday baseline study, voice input, the "i" explanations on every chart, the Sprint 2 video pipeline and the final submission documents.</li></ul>
+<h3>Foo Toon Ming (Matthew)</h3>
+<ul><li>The morning briefing: fact packet, model writing with the number check and the audit pass, the briefing page and its evidence; made it run on the cloud schedule.</li>
+<li>The alert email pipeline and the 07:00 / 14:00 digests; the dashboard data service; the rule-based demo used as the Sprint 1 fallback.</li>
+<li>Co-produced the Sprint 2 video and slides; the demo recording on the live site.</li></ul>
+<h3>Kevin Royce Thomson</h3>
+<ul><li>Actions with a safety catch: chase-up drafts, previews, the exact-phrase confirmation with a 15-minute single-use key, internal notes, conditional reminders evaluated by the server.</li>
+<li>Wrote and ran blind questions against the live system (the 26 Oct question sheet), including the action edge cases that became regression tests.</li>
+<li>Voice chatbot design for Sprint 3; presented the roadmap and architecture in the Sprint 2 video.</li></ul>
+<h3>Lin Anqi</h3>
+<ul><li>The home screen redesign after the CEO interface review: status line, decide-today cards, order health bar, production pulse; the phone layout.</li>
+<li>Slides and video production for Sprints 1–2; user testing of the chat and the feasibility page; the voice chatbot interaction design.</li></ul>
+<h3>Liu Jing</h3>
+<ul><li>The problem statement and the business case; the blind question set (10 questions per member, 70% target) and the live second-pass protocol.</li>
+<li>Presented the objective and problem in the Sprint 2 video; prepared the Q&amp;A answers; reviewed the evaluation report for honesty of claims.</li></ul>
+
+<h2>3. How we worked together</h2>
+<p><b>Cadence.</b> A weekly sync after the lecture, a mid-week check-in on the shared chat, and a sprint review before each deadline where every member ran the product themselves before anyone presented it. Decisions were written down in the repository (<code>docs/SPRINT2_CHANGES.md</code>, <code>docs/SPRINT3_CHANGES.md</code>) so a member who missed a meeting could read why something was done.</p>
+<p><b>Ownership.</b> Each feature had one owner and one reviewer. The owner wrote the regression tests for the feature; the reviewer wrote blind questions against it without seeing the implementation. The 26 Oct question sheet (59 questions written by all six, 24 wrong and 17 partial on the live build) is the clearest example: it was uncomfortable, it was reported as measured, and it produced seven fixes and 32 new evaluation scenarios.</p>
+<p><b>Division between people and the model.</b> Early on, members spent time hand-checking the model's arithmetic. The team moved to the principle "the model routes, code computes": humans write the tools and the tests, the model only reads questions and words answers. That changed what each member did day to day, from checking answers to designing checks.</p>
+<p><b>Tools.</b> GitHub with pull requests and CI on every push (tests plus the offline evaluation), a shared Claude project for notes and reviews, Tencent CloudBase for the shared deployment, and a shared question sheet for blind testing. Pair sessions were used for the hard pieces (the queue simulation, the Outlook OAuth flow, the live evaluation run).</p>
+<p><b>What we would change.</b> Start the evaluation set in week one rather than week six; it changed our design more than any other artefact. And deploy to the cloud earlier: several problems (CORS, the business clock, the MySQL ledger) only appeared once the system ran outside a laptop.</p>
+
+<div class="sig"><div>Luo Jingwei</div><div>Le Wenni</div><div>Foo Toon Ming</div><div>Kevin Royce Thomson</div><div>Lin Anqi</div><div>Liu Jing</div></div>
+</body></html>
