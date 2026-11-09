@@ -10,6 +10,9 @@ async function scheduleRequest(path,options={}){
 function expediteEntry(id){return btn('expedite-preview','Analyze expedite impact','primary',`data-id="${esc(id)}"`)}
 riskPage=function(){
  const rows=[...(window.QUEUE_DATA?.orders||[])].sort((a,b)=>queueRank[a.risk.level]-queueRank[b.risk.level]||a.due_date.localeCompare(b.due_date));
+ // "Review options" on a home decision card links to #/risk?id=ORD-029: open that order once; later row clicks still win
+ const urlId=new URLSearchParams(location.hash.split('?')[1]||'').get('id');
+ if(urlId&&urlId!==riskUrlSeen){riskUrlSeen=urlId;if(rows.some(x=>x.order_id===urlId))riskId=urlId}
  const o=rows.find(x=>x.order_id===riskId)||rows[0];
  if(!o)return head('Queue risk','No in-progress orders.');
  riskId=o.order_id;

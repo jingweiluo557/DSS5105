@@ -80,8 +80,18 @@ def detect(data: dict, now: datetime) -> list[Alert]:
                 below.append({'date': r['date'], 'output': int(r['pieces_completed']), 'same_weekday_min': min(base), 'mean': round(mean(base), 1)})
         if len(below) == SUSTAINED_DROP_DAYS:
             gap = round(100 * (1 - mean(b['output'] / b['mean'] for b in below)))
+            # the whole streak, counted back from the latest working day (the home screen counts the same way), so the alert
+            # and the home card never give two different lengths for one drop
+            streak, since = 0, None
+            for r in reversed([r for r in rows if date.fromisoformat(r['date']) < today and is_working(date.fromisoformat(r['date']))]):
+                d = date.fromisoformat(r['date'])
+                base = [int(x['pieces_completed']) for x in rows if date.fromisoformat(x['date']) < d and date.fromisoformat(x['date']).weekday() == d.weekday()][-8:]
+                if len(base) >= 3 and int(r['pieces_completed']) < min(base):
+                    streak, since = streak + 1, r['date']
+                else:
+                    break
             out.append(Alert(key=f'stage_drop:{stage}', kind='stage_drop', tier=P1, score=min(100, 60 + gap), entity=stage,
-                             title=f'{stage.title()} has been below its normal range for {SUSTAINED_DROP_DAYS} working days ({gap}% under)',
+                             title=f'{stage.title()} has been below its normal range for {streak} working days, since {since} ({gap}% under over the last {SUSTAINED_DROP_DAYS})',
                              detail='; '.join(f"{b['date']}: {b['output']} vs min {b['same_weekday_min']} (mean {b['mean']})" for b in below),
                              action='Ask the floor what changed; check which near-due orders sit at or after this stage.',
                              evidence=below, rule=f'{SUSTAINED_DROP_DAYS} consecutive working days below the previous-8-same-weekday minimum'))

@@ -31,7 +31,7 @@
    "waitFor": {"css": "…"} | {"text": "…"}            wait for an element (timeout 120 s)
    "hold": 2                       pause that many seconds
    "optional": true                a failing step is logged and skipped instead of stopping the run
- --badge "text"  shows a small fixed label at the top of the page for the whole recording (e.g. "Offline replay").
+ --badge "text"  shows a small fixed label in the bottom-left corner (over the sidebar footer) for the whole recording (e.g. "Offline replay").
  A step runs no earlier than its "at"; if an earlier step overran (the model was slow), every later step shifts by the
  same amount, so the spacing you planned is kept and the .srt still matches the video.
 */
@@ -72,8 +72,9 @@ const OVERLAY = `
     #__demo-wait{position:fixed;right:14px;top:var(--demo-wait-top, 14px);bottom:var(--demo-wait-bottom, auto);z-index:2147483644;pointer-events:none;background:rgba(224,122,95,.95);
       color:#fff;font:600 13px/1 'IBM Plex Sans','Segoe UI',Arial,sans-serif;padding:8px 12px;border-radius:999px;opacity:0;transition:opacity .2s}
     #__demo-wait.on{opacity:1}
-    #__demo-badge{position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:2147483643;pointer-events:none;
-      background:rgba(28,39,51,.88);color:#F3F1EC;font:600 14px/1 'IBM Plex Sans','Segoe UI',Arial,sans-serif;padding:9px 16px;border-radius:999px;letter-spacing:.2px}
+    #__demo-badge{position:fixed;left:14px;bottom:14px;max-width:200px;z-index:2147483643;pointer-events:none;
+      font:600 11px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;color:#F3F1EC;background:rgba(28,39,51,.88);
+      padding:7px 10px;border-radius:8px;letter-spacing:.1px}
   \`;
   const style = document.createElement('style'); style.textContent = css;
   const cursor = document.createElement('div'); cursor.id = '__demo-cursor';

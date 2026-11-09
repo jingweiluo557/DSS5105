@@ -30,9 +30,12 @@ lacked ("No customer named Patagonia…"), 1 reason corrected. `results/heldout_
 | Follow-ups (2–3 turns) | 4/8 | 0/8 |
 | Rankings | 3/8 | 0/8 |
 | Comparisons | 3/8 | 4/8 |
-| **Total** | **48/70 (69%)**, 14 partial, 8 wrong | **15/70 (21%)** |
+| **Total** | **48/70 (69%)**, 14 partial, 8 wrong; 95% Wilson interval 57–78% | **15/70 (21%)** |
 
 No email was sent in any run (every chase stops at a preview; the fallback never drafts at all).
+
+With 8–10 items per category, a difference of one or two questions between categories is within noise; read the
+category rows as indicative and the total as the result.
 
 ## What breaks it (the 22 non-PASS items, ideal reading)
 
@@ -47,4 +50,11 @@ No email was sent in any run (every chase stops at a preview; the fallback never
 1. One sort-and-filter tool over any order field (order date, due date, idle days, pieces; stage/customer filter; ascending or descending; "after today"), with totals — 9.
 2. Read "#81", "83 or 2", bare zero-padded numbers as order IDs when the number is on file — 7.
 3. A one-line verdict under every comparison table — 3.
-4. Run these 70 on the live model (`../q100/run_live_q100.py` pattern) to measure the planner itself, which this run does not.
+4. Run these 70 on the live model to measure the planner itself, which this run does not:
+
+   ```
+   THREADPILOT_TOKEN=<workspace access key> python run_live_heldout.py --base https://<backend>
+   ```
+
+   The key is read from the environment only (never commit it). Same grader as `run_heldout.py`; nothing is sent
+   (chase-ups stop at the preview). Writes `results/heldout_live.json`; audit the non-PASS rows by hand before reporting.
