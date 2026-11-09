@@ -11,7 +11,8 @@ from pathlib import Path
 from urllib import request, error
 
 HERE = Path(__file__).resolve().parent
-Q = json.loads((HERE / 'questions.json').read_text(encoding='utf-8'))
+SET = os.environ.get('Q100_SET', 'q100')   # similar = the 'Similar Questions' tab (grade with grade_similar.py)
+Q = json.loads((HERE / ('questions.json' if SET == 'q100' else f'{SET}_questions.json')).read_text(encoding='utf-8'))
 
 
 def post(base, token, body, timeout=120):
@@ -30,7 +31,7 @@ def main():
     ap.add_argument('--base', required=True)
     ap.add_argument('--ctx', default='1,2,3')
     ap.add_argument('--sleep', type=float, default=1.0)
-    ap.add_argument('--out', default=str(HERE / 'answers_live.json'))
+    ap.add_argument('--out', default=str(HERE / ('answers_live.json' if SET == 'q100' else f'answers_{SET}_live.json')))
     args = ap.parse_args()
     token = os.environ.get('THREADPILOT_TOKEN')
     if not token:
@@ -66,7 +67,7 @@ def main():
                 print(f"{q['no']}.{ctx} {msg[:50]!r} -> {str(data.get('answer',''))[:70]!r}")
                 time.sleep(args.sleep)
         Path(args.out).write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding='utf-8')
-    print(f'{len(out)} answers -> {args.out}; now: python grade.py {args.out}')
+    print(f'{len(out)} answers -> {args.out}; now: python ' + ('grade.py' if SET == 'q100' else 'grade_similar.py') + f' {args.out}')
 
 
 if __name__ == '__main__':

@@ -336,6 +336,11 @@ class WorkflowEngine:
             return self.ask('Please prepare one action at a time for preview and confirmation. You can combine other queries.',
                 state, plan.tasks[0].classification, now, [], [])
         if all(t.classification.intent == Intent.EXECUTION_CHASE for t in expanded):
+            grounded = self.grounding_check(request.message, expanded[0].classification.slots, Intent.EXECUTION_CHASE, expanded[0].classification, state, now, [], [],
+                                            list(dict.fromkeys(re.findall(r'\bORD-\d{3}\b', request.message.upper()))))
+            if grounded is not None:
+                if emit: await emit(grounded.answer)
+                return grounded
             if state.comparison_orders and not human_ids and not expanded[0].classification.slots.draft_number and not self.describe_candidates(request.message, now):
                 response = self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, expanded[0].classification, now, [], [], state.comparison_orders)
                 if emit: await emit(response.answer)
@@ -352,7 +357,8 @@ class WorkflowEngine:
                 response = ChatResponse(answer='The model is unavailable. Please try your general question again later.', intent=Intent.GENERAL,
                     slots=Slots(), confidence=result.confidence, state=state, business_date=now.date().isoformat())
             elif result.intent in (Intent.ORDER_SUMMARY, Intent.RISK_OVERVIEW):
-                response = summary_response(self, result, state, now, request.message)
+                response = self.grounding_check(request.message, result.slots, result.intent, result, state, now, [], [], list(dict.fromkeys(re.findall(r'\bORD-\d{3}\b', request.message.upper())))) \
+                    or summary_response(self, result, state, now, request.message)
             else:
                 if state.last_intent:
                     state.topics[state.last_intent.value] = {
@@ -490,7 +496,7 @@ class WorkflowEngine:
                 and not re.search(r'\b(this order|that order|this one|that one|\bit\b|the first|the second|the other)\b|\bthe order\b(?! (with|of|for|that|which|from))', message.casefold())
                 and not slots.department
                 and re.search(r'\b(with|of|for|at|in|stuck|pending|phase|stage|overdue|overdued|late|largest|biggest|main|scar|beanie|vest|hood|cardigan|polo|sweater|crewneck|tops|accessor)\w*', message.casefold())):
-            described = self.describe_candidates(message, now)
+            described = None if (self.foreign_stage(message) or self.foreign_order_numbers(message, explicit_ids)) else self.describe_candidates(message, now)
             open_ids = set((previous_clarification.candidates if previous_clarification else []) or []) | set(state.comparison_orders)
             reply_like = len(message.split()) <= 6 or re.match(r'^\W*(the|that|this)\b', message.casefold())
             if described and open_ids and reply_like and described[1] and {e.record['order_id'] for e in described[1]} & open_ids:
@@ -536,12 +542,18 @@ class WorkflowEngine:
             state.pending_clarification = None
             calls.append(ToolCall(name='explain_no_data', arguments={'reason': 'hypothetical'}, result={'declined': False, 'reason': 'hypothetical orders; rule stated'}, executed=False))
             return self.response(state, result, now, policy, calls, evidence)
+        # Grounding: an order, product, stage, customer or workshop that is not in the records is an answer in itself
+        # (what is on file instead), never a guess, a stale candidate list or a crash.
+        grounded = self.grounding_check(message, slots, intent, result, state, now, calls, evidence, explicit_ids)
+        if grounded is not None:
+            return grounded
         if state.comparison_orders and not explicit_ids and not narrowed and intent not in entity_free:
             if mentions_order_reference(message) or slots.reference in ('active', 'ambiguous'):
                 return self.ask('Which order do you mean: ' + ', '.join(state.comparison_orders) + '?', state, result, now, calls, evidence)
             state.comparison_orders = []   # the new question does not point at the compared orders at all
         if result.confidence < 0.65 or intent == Intent.UNKNOWN:
-            if re.fullmatch(r'\W*(ok|okay|k|yep|yes|yeah|sure|fine|sounds good|great|thanks|thank you|noted|got it|alright|cool)\W*', message.casefold()):
+            if re.fullmatch(r'\W*(ok|okay|k|yep|yes|yeah|sure|fine|sounds good|great|thanks|thank you|noted|got it|alright|cool)\W*', message.casefold()) \
+                    or re.search(r'\b(draft|message|email|mail)\b.*\b(looks? (fine|good|ok|okay)|sounds? (good|fine|right)|is fine)\b|^\W*(okay|ok|yep|yes)\b.*\b(draft|message|email)\b', message.casefold()):
                 unsent = [d for d in state.chase_drafts if not d.get('sent')]
                 if unsent:
                     d = unsent[-1]
@@ -720,6 +732,30 @@ class WorkflowEngine:
                     text = f'Orders due on {day}: ' + '; '.join(f"{e.record['order_id']} ({e.record['customer']}, {e.record['pieces']} {e.record['product']}) {e.record['status']} at {e.record['current_stage']}" for e in due_rows) + '.' + (' None is still in progress.' if not active else '')
                 state.last_order_ids = [e.record['order_id'] for e in due_rows]
                 return self.response(state, result, now, text, calls, evidence)
+            MON = r'(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*'
+            DAYX = r'(?:\d{1,2}(?:st|nd|rd|th)?(?:\s+' + MON + r')?|' + MON + r'\s+\d{1,2}(?:st|nd|rd|th)?|\d{4}-\d{2}-\d{2})'
+            span = re.search(r'\b(?:between|from|due)\s+(' + DAYX + r')\s+(?:and|to|-|–|until|till)\s+(' + DAYX + r')\b', lowered)
+            if span:
+                def _day(t):
+                    try: return parse_day(t, now)
+                    except Exception: return None
+                a, b = _day(span.group(1)), _day(span.group(2))
+                if b and not a and re.fullmatch(r'\d{1,2}(st|nd|rd|th)?', span.group(1).strip()):
+                    a = b.replace(day=int(re.sub(r'\D', '', span.group(1))))      # "from 1 to 11 June"
+                if a and not b and re.fullmatch(r'\d{1,2}(st|nd|rd|th)?', span.group(2).strip()):
+                    b = a.replace(day=int(re.sub(r'\D', '', span.group(2))))      # "June 1 to 11"
+                if a and b and b >= a:
+                    due_rows = sorted([e for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS' and a.isoformat() <= e.record['due_date'] <= b.isoformat()], key=lambda e: e.record['due_date'])
+                    calls.append(ToolCall(name='search_orders', arguments={'due_from': a.isoformat(), 'due_to': b.isoformat(), 'status': 'IN_PROGRESS'}, result={'candidates': [e.record for e in due_rows]}))
+                    if not due_rows:
+                        latest_due = max(e.record['due_date'] for e in self.tools.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS')
+                        text = f"No active orders are due between {a.isoformat()} and {b.isoformat()}: the latest due date among active orders is {latest_due} (business date {now.date().isoformat()}). Nothing in that window can slip yet; ask about the coming week for today's risks."
+                        return self.response(state, result, now, text, calls, evidence)
+                    evidence.extend(due_rows)
+                    risks = {e.record['order_id']: self.tools.assess_risk(e, now) for e in due_rows}
+                    lines = [f"{e.record['order_id']} ({e.record['customer']}, {e.record['pieces']} {e.record['product']}, {e.record['current_stage'].lower()}, due {e.record['due_date']}): {risks[e.record['order_id']]['risk_level']}" for e in due_rows]
+                    state.last_order_ids = [e.record['order_id'] for e in due_rows]
+                    return self.response(state, result, now, f"Active orders due {a.isoformat()} to {b.isoformat()}, with the queue's risk level:\n" + '\n'.join(lines), calls, evidence)
             if slots.window_days is None:
                 if re.search(r'this week|next (seven|7) days|7 days', lowered):
                     slots.window_days = 7
@@ -813,6 +849,8 @@ class WorkflowEngine:
                 return self.ask('What product, quantity and explicit due date should I estimate?', state, result, now, calls, evidence)
             if resolve_date(slots.due_date, now) <= now.date():
                 return self.ask('That date is not in the future. What new delivery date should I assess?', state, result, now, calls, evidence)
+            if slots.product and self.foreign_product('', Slots(product=slots.product)):
+                assumed_point = ((assumed_point + '; ') if assumed_point else '') + f"no {slots.product.lower()} orders in the history (products on file: {', '.join(sorted({e.record['product'] for e in self.tools.rows('orders.csv')}))}), so the estimate uses the size-based lead-time model and the shared queue only"
             if wants_max:
                 best_q, probe, rows = self.max_quantity_by(slots, now)
                 evidence.extend(rows)
@@ -833,9 +871,13 @@ class WorkflowEngine:
         elif intent in (Intent.OPERATIONS_NORMALITY, Intent.OPERATIONS_DEVIATION, Intent.OPERATIONS_OUTPUT):
             return self.production(message, intent, result, slots, state, now, calls, evidence, previous_clarification)
         elif intent == Intent.OPERATIONS_DISCOVERY:
+            topn = re.search(r'\btop\s+(\d{1,2}|three|four|five|six|seven|eight|nine|ten)\b|\b(\d{1,2}|three|four|five|six|seven|eight|nine|ten)\s+(?:issues|problems|things|items|findings)\b', message.casefold())
+            if topn and slots.window_days is None:
+                w = topn.group(1) or topn.group(2)
+                slots.window_days = int(w) if w.isdigit() else {'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10}[w]
             data, rows = self.tools.find_anomalies(slots, now)
             evidence.extend(rows)
-            focus = self.stage_focus(now) if re.search(r'one stage|which stage|where should i move|focus', message.casefold()) else None
+            focus = self.stage_focus(now) if re.search(r'one (stage|workshop|line|team|area)|which (stage|workshop|line)|where should i move|focus|biggest risk reduction|most deadlines', message.casefold()) else None
             if focus:
                 calls.append(ToolCall(name='stage_focus', arguments={}, result=focus))
             calls.append(ToolCall(name='find_anomalies', arguments={'customer': slots.customer, 'stage': slots.stage, 'limit': data['shown']}, result=data))
@@ -1521,13 +1563,16 @@ class WorkflowEngine:
         if stage and re.search(r'\b(at|in|stuck|pending|phase|stage|queue|waiting)\b', lowered):
             rows = sorted([e for e in active if e.record['current_stage'] == stage[1].upper()], key=lambda e: e.record['due_date'])
             return (f'{len(rows)} active orders are at {stage[1]}', rows) if rows else (f'no active order is at {stage[1]}', [])
-        if re.search(r'\b(largest|biggest|main|top|most important) (customer|client|account)\b', lowered):
+        if re.search(r'\b(largest|biggest|main|top|most important) (customer|client|account)\b|customer with (the )?(largest|biggest|most|highest)|(largest|biggest|most) (open|outstanding|unfilled|active)? ?(order )?(volume|pieces|backlog)', lowered):
             counts: dict[str, list] = {}
             for e in active: counts.setdefault(e.record['customer'], []).append(e)
-            best = max(len(v) for v in counts.values())
-            leaders = sorted(c for c, v in counts.items() if len(v) == best)
+            by_pieces = bool(re.search(r'pieces|volume|backlog|unfilled|outstanding', lowered))
+            size = (lambda v: sum(int(e.record['pieces']) for e in v)) if by_pieces else len
+            best = max(size(v) for v in counts.values())
+            leaders = sorted(c for c, v in counts.items() if size(v) == best)
             rows = sorted([e for c in leaders for e in counts[c]], key=lambda e: (e.record['customer'], e.record['due_date']))
-            label = ' and '.join(leaders) + f' {"each have" if len(leaders) > 1 else "has"} the most active orders ({best})'
+            label = ' and '.join(leaders) + (f' {"each have" if len(leaders) > 1 else "has"} the most active pieces outstanding ({best:,} pieces in {len(rows)} orders)' if by_pieces
+                                              else f' {"each have" if len(leaders) > 1 else "has"} the most active orders ({best})')
             return (label, rows)
         products = {e.record['product'] for e in self.tools.rows('orders.csv')}
         words = {p.lower().split()[0]: p for p in products} | {'scarves': 'Scarf', 'beanies': 'Beanie', 'vests': 'Vest', 'hoodies': 'Hoodie', 'cardigans': 'Cardigan', 'polos': 'Polo shirt', 'sweaters': 'Crewneck sweater', 'crewnecks': 'Crewneck sweater'}
@@ -1546,6 +1591,10 @@ class WorkflowEngine:
             rows = sorted(rows, key=lambda e: e.record['due_date'])
             if rows:
                 return (label, rows)
+            if n is not None:
+                have = sorted([e for e in active if (e.record['category'] == categories[word] if word in categories else e.record['product'] == words[word])], key=lambda e: e.record['due_date'])
+                name = categories[word].lower() if word in categories else words[word].lower()
+                return (f"no active {name} order of {n} pieces; active {name} orders: " + (', '.join(f"{e.record['order_id']} ({e.record['pieces']} pieces, due {e.record['due_date']})" for e in have) or 'none'), [])
         bare = re.fullmatch(r'\W*(?:show me |what is |the |status of |status for |order )*(\d{1,3})\W*(?:status|is in which production phase now|stage|progress)?\W*', lowered)
         if bare and int(bare[1]) in self.known_order_numbers():
             rows = [e for e in self.tools.rows('orders.csv') if e.record['order_id'] == f'ORD-{int(bare[1]):03d}']
@@ -1576,6 +1625,209 @@ class WorkflowEngine:
 
     def candidate_call(self, rows, now: datetime, **arguments) -> ToolCall:
         return ToolCall(name='search_orders', arguments=arguments, result={'candidates': [self.candidate_facts(e.record, now) for e in rows]})
+
+    # ------------------------------------------------------------------ grounding
+    FOREIGN_STAGES = {'cutting': 'cutting', 'cut': 'cutting', 'sewing': 'sewing', 'sew': 'sewing', 'embroidery': 'embroidery', 'embroidered': 'embroidery', 'embroidry': 'embroidery', 'inspection': 'inspection',
+                      'dyeing': 'dyeing', 'printing': 'printing', 'pressing': 'pressing', 'ironing': 'ironing', 'quality control': 'quality control', 'qc': 'quality control',
+                      'colour matching': 'colour matching', 'color matching': 'colour matching', 'sewin': 'sewing', 'cuting': 'cutting', 'inspecton': 'inspection', 'embroidry': 'embroidery'}
+    PRODUCT_STOP = {'active', 'overdue', 'overdued', 'late', 'open', 'new', 'these', 'those', 'this', 'that', 'the', 'all', 'which', 'what', 'my', 'our', 'your', 'two', 'three', 'both', 'other', 'similar',
+                    'past', 'completed', 'complete', 'finished', 'stale', 'idle', 'quiet', 'risky', 'urgent', 'pending', 'current', 'remaining', 'existing', 'running', 'many', 'more', 'most', 'few',
+                    'several', 'some', 'any', 'no', 'each', 'every', 'first', 'last', 'next', 'previous', 'customer', 'customers', 'their', 'its', 'his', 'her', 'about', 'for', 'of', 'on', 'in', 'from',
+                    'with', 'and', 'or', 'between', 'into', 'per', 'top', 'same', 'such', 'matching', 'affected', 'delayed', 'problem', 'priority', 'production', 'progress', 'in-progress', 'hidden',
+                    'risk', 'high-risk', 'due', 'chase', 'draft', 'send', 'compare', 'show', 'list', 'rank', 'check', 'hoodie', 'hoodies', 'cardigan', 'cardigans', 'scarf', 'scarves', 'vest', 'vests',
+                    'beanie', 'beanies', 'polo', 'polos', 'sweater', 'sweaters', 'crewneck', 'crewnecks', 'tops', 'accessories', 'accessory', 'knitwear', 'workshop', 'department', 'summary', 'placed',
+                    'unfilled', 'outstanding', 'large', 'largest', 'biggest', 'small', 'smaller', 'bigger', 'older', 'oldest', 'newer', 'recent', 'future', 'today', 'tomorrow', 'yesterday', 'week',
+                    'month', 'day', 'days', 'queue', 'critical', 'important', 'key', 'main', 'major', 'minor', 'relevant', 'related', 'said', 'mentioned', 'discussed', 'listed', 'shown', 'above',
+                    'below', 'following', 'remaining', 'planned', 'scheduled', 'ready', 'export', 'domestic', 'local', 'overseas', 'uniform', 'vip', 'sample', 'trial', 'bulk', 'repeat', 'rush', 'wrong', 'right'}
+    GARMENT_WORDS = {'jacket', 'uniform', 'outerwear', 'mitten', 'tunic', 'shirt', 'trouser', 'pant', 'dress', 'skirt', 'coat', 'glove', 'sock', 'blanket', 'towel', 'cap', 'hat', 'jean',
+                     'suit', 'blouse', 'legging', 'short', 'tee', 't-shirt', 'sweatshirt', 'pullover', 'jumper', 'blazer', 'parka', 'anorak', 'gilet', 'shawl', 'poncho', 'cape', 'romper', 'onesie',
+                     'bodysuit', 'swimwear', 'underwear', 'bra', 'lingerie', 'pyjama', 'pajama', 'robe', 'apron', 'bag', 'tote', 'backpack', 'belt', 'tie', 'scarve', 'knitwear', 'denim', 'linen', 'silk'}
+    ORDER_TAGS = {'export', 'domestic', 'local', 'overseas', 'uniform', 'vip', 'sample', 'trial', 'bulk', 'repeat', 'rush'}   # words that look like an order type the records do not hold
+
+    def known_product_words(self) -> set[str]:
+        words = set()
+        for p in {e.record['product'] for e in self.tools.rows('orders.csv')}:
+            for w in p.lower().split():
+                words.add(w); words.add(w + 's'); words.add(w + 'es')
+            words.add(p.lower()); words.add(p.lower() + 's')
+        words |= {'scarves', 'tops', 'top', 'accessories', 'accessory', 'knitwear', 'garments', 'garment', 'pieces', 'piece'}
+        return words
+
+    def foreign_product(self, message: str, slots: Slots) -> str | None:
+        """A product word the records do not hold ("jacket orders", product='mittens'); None when every product word is on file."""
+        import difflib
+        known = self.known_product_words()
+        def is_known(w: str) -> bool:
+            w = w.lower().strip()
+            if w in known or w.rstrip('s') in known or w in self.PRODUCT_STOP: return True
+            return any(difflib.SequenceMatcher(None, w.rstrip('s'), k.rstrip('s')).ratio() >= 0.85 for k in known if len(k) >= 4)
+        customers = ' '.join(known_customers(self.tools)).lower().split()
+        candidates = []
+        if slots.product and not is_known(slots.product) and slots.product.lower() not in self.ORDER_TAGS:
+            candidates.append(slots.product.lower())
+        for m in re.finditer(r"\b([a-z][a-z\-]{3,})\s+(?:orders?|jobs?|batch(?:es)?|lines?|styles?)\b", message.casefold()):
+            w = m.group(1)
+            if w in customers or is_known(w) or w in self.ORDER_TAGS or w in self.FOREIGN_STAGES: continue
+            if w.rstrip('s') in self.GARMENT_WORDS or w in self.GARMENT_WORDS:
+                candidates.append(w)
+        return candidates[0] if candidates else None
+
+    def foreign_tag(self, message: str, slots: Slots) -> str | None:
+        lowered = message.casefold()
+        for tag in self.ORDER_TAGS:
+            if re.search(r'\b' + tag + r'\b\s+(?:orders?|jobs?|customers?|batch(?:es)?)', lowered) or (slots.product or '').lower() == tag:
+                return tag
+        return None
+
+    def foreign_stage(self, message: str) -> str | None:
+        lowered = message.casefold()
+        hits = []
+        for word, name in self.FOREIGN_STAGES.items():
+            m = re.search(r'\b' + re.escape(word) + r'\b', lowered)
+            if m: hits.append((m.start(), name))
+        return min(hits)[1] if hits else None
+
+    def foreign_order_numbers(self, message: str, explicit_ids: list[str]) -> list[str]:
+        """Order references that are not on file: ORD-244, "order 218", "237 status?", spoken digits already normalised."""
+        from .services.order_refs import WORDNUM, words_to_digits
+        known = self.known_order_numbers()
+        found = [i for i in explicit_ids if int(i[4:]) not in known]
+        lowered = message.casefold()
+        def add(n: int):
+            if 0 < n < 1000 and n not in known and f'ORD-{n:03d}' not in found: found.append(f'ORD-{n:03d}')
+        for m in re.finditer(r'\b(?:ord|orders?)\s*(?:number|no\.?|id)?\s*#?\s*((?:\d{1,4})(?:\s*(?:,|and|&|or|vs\.?|versus)\s*\d{1,4})*)\b', lowered):
+            for n in re.findall(r'\d{1,4}', m.group(1)): add(int(n))
+        for m in re.finditer(r'\b(?:ord|order)\s*(?:number|no\.?|id)?\s+((?:' + WORDNUM + r')(?:[\s\-]+(?:' + WORDNUM + r')){0,6})\b', lowered):
+            d = words_to_digits(m.group(1))
+            if d.isdigit(): add(int(d))
+        for m in re.finditer(r'(?<![\w-])(\d{3})(\s*(?:vs\.?|versus|v\.|or|and)\s*)(\d{3})(?![\w-])', lowered):
+            if int(m.group(1)) not in known and int(m.group(3)) not in known: add(int(m.group(1))); add(int(m.group(3)))
+        if re.search(r'\b(status|stuck|chase|remind|expedite|note|phase|stage|moved|moving|progress|where)\b', lowered) and not re.search(r'\b(output|pieces|pcs|did|cleared|hit|normal|range|took|take|lead time)\b', lowered):
+            for m in re.finditer(r'(?<![\w\-,.])(\d{3})(?![\w\-,.%])(?!\s*(?:pieces|pcs|piece|%|days|hours|hrs|on \d|' + '|'.join(sorted(self.known_product_words(), key=len, reverse=True)) + r'))', lowered):
+                if int(m.group(1)) > max(known): add(int(m.group(1)))
+        bare = re.fullmatch(r'\W*(?:show me |what is |the |status of |status for )*(\d{3})\W*(?:status|in which production phase now|stage|progress|at where)?\W*', message.casefold())
+        if bare and int(bare[1]) not in known and f'ORD-{int(bare[1]):03d}' not in found:
+            found.append(f'ORD-{int(bare[1]):03d}')
+        return found
+
+    def foreign_workshop(self, message: str, slots: Slots) -> str | None:
+        on_file = {e.record['workshop_id'].upper() for e in self.tools.rows('workshops.csv')}
+        text = message.upper() + ' ' + (slots.recipient or '').upper()
+        for m in re.finditer(r'\bW(\d{1,2})\b', text):
+            if f'W{int(m.group(1))}' not in on_file:
+                return f'W{int(m.group(1))}'
+        return None
+
+    def foreign_customer(self, message: str, slots: Slots) -> str | None:
+        """A customer the planner or the message names that is not on file (fuzzy match tolerated)."""
+        if slots.customer and not detect_customer(slots.customer, self.tools) and slots.customer.casefold() not in message.casefold().replace('’', "'"):
+            return slots.customer
+        if slots.customer and not detect_customer(message, self.tools) and not detect_customer(slots.customer, self.tools):
+            return slots.customer
+        if not detect_customer(message, self.tools):
+            names = [m.group(0) for m in re.finditer(r"\b([A-Z][a-z]{2,}(?:\s+(?:&\s+)?[A-Z][a-z]{2,}))\b", message)]
+            skip = {'Order', 'Orders', 'Show', 'Which', 'What', 'Chase', 'Draft', 'Remind', 'Make', 'Add', 'Note', 'Log', 'Record', 'Compare', 'Is', 'Are', 'Can', 'Does', 'Did', 'Has', 'Was', 'Who', 'The', 'My', 'Please', 'Okay', 'Just', 'Since', 'For', 'Among', 'Between', 'Update', 'Refresh', 'Trace', 'Check', 'Find', 'Identify', 'Spot', 'Rank', 'Give', 'Tell', 'Keep', 'Leave', 'Clarify', 'Moving', 'Someone', 'When', 'Nothing', 'Four', 'Two', 'Three', 'Seven', 'New', 'Quick', 'Expedite', 'Prioritize', 'Prioritise', 'Generate', 'Email', 'Assess', 'Faster', 'Partial', 'Hidden', 'Same', 'Export', 'Embroidery', 'Cutting', 'Sewing', 'Inspection', 'Mittens', 'Vests', 'Jacket', 'Uniform', 'Top', 'Top'}
+            for n in names:
+                first = n.split()[0]
+                if first in skip or 'ORD' in n.upper(): continue
+                if re.search(r'\b(Apparel|Textiles?|Garments?|Fashion|Clothing|Trading|Mills?|Knits?|Co\.?|Ltd|Inc|Corp|Group|Brands?|Wear|Basics|Threads?)\b', n):
+                    return n
+        return None
+
+    def grounding_check(self, message: str, slots: Slots, intent: Intent, result: Classification, state: DialogState, now: datetime,
+                        calls: list[ToolCall], evidence: list[Evidence], explicit_ids: list[str]) -> ChatResponse | None:
+        if intent in (Intent.UNANSWERABLE, Intent.UNKNOWN):
+            return None
+        lowered = message.casefold()
+        products = sorted({e.record['product'] for e in self.tools.rows('orders.csv')})
+        notes = []
+        # 1. orders that do not exist
+        missing = self.foreign_order_numbers(message, explicit_ids)
+        if missing:
+            state.slots = Slots(action=slots.action)
+            state.comparison_orders = []
+            state.active_order = None
+            state.last_order_ids = []
+            state.chase_context = {}
+            for oid in missing:
+                calls.append(ToolCall(name='refresh_order', arguments={'order_id': oid}, result={'status': 'not_found', 'order_id': oid}, executed=True))
+            ids = ', '.join(missing)
+            text = (f"There is no order {ids} in the current records. Order IDs run ORD-001 to ORD-{len(self.tools.rows('orders.csv')):03d}; check the number or give the customer and product instead."
+                    if len(missing) == 1 else f"None of {ids} is in the current records (order IDs run ORD-001 to ORD-{len(self.tools.rows('orders.csv')):03d}). Check the numbers; nothing was compared, drafted, noted or scheduled.")
+            if intent.value.startswith('execution.'):
+                text += ' Nothing was drafted, saved or scheduled.' if len(missing) == 1 else ''
+            return self.response(state, result, now, text, calls, evidence)
+        # 2. a stage this factory does not have
+        stage = self.foreign_stage(message)
+        if stage and intent in (Intent.OPERATIONS_NORMALITY, Intent.OPERATIONS_DEVIATION, Intent.OPERATIONS_OUTPUT, Intent.ORDER_EXPEDITE, Intent.ORDER_PRIORITIZE, Intent.ORDER_RANK, Intent.ORDER_REFRESH,
+                             Intent.ORDER_LOOKUP, Intent.ORDER_RISK, Intent.EXECUTION_REMINDER, Intent.EXECUTION_CHASE, Intent.ORDER_COMPARE, Intent.OPERATIONS_DISCOVERY) \
+                and not (intent in (Intent.EXECUTION_CHASE, Intent.EXECUTION_NOTE) and (explicit_ids or state.active_order) and slots.action in ('revise', 'send', 'read')):
+            if intent == Intent.EXECUTION_CHASE and (explicit_ids or state.active_order) and slots.action == 'draft':
+                pass   # a chase about a real order whose text mentions a foreign stage: the chase_chat path notes the department instead
+            else:
+                calls.append(ToolCall(name='explain_no_data', arguments={'reason': 'unknown_stage', 'stage': stage}, result={'declined': True, 'stages_on_file': STAGE_ORDER}, executed=False))
+                text = f"There is no {stage} stage in this factory's records: the stages are knitting → assembly → washing → packing, and only those four have output, queues or departments on file."
+                when = re.search(r'\b(20\d{2}-\d{2}-\d{2}|\d{1,2}(?:st|nd|rd|th)? (?:january|february|march|april|may|june|july|august|september|october|november|december)(?: 20\d{2})?|(?:january|february|march|april|may|june|july|august|september|october|november|december) \d{1,2})\b', lowered)
+                if when:
+                    try:
+                        d = parse_day(when.group(0), now) or resolve_date(when.group(0), now)
+                        latest = max(e.record['date'] for e in self.tools.rows('production_log.csv'))
+                        if d and d.isoformat() > latest:
+                            text += f" Also, the production log ends {latest} (business date {now.date().isoformat()}), so no output exists for {d.isoformat()} yet."
+                    except Exception:
+                        pass
+                if intent == Intent.EXECUTION_REMINDER:
+                    text += ' Say which of the four stages to watch and I will set the reminder.'
+                elif intent == Intent.EXECUTION_CHASE:
+                    text += ' Say which department (knitting, assembly, washing or packing) or workshop (W1–W8) should receive the chase, and which order.'
+                else:
+                    text += ' Ask about one of those stages instead.'
+                state.pending_clarification = None
+                return self.response(state, result, now, text, calls, evidence)
+        # 3. a product or order type the records do not hold
+        if intent not in (Intent.ORDER_COMMITMENT, Intent.ORDER_FORECAST, Intent.EXECUTION_NOTE) and not (intent == Intent.EXECUTION_CHASE and slots.action in ('revise', 'send', 'read')):
+            tag = self.foreign_tag(message, slots)
+            product = None if tag else self.foreign_product(message, slots)
+            if tag or product:
+                word = (tag or product)
+                word = word[:-1] if word.endswith('s') and not word.endswith('ss') and word not in ('dress',) else word
+                calls.append(ToolCall(name='search_orders', arguments={'product': word}, result={'candidates': [], 'products_on_file': products}, executed=True))
+                state.slots = Slots(action=slots.action)
+                state.comparison_orders = []
+                state.active_order = None
+                if tag:
+                    text = (f"The records do not tag orders as '{tag}': each order carries customer, product, pieces, due date, stage and last activity only, so '{tag} orders' cannot be selected. "
+                            f"Products on file: {', '.join(products)}; customers: {', '.join(known_customers(self.tools))}. Name a product or a customer and I will run the same question.")
+                else:
+                    text = f"No {word} orders in the records. Products on file: {', '.join(products)}. Name one of those (or a customer) and I will run the same question."
+                return self.response(state, result, now, text, calls, evidence)
+        # 4. a customer that is not on file
+        if intent in (Intent.ORDER_LOOKUP, Intent.ORDER_COMPARE, Intent.EXECUTION_CHASE, Intent.ORDER_EXPEDITE, Intent.ORDER_PRIORITIZE, Intent.ORDER_RANK, Intent.EXECUTION_NOTE, Intent.ORDER_RISK, Intent.ORDER_REFRESH) \
+                and not (intent == Intent.EXECUTION_CHASE and slots.action in ('revise', 'send', 'read')):
+            customer = self.foreign_customer(message, slots)
+            if customer:
+                calls.append(ToolCall(name='search_orders', arguments={'customer': customer}, result={'candidates': [], 'customers_on_file': known_customers(self.tools)}, executed=True))
+                state.slots = Slots(action=slots.action)
+                state.comparison_orders = []
+                state.active_order = None
+                text = f"No customer named {customer} in the records. Customers on file: {', '.join(known_customers(self.tools))}. Nothing was changed; name one of them and I will run the same question."
+                return self.response(state, result, now, text, calls, evidence)
+        # 4b. "the third order from yesterday's planning meeting": meetings and conversations are not in the records
+        if intent in (Intent.EXECUTION_NOTE, Intent.EXECUTION_CHASE, Intent.ORDER_LOOKUP, Intent.ORDER_RISK, Intent.ORDER_REFRESH, Intent.ORDER_EXPEDITE, Intent.EXECUTION_REMINDER) \
+                and not explicit_ids and not state.active_order and not slots.customer and not slots.product \
+                and re.search(r"(from|at|in|of) (yesterday'?s?|today'?s?|this morning'?s?|monday'?s?|tuesday'?s?|wednesday'?s?|thursday'?s?|friday'?s?|the|our|last) (planning |production |morning )?meeting|we (discussed|talked about|spoke about|went through) (on|at|in|yesterday|last)", lowered):
+            calls.append(ToolCall(name='explain_no_data', arguments={'reason': 'meeting'}, result={'declined': True}, executed=False))
+            text = 'Meeting notes and conversations are not in the records, and no order is in focus in this chat, so "the order from the meeting" cannot be resolved. Give the order ID (or customer and product) and I will do it.'
+            return self.response(state, result, now, text, calls, evidence)
+        # 5. a workshop that is not on file (chases and reminders only; a note may mention anything)
+        if intent in (Intent.EXECUTION_CHASE, Intent.EXECUTION_REMINDER, Intent.WORKSHOPS) and slots.action != 'read':
+            shop = self.foreign_workshop(message, slots)
+            if shop:
+                on_file = sorted({e.record['workshop_id'] for e in self.tools.rows('workshops.csv')}, key=lambda w: int(w[1:]))
+                calls.append(ToolCall(name='list_workshops', arguments={'workshop': shop}, result={'status': 'not_found', 'workshops_on_file': on_file}, executed=True))
+                text = f"{shop} is not a workshop on file: the workshops are {on_file[0]}–{on_file[-1]}. Nothing was drafted or sent; say which workshop or department should receive it."
+                return self.response(state, result, now, text, calls, evidence)
+        return None
 
     def not_found(self, order_id: str, state: DialogState, result: Classification, now: datetime,
                   calls: list[ToolCall], evidence: list[Evidence]) -> ChatResponse:
