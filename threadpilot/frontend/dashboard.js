@@ -27,6 +27,13 @@ function decisionCards(){
  const empty=`<article class="decision none"><h3>Nothing needs a decision today.</h3><p>The briefing has the detail; the counters below say where to look.</p></article>`;
  return `<section class="decide" aria-label="Decide today"><div class="section-heading"><div class="eyebrow">DECIDE TODAY${infoButton('decide')}</div>${h.more_waiting?`<a href="#/risk" class="small-link">${h.more_waiting} more in Risk orders →</a>`:''}</div><div class="decision-cards">${cards||empty}</div></section>`;
 }
+function draftsCard(){
+ // Chase-ups drafted before the manager asks (backend services/ready_drafts.py): stalled orders, written from the record.
+ // "Review & send" opens the chat on the usual preview; only "Confirm send" there sends. Hidden when there are none.
+ const r=(homeData||{}).ready_drafts;if(!r||!r.drafts?.length)return '';
+ const items=r.drafts.map(d=>`<article class="ready-draft" data-order="${esc(d.order_id)}"><div class="decision-head"><strong>${esc(d.order_id)} · ${esc(d.customer||'')}</strong><span class="badge watch">To ${esc(titleCase(d.department).toLowerCase())}</span></div><p class="muted">${esc(d.reason)}</p><details><summary>${esc(d.subject)}</summary><pre class="draft-text">${esc(d.text)}</pre></details><div class="actions">${btn('ready-draft','Review &amp; send','primary',`data-id="${esc(d.order_id)}"`)}</div></article>`).join('');
+ return `<section class="ready-drafts" aria-label="Drafted for you"><div class="section-heading"><div class="eyebrow">DRAFTED FOR YOU${infoButton('drafted')}</div><small class="muted">${r.drafts.length} chase-up${r.drafts.length===1?'':'s'} ready · nothing is sent until you confirm${r.more?` · ${r.more} more stalled`:''}</small></div><div class="decision-cards">${items}</div></section>`;
+}
 function healthCard(){
  const h=(homeData||homeFallback()).health,total=h.active||1;
  const seg=[['late',h.late],['at-risk',h.at_risk],['on-track',h.on_track],['unknown',h.unknown||0]];
@@ -56,7 +63,7 @@ function askCard(){
  const chips=['Which orders are most at risk?','Did anything go wrong yesterday?','Can we take 800 hoodies by the 25th?'];
  return `<section class="card home-ask" aria-label="Ask ThreadPilot"><div class="section-heading"><h2>Ask ThreadPilot${infoButton('ask')}</h2><small>typed or spoken</small></div>${composer().replace('<form class="composer"','<form class="composer home-composer" data-home="1"')}<div class="workspace-suggestions">${chips.map(q=>btn('dash-suggest',esc(q),'small-button',`data-question="${esc(q)}"`)).join('')}</div></section>`;
 }
-dashboard=function(){return `<div class="dashboard-refresh home">${statusLine()}${dashboardError||homeError?`<div class="callout error" role="alert">${esc(homeError||dashboardError)} ${btn('dash-refresh','Retry','small-button')}</div>`:''}${kpiStrip()}${decisionCards()}<div class="grid two home-row">${healthCard()}${pulseCard()}</div><div class="grid two home-row">${briefingCard()}${todosCard()}</div>${askCard()}</div>`};
+dashboard=function(){return `<div class="dashboard-refresh home">${statusLine()}${dashboardError||homeError?`<div class="callout error" role="alert">${esc(homeError||dashboardError)} ${btn('dash-refresh','Retry','small-button')}</div>`:''}${kpiStrip()}${decisionCards()}${draftsCard()}<div class="grid two home-row">${healthCard()}${pulseCard()}</div><div class="grid two home-row">${briefingCard()}${todosCard()}</div>${askCard()}</div>`};
 async function dashboardRequest(path,options={}){
  const response=await window.threadpilotFetch(window.THREADPILOT_API_BASE+'/api/'+path,{...options,headers:{'Content-Type':'application/json',...options.headers}});
  if(!response.ok)throw Object.assign(new Error(response.status===409?'This item changed on another device. Refresh and try again.':response.status===404?'not_found':'Unable to save or load dashboard data. Please retry.'),{status:response.status});
@@ -96,6 +103,7 @@ document.addEventListener('click',e=>{
  if(b.dataset.action==='dash-suggest')dashboardChase(b.dataset.question);
  if(b.dataset.action==='decide-chat')dashboardChase(b.dataset.message);
  if(b.dataset.action==='decide-route')go(b.dataset.route);
+ if(b.dataset.action==='ready-draft')dashboardChase(`Review the drafted chase-up for ${b.dataset.id}`);
  if(b.dataset.action==='dash-brief-chase'){const r=morningReport||dashboardData?.ai_briefing;if(r)dashboardChase('Draft one summary chase-up to myself based on these recommendations. Show the draft for my confirmation before sending: '+r.decide);}
  if(b.dataset.action==='dash-task-chase'){const task=dashboardData?.tasks.find(t=>t.id===b.dataset.task);if(task)dashboardChase('Draft a chase-up for this action. Show the draft for my confirmation before sending: '+task.title);}
  if(b.dataset.action==='dash-chase')dashboardChase(`Draft a chase-up for ${b.dataset.id}. Show me the draft for confirmation before sending.`);

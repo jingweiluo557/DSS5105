@@ -66,7 +66,15 @@ def dashboard_home(request: Request, response: Response):
     Same snapshot and detectors as the chat tools and the alert policy; nothing is stored or sent."""
     response.headers['Cache-Control'] = 'no-store'
     now = business_now()
-    return home_service.home(current_snapshot(request.app.state.database, now.date().isoformat()), now)
+    chased = set()
+    scheduler = getattr(getattr(request.app.state, 'workflow', None), 'email_scheduler', None)
+    if scheduler is not None and hasattr(scheduler, 'history'):
+        try:   # orders chased in the last few days are not drafted again (services/ready_drafts.py)
+            from ..services.ready_drafts import recently_chased
+            chased = recently_chased(scheduler.history(), now.date())
+        except Exception:  # noqa: BLE001  (no ledger yet: offer every draft; sending still needs a confirmed preview)
+            chased = set()
+    return home_service.home(current_snapshot(request.app.state.database, now.date().isoformat()), now, chased)
 
 
 @router.get('/dashboard')
