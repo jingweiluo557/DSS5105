@@ -78,7 +78,7 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
             response = engine.ask(text, state, result, now, [ToolCall(name='refresh_order', arguments={'order_id': target_ids[0]}, result={'status': rec['status'], 'current_stage': rec['current_stage'], 'premise': 'not shipped'})], [engine.tools.refresh_order(target_ids[0])])
             if emit: await emit(text)
             return response
-    if (slots.recipient and re.search(r'^(the )?(customer|client|buyer)s?$', slots.recipient.strip(), re.I)) or re.search(r'\b(write|draft|send|email|chase)\b[^.]{0,40}\b(to )?the customer\b|\bcustomer a follow-up\b|\btell the customer\b|\bpromise the customer\b', lower):
+    if (slots.recipient and re.search(r'^(the )?(customer|client|buyer)s?$', slots.recipient.strip(), re.I)) or re.search(r'\b(write|draft|send|email|chase|message)\b[^.]{0,40}\bto the customer\b|\bcustomer a (follow-up|note|message|update|reply)\b|\btell the customer\b|\bpromise the customer\b|\bcustomer-facing\b|\bchase (the )?customer\b|\bemail the customer\b', lower):
         text = ('I do not write to customers: chase-ups go to our departments and outside workshops, and delivery promises are the manager\u2019s to make. '
                 + (f"I can draft an internal chase-up on {target_ids[0]} asking for the expected completion date, if you want it." if target_ids else 'Name the order and I can draft an internal chase-up asking for the expected completion date.'))
         response = engine.response(state, result, now, text, [ToolCall(name='explain_no_data', arguments={'reason': 'external'}, result={'declined': True, 'reason': 'external', 'answer': text}, executed=False)], [])
@@ -231,6 +231,8 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
         matches = [d for d in drafts if not d.get('sent') and (not explicit or d['order_ids'] == explicit)]
         chosen = drafts[number-1] if number and number <= len(drafts) else matches[0] if not number and len(matches) == 1 else None
         if chosen is None or chosen.get('sent'):
+            if not any(not d.get('sent') for d in drafts):
+                return await reply('There is no unsent draft in this chat, so nothing was sent. Say which order to draft for and I will show the preview first.', True)
             return await reply('Which draft should I preview? Choose a draft number. Each draft is confirmed separately.', True)
         if 'clock_run_id' in chosen and chosen['clock_run_id'] != clock_run_id:
             return await reply('Business clock changed. Regenerate the draft before reviewing it.', True)
@@ -276,6 +278,8 @@ async def chase_chat(engine, message, result, state, now, agent, emit=None):
     if len(ids) > 1 and not mode:
         return await reply('Orders: ' + ', '.join(ids) + '.\nWould you like one summary draft or separate drafts?', True)
     if not ids and mode != 'summary':
+        if slots.action == 'revise' or (not state.chase_drafts and re.search(r'\b(cc|recipient|firmer|softer|shorter|politer?|tone|deadline|reply by|add (this|that)|change the)\b', lower)):
+            return await reply('There is no draft in this chat to revise, so nothing was changed or sent. Say which order to draft for and I will write it with that change included.', True)
         return await reply('Which order should I draft for? Please give its ID, or choose a summary draft.', True)
     if len(ids) == 1 and mode != 'summary' and not recipient and mail_settings is None:
         return await reply('Who should receive the draft for ' + ids[0] + '?', True)

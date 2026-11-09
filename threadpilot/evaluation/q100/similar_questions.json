@@ -1,0 +1,1002 @@
+[
+ {
+  "no": 1,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Are the jacket orders moving?",
+   "Jacket orders going okay?",
+   "Jacket jobs moving?"
+  ]
+ },
+ {
+  "no": 2,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Which uniform orders require my attention?",
+   "Which uniform jobs need my help?",
+   "Uniform orders need help?"
+  ]
+ },
+ {
+  "no": 3,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "What is the status of orders that were due three days ago?",
+   "Orders overdue from three days ago?",
+   "Orders due 3 days ago done production?"
+  ]
+ },
+ {
+  "no": 4,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Show me the status of the first 15 outerwear orders.",
+   "What is the status of the first 15 outerwear orders?",
+   "First 15 outerwear orders completed?"
+  ]
+ },
+ {
+  "no": 5,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "What is the status of order 218?",
+   "Show me the status of order 218.",
+   "Show status of order two one eight."
+  ]
+ },
+ {
+  "no": 6,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Show me the status of 237.",
+   "237 status?",
+   "237 in which production phase now?"
+  ]
+ },
+ {
+  "no": 7,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Chase the order with 900 vests.",
+   "Expedite the order for 900 vests.",
+   "Faster produce the order with 900 vests."
+  ]
+ },
+ {
+  "no": 8,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Expedite orders stuck at the embroidery stage.",
+   "Prioritize orders waiting to be processed at embroidery.",
+   "Give priority to jobs pending at embroidery."
+  ]
+ },
+ {
+  "no": 9,
+  "scenario": "1. Order and customer management",
+  "field": "1.1 Clarify a vague order request",
+  "q": [
+   "Expedite order 244.",
+   "Chase order 0000244.",
+   "Chase order number zero zero zero two forty four."
+  ]
+ },
+ {
+  "no": 10,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Okay, please draft an email to chase this jacket order.",
+   "Generate an email to chase this jacket batch.",
+   "Email and chase this jacket job."
+  ]
+ },
+ {
+  "no": 11,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Has the vest order moved out of embroidery yet?",
+   "What is the vest order's status now?",
+   "Vest order still stuck at embroidery?"
+  ]
+ },
+ {
+  "no": 12,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Which stage is the uniform order at now?",
+   "Uniform order at where?",
+   "Show current uniform order status."
+  ]
+ },
+ {
+  "no": 13,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Should I chase this cardigan order?",
+   "Need to expedite this cardigan order or not?",
+   "Assess this cardigan job and tell me if I should chase."
+  ]
+ },
+ {
+  "no": 14,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Show the last recorded activity on the embroidery line.",
+   "What is the embroidery line's latest activity?",
+   "Embroidery line current activity?"
+  ]
+ },
+ {
+  "no": 15,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Chase orders overdue by more than three days.",
+   "Chase orders overdue > 3 days.",
+   "Expedite orders more than 72 hours overdue."
+  ]
+ },
+ {
+  "no": 16,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Chase all orders from the customer with the largest open order volume.",
+   "Expedite jobs from our biggest customer by outstanding pieces.",
+   "Do customer with most unfilled pieces first."
+  ]
+ },
+ {
+  "no": 17,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Chase all Cedar Apparel orders.",
+   "Expedite all Cedar Aprel orders.",
+   "Give very first priority to cedar apparel jobs."
+  ]
+ },
+ {
+  "no": 18,
+  "scenario": "1. Order and customer management",
+  "field": "1.2 Refresh an active order",
+  "q": [
+   "Refresh ORD-244 using the latest recorded stage, completed quantity and update time; flag stale fields.",
+   "For order 244, what changed since the previous workshop report, and when was the new update logged?",
+   "Order 244: latest verified progress vs last workshop report?"
+  ]
+ },
+ {
+  "no": 19,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Trace ORD-244 from cutting through its current stage and identify the earliest recorded handoff that missed its planned date.",
+   "For order 244, where did the production timeline first diverge from the scheduled cutting and sewing dates?",
+   "ORD-244: first delayed handoff after cutting, with evidence?"
+  ]
+ },
+ {
+  "no": 20,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "For ORD-201, quantify the delivery exposure caused by its time in embroidery and identify the next required handoff.",
+   "How many days has order 201 stayed in embroidery, and what needs to happen next to protect dispatch?",
+   "Order 201 embroidery hold: deadline impact?"
+  ]
+ },
+ {
+  "no": 21,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Check whether ORD-286 has enough time left for sewing, inspection and packing before its promised ship date.",
+   "Can order 286 clear all unfinished downstream steps before the customer's deadline?",
+   "ORD-286: remaining sewing-to-packing route vs time left?"
+  ]
+ },
+ {
+  "no": 22,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Find active jacket orders whose sewing stage has not changed despite recent piece-count updates; explain whether this is normal progress or a warning.",
+   "Which jacket jobs show completed-piece movement without a sewing handoff, and should their risk be escalated?",
+   "Any jacket orders progressing inside sewing but nearing a bottleneck?"
+  ]
+ },
+ {
+  "no": 23,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Identify orders whose remaining embroidery quantity exceeds their workshop's likely output before the planned transfer to sewing.",
+   "Which embroidery workshop assignments cannot clear their remaining pieces by the scheduled sewing handoff?",
+   "Embroidery loads: which sewing handoffs are infeasible?"
+  ]
+ },
+ {
+  "no": 24,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "For ORD-312, trace whether its overdue exposure began before inspection or accumulated after inspection started.",
+   "Did order 312 arrive late at inspection, or did the delay build up while it was there?",
+   "ORD-312: upstream delay or inspection dwell?"
+  ]
+ },
+ {
+  "no": 25,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Spot export orders shipping within five working days whose last progress update is older than the factory reporting threshold.",
+   "Which export jobs due within five working days have stale production evidence, even though they are labelled on track?",
+   "Export due within 5 workdays and no fresh update: which orders?"
+  ]
+ },
+ {
+  "no": 26,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Which uniform orders have enough approved pieces for a partial dispatch but an unfinished balance that threatens the full commitment?",
+   "Can any late uniform orders be partially shipped, and how many pieces would remain exposed?",
+   "Partial release options for risky uniform orders?"
+  ]
+ },
+ {
+  "no": 27,
+  "scenario": "1. Order and customer management",
+  "field": "1.3 Assess order risk and trace it",
+  "q": [
+   "Rank active jacket orders by dispatch risk after accounting for embroidery and inspection workloads, not just their current stage.",
+   "Which jacket jobs look on schedule but have too little time left for embroidery and inspection?",
+   "Hidden jacket delivery risks beyond current stage?"
+  ]
+ },
+ {
+  "no": 28,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare ORD-244 and ORD-286 on remaining production workload per available working day and identify the tighter delivery plan.",
+   "Between orders 244 and 286, which needs the higher daily completion rate to meet its commitment?",
+   "244 vs 286: tougher production pace?"
+  ]
+ },
+ {
+  "no": 29,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare Cedar Apparel and Seabrook Textiles on the share of active orders with stale updates, rather than just counting overdue jobs.",
+   "Between Cedar Apparel and Seabrook Textiles, which has the greater proportion of in-progress orders without recent verified movement?",
+   "Cedar vs Seabrook: whose updates are less reliable?"
+  ]
+ },
+ {
+  "no": 30,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Among orders currently in embroidery, compare remaining quantities and downstream sewing demand to decide which handoff would relieve congestion fastest.",
+   "Which embroidery order should move to sewing first if sewing has limited free capacity?",
+   "Embroidery queue: best next release to sewing?"
+  ]
+ },
+ {
+  "no": 31,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare orders that require the same embroidery hoop size and determine whether their planned production windows conflict.",
+   "Which active styles need the same embroidery setup at overlapping times, and what rescheduling options exist?",
+   "Same-hoop embroidery conflicts across orders?"
+  ]
+ },
+ {
+  "no": 32,
+  "scenario": "1. Order and customer management",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare two orders with similar deadlines but different fabric readiness and explain which can enter cutting without leaving machines idle.",
+   "Which near-due order has its fabric allocated and is actually ready to start cutting?",
+   "Same deadline, different fabric readiness: cut which first?"
+  ]
+ },
+ {
+  "no": 33,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare customer orders by the amount of repair work or inspection hold still blocking release, not only their percentage sewn.",
+   "Which customer has more sewn pieces awaiting inspection clearance, and what does that mean for ship-ready quantity?",
+   "Whose sewn stock is not yet releasable?"
+  ]
+ },
+ {
+  "no": 34,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Compare customer orders needing the same embroidery machine this week and recommend a feasible sequence that protects confirmed sewing slots.",
+   "Which customer orders compete for embroidery capacity before their sewing cutoffs, and what should run first?",
+   "Embroidery-machine clash: job sequence and handoff risk?"
+  ]
+ },
+ {
+  "no": 35,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "ORD-201 or ORD-267, which should I chase first?",
+   "Which is more urgent, order 201 or order 267?",
+   "ord201 vs ord267, chase which first?"
+  ]
+ },
+ {
+  "no": 36,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.4 Compare customer orders",
+  "q": [
+   "Cedar Apparel or Seabrook Textiles, whose orders look worse?",
+   "Which customer needs more attention, Cedar Apparel or Seabrook Textiles?",
+   "cedar apparel vs seabrook, whose jobs riskier now?"
+  ]
+ },
+ {
+  "no": 37,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Can we take an order for 700 jackets due on June 3?",
+   "Can we take 700 jackets due 6/3?",
+   "Seven hundred jackets by 3.6?"
+  ]
+ },
+ {
+  "no": 38,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Can we finish 450 vests by 2026-06-01?",
+   "450 vests by June 1, possible?",
+   "Vests 2026.06.01, quantity 450?"
+  ]
+ },
+ {
+  "no": 39,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Maximum mittens by 2026-06-02?",
+   "How many mittens can we finish by 2 June?",
+   "Mittens by 2 June, how many?"
+  ]
+ },
+ {
+  "no": 40,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "What is the earliest finish date for 1,400 cardigans?",
+   "When can fourteen hundred cardigans be ready?",
+   "New 1400 cardigan order, ready when?"
+  ]
+ },
+ {
+  "no": 41,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Which is safer: 450 vests by June 1 or 1,100 jackets by June 5?",
+   "Vests for 6/1 or jackets for 6/5, which can we promise?",
+   "Compare: 450 vests 6/1 vs 1100 jackets 6/5."
+  ]
+ },
+ {
+  "no": 42,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "When can fourteen hundred cardigans be ready with the current backlog?",
+   "With 28 orders in progress, when can we finish 1,400 cardigans?",
+   "New 1400 cardigan order today, ready when with this backlog?"
+  ]
+ },
+ {
+  "no": 43,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Can 900 tunics meet June 4 if the request drops from 1,600?",
+   "The customer cuts the tunic order from sixteen hundred to nine hundred. Can we meet 4 June?",
+   "900 instead of 1600 tunics by 06/04, possible?"
+  ]
+ },
+ {
+  "no": 44,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "Do 650 vests become feasible if the deadline moves from June 1 to June 4?",
+   "The customer gives three more days for six hundred fifty vests. Can we take it?",
+   "650 vests, 06/01 changed to 06/04, possible?"
+  ]
+ },
+ {
+  "no": 45,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.5 Assess an urgent new-order commitment",
+  "q": [
+   "How long did similar 750-piece jacket orders take?",
+   "What was the typical lead time for past orders of seven hundred fifty jackets?",
+   "How long did previous 750-piece jacket orders take to complete?"
+  ]
+ },
+ {
+  "no": 46,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "What needs attention on the evening shift?",
+   "Anything unusual in the factory this evening?",
+   "Everything running normally this evening?"
+  ]
+ },
+ {
+  "no": 47,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Which overdue export orders come first?",
+   "Which late export jobs should we chase first?",
+   "Prioritise export orders past their due dates."
+  ]
+ },
+ {
+  "no": 48,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Which uniform customer needs an update first based on their in-progress overdue orders?",
+   "Whose late uniform orders should I call about first?",
+   "Which uniform customer has highest overdue risk today?"
+  ]
+ },
+ {
+  "no": 49,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "ORD-296 and ORD-305 are both in INSPECTION. Which should be cleared first?",
+   "ord296 vs ord305 in inspection, prioritise which?",
+   "Order 296 or 305, which should inspection release first?"
+  ]
+ },
+ {
+  "no": 50,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "If we focus on one workshop this evening, which would reduce delivery risk most?",
+   "Where should I move the evening team first to protect the most deadlines?",
+   "One workshop only this evening, biggest risk reduction?"
+  ]
+ },
+ {
+  "no": 51,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Rank the top 7 order and production issues for the morning shift.",
+   "Which seven issues should we handle first this morning?",
+   "Top seven problems this morning, what first?"
+  ]
+ },
+ {
+  "no": 52,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Which active jacket orders have gone quiet the longest?",
+   "Any jacket orders untouched for over ten days?",
+   "wich jacket orders havent had activty for ages?"
+  ]
+ },
+ {
+  "no": 53,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Which orders are at risk of becoming late between June 1 and June 11?",
+   "What's due from 1 to 11 June that could slip?",
+   "wat orders r due june 1 to 11 and at risk?"
+  ]
+ },
+ {
+  "no": 54,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "1.6 Prioritise a daily exception list",
+  "q": [
+   "Is there anything on Seabrook Textiles' orders I need to act on this morning?",
+   "Quick check on Seabrook Textiles: any orders in trouble this morning?",
+   "any isues with seabrook jobs this morning?"
+  ]
+ },
+ {
+  "no": 55,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was sewing output on 20 May 2026 normal?",
+   "Sewing on Wednesday the 20th of May, was that a normal day?",
+   "was sewin output on 20 may normall?"
+  ]
+ },
+ {
+  "no": 56,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was embroidery output on 25 May 2026 normal?",
+   "How did embroidery do on Monday 25 May? Normal or not?",
+   "embroidry on 25 may normal??"
+  ]
+ },
+ {
+  "no": 57,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was cutting output on 25 May 2026 normal?",
+   "Cutting only did about 750 on 25 May. Should that worry me?",
+   "was cuting output on 25th may normal?"
+  ]
+ },
+ {
+  "no": 58,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was inspection output on 23 May 2026 normal?",
+   "Inspection on Saturday 23 May: in line with usual?",
+   "inspecton on 23 may normal or not?"
+  ]
+ },
+ {
+  "no": 59,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was embroidery output on 21 May 2026 normal?",
+   "Embroidery hit over 850 on 21 May. Is that unusual?",
+   "embroidry output 21 may normal?"
+  ]
+ },
+ {
+  "no": 60,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Is 950 pieces a normal day for sewing?",
+   "If sewing does 950 today, would that be normal?",
+   "is 950 pcs normal for sewin?"
+  ]
+ },
+ {
+  "no": 61,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Cutting output was 0 on 17 May 2026. Is that normal?",
+   "Why did cutting record zero on Sunday 17 May? Is something wrong?",
+   "cuting was zero on 17 may is that normall?"
+  ]
+ },
+ {
+  "no": 62,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Inspection cleared 1,100 pieces on 20 May. Is that normal?",
+   "I heard inspection reached 1,100 pieces on 20 May. Is that a record?",
+   "inspection did 1100 on 20 may, normal?"
+  ]
+ },
+ {
+  "no": 63,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.1 Check whether a stage output is normal",
+  "q": [
+   "Was sewing output normal during the week of 18 to 23 May 2026?",
+   "How did sewing do over 18 to 23 May compared with usual?",
+   "was sewing output wk of 18 to 23 may normal?"
+  ]
+ },
+ {
+  "no": 64,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Why did embroidery output drop on 20 May?",
+   "Something happened to embroidery around 20 May. What does the data say?",
+   "why did embroidry drop on 20th may?"
+  ]
+ },
+ {
+  "no": 65,
+  "scenario": "2. Factory operation and daily decisions",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Is cutting causing the sewing drop?",
+   "Did upstream cutting fall short and leave sewing without enough pieces?",
+   "is cuting the reason sewing is low?"
+  ]
+ },
+ {
+  "no": 66,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "If ORD-218 has no reply by tomorrow at 10 a.m., remind me.",
+   "Remind me tomorrow at ten in the morning if nobody has answered on order 218.",
+   "if no reply ord218 by tmrw 10am remind me"
+  ]
+ },
+ {
+  "no": 67,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me if ORD-256 has not moved by next Tuesday.",
+   "Let me know next Tuesday if order 256 is still stuck.",
+   "remind me next tue if 256 still stuck"
+  ]
+ },
+ {
+  "no": 68,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me if there is no reply by tomorrow at 4 p.m.",
+   "Keep an eye on it and tell me tomorrow afternoon if nothing changes.",
+   "remind me tmrw arvo if no reply"
+  ]
+ },
+ {
+  "no": 69,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me yesterday at 4 p.m. if ORD-218 has no reply.",
+   "If there was no answer by 8 yesterday morning, remind me.",
+   "remind me by last tue if no reply ord218"
+  ]
+ },
+ {
+  "no": 70,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me if the customer loses confidence in ORD-275.",
+   "Tell me if the customer's attitude changes on order 275.",
+   "remind me if cust worried ord275"
+  ]
+ },
+ {
+  "no": 71,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Remind me tomorrow afternoon if embroidery output is below the normal range.",
+   "Ping me if embroidery falls below its usual level tomorrow.",
+   "remind me if embroidery below normal tmrw"
+  ]
+ },
+ {
+  "no": 72,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "2.2 Explain a production deviation",
+  "q": [
+   "Go ahead and create the embroidery reminder.",
+   "Confirm the embroidery reminder.",
+   "yes do that embroidery reminder"
+  ]
+ },
+ {
+  "no": 73,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "ORD-218 has not moved for ten days. Chase it up.",
+   "Nothing has happened on order 218 for ten days. Can you chase it?",
+   "chase ord218 no movement 10 days"
+  ]
+ },
+ {
+  "no": 74,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Since ORD-218 has already shipped, draft a follow-up to the customer.",
+   "Order 218 is completed and delivered, right? Write the customer a follow-up.",
+   "ord218 shipped already, chase customer"
+  ]
+ },
+ {
+  "no": 75,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Draft a chase-up for Seabrook Textiles.",
+   "Chase the Sea Brook Textiles order.",
+   "chase seabrook"
+  ]
+ },
+ {
+  "no": 76,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Draft a chase-up to the embroidery workshop for ORD-275 and send it.",
+   "Write to embroidery about order 275 and send it straight away.",
+   "chase embroidery ord275 send now"
+  ]
+ },
+ {
+  "no": 77,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Make the embroidery chase firmer but still polite.",
+   "The embroidery message sounds abrupt. Soften it.",
+   "make embroidery msg shorter n more polite"
+  ]
+ },
+ {
+  "no": 78,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Add the merchandising manager in CC.",
+   "Change the recipient to W8's lead.",
+   "send this to another workshop contact instead"
+  ]
+ },
+ {
+  "no": 79,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Just send the chase for ORD-256 to W7. I trust you, so skip the preview.",
+   "Skip the preview and send the W7 chase.",
+   "send W7 chase now no preview"
+  ]
+ },
+ {
+  "no": 80,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Okay, the embroidery draft looks fine.",
+   "That embroidery message sounds good.",
+   "yep embroidery draft looks good"
+  ]
+ },
+ {
+  "no": 81,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.1 Draft, revise, and send a chase-up",
+  "q": [
+   "Draft a chase to W7 and promise the customer delivery next Tuesday.",
+   "Tell the customer order 218 will definitely arrive next Tuesday.",
+   "tell cust ord218 will deliver next tue"
+  ]
+ },
+ {
+  "no": 82,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Add a note that we escalated ORD-218 this afternoon.",
+   "Log that I escalated order 218 to the operations head this afternoon.",
+   "note: escalated ord218 this afternoon"
+  ]
+ },
+ {
+  "no": 83,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Draft a follow-up on ORD-256 asking how many bundles remain to be embroidered. Show me first.",
+   "Draft a note asking cutting how many panels they can hand over today for order 218. Hold it for review.",
+   "How far along are the vests for ORD218? Draft a quick update request."
+  ]
+ },
+ {
+  "no": 84,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Four is too late. Ask them to reply by 1:15 p.m.",
+   "The review moved to this afternoon. Ask them to send the panel count by noon.",
+   "My meeting is at 11. Make the reply deadline 10:30 in the email?"
+  ]
+ },
+ {
+  "no": 85,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "The revised ORD-256 draft looks good. Send it to that order's coordinator.",
+   "Send it to W7's production contact. Check with me first if you only have a general inbox.",
+   "Send only the email for order 218. Keep the other as a draft."
+  ]
+ },
+ {
+  "no": 86,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Can you chase the vests we discussed on Monday?",
+   "Can you get an update on Seabrook Textiles' most urgent order?",
+   "Doesn't W7 have two jacket batches? Chase the one due sooner."
+  ]
+ },
+ {
+  "no": 87,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "No update on ORD-275 for three days. Ask for the expected transfer date without calling it late.",
+   "Ask the lead for order 256 whether this morning's embroidery count is missing from the log or work has not started.",
+   "Is the ORD-218 cutting update missing or has the handoff slipped? Ask the workshop to clarify in the draft."
+  ]
+ },
+ {
+  "no": 88,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Did we send a follow-up on ORD-256 on Monday morning?",
+   "Who received the last chase to W7? I want to check the recipient.",
+   "I remember writing an email about order218. Sent or still a draft?"
+  ]
+ },
+ {
+  "no": 89,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "Draft an email asking W8 if they can take 420 pieces next Wednesday.",
+   "Add this to the email: if W7 cannot take all 650 pieces, could they take 250 on Tuesday?",
+   "Ask W9 whether Monday is when they can receive the jacket batch or finish it. I need both dates."
+  ]
+ },
+ {
+  "no": 90,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.2 Record an internal decision",
+  "q": [
+   "I heard embroidery might be waiting for thread. Can you ask whether that is true?",
+   "Is W7 short of operators or waiting for fabric? Ask what is holding things up.",
+   "ORD-275 may be stuck at colour matching. I only heard at handover. Ask the workshop to verify?"
+  ]
+ },
+ {
+  "no": 91,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Log this for ORD-256. Keep its queue position this afternoon and review it tomorrow at 10 a.m.",
+   "Note that order 218 stays in sequence until cutting reports the panel count.",
+   "Record that ORD-296 will not move up during the night shift. Revisit it at morning handover."
+  ]
+ },
+ {
+  "no": 92,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Add that W8 has not confirmed when it can accept the embroidered panels.",
+   "Add the reason to that note. We are waiting for colour approval, and the customer has not requested a postponement.",
+   "Add that we are holding off on a Tuesday completion promise until weekend staffing is confirmed."
+  ]
+ },
+ {
+  "no": 93,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "I got the day wrong. Change the ORD-256 review from Monday to Wednesday.",
+   "Change the order218 review from 10 to 10:45 a.m. Keep everything else as written.",
+   "I mistyped the order number. The note about pausing embroidery outsourcing was for ORD-275, not ORD-257. Correct it?"
+  ]
+ },
+ {
+  "no": 94,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Make a note that we are sticking to the plan for the vest order.",
+   "Add a note to hold off on changes to the order Seabrook Textiles chased last time.",
+   "Note that we will revisit the third order from yesterday's planning meeting next Monday?"
+  ]
+ },
+ {
+  "no": 95,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Note that we are holding off on outsourcing ORD-275. Revisit it if W8 confirms by 2 p.m. Tuesday that it can take the batch.",
+   "Record that order 256 stays in-house for now. Reassess outsourcing if 450 pieces remain unfinished tomorrow afternoon.",
+   "Add this condition to ORD-218: if W7 can take only one third of the batch, recalculate the delivery date."
+  ]
+ },
+ {
+  "no": 96,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Log that 30 pieces from ORD-201 must be sampled and inspection must sign off before release.",
+   "Add to handover that order 275's colourfastness recheck is due tomorrow afternoon. The day shift should hold the batch.",
+   "Clarify the ORD-256 note. We approved sending it for testing. Shipment approval is still pending."
+  ]
+ },
+ {
+  "no": 97,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Moving ORD-312 forward two days was a suggestion. Mark it pending planning-manager approval and leave the due date unchanged.",
+   "Someone suggested sending this batch to W9. Nobody has approved it. Add a discussion note to ORD-256.",
+   "When I said move it to the embroidery line first, I was asking if it was feasible. Mark it under review?"
+  ]
+ },
+ {
+  "no": 98,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Does ORD-218 already have a note about waiting for the cutting count? Skip it if so.",
+   "Has anyone noted that the panel count needs checking before W8 receives the batch? Show me the original wording first.",
+   "I may have used the wrong order yesterday. Is the note about customer label approval on ORD-201 or ORD-210?"
+  ]
+ },
+ {
+  "no": 99,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Who signed off on releasing ORD-275 yesterday afternoon? Leave the name blank if there is no record.",
+   "Did procurement or the production manager approve outsourcing to W7? Record only what you can verify.",
+   "I think Supervisor Tan approved it. Check first and mark it unverified without a supporting record."
+  ]
+ },
+ {
+  "no": 100,
+  "scenario": "3. Execution and ongoing monitoring",
+  "field": "3.3 Create a conditional reminder",
+  "q": [
+   "Leave a handover note for ORD-256. I will verify the embroidered count this afternoon, and the night supervisor will confirm the inspection time.",
+   "Update the handover for order 218. I will contact W7, and Mei will follow up with the inspection team.",
+   "Note this for ORD-296. Stores will report remaining thread by 11 a.m., then merchandising will reply to the customer. Read it back so I can check."
+  ]
+ }
+]

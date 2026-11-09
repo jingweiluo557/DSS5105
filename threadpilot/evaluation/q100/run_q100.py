@@ -3,6 +3,7 @@
   ideal     = a careful reading of each question (intent + slots), i.e. what the server does when the model reads right
 Rows of one Scenario (Q100_SESSION=field: one Field) run in sequence inside one session per context, so follow-ups ("this order", "Go ahead") have context.
 Output: answers_<mode>.json with every answer, intent, tools, flags. Usage: python run_q100.py ideal|fallback ; then python grade.py answers_ideal.json
+Q100_SET=similar runs the "Similar Questions" tab (annotations_similar.py, graded by grade_similar.py).
 Department e-mail addresses are fixed test values here so drafts resolve a recipient without a mailbox configuration."""
 import asyncio, json, os, re, sys, tempfile
 from datetime import datetime
@@ -22,7 +23,8 @@ from app.workflow_store import WorkflowStore
 from app.workflow_tools import DataTools
 from app.services.order_refs import normalize_order_refs
 
-Q = json.loads(Path(__file__).with_name('questions.json').read_text())
+SET = os.environ.get('Q100_SET', 'q100')   # q100 = the original sheet; similar = the 'Similar Questions' tab (new entities, same structure)
+Q = json.loads(Path(__file__).with_name('questions.json' if SET == 'q100' else f'{SET}_questions.json').read_text())
 NOW = datetime.fromisoformat('2026-04-01T12:00:00+08:00')
 
 U = lambda reason, **k: dict(intent='general.unanswerable', reason=reason, **k)
@@ -126,6 +128,7 @@ A = {
  99: U('people', ids=1),
  100: dict(intent='execution.note', action='save', ids=1, text='handover: verify count this morning; evening supervisor confirms packing time', c2=dict(intent='execution.note', action='update', ids=1, text='handover: I contact W2; Chen follows up with quality control'), c3=dict(intent='execution.note', action='save', ids=1, text='warehouse reports remaining material by 2 p.m., then planning replies')),
 }
+ANNOTATIONS = A if SET == 'q100' else __import__(f'annotations_{SET}').A
 
 class IdealPlanner:
     client, degraded, api_style, model = None, True, 'responses', 'ideal'
@@ -174,7 +177,7 @@ async def run(mode):
                 for q in rows:
                     msg = q['q'][ctx]
                     if not msg: continue
-                    spec = A[q['no']]
+                    spec = ANNOTATIONS[q['no']]
                     if isinstance(spec, dict): spec = spec.get(f'c{ctx + 1}', spec)
                     pl.spec = spec
                     sent_before = len(sender.sent) + len(eng.email_scheduler.sent)
@@ -203,5 +206,5 @@ async def run(mode):
 if __name__ == '__main__':
     mode = sys.argv[1]
     res = asyncio.run(run(mode))
-    Path(__file__).with_name(f'answers_{mode}.json').write_text(json.dumps(res, ensure_ascii=False, indent=1))
+    Path(__file__).with_name(f'answers_{mode}.json' if SET == 'q100' else f'answers_{SET}_{mode}.json').write_text(json.dumps(res, ensure_ascii=False, indent=1))
     print(mode, len(res), 'answers;', sum(1 for r in res if r.get('error')), 'errors')
