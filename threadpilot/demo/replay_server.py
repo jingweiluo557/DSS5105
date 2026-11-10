@@ -20,7 +20,7 @@ import types
 from datetime import datetime
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'backend'))
@@ -306,6 +306,11 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         path = urlparse(self.path).path
+        if path == '/__replay/clock':   # ?t=11:15 moves the business clock within the same day (the demo's 07:00, 09:40, ...)
+            global NOW
+            hh, mm = (parse_qs(urlparse(self.path).query).get('t') or ['09:00'])[0].split(':')
+            NOW = NOW.replace(hour=int(hh), minute=int(mm), second=0)
+            return self.send_json({'now': NOW.isoformat()})
         body = self.route(path)
         if body is not None: return self.send_json(body)
         if path.startswith('/api/'): return self.send_json({'error': {'code': 'NOT_FOUND', 'message': 'replay'}}, 404)
