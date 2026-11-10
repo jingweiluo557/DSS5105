@@ -29,9 +29,12 @@
    "waitAnswer": true              wait until the co-pilot has answered (shows a "waiting for the model" tag; the
                                    interval is listed in waits.json so --compress-waits can speed it up)
    "waitFor": {"css": "…"} | {"text": "…"}            wait for an element (timeout 120 s)
+   "evaluate": "js"                run a snippet in the page (async body), e.g. to move the replay server's clock
    "hold": 2                       pause that many seconds
    "optional": true                a failing step is logged and skipped instead of stopping the run
  --badge "text"  shows a small fixed label in the bottom-left corner (over the sidebar footer) for the whole recording (e.g. "Offline replay").
+                 With a caption band the label is written along the band's bottom edge instead, so it never covers the page.
+ --no-wait-tag   do not show the "waiting for the model" tag (an offline replay has no model to wait for).
  A step runs no earlier than its "at"; if an earlier step overran (the model was slow), every later step shifts by the
  same amount, so the spacing you planned is kept and the .srt still matches the video.
 */
@@ -177,7 +180,7 @@ async function chatIdle(page, timeoutMs = 180000) {
   const captionTop = band ? -1 : (timeline.captionTop ?? (vp.width < 700 ? 76 : 0));   // px from the top; 0 = bottom; -1 = hidden
   const captionSize = timeline.captionSize ?? (vp.width < 700 ? 17 : 26);
   const badge = typeof args.badge === 'string' ? args.badge : (timeline.badge || '');
-  await context.addInitScript(([t, sz, b]) => { window.__demoCaptionTop = t; window.__demoCaptionSize = sz; window.__demoBadge = b; }, [captionTop, captionSize, badge]);
+  await context.addInitScript(([t, sz, b]) => { window.__demoCaptionTop = t; window.__demoCaptionSize = sz; window.__demoBadge = b; }, [captionTop, captionSize, band ? '' : badge]);
   await context.addInitScript(OVERLAY);
   if (KEY) {
     const origin = process.env.THREADPILOT_API_ORIGIN || '';
@@ -242,6 +245,7 @@ async function chatIdle(page, timeoutMs = 180000) {
         await sleep(250);
       }
       if (step.press) await page.keyboard.press(step.press);
+      if (step.evaluate) await page.evaluate(code => (0, eval)(`(async () => { ${code} })()`), step.evaluate);
       if (step.scroll) {
         if (step.scroll.to) await locatorFor(page, step.scroll.to).evaluate(el => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
         else await page.evaluate(s => window.scrollBy({ top: s.by || 0, left: 0, behavior: 'smooth' }) || (s.y !== undefined && window.scrollTo({ top: s.y, behavior: 'smooth' })), step.scroll);
@@ -252,7 +256,7 @@ async function chatIdle(page, timeoutMs = 180000) {
         await loc.waitFor({ state: 'visible', timeout: step.waitFor.timeout || 120000 });
       }
       if (step.waitAnswer) {
-        await page.evaluate(() => window.__demo.waiting(true));
+        if (!args['no-wait-tag']) await page.evaluate(() => window.__demo.waiting(true));
         const w = { start: elapsed(), end: null };
         await sleep(250);
         await chatIdle(page, step.timeout || 180000);
@@ -324,10 +328,17 @@ async function chatIdle(page, timeoutMs = 180000) {
       const W = vp.width * vp.scale, H = vp.height * vp.scale + band;
       const out = path.join(outDir, 'demo_final.mp4');
       // libass sizes an .srt on a 288-line canvas, so px values are scaled by 288/H
-      const k = 288 / H, fontPx = Math.round(band * 0.32);
-      const style = `FontName=DejaVu Sans,FontSize=${Math.max(6, Math.round(fontPx * k))},Bold=1,PrimaryColour=&H00F6F4EF,BorderStyle=1,Outline=0,Shadow=0,Alignment=2,MarginV=${Math.round((band - fontPx) / 2 * k)},MarginL=${Math.round(120 * 384 / W)},MarginR=${Math.round(120 * 384 / W)}`;
+      // with a badge, the captions sit a little higher and smaller and the badge runs along the band's bottom edge
+      const foot = badge ? Math.round(band * 0.2) : 0;
+      const k = 288 / H, fontPx = Math.round((band - foot) * (badge ? 0.34 : 0.32));
+      const style = `FontName=DejaVu Sans,FontSize=${Math.max(6, Math.round(fontPx * k))},Bold=1,PrimaryColour=&H00F6F4EF,BorderStyle=1,Outline=0,Shadow=0,Alignment=2,MarginV=${Math.round((foot + (band - foot - fontPx) / 2) * k)},MarginL=${Math.round(120 * 384 / W)},MarginR=${Math.round(120 * 384 / W)}`;
       const srtArg = srtForBurn.replace(/\\/g, '/').replace(/:/g, '\\:').replace(/'/g, "\\'");
-      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-threads', '2', '-i', input, '-vf', `pad=${W}:${H}:0:0:color=#1C2733,subtitles='${srtArg}':force_style='${style}'`, '-r', '30', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', out], { stdio: 'inherit' });
+      let badgeFilter = '';
+      if (badge) {
+        const badgeFile = path.join(outDir, 'badge.txt'); fs.writeFileSync(badgeFile, badge);
+        badgeFilter = `,drawtext=textfile='${badgeFile.replace(/:/g, '\\:')}':font='DejaVu Sans':fontsize=${Math.round(foot * 0.72)}:fontcolor=0x9AA7B4:x=(w-text_w)/2:y=h-${foot}-2`;
+      }
+      execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-threads', '2', '-i', input, '-vf', `pad=${W}:${H}:0:0:color=#1C2733,subtitles='${srtArg}':force_style='${style}'${badgeFilter}`, '-r', '30', '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-crf', '20', out], { stdio: 'inherit' });
       console.log(`captions burned into a ${band}px band → ${out} (${W}x${H})`);
       input = out;
     }
