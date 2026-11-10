@@ -52,7 +52,8 @@ Two steps act for real on the live system: `Confirm send` (sends the chase-up th
 - Keep `demo_cut.mp4` honest: the on-screen tag already says the model waits are sped up; do not cut them out entirely.
 - `demo_final.mp4` already has the captions burned in; `demo_cut.srt` is the same text as a subtitle file, if a player or editor needs it.
 - Record the voice-over from the teleprompter, not the `say` lines: the captions are too dense to speak. `make_prompter.py`
-  turns the spoken lines in `prompter_lines.py` into a silent karaoke video timed to a recording's `.srt` (whole line on
-  screen, words filling at about 145 words a minute, speaker, clock, next line, handover warning); see
+  turns the spoken lines in `prompter_lines.py` into a silent, scrolling karaoke video timed to a recording's `.srt` (the
+  current line filling at about 145 words a minute, the next lines below it with their start times, speaker, clock,
+  handover warning); see
   `voice/README.md`. Or let the captions carry the narration and add music.
 - A take that goes wrong: fix the step in the timeline and re-run; nothing is cached.
