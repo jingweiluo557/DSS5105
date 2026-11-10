@@ -3,11 +3,12 @@
     python3 demo/make_prompter.py demo  --srt ThreadPilot_Demo.srt      --duration 249.5 --out ThreadPilot_Demo_prompter.mp4
     python3 demo/make_prompter.py presentation --srt Presentation_Group19.srt --duration 289.2 --out Presentation_Group19_prompter.mp4
 
-Play the prompter next to (or instead of) the video while recording the voice-over. For each spoken line in
-demo/prompter_lines.py the whole chunk is shown at once and the words fill in at a speakable pace (about 145 words a
-minute, faster only when the window is tight), so the presenter can see both what comes next and whether they are
-ahead or behind. On screen as well: who speaks, a clock (m:ss / total), the caption the viewer sees at that moment,
-a bar for the time left on this line, the next line, and a handover warning three seconds before the speaker changes.
+Play the prompter next to (or instead of) the video while recording the voice-over. It scrolls like a teleprompter:
+the line to say now sits at the top in bold, its words turning yellow at a speakable pace (about 145 words a minute,
+faster only when the window is tight), and the lines coming up are listed below it in grey, each with the time it
+starts and, if the voice changes, who says it. So the presenter can read ahead and see at a glance whether to speed up
+or slow down. Also on screen: who speaks, a clock (m:ss / total), the caption the viewer sees at that moment, a bar for
+the time left on this line, and a handover warning three seconds before the speaker changes.
 
 Optional: --script FILE writes the spoken lines with their start times as plain text. Needs ffmpeg with libass.
 """
@@ -69,21 +70,65 @@ def esc(text: str) -> str:
     return text.replace('\\', '\\\\').replace('{', '(').replace('}', ')')
 
 
-def karaoke(text: str, speak: float) -> str:
-    """{\\kf} per word, weighted by length (a rough syllable count), summing to the speaking time."""
-    ws = words(text)
+FONT_DIR = Path('/usr/share/fonts/opentype/inter')
+X0, X1 = 250, W - 70             # text column; the gutter on the left holds start times and speaker names
+TOP, BOTTOM = 214, 1012          # the scrolling area
+CUR, UP = 54, 44                 # font sizes: the line being spoken, the lines coming up
+LEAD = 1.0                       # libass steps lines by the font size
+_fonts = {}
+
+
+def _font(size: int, bold: bool):
+    from PIL import ImageFont
+    key = (size, bold)
+    if key not in _fonts:
+        _fonts[key] = ImageFont.truetype(str(FONT_DIR / ('Inter-Bold.otf' if bold else 'Inter-Regular.otf')), size)
+    return _fonts[key]
+
+
+def wrap(text: str, size: int, bold: bool) -> list[list[str]]:
+    """Words per screen line, measured with the same font libass uses (with a little slack)."""
+    f, limit = _font(size, bold), (X1 - X0) * 0.96
+    rows, row = [], []
+    for w in words(text):
+        if row and f.getlength(' '.join(row + [w])) > limit:
+            rows.append(row)
+            row = []
+        row.append(w)
+    return rows + [row] if row else rows
+
+
+def karaoke(rows: list[list[str]], speak: float) -> str:
+    """{\\kf} per word, weighted by length (a rough syllable count), summing to the speaking time; \\N at the wraps."""
+    ws = [w for r in rows for w in r]
+    breaks = set()
+    n = 0
+    for r in rows[:-1]:
+        n += len(r)
+        breaks.add(n)                                                     # a line break before word n
     weight = [max(2, len(re.sub(r'[^\w]', '', w))) + 3 for w in ws]      # + 3: every word costs a beat, plus its length
     total = sum(weight)
     out, used = [], 0
     for i, (w, k) in enumerate(zip(ws, weight)):
         cs = round(speak * 100 * k / total) if i < len(ws) - 1 else max(1, round(speak * 100) - used)
         used += cs
-        out.append(f'{{\\kf{cs}}}{esc(w)} ')
-    return ''.join(out).rstrip()
+        out.append(('\\N' if i in breaks else (' ' if i else '')) + f'{{\\kf{cs}}}{esc(w)}')
+    return ''.join(out)
 
 
-def size_for(n: int) -> int:
-    return 84 if n <= 14 else 74 if n <= 24 else 62 if n <= 45 else 52 if n <= 70 else 46
+def layout(chunks, i):
+    """[(j, y, rows, size)] for the blocks on screen while line i is spoken: line i on top, then what comes next."""
+    out, y = [], TOP
+    for j in range(i, len(chunks)):
+        size = CUR if j == i else UP
+        rows = wrap(chunks[j]['text'], size, j == i)
+        if j > i and chunks[j]['who'] != chunks[j - 1]['who']:
+            y += 30                                                       # a little air before a new voice
+        out.append((j, y, rows, size))
+        y += len(rows) * size * LEAD + (46 if j == i else 28)
+        if y > BOTTOM:
+            break
+    return out
 
 
 def ass(chunks, cues, duration, title) -> str:
@@ -91,19 +136,20 @@ def ass(chunks, cues, duration, title) -> str:
 ScriptType: v4.00+
 PlayResX: {W}
 PlayResY: {H}
-WrapStyle: 0
+WrapStyle: 2
 ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Say,Inter,72,&H00FFFFFF,&H00786A5E,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,5,170,170,0,1
+Style: Say,Inter,{CUR},&H0066E6FF,&H00E8E2DC,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
+Style: Up,Inter,{UP},&H00B4ABA2,&H00B4ABA2,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
+Style: Gut,Inter,26,&H00968676,&H00968676,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
 Style: Who,Inter,46,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,7,90,90,56,1
 Style: Clock,Inter,46,&H00E6E0DA,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,9,90,90,56,1
-Style: Ctx,Inter,28,&H00A09080,&H00FFFFFF,&H00000000,&H00000000,0,-1,0,0,100,100,0,0,1,0,0,8,240,240,156,1
-Style: Next,Inter,34,&H00968676,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,1,90,90,70,1
-Style: Hand,Inter,40,&H0040A0FF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,3,90,90,128,1
+Style: Ctx,Inter,26,&H00A09080,&H00FFFFFF,&H00000000,&H00000000,0,-1,0,0,100,100,0,0,1,0,0,7,0,0,0,1
+Style: Hand,Inter,40,&H0040A0FF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,8,90,90,58,1
 Style: Bar,Inter,10,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
-Style: Tag,Inter,24,&H00786A5E,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,2,90,90,14,1
+Style: Tag,Inter,22,&H00786A5E,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,2,90,90,12,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -111,29 +157,42 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     ev = []
     add = lambda s, e, style, text, layer=1: ev.append(f'Dialogue: {layer},{ts(s)},{ts(e)},{style},,0,0,0,,{text}')
     total = clock(duration)
+    clip = f'\\clip(0,{TOP - 8},{W},{BOTTOM + 6})'
     for s in range(int(duration) + 1):                                    # the running clock
         add(s, min(s + 1, duration), 'Clock', f'{clock(s)} / {total}')
-    add(0, duration, 'Tag', esc(title) + ' · teleprompter (silent): say the bright words as they fill')
-    # overall progress, full width at the very bottom
+    add(0, duration, 'Tag', esc(title) + ' · teleprompter (silent): yellow = say it now · the grey lines below are coming up, read ahead')
     add(0, duration, 'Bar', f'{{\\pos(0,{H - 8})\\1c&H00403830&\\p1}}m 0 0 l {W} 0 {W} 8 0 8', 0)
     add(0, duration, 'Bar', f'{{\\pos(0,{H - 8})\\1c&H00A0A0A0&\\clip(0,{H - 8},0,{H})\\t(0,{int(duration * 1000)},\\clip(0,{H - 8},{W},{H}))\\p1}}m 0 0 l {W} 0 {W} 8 0 8', 1)
-    for c in cues:                                                        # what the viewer sees at that moment
-        add(c['start'], c['end'], 'Ctx', 'On screen:  ' + esc(c['text']))
+    for c in cues:                                                        # what the viewer sees, one line, cut short
+        ws = words(c['text'])
+        add(c['start'], c['end'], 'Ctx', f'{{\\pos(90,150)}}On screen:  ' + esc(' '.join(ws[:22]) + (' …' if len(ws) > 22 else '')))
+    prev = {}
     for i, ch in enumerate(chunks):
         s, e, col = ch['start'], ch['end'], COLOURS[ch['who']]
         add(s, e, 'Who', f'{{\\1c{col}}}{SHORT[ch["who"]]}{{\\1c&H00968676&\\b0\\fs32}}   {esc(ch["who"].split(" (")[0])}')
-        add(s, e, 'Say', f'{{\\fs{size_for(ch["n"])}\\1c&H00FFFFFF&}}' + karaoke(ch['text'], ch['speak']))
-        # time left on this line: a bar under the header that empties
-        dur = int((e - s) * 1000)
-        add(s, e, 'Bar', f'{{\\pos(90,124)\\1c{col}\\clip(90,124,{W - 90},132)\\t(0,{dur},\\clip(90,124,90,132))\\p1}}m 0 0 l {W - 180} 0 {W - 180} 8 0 8')
-        if i + 1 < len(chunks):
-            nx = chunks[i + 1]
-            preview = ' '.join(words(nx['text'])[:14]) + (' …' if nx['n'] > 14 else '')
-            add(s, e, 'Next', f'Next{" (" + SHORT[nx["who"]] + ")" if nx["who"] != ch["who"] else ""}:  {esc(preview)}')
-            if nx['who'] != ch['who']:
-                add(max(s, e - 3), e, 'Hand', f'{{\\1c{COLOURS[nx["who"]]}}}Handover to {SHORT[nx["who"]]} ▸')
-        else:
-            add(s, e, 'Next', 'Last line.')
+        dur = int((e - s) * 1000)                                         # time left on this line: a bar that empties
+        add(s, e, 'Bar', f'{{\\pos(90,118)\\1c{col}\\clip(90,118,{W - 90},126)\\t(0,{dur},\\clip(90,118,90,126))\\p1}}m 0 0 l {W - 180} 0 {W - 180} 8 0 8')
+        nxt = chunks[i + 1] if i + 1 < len(chunks) else None
+        if nxt and nxt['who'] != ch['who']:
+            add(max(s, e - 3), e, 'Hand', f'{{\\1c{COLOURS[nxt["who"]]}}}Handover to {SHORT[nxt["who"]]} ▸')
+        here, blocks = {}, layout(chunks, i)
+        # how far the list scrolls on this change: lines already on screen slide up by this much, new ones slide in with them
+        shift = next((prev[j] - y for j, y, _, _ in blocks if j != i and j in prev), 0)
+        for j, y, rows, size in blocks:
+            c2 = chunks[j]
+            here[j] = y
+            y0 = prev.get(j, y + shift)
+            mv = (f'\\move({{x}},{y0:.0f},{{x}},{y:.0f},0,320)' if j != i and abs(y0 - y) > 1 else f'\\pos({{x}},{y:.0f})')
+            if j == i:
+                add(s, e, 'Say', f'{{{mv.format(x=X0)}{clip}}}' + karaoke(rows, ch['speak']), 2)
+                h = len(rows) * size * LEAD + 4                           # a bar in the speaker's colour beside it
+                add(s, e, 'Bar', f'{{\\pos({X0 - 26},{y + 8:.0f})\\1c{col}{clip}\\p1}}m 0 0 l 7 0 7 {h:.0f} 0 {h:.0f}', 2)
+            else:
+                dim = '' if j - i <= 2 else '\\alpha&H40&'
+                add(s, e, 'Up', f'{{{mv.format(x=X0)}{clip}{dim}}}' + '\\N'.join(esc(' '.join(r)) for r in rows))
+            who = f'\\N{{\\1c{COLOURS[c2["who"]]}\\b1}}{SHORT[c2["who"]]}' if (j == i or c2['who'] != ch['who']) else ''
+            add(s, e, 'Gut', f'{{{mv.format(x=90)}{clip}}}{clock(c2["start"])}{who}')
+        prev = here
     return head + '\n'.join(ev) + '\n'
 
 
