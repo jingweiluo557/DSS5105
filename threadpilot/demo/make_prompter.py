@@ -1,7 +1,8 @@
 """Karaoke teleprompter videos: the words to SAY, timed to a recorded video, with no slides or footage.
 
     python3 demo/make_prompter.py demo  --srt ThreadPilot_Demo.srt      --duration 249.5 --out ThreadPilot_Demo_prompter.mp4
-    python3 demo/make_prompter.py presentation --srt Presentation_Group19.srt --duration 289.2 --out Presentation_Group19_prompter.mp4
+    python3 demo/make_prompter.py presentation --srt demo/presentation_cues.srt --duration 289.2 --no-context \
+        --subs Presentation_Group19.srt --out Presentation_Group19_prompter.mp4
 
 Play the prompter next to (or instead of) the video while recording the voice-over. It scrolls like a teleprompter:
 the line to say now sits at the top in bold, its words turning yellow at a speakable pace (about 145 words a minute,
@@ -10,7 +11,9 @@ starts and, if the voice changes, who says it. So the presenter can read ahead a
 or slow down. Also on screen: who speaks, a clock (m:ss / total), the caption the viewer sees at that moment, a bar for
 the time left on this line, and a handover warning three seconds before the speaker changes.
 
-Optional: --script FILE writes the spoken lines with their start times as plain text. Needs ffmpeg with libass.
+Optional: --script FILE writes the spoken lines with their start times as plain text; --subs FILE writes them as
+subtitles, cut to two lines and timed to the prompter's pace (the Sprint 3 video is subtitled with these, burned in by
+demo/burn_subs.py); --no-context leaves out the "On screen" caption line, for a video subtitled with the lines themselves. Needs ffmpeg with libass.
 """
 import argparse
 import re
@@ -98,15 +101,30 @@ def wrap(text: str, size: int, bold: bool) -> list[list[str]]:
     return rows + [row] if row else rows
 
 
+def weights(ws: list[str]) -> list[int]:
+    """A rough syllable count per word: every word costs a beat, plus its length."""
+    return [max(2, len(re.sub(r'[^\w]', '', w))) + 3 for w in ws]
+
+
+def word_starts(text: str, speak: float) -> list[float]:
+    """When each word starts, in seconds from the line's start, at the karaoke pace (the same as the prompter's fill)."""
+    wt = weights(words(text))
+    total, out, at = sum(wt), [], 0.0
+    for k in wt:
+        out.append(at)
+        at += speak * k / total
+    return out
+
+
 def karaoke(rows: list[list[str]], speak: float) -> str:
-    """{\\kf} per word, weighted by length (a rough syllable count), summing to the speaking time; \\N at the wraps."""
+    """{\\kf} per word, weighted by weights(), summing to the speaking time; \\N at the wraps."""
     ws = [w for r in rows for w in r]
     breaks = set()
     n = 0
     for r in rows[:-1]:
         n += len(r)
         breaks.add(n)                                                     # a line break before word n
-    weight = [max(2, len(re.sub(r'[^\w]', '', w))) + 3 for w in ws]      # + 3: every word costs a beat, plus its length
+    weight = weights(ws)
     total = sum(weight)
     out, used = [], 0
     for i, (w, k) in enumerate(zip(ws, weight)):
@@ -114,6 +132,54 @@ def karaoke(rows: list[list[str]], speak: float) -> str:
         used += cs
         out.append(('\\N' if i in breaks else (' ' if i else '')) + f'{{\\kf{cs}}}{esc(w)}')
     return ''.join(out)
+
+
+SUB_MAX = 14                     # words per subtitle (two lines)
+
+
+def _segments(ws: list[str]) -> list[list[str]]:
+    """Split a sentence into pieces of at most SUB_MAX words, at the punctuation nearest the middle if there is any."""
+    if len(ws) <= SUB_MAX:
+        return [ws]
+    mid = len(ws) / 2
+    cuts = [i + 1 for i, w in enumerate(ws[:-1]) if w[-1] in ',:;—' and 3 <= i + 1 <= len(ws) - 3]
+    cut = min(cuts, key=lambda c: abs(c - mid)) if cuts else round(mid)
+    return _segments(ws[:cut]) + _segments(ws[cut:])
+
+
+def subtitles(chunks) -> list[dict]:
+    """The spoken lines as subtitles: sentences, cut to two lines, each shown from when its first word is said (at the
+    prompter's pace) until the next one starts; a line's last subtitle stays up to 2 s after it is said."""
+    out = []
+    for ch in chunks:
+        ws, starts = words(ch['text']), word_starts(ch['text'], ch['speak'])
+        sentences, cur = [], []
+        for w in ws:
+            cur.append(w)
+            if re.search(r'[.!?]["”’)]?$', w):
+                sentences.append(cur)
+                cur = []
+        if cur:
+            sentences.append(cur)
+        pieces = [seg for sent in sentences for seg in _segments(sent)]
+        k = 0
+        while k + 1 < len(pieces):                                        # a 1-3 word piece joins the next if both fit
+            if len(pieces[k]) <= 3 and len(pieces[k]) + len(pieces[k + 1]) <= SUB_MAX:
+                pieces[k:k + 2] = [pieces[k] + pieces[k + 1]]
+            else:
+                k += 1
+        i = 0
+        for k, seg in enumerate(pieces):
+            start = ch['start'] + starts[i]
+            i += len(seg)
+            end = ch['start'] + starts[i] if k + 1 < len(pieces) else min(ch['end'], ch['start'] + ch['speak'] + 2.0)
+            out.append({'start': start, 'end': end, 'text': ' '.join(seg)})
+    return out
+
+
+def srt_text(subs) -> str:
+    t = lambda x: f'{int(x // 3600):02d}:{int(x // 60 % 60):02d}:{int(x % 60):02d},{int(round(x * 1000)) % 1000:03d}'
+    return '\n'.join(f'{i + 1}\n{t(c["start"])} --> {t(c["end"])}\n{c["text"]}\n' for i, c in enumerate(subs))
 
 
 def layout(chunks, i):
@@ -131,7 +197,7 @@ def layout(chunks, i):
     return out
 
 
-def ass(chunks, cues, duration, title) -> str:
+def ass(chunks, cues, duration, title, context=True) -> str:
     head = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
@@ -163,7 +229,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     add(0, duration, 'Tag', esc(title) + ' · teleprompter (silent): yellow = say it now · the grey lines below are coming up, read ahead')
     add(0, duration, 'Bar', f'{{\\pos(0,{H - 8})\\1c&H00403830&\\p1}}m 0 0 l {W} 0 {W} 8 0 8', 0)
     add(0, duration, 'Bar', f'{{\\pos(0,{H - 8})\\1c&H00A0A0A0&\\clip(0,{H - 8},0,{H})\\t(0,{int(duration * 1000)},\\clip(0,{H - 8},{W},{H}))\\p1}}m 0 0 l {W} 0 {W} 8 0 8', 1)
-    for c in cues:                                                        # what the viewer sees, one line, cut short
+    for c in (cues if context else []):                                  # what the viewer sees, one line, cut short
         ws = words(c['text'])
         add(c['start'], c['end'], 'Ctx', f'{{\\pos(90,150)}}On screen:  ' + esc(' '.join(ws[:22]) + (' …' if len(ws) > 22 else '')))
     prev = {}
@@ -221,6 +287,9 @@ def main():
     ap.add_argument('--out', type=Path)
     ap.add_argument('--script', type=Path)
     ap.add_argument('--check', action='store_true', help='only report the pace of each line')
+    ap.add_argument('--subs', type=Path, help='also write the spoken lines as subtitles (.srt), timed to the prompter')
+    ap.add_argument('--no-context', action='store_true', help='leave out the "On screen" caption line (when the video '
+                    'is subtitled with the spoken lines themselves)')
     a = ap.parse_args()
     lines = prompter_lines.DEMO if a.which == 'demo' else prompter_lines.PRESENTATION
     title = 'ThreadPilot · product demo' if a.which == 'demo' else 'ThreadPilot · Sprint 3 presentation'
@@ -235,11 +304,15 @@ def main():
     print(f'{len(chunks)} lines; fastest {max(c["wps"] for c in chunks) * 60:.0f} wpm; {len(fast)} over {MAX_WPS * 60:.0f} wpm')
     if a.script:
         a.script.write_text(script_text(chunks, title, a.duration), encoding='utf-8')
+    if a.subs:
+        subs = subtitles(chunks)
+        a.subs.write_text(srt_text(subs), encoding='utf-8')
+        print(f'{len(subs)} subtitles -> {a.subs}')
     if a.check or not a.out:
         return
     with tempfile.TemporaryDirectory() as tmp:
         sub = Path(tmp) / 'prompter.ass'
-        sub.write_text(ass(chunks, cues, a.duration, title), encoding='utf-8')
+        sub.write_text(ass(chunks, cues, a.duration, title, context=not a.no_context), encoding='utf-8')
         subprocess.run(['ffmpeg', '-y', '-v', 'error', '-f', 'lavfi', '-i', f'color=c=0x141C26:s={W}x{H}:r=30:d={a.duration}',
                         '-vf', f'ass={sub}', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p',
                         '-movflags', '+faststart', str(a.out)], check=True)

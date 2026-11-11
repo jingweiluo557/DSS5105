@@ -1,0 +1,155 @@
+1
+00:00:00,000 --> 00:00:00,928
+Good afternoon.
+
+2
+00:00:00,928 --> 00:00:06,000
+We are Group 19, Track 1, and this is ThreadPilot, the general manager’s co-pilot.
+
+3
+00:00:06,000 --> 00:00:09,472
+Our user is the general manager of a quick-response knitwear factory.
+
+4
+00:00:09,472 --> 00:00:17,975
+She runs it on the move, without SQL, and the questions start at seven: did anything go wrong yesterday, how is the TrendCart order, can we take 800 hoodies by the 25th?
+
+5
+00:00:17,975 --> 00:00:25,723
+Today that costs an estimated seventy-three planner-hours a month, and a wrong answer costs a delivery: eight of thirty-four open orders are already late.
+
+6
+00:00:25,723 --> 00:00:30,000
+ThreadPilot answers from the factory's own records, and acts only after she confirms.
+
+7
+00:00:30,000 --> 00:00:33,399
+User journey. 07:00 — the general manager opens ThreadPilot before walking the floor. The day is already on one screen.
+
+8
+00:00:33,399 --> 00:00:37,002
+RED: 8 orders overdue, assembly below its normal range for 6 days, 3 decisions waiting. Nothing here was asked for.
+
+9
+00:00:37,002 --> 00:00:41,600
+A decision card: ORD-029 will miss 1 April. “Review options” runs the queue simulation.
+
+10
+00:00:41,600 --> 00:00:47,973
+Moving ORD-029 up saves it 5 days but makes 6 other orders 11 days later in total, so it recommends keeping the current order.
+
+11
+00:00:47,973 --> 00:00:54,384
+It also drafts before she asks: both stalled orders already have a chase-up, written from the records.
+
+12
+00:00:54,384 --> 00:01:00,741
+“Review & send” opens the preview: to washing, 9 days idle, 3 days overdue. She checks it and confirms.
+
+13
+00:01:00,741 --> 00:01:06,048
+Sent and logged; ORD-002 leaves the list. Nothing went out before her click.
+
+14
+00:01:06,048 --> 00:01:08,038
+Every chart has an “i”: what it shows and why it is computed that way.
+
+15
+00:01:08,038 --> 00:01:11,839
+“Normal” = the previous 8 same weekdays: on this factory that cut false alerts from 0.67 to 0.1 a month.
+
+16
+00:01:11,838 --> 00:01:19,039
+The morning briefing, written at 07:00, each point with its supporting records.
+
+17
+00:01:19,039 --> 00:01:24,919
+09:40 — on the floor, she asks in her own words.
+
+18
+00:01:24,919 --> 00:01:32,209
+TrendCart has six active orders, so it asks instead of guessing.
+
+19
+00:01:32,209 --> 00:01:36,267
+ORD-005: 500 scarves at knitting, due 20 April. Each answer shows the tool calls behind it.
+
+20
+00:01:36,267 --> 00:01:41,256
+“Show more”: the planner’s reading, each tool with its arguments, and the records it used.
+
+21
+00:01:41,256 --> 00:01:46,519
+11:15 — a customer asks for 800 hoodies by the 25th.
+
+22
+00:01:46,519 --> 00:01:54,340
+It asks the one thing that changes the answer: ready at the factory, or delivered?
+
+23
+00:01:54,340 --> 00:01:59,742
+An estimate with its assumptions: the queue’s finish date, the on-time chance, the bottleneck, outside workshops that could take it. Not a promise.
+
+24
+00:01:59,742 --> 00:02:06,774
+Core task, end to end. 14:30 — the same chase in her own words, typed the way it is said on the floor.
+
+25
+00:02:06,774 --> 00:02:15,993
+It checks the claim against the record first — last activity 24 March, 8 days: true — then drafts to knitting.
+
+26
+00:02:15,993 --> 00:02:21,613
+Preview first. Nothing is sent until the manager confirms this exact draft.
+
+27
+00:02:21,613 --> 00:02:29,555
+Sent from the manager’s mailbox, and logged.
+
+28
+00:02:29,555 --> 00:02:37,214
+A conditional watch: at 10:00 tomorrow it notifies only if no reply has been recorded.
+
+29
+00:02:37,214 --> 00:02:43,215
+It also speaks first: an alert email only for a decision needed today — at most 3 a day, never the same item twice in 24 hours.
+
+30
+00:02:43,215 --> 00:02:48,998
+Hard case 1 — a wrong premise: ORD-029 “stuck since last week”.
+
+31
+00:02:48,998 --> 00:02:53,399
+The record says it moved today. It says so, and asks before writing anything.
+
+32
+00:02:53,399 --> 00:02:58,696
+Hard case 2 — no order ID, only a description.
+
+33
+00:02:58,696 --> 00:03:05,970
+Three orders match, so it lists them instead of picking one.
+
+34
+00:03:05,970 --> 00:03:10,171
+“The vest one” narrows that list to ORD-120 and drafts to assembly. Nothing sent.
+
+35
+00:03:10,171 --> 00:03:15,596
+Hard case 3 — an order that does not exist.
+
+36
+00:03:15,596 --> 00:03:20,598
+Not in the records — and it says so. It does not invent an order, a stage or a number.
+
+37
+00:03:22,167 --> 00:04:00,167
+We tested against ground truth: seventy new questions written from the data files only, every answer computed twice and checked, run once with no fixes. Sixty-nine percent fully correct, with a confidence interval of fifty-seven to seventy-eight. Production and normal-range questions: ten of ten. Not-in-the-records: seven of eight. But rankings and comparisons: three of eight each. Without the language model, twenty-one percent. With eight to ten questions per type, read the categories as indicative. And in thirteen hundred graded runs, no email went out without a confirmed preview.
+
+38
+00:04:00,167 --> 00:04:27,167
+What breaks it? Nine misses need a ranking or filter we never built, like oldest by order date. Seven are order numbers it can't read, like hash eighty-one, or eighty-three or two. Three comparisons give a table but no verdict. The pattern: one question, one tool, it is right. Next we build one sort-and-filter tool, fix the number parsing, and run these seventy on the live model.
+
+39
+00:04:27,167 --> 00:04:49,167
+We built a co-pilot a manager can use all day, and on questions it had never seen it was right sixty-nine percent of the time, never sent an email without a confirmed preview, and never invented a record. What we learned: a score on questions you tuned against is a regression check, not accuracy; rules belong in code; and the misses cluster, so build the missing tool first. Thank you.
