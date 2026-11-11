@@ -5,7 +5,7 @@
         --subs Presentation_Group19.srt --out Presentation_Group19_prompter.mp4
 
 Play the prompter next to (or instead of) the video while recording the voice-over. It scrolls like a teleprompter:
-the line to say now sits at the top in bold, its words turning yellow at a speakable pace (about 145 words a minute,
+the lines already said stay above, dimmed, so you can see where you are; the line to say now sits in bold below them, its words turning yellow at a speakable pace (about 145 words a minute,
 faster only when the window is tight), and the lines coming up are listed below it in grey, each with the time it
 starts and, if the voice changes, who says it. So the presenter can read ahead and see at a glance whether to speed up
 or slow down. Also on screen: who speaks, a clock (m:ss / total), the caption the viewer sees at that moment, a bar for
@@ -75,8 +75,9 @@ def esc(text: str) -> str:
 
 FONT_DIR = Path('/usr/share/fonts/opentype/inter')
 X0, X1 = 250, W - 70             # text column; the gutter on the left holds start times and speaker names
-TOP, BOTTOM = 214, 1012          # the scrolling area
-CUR, UP = 54, 44                 # font sizes: the line being spoken, the lines coming up
+TOP, BOTTOM = 214, 1040          # the scrolling area (TOP moves up to 160 without the "On screen" line)
+CUR, UP, PAST = 52, 42, 38       # font sizes: the line being spoken, the lines coming up, the lines already said
+ABOVE = 250                      # the line being spoken starts this far below TOP; the lines already said fill the space above
 LEAD = 1.0                       # libass steps lines by the font size
 _fonts = {}
 
@@ -182,9 +183,18 @@ def srt_text(subs) -> str:
     return '\n'.join(f'{i + 1}\n{t(c["start"])} --> {t(c["end"])}\n{c["text"]}\n' for i, c in enumerate(subs))
 
 
-def layout(chunks, i):
-    """[(j, y, rows, size)] for the blocks on screen while line i is spoken: line i on top, then what comes next."""
-    out, y = [], TOP
+def layout(chunks, i, top=TOP):
+    """[(j, y, rows, size)] for the blocks on screen while line i is spoken: line i at a fixed height, the lines already
+    said above it (dimmed, newest nearest), the lines coming up below it."""
+    out, anchor = [], top + ABOVE
+    y = anchor                                                            # lines already said, upwards from the anchor
+    for j in range(i - 1, -1, -1):
+        rows = wrap(chunks[j]['text'], PAST, False)
+        y -= len(rows) * PAST * LEAD + 24 + (30 if chunks[j]['who'] != chunks[j + 1]['who'] else 0)
+        out.append((j, y, rows, PAST))
+        if y < top:
+            break
+    y = anchor                                                            # the line being spoken, then what comes next
     for j in range(i, len(chunks)):
         size = CUR if j == i else UP
         rows = wrap(chunks[j]['text'], size, j == i)
@@ -209,6 +219,7 @@ ScaledBorderAndShadow: yes
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Say,Inter,{CUR},&H0066E6FF,&H00E8E2DC,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
 Style: Up,Inter,{UP},&H00B4ABA2,&H00B4ABA2,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
+Style: Past,Inter,{PAST},&H00807468,&H00807468,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
 Style: Gut,Inter,26,&H00968676,&H00968676,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
 Style: Who,Inter,46,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,7,90,90,56,1
 Style: Clock,Inter,46,&H00E6E0DA,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,9,90,90,56,1
@@ -223,7 +234,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     ev = []
     add = lambda s, e, style, text, layer=1: ev.append(f'Dialogue: {layer},{ts(s)},{ts(e)},{style},,0,0,0,,{text}')
     total = clock(duration)
-    clip = f'\\clip(0,{TOP - 8},{W},{BOTTOM + 6})'
+    clip = f'\\clip(0,{(TOP if context else 160) - 8},{W},{BOTTOM + 6})'
     for s in range(int(duration) + 1):                                    # the running clock
         add(s, min(s + 1, duration), 'Clock', f'{clock(s)} / {total}')
     add(0, duration, 'Tag', esc(title) + ' · teleprompter (silent): yellow = say it now · the grey lines below are coming up, read ahead')
@@ -241,7 +252,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         nxt = chunks[i + 1] if i + 1 < len(chunks) else None
         if nxt and nxt['who'] != ch['who']:
             add(max(s, e - 3), e, 'Hand', f'{{\\1c{COLOURS[nxt["who"]]}}}Handover to {SHORT[nxt["who"]]} ▸')
-        here, blocks = {}, layout(chunks, i)
+        here, blocks = {}, layout(chunks, i, TOP if context else 160)
         # how far the list scrolls on this change: lines already on screen slide up by this much, new ones slide in with them
         shift = next((prev[j] - y for j, y, _, _ in blocks if j != i and j in prev), 0)
         for j, y, rows, size in blocks:
@@ -253,10 +264,14 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 add(s, e, 'Say', f'{{{mv.format(x=X0)}{clip}}}' + karaoke(rows, ch['speak']), 2)
                 h = len(rows) * size * LEAD + 4                           # a bar in the speaker's colour beside it
                 add(s, e, 'Bar', f'{{\\pos({X0 - 26},{y + 8:.0f})\\1c{col}{clip}\\p1}}m 0 0 l 7 0 7 {h:.0f} 0 {h:.0f}', 2)
+            elif j < i:                                                   # already said: dim, fading with age
+                dim = '' if i - j == 1 else '\\alpha&H50&' if i - j == 2 else '\\alpha&H90&'
+                add(s, e, 'Past', f'{{{mv.format(x=X0)}{clip}{dim}}}' + '\\N'.join(esc(' '.join(r)) for r in rows))
             else:
                 dim = '' if j - i <= 2 else '\\alpha&H40&'
                 add(s, e, 'Up', f'{{{mv.format(x=X0)}{clip}{dim}}}' + '\\N'.join(esc(' '.join(r)) for r in rows))
-            who = f'\\N{{\\1c{COLOURS[c2["who"]]}\\b1}}{SHORT[c2["who"]]}' if (j == i or c2['who'] != ch['who']) else ''
+            first = j == 0 or chunks[j - 1]['who'] != c2['who']            # the speaker's name where a voice starts
+            who = f'\\N{{\\1c{COLOURS[c2["who"]]}\\b1}}{SHORT[c2["who"]]}' if (j == i or (first and c2['who'] != ch['who']) or (first and j > i)) else ''
             add(s, e, 'Gut', f'{{{mv.format(x=90)}{clip}}}{clock(c2["start"])}{who}')
         prev = here
     return head + '\n'.join(ev) + '\n'
