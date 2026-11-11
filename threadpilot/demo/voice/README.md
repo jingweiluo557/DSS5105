@@ -22,14 +22,25 @@ Wendy 101 s · Matthew 101 s · Kevin 87 s (total 4:49).
 into it (video 1:41, the caption "11:15 — a customer asks for 800 hoodies by the 25th"). A clip longer than its window
 runs over the next part, so keep `demo@0` under 71 s.
 
-**Pace with the teleprompter, not the captions.** The burned-in captions are written to be read and many run at
-200–570 words a minute, too fast to say. `Presentation_Group19_prompter.mp4` (and `ThreadPilot_Demo_prompter.mp4` for the
+**Pace with the teleprompter.** `Presentation_Group19_prompter.mp4` (and `ThreadPilot_Demo_prompter.mp4` for the
 product demo) is a silent, text-only video timed to the real one that scrolls like a teleprompter. The line to say now
 sits at the top, its words turning yellow at speaking pace (about 145 words a minute). The next five or six lines are
 listed below in grey with the time each one starts, so you can read ahead and decide whether to speed up or slow down.
-It also shows who speaks, the clock, the caption the viewer sees, and a handover warning three seconds before the
-speaker changes. Start it, start recording at the clip's start time, and keep level with the yellow. The lines are in `demo/prompter_lines.py`; rebuild with `demo/make_prompter.py`
-(see its docstring), which also writes the lines as a text script and warns when a line is too fast for its window.
+It also shows who speaks, the clock and a handover warning three seconds before the speaker changes. Start it, start
+recording at the clip's start time, and keep level with the yellow. The lines are in `demo/prompter_lines.py`; rebuild
+with `demo/make_prompter.py` (see its docstring), which warns when a line is too fast for its window.
+
+**Subtitles = the spoken lines (Sprint 3 video).** The first captions were written to be read and ran at up to 570 words
+a minute, too fast to say, so the Sprint 3 video is now subtitled with the spoken lines themselves, each shown from the
+moment the prompter reaches it. Voice, subtitles and prompter say the same words. The lines stay anchored to the original
+caption times in `demo/presentation_cues.srt`. To rebuild after changing a line:
+
+    python3 demo/make_prompter.py presentation --srt demo/presentation_cues.srt --duration 289.2 \
+        --subs Presentation_Group19.srt --no-context --out Presentation_Group19_prompter.mp4
+    # the video without captions: the demo recording padded to 1920x1080, band left empty, as the only demo file
+    ffmpeg -i dist/demo/demo_cut.mp4 -vf "pad=1920:1080:0:0:color=#1C2733" -an demo_clean/demo_final.mp4
+    node demo/assemble_video.cjs --slides dist/slides --demo demo_clean --out dist/clean      # no --burn
+    python3 demo/burn_subs.py dist/clean/presentation.mp4 Presentation_Group19.srt Presentation_Group19.mp4
 
 Lines: the "Sprint 3 video script" doc, or each slide's speaker notes. `.m4a`, `.mp3`, `.wav`, `.aac` or `.ogg` all
 work. Record with the phone's voice memo app or QuickTime, export, rename exactly as above, commit, push, run the
