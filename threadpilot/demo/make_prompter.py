@@ -281,7 +281,8 @@ def script_text(chunks, title, duration) -> str:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('which', choices=['demo', 'presentation'])
+    ap.add_argument('which', choices=['demo', 'presentation', 'presentation-original'],
+                    help='presentation-original: the original subtitles word for word, one line per subtitle')
     ap.add_argument('--srt', required=True, type=Path)
     ap.add_argument('--duration', type=float, required=True)
     ap.add_argument('--out', type=Path)
@@ -294,6 +295,10 @@ def main():
     lines = prompter_lines.DEMO if a.which == 'demo' else prompter_lines.PRESENTATION
     title = 'ThreadPilot · product demo' if a.which == 'demo' else 'ThreadPilot · Sprint 3 presentation'
     cues = srt(a.srt)
+    if a.which == 'presentation-original':          # say every subtitle as written; the speaker comes from the spoken lines
+        who = {c: w for first, last, w, _ in prompter_lines.PRESENTATION for c in range(first, last + 1)}
+        lines = [(i, i, who[i], c['text']) for i, c in enumerate(cues)]
+        title = 'ThreadPilot · Sprint 3 presentation · original subtitles'
     assert lines[-1][1] == len(cues) - 1 and all(lines[i + 1][0] == lines[i][1] + 1 for i in range(len(lines) - 1)), \
         'prompter lines must cover every cue once, in order'
     chunks = plan(lines, cues, a.duration)
