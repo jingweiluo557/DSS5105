@@ -98,8 +98,12 @@ def test_the_stream_shows_planner_tool_calls_and_narration_in_order(tmp_path: Pa
     assert [s['phase'] for s in steps] == ['plan', 'plan'] + ['tool'] * len(r.tool_calls) + ['narrate']
     assert steps[1]['text'] == 'order.lookup' and steps[1]['slots'] == {'order_ids': 'ORD-005'}
     assert [s['text'] for s in steps if s['phase'] == 'tool'] == [c.name for c in r.tool_calls]
-    last_tool = [s for s in steps if s['phase'] == 'tool'][-1]
-    assert last_tool['summary'].startswith('ORD-005: knitting') and last_tool['rows'] >= 1 and last_tool['ms'] is not None
+    tools = [s for s in steps if s['phase'] == 'tool']
+    record = next(s for s in tools if s['summary'].startswith('ORD-005: knitting'))     # the order record itself
+    assert record['text'] in ('refresh_order', 'search_orders')
+    # then the derived days (14 Nov); the row count and the time are carried by the last tool step
+    assert tools[-1]['text'] == 'order_timing' and 'days since last activity' in tools[-1]['summary']
+    assert tools[-1]['rows'] >= 1 and tools[-1]['ms'] is not None
     assert events.index(steps[-1]) < len(events), 'narration step comes before the answer text'
 
 

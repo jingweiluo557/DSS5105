@@ -329,6 +329,14 @@ class WorkflowEngine:
             return 'declined: not in the data (' + str(result.get('reason', '')) + ')'
         if 'order_id' in result and 'current_stage' in result:
             return f"{result['order_id']}: {str(result['current_stage']).lower()}, due {result.get('due_date', '?')}"
+        if 'days_overdue' in result and 'idle_days' in result:
+            return (f"{result['days_overdue']} days overdue" if result['days_overdue'] else f"due in {result['days_to_due']} days") + f", {result['idle_days']} days since last activity"
+        if isinstance(result.get('count'), int) and 'order_ids' in result:
+            return f"{result['count']} order{'s' if result['count'] != 1 else ''}"
+        if 'total_pieces' in result:
+            return f"{result['total_pieces']:,} pieces over {result.get('count', '?')} orders"
+        if isinstance(result.get('answer'), list) and result['answer']:
+            return 'picked: ' + ', '.join(str(a) for a in result['answer'][:3])
         for key in ('verdict', 'status', 'risk_level', 'preliminary'):
             if isinstance(result.get(key), str):
                 return f'{key.replace("_", " ")}: {result[key]}'
