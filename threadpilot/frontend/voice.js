@@ -109,10 +109,11 @@
   function speakText(text, button){
     if (!canSpeak || !text) return;
     const lead = firstLines(text); if (!lead) return;
+    resetReadButtons();
     const zh = /[\u4e00-\u9fff]/.test(lead), lang = zh ? 'zh-CN' : 'en-SG';
     window.speechSynthesis.cancel();
     // Short sentences one at a time: some browsers cut off a long single utterance.
-    const parts = spokenForm(lead, zh).match(/[^.!?。！？;；]+[.!?。！？;；]*/g) || [lead];
+    const parts = spokenForm(lead, zh).split(/(?<=[.!?;])\s+|(?<=[。！？；])/);   // not inside washing@example.com or 60.5%
     const voice = voiceFor(lang) || (zh ? null : voiceFor('en-GB') || voiceFor('en-US'));
     parts.map(t => t.trim()).filter(Boolean).forEach((t, i, all) => {
       const utter = new SpeechSynthesisUtterance(t);
@@ -154,7 +155,12 @@
       const before = (state.chat || []).length;
       await textAsk(question);
       const answer = (state.chat || []).slice(before).reverse().find(m => m.role === 'assistant');
-      if ((spoken || speakOn()) && answer) speakText(answer.text);
+      if ((spoken || speakOn()) && answer) {
+        // the newest answer's own button shows "Stop" while it is being read, so there is always a way to silence it
+        decorate();
+        const buttons = document.querySelectorAll('[data-action="read-aloud"]');
+        speakText(answer.text, buttons[buttons.length - 1]);
+      }
     };
   }
   document.addEventListener('submit', () => { if (speakOn()) unlock(); }, true);

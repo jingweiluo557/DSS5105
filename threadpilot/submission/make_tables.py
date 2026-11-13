@@ -27,7 +27,7 @@ def inline(md):
     return s
 
 
-# ---------------------------------------------------------------- tool specification (32 tools)
+# ---------------------------------------------------------------- tool specification (34 tools)
 head, rows = md_table(ROOT / 'docs/TOOL_SPECIFICATION.md', '#')
 rows = [r for r in rows if len(r) >= 8 and r[0].strip().isdigit()]
 rows.sort(key=lambda r: int(r[0]))
