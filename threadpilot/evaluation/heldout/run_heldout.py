@@ -1,6 +1,8 @@
 """Run the held-out ground-truth set once through the real WorkflowEngine and grade it against the verified gold.
 
   python run_heldout.py ideal|fallback      -> heldout_<mode>.json (answers + verdicts) and a summary table
+  python run_heldout.py ideal regression_2026-11-14   -> results/regression_2026-11-14_ideal.json: a later re-run kept
+                                                         beside the frozen first run (the questions are then no longer unseen)
 
 ideal    = the planner returns the reading in annotations_heldout.py (measures the server: routing, tools, wording)
 fallback = the keyword planner the product uses when the model is down
@@ -100,8 +102,19 @@ AUDIT = {
 }
 
 
-async def run(mode):
+# Regression run of 14 Nov, after the fixes that the 9 Nov failures led to (services/set_questions.py and friends). The 70
+# questions are no longer unseen, so this run is a regression check, not a held-out accuracy. Read the same way: every
+# answer against the gold answer_text. Three answers are right but worded outside the automatic phrase list.
+AUDIT_REGRESSION = {
+    'N07': ('PASS', '"SilkRoute is not a workshop on file … Nothing was drafted or sent" is the gold; the phrase list has "not on file" only as an unbroken phrase'),
+    'N08': ('PASS', '"No customer named Patagonia in the records" is the gold; the phrase list lacked this wording'),
+    'M08': ('PASS', '"Not past due, not delayed yet: due 2026-04-01" is the gold; the phrase list lacked "not past due"'),
+}
+
+
+async def run(mode, label=''):
     out = []
+    audit = AUDIT_REGRESSION if label else AUDIT
     with tempfile.TemporaryDirectory() as tmp:
         for i, item in enumerate(ITEMS):
             sender = R.Sender()
@@ -124,10 +137,10 @@ async def run(mode):
                      sent=len(eng.email_scheduler.sent) + len(sender.sent))
             r['verdict'], r['why'] = grade(item, r)
             r['auto_verdict'] = r['verdict']
-            if mode == 'ideal' and item['id'] in AUDIT:
-                r['verdict'], r['why'] = AUDIT[item['id']][0], 'audit: ' + AUDIT[item['id']][1]
+            if mode == 'ideal' and item['id'] in audit:
+                r['verdict'], r['why'] = audit[item['id']][0], 'audit: ' + audit[item['id']][1]
             out.append(r)
-    (HERE / 'results' / f'heldout_{mode}.json').write_text(json.dumps(out, ensure_ascii=False, indent=1))
+    (HERE / 'results' / (f'{label}_{mode}.json' if label else f'heldout_{mode}.json')).write_text(json.dumps(out, ensure_ascii=False, indent=1))
     return out
 
 
@@ -143,7 +156,8 @@ def table(rows):
 
 if __name__ == '__main__':
     mode = sys.argv[1] if len(sys.argv) > 1 else 'ideal'
-    rows = asyncio.run(run(mode))
+    label = sys.argv[2] if len(sys.argv) > 2 else ''   # e.g. regression_2026-11-14: a separate file; heldout_<mode>.json is the frozen 9 Nov run
+    rows = asyncio.run(run(mode, label))
     print(mode, 'audited' if mode == 'ideal' else ''); table(rows)
     if mode == 'ideal':
         print('automatic grade before the audit:'); table([dict(r, verdict=r['auto_verdict']) for r in rows])

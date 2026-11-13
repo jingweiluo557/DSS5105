@@ -58,3 +58,33 @@ category rows as indicative and the total as the result.
 
    The key is read from the environment only (never commit it). Same grader as `run_heldout.py`; nothing is sent
    (chase-ups stop at the preview). Writes `results/heldout_live.json`; audit the non-PASS rows by hand before reporting.
+
+## 14 Nov: the fixes, and a regression run (not a new accuracy)
+Fixes 1–3 above are in (`backend/app/services/set_questions.py`, `order_refs.py`, the comparison and ranking branches of
+`workflow_engine.py`, `conversation_memory.py`; tests in `backend/tests/test_heldout_fixes.py`, most with a sibling
+question worded differently and the expected value computed in the test from `orders.csv`).
+
+| Run on the same 70 | 9 Nov (first, unseen) | 14 Nov (after the fixes) |
+|---|---|---|
+| Ideal reading, audited | 48 pass · 14 partial · 8 fail | 70 pass |
+| Keyword fallback | 15 pass · 40 partial · 15 fail | 26 pass · 29 partial · 15 fail |
+
+```
+python run_heldout.py ideal regression_2026-11-14      # results/regression_2026-11-14_ideal.json
+python run_heldout.py fallback regression_2026-11-14
+```
+
+Read this table with three cautions.
+1. **The 14 Nov column is a regression check, not held-out accuracy.** The fixes were written after reading these 70
+   answers, so the questions are no longer unseen. The number to quote for "how accurate on questions it has not seen"
+   is still 48/70 (69%, 95% interval 57–78%) until a fresh set is written and run once. The frozen first run stays in
+   `results/heldout_ideal.json` and `results/heldout_fallback.json`; the planner readings in `annotations_heldout.py`
+   were not changed.
+2. **Three passes are by reading, not by the automatic phrase list** (N07, N08, M08; listed in `AUDIT_REGRESSION` with
+   the reason). All 70 answers were read against the gold text by the same person who wrote the fixes; a second reader
+   has not checked them.
+3. **The planner is still not measured.** Both columns hand the server a correct reading of each question. The live
+   model run (step 4 above) is still to do.
+
+Other suites after the fixes: the two 300-question sheets stay at 300/300 (`evaluation/q100`), the 88-scenario replay
+at 88/88 with every stated number traced to a tool result (`run_annotated_eval.py`, `score.py --strict`).
