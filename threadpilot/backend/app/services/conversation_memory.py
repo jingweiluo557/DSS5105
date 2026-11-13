@@ -86,6 +86,16 @@ def recall(message: str, state: DialogState, tools) -> tuple[str, list[dict]]:
     m = OTHER_RE.search(message)
     if m:
         current = state.active_order or state.recent_orders[-1]
+        # Right after a two-order comparison the answer named one of the pair ("ORD-053 first", "ORD-081 is bigger"):
+        # "the other one" is then the order the answer did not pick.
+        pair = state.comparison_orders if len(state.comparison_orders) == 2 and not state.active_order else []
+        if pair:
+            last = next((h['content'] for h in reversed(state.history) if h.get('role') == 'assistant'), '')
+            picked = re.search(r'(?:^|\n)(ORD-\d{3}) (?:first\b|is (?:bigger|further along|more overdue)|needs)|Higher delivery risk: (ORD-\d{3})|Review (ORD-\d{3}) first', last)
+            chosen = next((g for g in (picked.groups() if picked else ()) if g), None)
+            if chosen in pair:
+                rest = next(o for o in pair if o != chosen)
+                return swap(message, m.span(), rest, m.group(0), [rest], 'the comparison just shown'), notes
         others = [o for o in state.recent_orders if o != current]
         if others:
             return swap(message, m.span(), others[-1], m.group(0), [others[-1]], 'this conversation'), notes

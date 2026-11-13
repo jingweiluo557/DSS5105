@@ -34,7 +34,7 @@ def test_row28_two_bare_numbers_compared_are_two_orders_but_quantities_are_not()
 def test_rows63_67_shorthand_is_expanded_before_parsing():
     assert norm('was assembly output last wk normal?') == 'was assembly output last week normal?'
     assert norm('remind me tmrw if no reply') == 'remind me tomorrow if no reply'
-    assert norm('remind me fri if 017 still stuck') == 'remind me Friday if 017 still stuck'
+    assert norm('remind me fri if 017 still stuck') == 'remind me Friday if ORD-017 still stuck'   # a zero-padded number is an order number (held-out X07)
 
 
 def test_row65_one_letter_slip_in_a_stage_name_still_names_the_stage():

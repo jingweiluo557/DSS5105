@@ -481,11 +481,12 @@ class DataTools:
                 'rule': 'ACTIVE status, category in makes, batch within max_batch_pieces; ordered by queue + pickup + quantity/capacity.',
                 'limits': 'Profile cards only: no live availability, no price negotiation; defect rate is a batch probability, not a defective-piece share. Workshop choice stays with the dispatcher.'}, rows
 
-    def rank_active_orders(self, slots: Slots, now: datetime) -> tuple[dict[str, Any], list[Evidence]]:
+    def rank_active_orders(self, slots: Slots, now: datetime, stage: str | None = None) -> tuple[dict[str, Any], list[Evidence]]:
         """Judgement-free ranking of active orders by one explicit criterion (idle days or days to due)."""
         criterion = slots.criterion if slots.criterion in ('idle_days', 'due_date', 'last_activity_date') else 'idle_days'
         rows = [e for e in self.rows('orders.csv') if e.record['status'] == 'IN_PROGRESS'
-                and (not slots.customer or e.record['customer'].casefold() == slots.customer.casefold())]
+                and (not slots.customer or e.record['customer'].casefold() == slots.customer.casefold())
+                and (not stage or e.record['current_stage'] == stage)]
         items = [{'order_id': e.record['order_id'], 'customer': e.record['customer'], 'product': e.record['product'], 'pieces': int(e.record['pieces']),
                   'current_stage': e.record['current_stage'], 'due_date': e.record['due_date'], 'last_activity_date': e.record['last_activity_date'],
                   'idle_days': (now.date() - date.fromisoformat(e.record['last_activity_date'])).days,

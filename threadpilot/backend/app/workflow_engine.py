@@ -329,6 +329,14 @@ class WorkflowEngine:
             return 'declined: not in the data (' + str(result.get('reason', '')) + ')'
         if 'order_id' in result and 'current_stage' in result:
             return f"{result['order_id']}: {str(result['current_stage']).lower()}, due {result.get('due_date', '?')}"
+        if 'days_overdue' in result and 'idle_days' in result:
+            return (f"{result['days_overdue']} days overdue" if result['days_overdue'] else f"due in {result['days_to_due']} days") + f", {result['idle_days']} days since last activity"
+        if isinstance(result.get('count'), int) and 'order_ids' in result:
+            return f"{result['count']} order{'s' if result['count'] != 1 else ''}"
+        if 'total_pieces' in result:
+            return f"{result['total_pieces']:,} pieces over {result.get('count', '?')} orders"
+        if isinstance(result.get('answer'), list) and result['answer']:
+            return 'picked: ' + ', '.join(str(a) for a in result['answer'][:3])
         for key in ('verdict', 'status', 'risk_level', 'preliminary'):
             if isinstance(result.get(key), str):
                 return f'{key.replace("_", " ")}: {result[key]}'
@@ -388,15 +396,27 @@ class WorkflowEngine:
             response = await chase_chat(self, request.message, expanded[0].classification, state, now, agent, emit)
             await self.tool_steps(emit, response, (perf_counter() - t0) * 1000)
             return response
+        from .services import set_questions
         for task in expanded:
             t0 = perf_counter()
             result = task.classification
-            if result.intent == Intent.GENERAL:
+            # A filter or a superlative over a set of orders ("due between…", "finished in March", "which customer has the
+            # most pieces", "which of them is due soonest") is computed directly (services/set_questions.py); a name that
+            # is not on file still gets the not-on-file answer first.
+            direct = set_questions.answer(self, request.message, result, state, now) if len(expanded) == 1 else None
+            if direct is not None:
+                direct = self.grounding_check(request.message, result.slots, result.intent, result, state, now, [], [], []) or direct
+                state.last_intent = result.intent
+            if direct is not None:
+                response = direct
+            elif result.intent == Intent.GENERAL:
                 response = ChatResponse(answer='The model is unavailable. Please try your general question again later.', intent=Intent.GENERAL,
                     slots=Slots(), confidence=result.confidence, state=state, business_date=now.date().isoformat())
             elif result.intent in (Intent.ORDER_SUMMARY, Intent.RISK_OVERVIEW):
                 response = self.grounding_check(request.message, result.slots, result.intent, result, state, now, [], [], list(dict.fromkeys(re.findall(r'\bORD-\d{3}\b', request.message.upper())))) \
                     or summary_response(self, result, state, now, request.message)
+                if not response.needs_clarification:
+                    set_questions.remember_set(self, result, state, request.message)
             else:
                 if state.last_intent:
                     state.topics[state.last_intent.value] = {
@@ -670,6 +690,15 @@ class WorkflowEngine:
                 return self.ask(('Several matching orders. Which order ID, quantity or due date? ' + options) if matches else 'No matching order. Please check the order ID, quantity or due date.', state, result, now, calls, evidence, state.last_order_ids)
             order = self.select(matches[0].record['order_id'], state, calls, evidence)
             answer = self.order_facts(order)
+            if order.record['status'] == 'IN_PROGRESS':
+                # the two derived facts a status question is usually after: how late, and how long since anything was logged
+                late = (now.date() - datetime.fromisoformat(order.record['due_date'] + 'T00:00:00').date()).days
+                quiet = (now.date() - datetime.fromisoformat(order.record['last_activity_date'] + 'T00:00:00').date()).days
+                calls.append(ToolCall(name='order_timing', arguments={'order_id': order.record['order_id'], 'as_of': now.date().isoformat()},
+                                      result={'days_overdue': max(late, 0), 'days_to_due': max(-late, 0), 'idle_days': quiet, 'rule': 'calendar days between the business date and due_date / last_activity_date'}))
+                answer += (f" {late} day{'s' if late != 1 else ''} overdue as of {now.date().isoformat()}." if late > 0 else ' Due today.' if late == 0 else f" Due in {-late} day{'s' if late != -1 else ''}.")
+                if quiet >= 3:
+                    answer += f" No recorded activity for {quiet} days."
         elif intent == Intent.ORDER_COMPARE:
             customers = self.customers_named(message)
             if not customers and not explicit_ids and not result.slots.order_ids and re.search(r'which customer|whose|customers?\b.*(share|most|more|greater|worst)|(share|most|more|greater|worst).*\bcustomers?\b', message.casefold()):
@@ -718,7 +747,16 @@ class WorkflowEngine:
                 return self.ask('Should I rank by overall delivery risk, due-date pressure or update recency?', state, result, now, calls, evidence)
             answer = '| Order | ' + ' | '.join(slots.comparison_fields) + ' |\n| --- | ' + ' | '.join('---' for _ in slots.comparison_fields) + ' |\n'
             answer += '\n'.join('| ' + e.record['order_id'] + ' | ' + ' | '.join(e.record[f] for f in slots.comparison_fields) + ' |' for e in rows)
-            if slots.criterion != 'risk' and 'due_date' in slots.comparison_fields and rows[0].record['due_date'] != rows[1].record['due_date']:
+            from .services import set_questions as sq
+            recs = [e.record for e in rows]
+            wants_overdue = bool(re.search(r'over ?due|\blate\b|\blater\b|behind', lowered)) and slots.criterion != 'risk'
+            if 'current_stage' in slots.comparison_fields and slots.criterion != 'risk' and re.search(r'further|farther|ahead|closer|closest|nearer|nearest|along|behind|progress|done|finish', lowered):
+                answer += '\n' + sq.stage_verdict(recs, message)
+            if 'pieces' in slots.comparison_fields and slots.criterion != 'risk' and re.search(r'bigger|larger|biggest|largest|smaller|smallest|more (pcs|pieces)|fewer|size|big', lowered):
+                answer += '\n' + sq.pieces_verdict(recs)
+            if wants_overdue and 'due_date' in slots.comparison_fields:
+                answer += '\n' + sq.overdue_verdict(recs, now.date())
+            elif slots.criterion != 'risk' and 'due_date' in slots.comparison_fields and rows[0].record['due_date'] != rows[1].record['due_date']:
                 first = min(rows, key=lambda e: e.record['due_date'])
                 other = next(e for e in rows if e is not first)
                 answer += (f"\n{first.record['order_id']} first: its due date {first.record['due_date']} is earlier than {other.record['order_id']}'s {other.record['due_date']}"
@@ -870,6 +908,9 @@ class WorkflowEngine:
                 calls.append(ToolCall(name='refresh_order', arguments={'order_id': requested}, result=inspected.record))
                 answer += self.order_facts(inspected)
             answer += '\nRanking indicates review urgency, not a prediction of failure.'
+            # "what's our most overdue order": one order is asked for, so a follow-up "who's it for?" means that order
+            if shown and not slots.order_ids and re.search(r'\b(most|worst|top|latest|furthest|biggest)\b[^.?!]*\border\b(?!s)|\bwhich (one|order)\b(?!s)', message.casefold()):
+                state.active_order = shown[0].record['order_id']
         elif intent == Intent.ORDER_COMMITMENT:
             lowered_c = message.casefold()
             assumed_point = None
@@ -930,7 +971,10 @@ class WorkflowEngine:
                           '\n'.join(f"{i}. [{f['tier']}] {f['title']}. {f['action']} (rule: {f['rule']})" for i, f in enumerate(data['findings'], 1)) +
                           '\n' + data['limits'])
         elif intent == Intent.ORDER_RANK:
-            data, rows = self.tools.rank_active_orders(slots, now)
+            named_stages = stages_in(message)
+            rank_stage = (slots.stage or (named_stages[0] if len(named_stages) == 1 else None))
+            rank_stage = str(rank_stage).upper() if rank_stage else None
+            data, rows = self.tools.rank_active_orders(slots, now, stage=rank_stage)
             lowered_r = message.casefold()
             near = re.search(r'near[- ]term|soon[- ]due|due soon|near due\b|near-due|ship(ping)? date|next (seven|7) days|this week', lowered_r)
             if near and data['criterion'] == 'idle_days':
@@ -942,10 +986,14 @@ class WorkflowEngine:
             if re.search(r'quantity|piece[- ]?count|movement|handoff|hand-off|bottleneck|progressing inside', lowered_r):
                 data = dict(data, rule=data['rule'] + ' The log records no piece counts per order and no stage hand-off dates: only the current stage and the last activity date, so movement inside a stage cannot be seen; idle days are the only signal.')
             evidence.extend(rows)
-            calls.append(ToolCall(name='rank_active_orders', arguments={'criterion': data['criterion'], 'customer': slots.customer, 'limit': len(data['orders'])}, result=data))
+            calls.append(ToolCall(name='rank_active_orders', arguments={'criterion': data['criterion'], 'customer': slots.customer, 'stage': rank_stage, 'limit': len(data['orders'])}, result=data))
             state.last_order_ids = [o['order_id'] for o in data['orders']]
-            state.active_order = None
-            answer = (f"Active orders ranked by {data['criterion'].replace('_', ' ')} (business date {data['business_date']}). {data['rule']}\n" +
+            # "what's been stuck longest", "which order is most idle": one order is asked for, so it is the order in focus
+            single = bool(re.search(r'\b(longest|most|oldest|worst|top|first|next|soonest|earliest)\b', lowered_r)) and not re.search(r'\borders\b|\btop \d|\brank\b|\blist\b', lowered_r)
+            state.active_order = data['orders'][0]['order_id'] if single and data['orders'] else None
+            if not data['orders']:
+                return self.response(state, result, now, f"No active order{' at ' + rank_stage.lower() if rank_stage else ''}{' for ' + slots.customer if slots.customer else ''} to rank on {data['business_date']}.", calls, evidence)
+            answer = (f"Active orders{' at ' + rank_stage.lower() if rank_stage else ''} ranked by {data['criterion'].replace('_', ' ')} (business date {data['business_date']}). {data['rule']}\n" +
                       '\n'.join(f"{i}. {o['order_id']} ({o['customer']}, {o['pieces']} {o['product']}): last activity {o['last_activity_date']} ({o['idle_days']} days ago), due {o['due_date']}, stage {o['current_stage']}." for i, o in enumerate(data['orders'], 1)))
         elif intent == Intent.WORKSHOPS:
             data, rows = self.tools.list_workshops(slots)
@@ -1400,6 +1448,12 @@ class WorkflowEngine:
                 for i in range(0, max(1, len(compact) - len(key) + 3)):
                     if difflib.SequenceMatcher(None, compact[i:i + len(key)], key).ratio() >= 0.88:
                         pos = i; break
+            if pos < 0:
+                # "northwind", "maple", "harbor": the first word alone, when no other customer starts with it
+                first = re.sub(r'[^a-z0-9]', '', c.casefold().split(' ')[0])
+                if len(first) >= 5 and sum(1 for o in known_customers(self.tools) if re.sub(r'[^a-z0-9]', '', o.casefold()).startswith(first)) == 1:
+                    hit = re.search(r'(?<![a-z0-9])' + re.escape(first) + r'(?![a-z0-9])', lowered)
+                    pos = len(re.sub(r'[^a-z0-9]', '', lowered[:hit.start()])) if hit else -1
             if pos >= 0:
                 found.append((pos, c))
         return [c for _, c in sorted(found)]
@@ -1426,6 +1480,10 @@ class WorkflowEngine:
                  + f"; {f['idle_5d']} with no recorded activity for 5+ days" + (f" ({', '.join(f['idle_ids'])})" if f['idle_5d'] else '') + '.' for c, f in facts.items()]
         if tie:
             verdict = f"Neither looks worse on {'stale updates' if stale else 'overdue orders'}: the counts are equal. Overdue first, then idle, is how the orders are ranked."
+        elif not stale and len(customers) == 2 and facts[worse]['overdue'] == facts[other]['overdue'] and re.search(r'\b(more|most|fewer|fewest)\b.*\b(late|over ?due|delayed)\b|\bhow many\b', message.casefold()):
+            n = facts[worse]['overdue']
+            verdict = (f"Neither has more late orders: both have {n} overdue" + (f" ({'; '.join(c + ': ' + ', '.join(facts[c]['overdue_ids']) for c in customers)})" if n else '') + '.'
+                       + (f" {worse}'s worst is {facts[worse]['worst_overdue_days']} days late against {facts[other]['worst_overdue_days']}, so it is the one to chase first." if n and facts[worse]['worst_overdue_days'] != facts[other]['worst_overdue_days'] else ''))
         elif stale and len(customers) > 2:
             verdict = (f"{worse} has the greater share of in-progress orders without recent recorded activity ({facts[worse]['idle_5d']} of {facts[worse]['active']}); next "
                        + ', '.join(f"{c} ({facts[c]['idle_5d']} of {facts[c]['active']})" for c in ranked[1:4]) + '. Every customer with active orders is included.')
@@ -1754,6 +1812,21 @@ class WorkflowEngine:
         for m in re.finditer(r'\bW(\d{1,2})\b', text):
             if f'W{int(m.group(1))}' not in on_file:
                 return f'W{int(m.group(1))}'
+        # "the SilkRoute workshop", "workshop SilkRoute": a workshop called by a name that no workshop on file has
+        names = [e.record['name'].casefold() for e in self.tools.rows('workshops.csv')]
+        generic = {'the', 'a', 'an', 'our', 'their', 'that', 'this', 'outside', 'external', 'partner', 'washing', 'knitting', 'assembly', 'packing', 'same', 'other', 'another',
+                   'new', 'best', 'which', 'what', 'any', 'each', 'every', 'eligible', 'cheapest', 'fastest', 'right', 'current', 'assigned', 'usual', 'local', 'chase', 'email', 'ask', 'tell', 'message', 'contact', 'remind', 'for', 'to', 'at', 'with', 'from', 'of', 'on', 'and', 'or'}
+        import difflib
+        for m in re.finditer(r"\b([A-Za-z][\w&'-]{2,})\s+workshop\b|\bworkshop\s+(?:called\s+|named\s+)?([A-Z][\w&'-]{2,})", message):
+            word = (m.group(1) or m.group(2))
+            w = word.casefold()
+            if w in generic or w.endswith('ing') or re.fullmatch(r'w\d{1,2}', w) or not (word[0].isupper() or m.group(2)):
+                continue
+            if any(w in n or n in w or difflib.SequenceMatcher(None, w, n).ratio() >= 0.8 for n in names):
+                continue
+            if detect_customer(word, self.tools):
+                continue
+            return word
         return None
 
     def foreign_customer(self, message: str, slots: Slots) -> str | None:
@@ -1863,7 +1936,9 @@ class WorkflowEngine:
             if shop:
                 on_file = sorted({e.record['workshop_id'] for e in self.tools.rows('workshops.csv')}, key=lambda w: int(w[1:]))
                 calls.append(ToolCall(name='list_workshops', arguments={'workshop': shop}, result={'status': 'not_found', 'workshops_on_file': on_file}, executed=True))
-                text = f"{shop} is not a workshop on file: the workshops are {on_file[0]}–{on_file[-1]}. Nothing was drafted or sent; say which workshop or department should receive it."
+                shop_names = {e.record['workshop_id']: e.record['name'] for e in self.tools.rows('workshops.csv')}
+                text = (f"{shop} is not a workshop on file: the workshops are {on_file[0]}–{on_file[-1]}" + ('' if re.fullmatch(r'W\d{1,2}', shop) else ' (' + ', '.join(shop_names[w] for w in on_file) + ')')
+                        + ". Nothing was drafted or sent; say which workshop or department should receive it.")
                 return self.response(state, result, now, text, calls, evidence)
         return None
 
@@ -2040,7 +2115,9 @@ class WorkflowEngine:
                 previous = datetime.fromisoformat(existing['deadline'])
             deadline = resolve_datetime(slots.deadline or '', now, previous)
             if deadline is None:
-                return self.ask('What exact time on that date (for example Friday at 9 a.m.) should I check?', state, result, now, calls, evidence)
+                if not (slots.deadline or '').strip():
+                    return self.ask(f'When should I check {order_id}? Give the exact date and time (for example Friday at 9 a.m.); no reminder is created until you confirm it.', state, result, now, calls, evidence)
+                return self.ask(f'What exact time on that date (for example Friday at 9 a.m.) should I check {order_id}?', state, result, now, calls, evidence)
             if deadline <= now:
                 return self.ask('The reminder time must be in the future. What date and time?', state, result, now, calls, evidence)
             slots.deadline = deadline.isoformat()

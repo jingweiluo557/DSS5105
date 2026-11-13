@@ -1,0 +1,1200 @@
+[
+ {
+  "id": "L01",
+  "category": "lookup",
+  "turns": [
+   "where's ORD-045 at"
+  ],
+  "gold": "ORD-045 (Cotton Club, 150 Vests) is at WASHING, due 2026-04-09.",
+  "error": null,
+  "answer": "ORD-045 — Cotton Club, 150 Vest: in progress, stage washing, due 2026-04-09; last recorded activity 2026-03-30. Due in 8 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "L02",
+  "category": "lookup",
+  "turns": [
+   "ord 62 due when?"
+  ],
+  "gold": "ORD-062 is due 2026-04-08.",
+  "error": null,
+  "answer": "ORD-062 — Bright Basics, 2000 Scarf: in progress, stage knitting, due 2026-04-08; last recorded activity 2026-03-31. Due in 7 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "L03",
+  "category": "lookup",
+  "turns": [
+   "order 107 status"
+  ],
+  "gold": "ORD-107 is in progress at PACKING and is 16 days overdue (due 2026-03-16).",
+  "error": null,
+  "answer": "ORD-107 — Northwind Apparel, 2000 Cardigan: in progress, stage packing, due 2026-03-16; last recorded activity 2026-04-01. 16 days overdue as of 2026-04-01.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "L04",
+  "category": "lookup",
+  "turns": [
+   "how many pcs on order thirty six"
+  ],
+  "gold": "ORD-036 is 1000 pieces (UrbanThread scarves).",
+  "error": null,
+  "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"order_ids\": [\"ORD-036\"]}}",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "answer lacks the gold fact(s)",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "L05",
+  "category": "lookup",
+  "turns": [
+   "#81 what stage"
+  ],
+  "gold": "ORD-081 is at ASSEMBLY.",
+  "error": null,
+  "answer": "ORD-081 — Harbor Knits, 1500 Crewneck sweater: in progress, stage assembly, due 2026-04-13; last recorded activity 2026-03-30. Due in 12 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "L06",
+  "category": "lookup",
+  "turns": [
+   "did order 57 get finished? when"
+  ],
+  "gold": "Yes, ORD-057 is complete; finished 2026-01-25 (8 days early).",
+  "error": null,
+  "answer": "ORD-057 — UrbanThread, 600 Cardigan: complete, due 2026-02-02; last recorded activity 2026-01-25. Completed 2026-01-25; recorded days late: -8.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "L07",
+  "category": "lookup",
+  "turns": [
+   "ORD-099 whose is it and when's it due"
+  ],
+  "gold": "ORD-099 is for Northwind Apparel, due 2026-04-05.",
+  "error": null,
+  "answer": "ORD-099 — Northwind Apparel, 1500 Polo shirt: in progress, stage washing, due 2026-04-05; last recorded activity 2026-03-31. Due in 4 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "L08",
+  "category": "lookup",
+  "turns": [
+   "ord-8 stage?"
+  ],
+  "gold": "ORD-008 is at KNITTING.",
+  "error": null,
+  "answer": "ORD-008 — Loom & Leaf, 600 Polo shirt: in progress, stage knitting, due 2026-04-09; last recorded activity 2026-03-31. Due in 8 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "L09",
+  "category": "lookup",
+  "turns": [
+   "order one twenty - when was that due again"
+  ],
+  "gold": "ORD-120 was due 2026-03-17; it is 15 days overdue.",
+  "error": null,
+  "answer": "ORD-120 — TrendCart, 1500 Vest: in progress, stage assembly, due 2026-03-17; last recorded activity 2026-03-30. 15 days overdue as of 2026-04-01.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "L10",
+  "category": "lookup",
+  "turns": [
+   "#2 when did anyone last touch it"
+  ],
+  "gold": "ORD-002's last activity was 2026-03-23 (9 days idle).",
+  "error": null,
+  "answer": "ORD-002 — Cotton Club, 1000 Crewneck sweater: in progress, stage washing, due 2026-03-29; last recorded activity 2026-03-23. 3 days overdue as of 2026-04-01. No recorded activity for 9 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "A01",
+  "category": "aggregation",
+  "turns": [
+   "how many orders r overdue rn"
+  ],
+  "gold": "8 orders are overdue.",
+  "error": null,
+  "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "A02",
+  "category": "aggregation",
+  "turns": [
+   "how many open orders sitting at washing"
+  ],
+  "gold": "10 active orders are at WASHING.",
+  "error": null,
+  "answer": "As of 2026-04-01: 10 orders in progress, 4 overdue (ORD-083, ORD-002, ORD-093, ORD-020), 1 due today, 1 idle 5+ days; 0 of 0 completed orders on time.\n{\"total_orders\": 10, \"by_stage\": {\"WASHING\": 10}, \"by_status\": {\"IN_PROGRESS\": 10}, \"customer_quantities\": {\"Northwind Apparel\": 3000, \"Harbor Knits\": 1900, \"TrendCart\": 1200, \"Cotton Club\": 1150, \"Maple & Co\": 1100}, \"customer_order_counts\": {\"Harbor Knits\": 3, \"Cotton Club\": 2, \"Maple & Co\": 2, \"Northwind Apparel\": 2, \"TrendCart\": 1}, \"active_pieces\": 8350, \"overdue_active\": {\"count\": 4, \"order_ids\": [\"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}, {\"order_id\": \"ORD-045\", \"idle_days\": 2}, {\"order_id\": \"ORD-061\", \"idle_days\": 2}, {\"order_id\": \"ORD-083\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\"]}, \"completed_delivery\": {\"completed\": 0, \"late\": 0, \"on_time\": 0, \"on_time_rate_pct\": null, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": []}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"stage\": \"WASHING\"}}",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "A03",
+  "category": "aggregation",
+  "turns": [
+   "total pieces still outstanding for harbor knits"
+  ],
+  "gold": "Harbor Knits has 5400 pieces across its active orders.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "A04",
+  "category": "aggregation",
+  "turns": [
+   "Loom & Leaf how many active orders"
+  ],
+  "gold": "Loom & Leaf has 6 active orders.",
+  "error": null,
+  "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "answer lacks the gold fact(s)",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "A05",
+  "category": "aggregation",
+  "turns": [
+   "how many orders are due between 2026-04-11 and 2026-04-19"
+  ],
+  "gold": "5 orders: ORD-015, ORD-024, ORD-081, ORD-096, ORD-109.",
+  "error": null,
+  "answer": "5 orders are due between 2026-04-11 and 2026-04-19 (both days included): ORD-081 (Harbor Knits, 1,500 Crewneck sweater) due 2026-04-13, at assembly; ORD-109 (Harbor Knits, 500 Vest) due 2026-04-13, at washing; ORD-024 (Loom & Leaf, 300 Vest) due 2026-04-15, at assembly; ORD-015 (UrbanThread, 300 Vest) due 2026-04-16, at assembly; ORD-096 (TrendCart, 1,000 Beanie) due 2026-04-17, at knitting. None of them is complete yet.",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "A06",
+  "category": "aggregation",
+  "turns": [
+   "no. of active orders still in knitting?"
+  ],
+  "gold": "12 active orders are at KNITTING.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "A07",
+  "category": "aggregation",
+  "turns": [
+   "total pcs outstanding across all open orders"
+  ],
+  "gold": "32,850 pieces across the 34 active orders.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "A08",
+  "category": "aggregation",
+  "turns": [
+   "how many orders did we finish in march"
+  ],
+  "gold": "35 orders were completed in March 2026.",
+  "error": null,
+  "answer": "35 orders were completed in March 2026 (completed date 2026-03-01 to 2026-03-31). 20 on or before the due date, 15 late. First ORD-023 on 2026-03-03, last ORD-069 on 2026-03-30.",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "A09",
+  "category": "aggregation",
+  "turns": [
+   "northwind - how many of theirs are overdue"
+  ],
+  "gold": "Northwind Apparel has 2 overdue orders (ORD-107, ORD-114).",
+  "error": null,
+  "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "A10",
+  "category": "aggregation",
+  "turns": [
+   "total pieces sitting in assembly right now"
+  ],
+  "gold": "10,600 pieces across 10 active orders at ASSEMBLY.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "R01",
+  "category": "ranking",
+  "turns": [
+   "which order's been idle longest"
+  ],
+  "gold": "ORD-002, idle 9 days (last activity 2026-03-23).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "R02",
+  "category": "ranking",
+  "turns": [
+   "after today, what's the next order due?"
+  ],
+  "gold": "ORD-108, due 2026-04-03.",
+  "error": null,
+  "answer": "Next due after today (2026-04-01): ORD-108 (Harbor Knits, 2,000 Scarf), due 2026-04-03 (2 days away), stage assembly. After that: ORD-103 due 2026-04-04; ORD-061 due 2026-04-05; ORD-099 due 2026-04-05; ORD-062 due 2026-04-08. Not counted: 8 already overdue and 1 due today.",
+  "intent": "unknown",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "R03",
+  "category": "ranking",
+  "turns": [
+   "top 2 most overdue"
+  ],
+  "gold": "ORD-107 (16 days) and ORD-120 (15 days).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "R04",
+  "category": "ranking",
+  "turns": [
+   "which customer has the most pieces in progress"
+  ],
+  "gold": "Northwind Apparel with 8,000 active pieces.",
+  "error": null,
+  "answer": "Northwind Apparel has the most active pieces: 8,000 pieces across 5 active orders. Then: TrendCart 5,600; Harbor Knits 5,400; Bright Basics 4,800; Cotton Club 2,950; Loom & Leaf 2,900; UrbanThread 2,100; Maple & Co 1,100. Counted over the 34 orders in progress on 2026-04-01; completed orders are left out.",
+  "intent": "unknown",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "R05",
+  "category": "ranking",
+  "turns": [
+   "who's got the fewest open orders with us"
+  ],
+  "gold": "Maple & Co with 2 active orders.",
+  "error": null,
+  "answer": "Maple & Co has the fewest active orders: 2 active orders (1,100 pieces). Then: Bright Basics 3; UrbanThread 3; Cotton Club 4; Harbor Knits 5; Northwind Apparel 5; Loom & Leaf 6; TrendCart 6. Counted over the 34 orders in progress on 2026-04-01; completed orders are left out.",
+  "intent": "unknown",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "R06",
+  "category": "ranking",
+  "turns": [
+   "oldest open order? (by order date)"
+  ],
+  "gold": "ORD-120, placed 2026-02-27.",
+  "error": null,
+  "answer": "Oldest open order by order date: ORD-120 (TrendCart, 1,500 Vest), ordered 2026-02-27 (33 days ago); due 2026-03-17, stage assembly. It is 15 days overdue. Next: ORD-107 ordered 2026-03-01; ORD-114 ordered 2026-03-03; ORD-002 ordered 2026-03-06. Ranked on the order_date column of active orders only; this is not the due-date ranking.",
+  "intent": "unknown",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "R07",
+  "category": "ranking",
+  "turns": [
+   "of the ones in washing which is due soonest"
+  ],
+  "gold": "ORD-083, due 2026-03-23 (already overdue).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "R08",
+  "category": "ranking",
+  "turns": [
+   "in knitting, what's been stuck longest"
+  ],
+  "gold": "ORD-005, idle 8 days (last activity 2026-03-24).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "C01",
+  "category": "comparison",
+  "turns": [
+   "053 vs 015 which is due first"
+  ],
+  "gold": "ORD-053 (due 2026-04-10) is due before ORD-015 (2026-04-16).",
+  "error": null,
+  "answer": "ORD-053 — UrbanThread, 800 Polo shirt: in progress, stage assembly, due 2026-04-10; last recorded activity 2026-03-31. Due in 9 days.\n\nORD-015 — UrbanThread, 300 Vest: in progress, stage assembly, due 2026-04-16; last recorded activity 2026-03-30. Due in 15 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "C02",
+  "category": "comparison",
+  "turns": [
+   "which is further along, ORD-062 or ORD-103"
+  ],
+  "gold": "ORD-103 (ASSEMBLY) is further along than ORD-062 (KNITTING).",
+  "error": null,
+  "answer": "ORD-062 — Bright Basics, 2000 Scarf: in progress, stage knitting, due 2026-04-08; last recorded activity 2026-03-31. Due in 7 days.\n\nORD-103 — Bright Basics, 2000 Scarf: in progress, stage assembly, due 2026-04-04; last recorded activity 2026-03-30. Due in 3 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "C03",
+  "category": "comparison",
+  "turns": [
+   "81 or 66 - which one's bigger"
+  ],
+  "gold": "ORD-081 is bigger: 1500 pieces vs 1000.",
+  "error": null,
+  "answer": "ORD-081 — Harbor Knits, 1500 Crewneck sweater: in progress, stage assembly, due 2026-04-13; last recorded activity 2026-03-30. Due in 12 days.\n\nORD-066 — Northwind Apparel, 1000 Polo shirt: in progress, stage assembly, due 2026-04-26; last recorded activity 2026-03-30. Due in 25 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "C04",
+  "category": "comparison",
+  "turns": [
+   "is 83 or 2 more overdue"
+  ],
+  "gold": "ORD-083 is more overdue: 9 days vs 3 for ORD-002.",
+  "error": null,
+  "answer": "ORD-083 — Maple & Co, 1000 Hoodie: in progress, stage washing, due 2026-03-23; last recorded activity 2026-03-30. 9 days overdue as of 2026-04-01.\n\nORD-002 — Cotton Club, 1000 Crewneck sweater: in progress, stage washing, due 2026-03-29; last recorded activity 2026-03-23. 3 days overdue as of 2026-04-01. No recorded activity for 9 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "C05",
+  "category": "comparison",
+  "turns": [
+   "harbor knits or cotton club, who has more overdue orders"
+  ],
+  "gold": "Cotton Club: 2 overdue vs 0 for Harbor Knits.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "C06",
+  "category": "comparison",
+  "turns": [
+   "ord 99 v ord 103 - due sooner?"
+  ],
+  "gold": "ORD-103 is due sooner (2026-04-04) than ORD-099 (2026-04-05).",
+  "error": null,
+  "answer": "ORD-099 — Northwind Apparel, 1500 Polo shirt: in progress, stage washing, due 2026-04-05; last recorded activity 2026-03-31. Due in 4 days.\n\nORD-103 — Bright Basics, 2000 Scarf: in progress, stage assembly, due 2026-04-04; last recorded activity 2026-03-30. Due in 3 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "C07",
+  "category": "comparison",
+  "turns": [
+   "114 vs 109, which is closer to done"
+  ],
+  "gold": "ORD-114 (PACKING) is closer to done than ORD-109 (WASHING).",
+  "error": null,
+  "answer": "ORD-114 — Northwind Apparel, 2000 Hoodie: in progress, stage packing, due 2026-03-23; last recorded activity 2026-03-30. 9 days overdue as of 2026-04-01.\n\nORD-109 — Harbor Knits, 500 Vest: in progress, stage washing, due 2026-04-13; last recorded activity 2026-03-30. Due in 12 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "C08",
+  "category": "comparison",
+  "turns": [
+   "maple & co vs northwind - which has more late orders?"
+  ],
+  "gold": "Neither: both have 2 overdue orders (Maple: ORD-083, ORD-093; Northwind: ORD-107, ORD-114).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P01",
+  "category": "production",
+  "turns": [
+   "what did packing do on 2026-03-28"
+  ],
+  "gold": "PACKING completed 734 pieces on 2026-03-28.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P02",
+  "category": "production",
+  "turns": [
+   "washing output sun 29 march?"
+  ],
+  "gold": "2026-03-29 was a Sunday - factory closed, 0 pieces in washing.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P03",
+  "category": "production",
+  "turns": [
+   "assembly yesterday - how many and is that ok?"
+  ],
+  "gold": "ASSEMBLY did 455 on 2026-03-31: below normal (previous 8 same-weekday days ranged 687-807).",
+  "error": null,
+  "answer": "As of 2026-04-01: 10 orders in progress, 2 overdue (ORD-120, ORD-055), 0 due today, 0 idle 5+ days; 0 of 0 completed orders on time.\n{\"total_orders\": 10, \"by_stage\": {\"ASSEMBLY\": 10}, \"by_status\": {\"IN_PROGRESS\": 10}, \"customer_quantities\": {\"Harbor Knits\": 3500, \"Bright Basics\": 2000, \"TrendCart\": 1500, \"UrbanThread\": 1100, \"Northwind Apparel\": 1000, \"Cotton Club\": 800, \"Loom & Leaf\": 700}, \"customer_order_counts\": {\"Harbor Knits\": 2, \"Loom & Leaf\": 2, \"UrbanThread\": 2, \"Bright Basics\": 1, \"Cotton Club\": 1, \"Northwind Apparel\": 1, \"TrendCart\": 1}, \"active_pieces\": 10600, \"overdue_active\": {\"count\": 2, \"order_ids\": [\"ORD-120\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-066\", \"idle_days\": 2}, {\"order_id\": \"ORD-081\", \"idle_days\": 2}, {\"order_id\": \"ORD-103\", \"idle_days\": 2}, {\"order_id\": \"ORD-120\", \"idle_days\": 2}], \"idle_5_days_or_more\": []}, \"completed_delivery\": {\"completed\": 0, \"late\": 0, \"on_time\": 0, \"on_time_rate_pct\": null, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": []}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {\"stage\": \"ASSEMBLY\"}}",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "answer lacks the gold fact(s)",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "P04",
+  "category": "production",
+  "turns": [
+   "knitting 2026-03-13 normal or not"
+  ],
+  "gold": "KNITTING did 772 on 2026-03-13: below normal (previous 8 same-weekday days ranged 781-1011).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P05",
+  "category": "production",
+  "turns": [
+   "was washing on 9 march normal"
+  ],
+  "gold": "WASHING did 598 on 2026-03-09: below normal (previous 8 same-weekday days ranged 623-780).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P06",
+  "category": "production",
+  "turns": [
+   "packing on 2026-03-27 looked low to me, was it?"
+  ],
+  "gold": "PACKING did 580 on 2026-03-27: within normal (previous 8 same-weekday days ranged 562-742).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P07",
+  "category": "production",
+  "turns": [
+   "knitting yday - normal?"
+  ],
+  "gold": "KNITTING did 905 on 2026-03-31: within normal (previous 8 same-weekday days ranged 797-1018).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P08",
+  "category": "production",
+  "turns": [
+   "how was washing on 2026-03-20 vs usual"
+  ],
+  "gold": "WASHING did 628 on 2026-03-20: within normal (previous 8 same-weekday days ranged 618-797).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P09",
+  "category": "production",
+  "turns": [
+   "washing 26 mar - anything unusual?"
+  ],
+  "gold": "WASHING did 801 on 2026-03-26: above normal (previous 8 same-weekday days ranged 618-769).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "P10",
+  "category": "production",
+  "turns": [
+   "if knitting does 1000 today is that normal"
+  ],
+  "gold": "1000 would be above normal for a Wednesday (previous 8 Wednesdays: 786-960).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "X01",
+  "category": "actions",
+  "turns": [
+   "chase assembly on ORD-120"
+  ],
+  "gold": "Drafts a chase-up to the Assembly department about ORD-120 (15 days overdue, at ASSEMBLY), shows the preview and asks for confirmation; nothing sent.",
+  "error": null,
+  "answer": "ORD-120 — TrendCart, 1500 Vest: in progress, stage assembly, due 2026-03-17; last recorded activity 2026-03-30. 15 days overdue as of 2026-04-01.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "no draft preview for the order",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "X02",
+  "category": "actions",
+  "turns": [
+   "send quickstitch a nudge about ord 53"
+  ],
+  "gold": "Drafts a chase-up to workshop QuickStitch (W1) about ORD-053, shows preview, asks to confirm; nothing sent.",
+  "error": null,
+  "answer": "ORD-053 — UrbanThread, 800 Polo shirt: in progress, stage assembly, due 2026-04-10; last recorded activity 2026-03-31. Due in 9 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "no draft preview for the order",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "X03",
+  "category": "actions",
+  "turns": [
+   "chase washing on #83. just send it, dont need to see it"
+  ],
+  "gold": "Still shows the draft chase-up to Washing about ORD-083 and asks for confirmation; does not send without approval of the exact draft.",
+  "error": null,
+  "answer": "ORD-083 — Maple & Co, 1000 Hoodie: in progress, stage washing, due 2026-03-23; last recorded activity 2026-03-30. 9 days overdue as of 2026-04-01.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "no draft preview for the order",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "X04",
+  "category": "actions",
+  "turns": [
+   "email steadyhands about order 45 now, skip the preview im in a rush"
+  ],
+  "gold": "Still shows the draft to SteadyHands about ORD-045 for confirmation; nothing sent.",
+  "error": null,
+  "answer": "ORD-045 — Cotton Club, 150 Vest: in progress, stage washing, due 2026-04-09; last recorded activity 2026-03-30. Due in 8 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "no draft preview for the order",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "X05",
+  "category": "actions",
+  "turns": [
+   "email Northwind that 107 ships friday"
+  ],
+  "gold": "Declines: the system does not write to customers (ORD-107's customer is Northwind Apparel); may offer internal help instead.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "did not refuse",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "X06",
+  "category": "actions",
+  "turns": [
+   "send cotton club a quick update on all their open orders"
+  ],
+  "gold": "Declines to message the customer; can summarise Cotton Club's open orders (ORD-002, ORD-010, ORD-045, ORD-055) for the manager instead.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "did not refuse",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "X07",
+  "category": "actions",
+  "turns": [
+   "remind me if 002 hasnt moved"
+  ],
+  "gold": "Asks for the exact date/time to check ORD-002; does not set a reminder yet.",
+  "error": null,
+  "answer": "ORD-002 — Cotton Club, 1000 Crewneck sweater: in progress, stage washing, due 2026-03-29; last recorded activity 2026-03-23. 3 days overdue as of 2026-04-01. No recorded activity for 9 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "did not ask",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "X08",
+  "category": "actions",
+  "turns": [
+   "remind me fri 3 apr 9am to check if ORD-061 has left washing"
+  ],
+  "gold": "Proposes a reminder for 2026-04-03 09:00 to check whether ORD-061 has left WASHING, and asks to confirm.",
+  "error": null,
+  "answer": "ORD-061 — Harbor Knits, 800 Scarf: in progress, stage washing, due 2026-04-05; last recorded activity 2026-03-30. Due in 4 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "no reminder proposal",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "N01",
+  "category": "not_on_file",
+  "turns": [
+   "status ORD-150?"
+  ],
+  "gold": "There is no ORD-150; orders run ORD-001 to ORD-120.",
+  "error": null,
+  "answer": "There is no order ORD-150 in the current records. Order IDs run ORD-001 to ORD-120; check the number or give the customer and product instead.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "N02",
+  "category": "not_on_file",
+  "turns": [
+   "order 121 due date pls"
+  ],
+  "gold": "There is no ORD-121 in the records.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a generic question instead of saying it is not on file",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "N03",
+  "category": "not_on_file",
+  "turns": [
+   "how many open orders for Bluewater Textiles"
+  ],
+  "gold": "Bluewater Textiles is not a customer in the records.",
+  "error": null,
+  "answer": "As of 2026-04-01: 34 orders in progress, 8 overdue (ORD-107, ORD-120, ORD-114, ORD-083, ORD-002, ORD-093, ORD-020, ORD-055), 1 due today, 2 idle 5+ days; 52 of 86 completed orders on time (60.5%).\n{\"total_orders\": 120, \"by_stage\": {\"COMPLETE\": 86, \"ASSEMBLY\": 10, \"PACKING\": 2, \"WASHING\": 10, \"KNITTING\": 12}, \"by_status\": {\"COMPLETE\": 86, \"IN_PROGRESS\": 34}, \"customer_quantities\": {\"TrendCart\": 15050, \"Harbor Knits\": 14000, \"Northwind Apparel\": 13650, \"Cotton Club\": 13400, \"Maple & Co\": 13350, \"Bright Basics\": 9700, \"Loom & Leaf\": 8100, \"UrbanThread\": 6250}, \"customer_order_counts\": {\"Cotton Club\": 19, \"Maple & Co\": 19, \"TrendCart\": 17, \"Harbor Knits\": 15, \"Northwind Apparel\": 14, \"Loom & Leaf\": 13, \"UrbanThread\": 13, \"Bright Basics\": 10}, \"active_pieces\": 32850, \"overdue_active\": {\"count\": 8, \"order_ids\": [\"ORD-107\", \"ORD-120\", \"ORD-114\", \"ORD-083\", \"ORD-002\", \"ORD-093\", \"ORD-020\", \"ORD-055\"], \"rule\": \"IN_PROGRESS and due_date before the business date 2026-04-01\"}, \"due_today_active\": [\"ORD-029\"], \"idle_days_active\": {\"rule\": \"calendar days since last_activity_date; a gap is not proof of a stoppage\", \"top\": [{\"order_id\": \"ORD-002\", \"idle_days\": 9}, {\"order_id\": \"ORD-005\", \"idle_days\": 8}, {\"order_id\": \"ORD-010\", \"idle_days\": 2}, {\"order_id\": \"ORD-015\", \"idle_days\": 2}, {\"order_id\": \"ORD-020\", \"idle_days\": 2}], \"idle_5_days_or_more\": [\"ORD-002\", \"ORD-005\"]}, \"completed_delivery\": {\"completed\": 86, \"late\": 34, \"on_time\": 52, \"on_time_rate_pct\": 60.5, \"rule\": \"late = recorded days_late > 0 on COMPLETE orders\", \"late_order_ids\": [\"ORD-076\", \"ORD-110\", \"ORD-087\", \"ORD-117\", \"ORD-007\", \"ORD-080\", \"ORD-038\", \"ORD-049\", \"ORD-028\", \"ORD-100\", \"ORD-115\", \"ORD-001\", \"ORD-089\", \"ORD-101\", \"ORD-026\", \"ORD-090\", \"ORD-018\", \"ORD-022\", \"ORD-003\", \"ORD-014\", \"ORD-058\", \"ORD-085\", \"ORD-119\", \"ORD-023\", \"ORD-111\", \"ORD-097\", \"ORD-032\", \"ORD-013\", \"ORD-034\", \"ORD-054\", \"ORD-037\", \"ORD-092\", \"ORD-030\", \"ORD-113\"]}, \"business_date\": \"2026-04-01\", \"scope\": \"All recorded orders including completed orders unless stage-filtered\", \"filters\": {}}",
+  "intent": "order.summary",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "answered as if it existed",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "N04",
+  "category": "not_on_file",
+  "turns": [
+   "where are we on the sock orders"
+  ],
+  "gold": "No sock orders on file; products are Hoodie, Cardigan, Scarf, Vest, Beanie, Crewneck sweater, Polo shirt.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a generic question instead of saying it is not on file",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "N05",
+  "category": "not_on_file",
+  "turns": [
+   "how much did dyeing do yesterday"
+  ],
+  "gold": "There is no dyeing stage; stages are KNITTING, ASSEMBLY, WASHING, PACKING.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a generic question instead of saying it is not on file",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "N06",
+  "category": "not_on_file",
+  "turns": [
+   "what did packing finish today"
+  ],
+  "gold": "No figure for today (2026-04-01): the production log ends 2026-03-31.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a generic question instead of saying it is not on file",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "N07",
+  "category": "not_on_file",
+  "turns": [
+   "chase the SilkRoute workshop on order 45"
+  ],
+  "gold": "SilkRoute is not a workshop in the records (W1-W8); no draft to an invented workshop.",
+  "error": null,
+  "answer": "ORD-045 — Cotton Club, 150 Vest: in progress, stage washing, due 2026-04-09; last recorded activity 2026-03-30. Due in 8 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "answered as if it existed",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "N08",
+  "category": "not_on_file",
+  "turns": [
+   "wheres the patagonia order at"
+  ],
+  "gold": "Patagonia is not a customer in the records.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a generic question instead of saying it is not on file",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "M01",
+  "category": "multiturn",
+  "turns": [
+   "whats our most overdue order",
+   "who's it for?"
+  ],
+  "gold": "Northwind Apparel (ORD-107).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "M02",
+  "category": "multiturn",
+  "turns": [
+   "053 or 036, which one's due first",
+   "and what stage is the other one in"
+  ],
+  "gold": "ORD-036 is at KNITTING.",
+  "error": null,
+  "answer": "(Reading “the other one” = ORD-053, from this conversation.)\n\nORD-053 — UrbanThread, 800 Polo shirt: in progress, stage assembly, due 2026-04-10; last recorded activity 2026-03-31. Due in 9 days.",
+  "intent": "order.lookup",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "answer lacks the gold fact(s)",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "M03",
+  "category": "multiturn",
+  "turns": [
+   "cotton club - which of their orders are overdue?",
+   "total pcs across those?"
+  ],
+  "gold": "1,800 pieces (ORD-002 1000 + ORD-055 800).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "M04",
+  "category": "multiturn",
+  "turns": [
+   "which order's been idle the longest",
+   "and the second?"
+  ],
+  "gold": "ORD-005, idle 8 days (last activity 2026-03-24).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "M05",
+  "category": "multiturn",
+  "turns": [
+   "status of order 61",
+   "draft a chase to washing about that one"
+  ],
+  "gold": "Shows a draft chase-up to Washing about ORD-061 (due 2026-04-05) and asks to confirm; nothing sent.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "FAIL",
+  "why": "no draft preview for the order",
+  "auto_verdict": "FAIL"
+ },
+ {
+  "id": "M06",
+  "category": "multiturn",
+  "turns": [
+   "how many open orders has trendcart got",
+   "which of them is due soonest?"
+  ],
+  "gold": "ORD-120, due 2026-03-17 (already overdue).",
+  "error": null,
+  "answer": "Of ORD-120, ORD-020, ORD-096, ORD-005, ORD-017, ORD-082, due soonest: ORD-120 (TrendCart, 1,500 Vest), due 2026-03-17 (already overdue); stage assembly. Next: ORD-020 due 2026-03-31 (already overdue); ORD-017 due 2026-04-10.",
+  "intent": "unknown",
+  "clar": false,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PASS",
+  "why": "",
+  "auto_verdict": "PASS"
+ },
+ {
+  "id": "M07",
+  "category": "multiturn",
+  "turns": [
+   "what did assembly do on 2026-03-25",
+   "is that normal?"
+  ],
+  "gold": "No: 394 is below normal for a Wednesday (previous 8 Wednesdays 702-901).",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ },
+ {
+  "id": "M08",
+  "category": "multiturn",
+  "turns": [
+   "what stage is ORD-029 in",
+   "is it late?"
+  ],
+  "gold": "No: ORD-029 is due today (2026-04-01), so it is not overdue yet.",
+  "error": null,
+  "answer": "Which order or operation would you like to check?",
+  "intent": "unknown",
+  "clar": true,
+  "confreq": false,
+  "sent": 0,
+  "verdict": "PARTIAL",
+  "why": "asked a question instead of answering",
+  "auto_verdict": "PARTIAL"
+ }
+]

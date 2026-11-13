@@ -66,6 +66,30 @@ def normalize_order_numbers(text: str, known: set[int], products: set[str] = fro
         a, b = int(m.group(1)), int(m.group(3))
         return f'ORD-{a:03d}{m.group(2)}ORD-{b:03d}' if a in known and b in known else m.group(0)
     text = re.sub(r'(?<![\w-])(\d{1,3})(\s*(?:vs\.?|versus|v\.)\s*)(\d{1,3})(?![\w-])', pair, text)
+    def unit_follows(end: int) -> bool:
+        words = [w.strip('.,;:!?').lower() for w in text[end:end + 40].strip().split(' ')[:2]] + ['', '']
+        after = words[1] if words[0] in ('more', 'less', 'extra', 'working', 'calendar') and (words[1] in units or words[1].rstrip('s') in units or words[1] in ('week', 'weeks')) else words[0]
+        return (after in units or after.rstrip('s') in units
+                or after in {'%', 'am', 'pm', 'weeks', 'week', 'x', 'priority', 'priorities', 'choice', 'rule', 'issue', 'reason', 'thing', 'problem', 'concern', 'job', 'task', 'customer', 'stage'})
+    # "#81 what stage", "chase washing on #83": a hash number is an order number when that order exists
+    def hashed(m: re.Match) -> str:
+        n = int(m.group(1))
+        return f'ORD-{n:03d}' if n in known and not unit_follows(m.end()) else m.group(0)
+    text = re.sub(r'(?<![\w#&-])#\s?(\d{1,3})(?![\w.,:/-]*\d)', hashed, text)
+    # "002", "053": three digits with a leading zero are written as an order number, never as a quantity
+    def padded(m: re.Match) -> str:
+        n = int(m.group(1))
+        return f'ORD-{n:03d}' if n in known and not unit_follows(m.end()) else m.group(0)
+    text = re.sub(r'(?<![\w#.,:/-])(0\d{2})(?![\w.,:/-]*\d)(?![\w%])', padded, text)
+    # "81 or 66 - which one's bigger", "is 83 or 2 more overdue": two bare numbers joined by "or" in a question that
+    # compares two things. Without a comparing word ("2 or 3 days", "5 or 6 hundred") nothing is changed.
+    if re.search(r"\b(which|bigger|larger|smaller|more|less|first|sooner|later|closer|further|farther|ahead|behind|overdue|late|riskier|compare|urgent)\b", text, re.I):
+        def either(m: re.Match) -> str:
+            a, b = int(m.group(1)), int(m.group(3))
+            if a in known and b in known and a != b and not unit_follows(m.end()):
+                return f'ORD-{a:03d}{m.group(2)}ORD-{b:03d}'
+            return m.group(0)
+        text = re.sub(r'(?<![\w#.,:/-])(\d{1,3})(\s+or\s+)(\d{1,3})(?![\w.,:/-]*\d)(?![\w%])', either, text, flags=re.I)
     return text
 
 
