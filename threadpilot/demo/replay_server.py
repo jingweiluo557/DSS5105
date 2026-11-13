@@ -158,6 +158,11 @@ SCRIPT = {
     'is ord005 late': dict(intent='order.risk', order_ids=['ORD-005'], reference='explicit'),   # after memory reads "the scarf one"
     'what was the factorys total output yesterday': dict(intent='operations.output', target_date='yesterday'),
     'which order has gone the longest without any activity': dict(intent='order.rank', criterion='idle_days'),
+    # the phone chapter: spoken questions (voice.js cleans up the order numbers before they are sent)
+    'where is ord005': dict(intent='order.lookup', order_ids=['ORD-005'], reference='explicit'),
+    'which customer has the most pieces in progress': dict(intent='order.compare'),
+    'is ord083 or ord002 more overdue': dict(intent='order.compare', order_ids=['ORD-083', 'ORD-002'], reference='explicit', comparison_fields=['due_date']),
+    'chase washing on ord083': dict(intent='execution.chase', action='draft', order_ids=['ORD-083'], reference='explicit', department='WASHING'),
 }
 
 

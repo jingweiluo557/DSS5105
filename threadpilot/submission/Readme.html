@@ -6,9 +6,9 @@
 
 <h2>1. What is in the repository</h2>
 <table><tr><th style="width:30%">Path</th><th>What it holds</th></tr>
-<tr><td><code>threadpilot/backend/app</code></td><td>FastAPI backend: the conversation planner and narrator (<code>conversation.py</code>), the deterministic routing and dialogue rules (<code>workflow_engine.py</code>), the 32 typed tools (<code>workflow_tools.py</code>), the queue simulation, alert policy, morning briefing, Outlook sending, voice transcription (<code>services/</code>, <code>api/</code>).</td></tr>
-<tr><td><code>threadpilot/backend/tests</code></td><td>Regression tests (pytest; SQLite; no model key needed). About 250 tests run on every push.</td></tr>
-<tr><td><code>threadpilot/frontend</code></td><td>Static web app (plain HTML, CSS, JavaScript; no build step): home screen, chat, orders, exceptions, risk, feasibility, settings, briefing page.</td></tr>
+<tr><td><code>threadpilot/backend/app</code></td><td>FastAPI backend: the conversation planner and narrator (<code>conversation.py</code>), the deterministic routing and dialogue rules (<code>workflow_engine.py</code>), the 34 typed tools (<code>workflow_tools.py</code>, <code>services/set_questions.py</code>), the queue simulation, alert policy, morning briefing, Outlook sending, voice transcription (<code>services/</code>, <code>api/</code>).</td></tr>
+<tr><td><code>threadpilot/backend/tests</code></td><td>Regression tests (pytest; SQLite; no model key needed). About 340 tests run on every push.</td></tr>
+<tr><td><code>threadpilot/frontend</code></td><td>Static web app (plain HTML, CSS, JavaScript; no build step): home screen, chat, orders, exceptions, risk, feasibility, settings, briefing page; voice in and out (<code>voice.js</code>); laid out for phones as well as laptops.</td></tr>
 <tr><td><code>threadpilot/data</code></td><td>The Track 1 files (<code>orders.csv</code>, <code>production_log.csv</code>, <code>workshops.csv</code>), the data dictionary and the Alembic migrations.</td></tr>
 <tr><td><code>threadpilot/evaluation</code></td><td>The development set (88 questions / 116 turns, answers computed by code), the runners, the scorer, every saved transcript and report; <code>heldout/</code>, the 70-question held-out ground truth (Sprint 3); <code>q100/</code>, the team's two 300-turn question sheets.</td></tr>
 <tr><td><code>threadpilot/analysis</code></td><td>The studies behind the rules: alert-rule trade-off, risk calibration, baseline-window length, lead-time model.</td></tr>
@@ -67,12 +67,16 @@ cd heldout
 ../../backend/.venv/bin/python gold/build.py            # recomputes the gold twice (Python and SQLite) and refuses to write unless both agree
 ../../backend/.venv/bin/python run_heldout.py ideal      # 48/70 with the planner's reading supplied; results/heldout_ideal.json
 ../../backend/.venv/bin/python run_heldout.py fallback   # 15/70 with no language model
+# those two files are the frozen first run (9 Nov). A later re-run goes to its own file and is a regression check, not a held-out result:
+../../backend/.venv/bin/python run_heldout.py ideal regression_2026-11-14   # 70/70 after the fixes; results/regression_2026-11-14_ideal.json
 THREADPILOT_TOKEN=… ../../backend/.venv/bin/python run_live_heldout.py --base https://&lt;backend&gt;   # the same 70 on the deployed model
 
 # the team's two 300-turn question sheets (100 questions × 3 phrasings each)
 cd ../q100
 ../../backend/.venv/bin/python run_q100.py ideal && ../../backend/.venv/bin/python grade.py answers_ideal.json
 Q100_SET=similar ../../backend/.venv/bin/python run_q100.py ideal && ../../backend/.venv/bin/python grade_similar.py answers_similar_ideal.json</pre>
+<p><b>Voice and phone check</b> (Node + Playwright; with the replay server of 3a running): <code>node tests/e2e/voice_phone_check.cjs</code> runs 20 checks in a phone-sized browser with stand-ins for the microphone and speaker: voice in by both routes, spoken replies, the rule that a spoken "send now" is never submitted, and eleven pages at 390 px. To try voice by hand, open the app in Chrome, Edge or Safari, allow the microphone, tap the microphone button and speak; the speaker button beside it turns spoken replies on. Browsers without speech recognition record a clip instead, which needs the model key on the server.</p>
+<p><b>The demo video</b> (Video.mp4) is rebuilt with <code>python3 demo/make_timeline_demo.py</code>, three runs of <code>node demo/record_demo.cjs</code> (desk, phone, desk) against the replay server, and <code>python3 demo/assemble_demo.py</code>; the exact commands are in <code>demo/README.md</code>.</p>
 <p>Keys such as <code>THREADPILOT_TOKEN</code> are read from your own shell only; never put them in a committed file.</p>
 <p>The GitHub workflow <code>threadpilot-backend.yml</code> runs the tests and the offline evaluation on every push; <code>demo-video.yml</code> records the demo on the offline replay and assembles the presentation video (Sprint 3 timeline: <code>demo/demo_timeline_sprint3.json</code>).</p>
 
@@ -86,7 +90,7 @@ Q100_SET=similar ../../backend/.venv/bin/python run_q100.py ideal && ../../backe
 <tr><td><code>ALERT_EMAILS_ENABLED</code></td><td>Deployment-level switch for alert emails (default false). The manager's own switch in Settings has the same effect.</td></tr></table>
 
 <h2>6. Where to look first</h2>
-<ul><li><code>docs/TOOL_SPECIFICATION.md</code> — the 32 tools: input, output, purpose, non-goals, failure mode.</li>
+<ul><li><code>docs/TOOL_SPECIFICATION.md</code> — the 34 tools: input, output, purpose, non-goals, failure mode.</li>
 <li><code>docs/ALERT_POLICY.md</code>, <code>docs/BASELINE_WINDOW.md</code>, <code>docs/QUEUE_SCHEDULING.md</code> — the rules and the studies behind them.</li>
 <li><code>evaluation/EVALUATION.md</code>, <code>evaluation/FAILURE_ANALYSIS.md</code> — the question set and every failure analysed.</li>
 <li><code>docs/SPRINT2_CHANGES.md</code>, <code>docs/SPRINT3_CHANGES.md</code> — what changed and why, sprint by sprint.</li>

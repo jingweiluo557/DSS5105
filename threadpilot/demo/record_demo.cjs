@@ -32,6 +32,7 @@
    "evaluate": "js"                run a snippet in the page (async body), e.g. to move the replay server's clock
    "hold": 2                       pause that many seconds
    "optional": true                a failing step is logged and skipped instead of stopping the run
+ Top level "initScript": "voice_standin.js" runs that file (beside the timeline) in every page before the site's own scripts.
  --badge "text"  shows a small fixed label in the bottom-left corner (over the sidebar footer) for the whole recording (e.g. "Offline replay").
                  With a caption band the label is written along the band's bottom edge instead, so it never covers the page.
  --no-wait-tag   do not show the "waiting for the model" tag (an offline replay has no model to wait for).
@@ -182,6 +183,9 @@ async function chatIdle(page, timeoutMs = 180000) {
   const badge = typeof args.badge === 'string' ? args.badge : (timeline.badge || '');
   await context.addInitScript(([t, sz, b]) => { window.__demoCaptionTop = t; window.__demoCaptionSize = sz; window.__demoBadge = b; }, [captionTop, captionSize, band ? '' : badge]);
   await context.addInitScript(OVERLAY);
+  // "initScript": a file beside the timeline that runs before every page (e.g. voice_standin.js: a headless browser has no
+  // microphone or speaker, so the recording needs stand-ins that the real voice.js then drives)
+  if (timeline.initScript) await context.addInitScript({ path: path.resolve(path.dirname(timelinePath), timeline.initScript) });
   if (KEY) {
     const origin = process.env.THREADPILOT_API_ORIGIN || '';
     await context.addInitScript(([key, origin]) => {

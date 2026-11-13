@@ -18,7 +18,7 @@ async function page(browser, mode, transcribeStatus) {
   const p = await (await browser.newContext({ ...devices['iPhone 13'] })).newPage();
   await p.addInitScript(mode => {
     window.__spoken = [];
-    const synth = { speaking: false, cancel() { this.speaking = false; }, speak(u) { if (u.text.trim()) { this.speaking = true; window.__spoken.push(u.text); } }, getVoices: () => [] };
+    const synth = { speaking: false, cancel() { this.speaking = false; }, speak(u) { if (u.text.trim()) { this.speaking = true; window.__spoken.push(u.text); } setTimeout(() => { this.speaking = false; u.onend && u.onend(); }, 120); }, getVoices: () => [] };
     Object.defineProperty(window, 'speechSynthesis', { value: synth, configurable: true });
     window.SpeechSynthesisUtterance = function (t) { this.text = t; };
     if (mode === 'webspeech') {
@@ -58,6 +58,7 @@ const mic = p => p.locator('[data-action="voice"]').first();
   await p.locator('textarea[name="visible-question"]').first().fill('where is ORD-029'); await p.locator('form.composer button[type=submit]').first().click(); await p.waitForTimeout(7000);
   check((await p.evaluate(() => window.__spoken.join(' '))).includes('order 0 2 9'), '5 a typed question is answered aloud while spoken replies are on');
   const read = p.locator('[data-action="read-aloud"]').last();
+  await p.evaluate(() => { window.speechSynthesis.speak = function (u) { this.speaking = true; window.__spoken.push(u.text); }; });   // from here an utterance lasts until stopped
   await read.click(); const during = await read.textContent(); await read.click();
   check(/Stop/.test(during) && /Read aloud/.test(await read.textContent()), '5 "Read aloud" starts and stops');
 
