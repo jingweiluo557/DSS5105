@@ -65,7 +65,7 @@ def policy():
         'anti_spam': ['dedupe key per alert; same key not re-emailed within its cooldown unless the score rose by 8+',
                       'an unresolved alert is reminded in the digest, never re-emailed on its own',
                       'at most 3 immediate emails a day; overflow goes to the digest',
-                      'quiet hours 22:00-06:00 hold P2/P3', 'the manager can shelve a key or a kind for N days',
+                      'urgent emails are sent only between 07:00 and 22:00: what becomes urgent overnight is held until 07:00', 'quiet hours 22:00-06:00 hold P2/P3', 'the manager can shelve a key or a kind for N days',
                       'clearing never emails; the briefing says "cleared"']}
 
 
@@ -143,6 +143,7 @@ async def run_now(request: Request, x_confirm_write: str = Header(default='')):
     status = mail['status'] if mail else None
     result['message'] = (
         'Another check is running; try again in a moment.' if result.get('status') == 'busy' else
+        f"Nothing sent: {result['held_until_morning']} urgent item(s) are held until 07:00, because urgent emails are not sent at night." if not mail and result.get('held_until_morning') else
         f"Nothing new to email: {result.get('held_back', 0)} open item(s) were already emailed and are held back." if not mail else
         'Alert emails are switched off, so this was a dry run: nothing was sent. Tick the switch under Manager delivery preferences.' if status == 'dry_run' else
         'Not sent: connect Outlook and set the manager recipient email first.' if status == 'not_configured' else

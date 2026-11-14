@@ -28,7 +28,10 @@ P1, P2, P3 = 'P1', 'P2', 'P3'
 ESCALATION_STEP = 8
 MAX_P1_PER_DAY = 3
 COOLDOWN_HOURS = {P1: 24, P2: 24 * 3, P3: 24 * 7}
-QUIET_HOURS = (22, 6)                 # local time; P2/P3 wait for the next digest, P1 passes
+QUIET_HOURS = (22, 6)                 # local time; P2/P3 wait for the next digest
+URGENT_HOURS = (7, 22)                # local time; a P1 email is sent only from 07:00:00 up to 22:00. Nobody can act on a
+                                      # stalled line at midnight, and an email at 00:00 teaches the manager to mute alerts:
+                                      # what becomes urgent overnight is held and sent when the day starts, with the briefing
 DIGEST_HOURS = (7, 14)                # P2 digests
 SUSTAINED_DROP_DAYS = 3               # consecutive working days below the same-weekday minimum
 EXCURSION_SIGMA = 3.5                 # one working day this far under the same-weekday mean is an excursion (P1 the same day)
@@ -264,7 +267,10 @@ def gate(alerts: list[Alert], history: list[dict], now: datetime, shelved: dict[
                 decisions.append(Decision(a, 'digest', f'still open after {age_h / 24:.0f} days, not escalated; reminder in the digest, no new email'))
             continue
         if a.tier == P1:
-            if sent_today >= MAX_P1_PER_DAY:
+            if not URGENT_HOURS[0] <= now.hour < URGENT_HOURS[1]:
+                # held, not recorded: at 07:00 it is still new, so the first check of the day sends it
+                decisions.append(Decision(a, 'suppressed', f'held until {URGENT_HOURS[0]:02d}:00: urgent emails are sent only between {URGENT_HOURS[0]:02d}:00 and {URGENT_HOURS[1]:02d}:00'))
+            elif sent_today >= MAX_P1_PER_DAY:
                 decisions.append(Decision(a, 'digest', f'daily cap of {MAX_P1_PER_DAY} immediate emails reached; included in the next digest'))
             else:
                 decisions.append(Decision(a, 'email_now', 'P1: needs a decision today and is new or escalated'))
@@ -279,23 +285,26 @@ def gate(alerts: list[Alert], history: list[dict], now: datetime, shelved: dict[
 def next_trigger(snapshot_for, history: list[dict], shelved: dict[str, str] | None, start: date, tz, days: int = 14, delivered_only: bool = True) -> dict | None:
     """The next moment an immediate (P1) alert email becomes due, from `start` onwards, on the records as they stand.
 
-    The urgent rules read whole days: which production days are complete, how many working days are left to a due date.
-    None of them reads the hour (quiet hours hold only the digest items). So what is urgent can only change when the
-    business date changes, at 00:00:00. This walks the next `days` midnights and returns the first at which the check
-    would send: {'trigger_at', 'items': [{key, title}], 'reason'}. Only history up to each midnight counts, as in gate().
+    Two facts fix that moment. The urgent rules read whole days (which production days are complete, how many working
+    days are left to a due date), so what is urgent changes only when the business date changes. And an urgent email is
+    sent only inside URGENT_HOURS, so something that became urgent overnight is held until the window opens. The moment
+    is therefore the start of the sending window, 07:00:00, on the first day that has something new. This walks the next
+    `days` mornings and returns the first at which the check would send:
+    {'trigger_at', 'items': [{key, title, new_at_this_moment}], ...}. Only history up to each moment counts, as in gate().
     snapshot_for(date) -> the queue snapshot for that business date.
     """
     for offset in range(days):
         day = date.fromordinal(start.toordinal() + offset)
-        moment = datetime(day.year, day.month, day.day, 0, 0, 0, tzinfo=tz)
+        moment = datetime(day.year, day.month, day.day, URGENT_HOURS[0], 0, 0, tzinfo=tz)
         decisions = gate(detect(snapshot_for(day), moment), history, moment, shelved, delivered_only)
         immediate = [d for d in decisions if d.channel == 'email_now']
         if immediate:
-            before = date.fromordinal(day.toordinal() - 1)      # one second earlier is still the previous business date
-            earlier = {a.key for a in detect(snapshot_for(before), moment - timedelta(seconds=1)) if a.tier == P1}
+            before = date.fromordinal(day.toordinal() - 1)      # what was already urgent the day before
+            earlier = {a.key for a in detect(snapshot_for(before), datetime(before.year, before.month, before.day, URGENT_HOURS[0], tzinfo=tz)) if a.tier == P1}
             return {'trigger_at': moment.isoformat(), 'items': [{'key': d.alert.key, 'title': d.alert.title, 'new_at_this_moment': d.alert.key not in earlier} for d in immediate],
                     'held_back': sum(1 for d in decisions if d.channel == 'suppressed' and 'already reported' in d.reason),
-                    'rule': 'Urgent rules read whole days, so the set of urgent items changes only at 00:00:00 when the business date changes.'}
+                    'rule': (f'Urgent emails go out only between {URGENT_HOURS[0]:02d}:00 and {URGENT_HOURS[1]:02d}:00. What is urgent is worked out from whole days, so anything that '
+                             f'became urgent overnight is held and sent when the window opens at {URGENT_HOURS[0]:02d}:00:00.')}
     return None
 
 
@@ -350,4 +359,4 @@ def summarize(decisions: list[Decision]) -> dict:
             'suppressed': [d.alert.as_dict() | {'reason': d.reason} for d in decisions if d.channel == 'suppressed'],
             'policy': {'tiers': {P1: 'email at once', P2: 'digest at 07:00 / 14:00', P3: 'briefing and app only'},
                        'cooldown_hours': COOLDOWN_HOURS, 'escalation_step': ESCALATION_STEP, 'max_p1_per_day': MAX_P1_PER_DAY,
-                       'quiet_hours': QUIET_HOURS, 'digest_hours': DIGEST_HOURS}}
+                       'quiet_hours': QUIET_HOURS, 'urgent_hours': URGENT_HOURS, 'digest_hours': DIGEST_HOURS}}

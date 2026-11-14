@@ -16,7 +16,7 @@ The brief says it: "a co-pilot that pings ten times a day gets muted". Industria
 | P3 — watch | worth knowing, no action yet | briefing and the app only, never email | 7 d |
 
 3. **Never nag.** Each alert has a dedupe key (`kind:entity`). The same key is not emailed again within its cooldown, and after the cooldown an *unresolved* item is reminded inside the digest, never by a fresh email. It is emailed again only if it got worse (score up by 8 or more).
-4. **Caps and quiet hours.** At most 3 immediate emails per day; the overflow goes to the next digest as "several critical items". 22:00–06:00 holds P2/P3; P1 passes.
+4. **Caps and quiet hours.** At most 3 immediate emails per day; the overflow goes to the next digest as "several critical items". 22:00–06:00 holds P2/P3. An urgent (P1) email is sent only between 07:00 and 22:00: what becomes urgent overnight is held, unrecorded, and sent by the first check after 07:00:00 (changed 14 Nov; before that P1 passed at any hour, which on whole-day rules meant an email at 00:00:00).
 5. **Shelving.** The GM can mute a key ("ORD-107 overdue") or a kind ("overdue") for N days; shelved alerts stay visible in the app with the mute shown.
 6. **Clearing is silent.** When a condition clears, nothing is emailed; the briefing says "cleared".
 7. **Measured.** `GET /api/alerts/kpis`: immediate emails per week (target ≤ 5), items per digest, and the GM's own useful / not-useful ratings (target ≥ 70 % useful). If the ratings fall, thresholds move, not the GM's patience.
