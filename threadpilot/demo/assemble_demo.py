@@ -48,6 +48,10 @@ def main():
     # the wording is never shown over the simulated recording, the phone screen is left as a marked empty frame with no
     # synthetic voice: the team's recording (with its own sound) is laid into that frame. parts.json gives the rectangle.
     phone_live = '--phone-live' in sys.argv
+    # --phone-guide (with --phone-live): keep the simulated phone recording and its synthetic voice in the frame as a guide
+    # to record against and to cover, with a ribbon across the top of the phone screen saying it is guide footage. The
+    # team's recording, laid over the same rectangle, covers the ribbon too.
+    phone_guide = phone_live and '--phone-guide' in sys.argv
     live_badge = 'Recorded live on a real phone · real microphone and speaker · no email is sent in this chapter'
     work = out / 'work'; work.mkdir(exist_ok=True)
     files, all_cues, starts, offset = [], [], {}, 0.0
@@ -67,7 +71,13 @@ def main():
                     f"drawtext=textfile='{note}':font='{FONT}':fontsize=24:fontcolor=#5B6875:line_spacing=10:x={x - 14 - 80}-text_w:y=470,"
                     f"drawtext=textfile='{right}':font='{FONT}\\:style=Bold':fontsize=36:fontcolor=#1C2733:line_spacing=14:x={x + pw + 14 + 80}:y=320[v]")
             enc = ['-map', '[v]', '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', dst]
-            if phone_live:      # an empty, clearly marked screen instead of the simulated recording
+            ribbon = work / 'ribbon.txt'; ribbon.write_text('GUIDE FOOTAGE · replace with the live recording')
+            if phone_guide:
+                vf = (f"color=c=#E8ECEF:s={W}x{H}:r=30[bg];[0:v]scale={pw}:{ph}:flags=lanczos,fps=30,drawbox=x=0:y=0:w={pw}:h=44:color=#B4532A@0.92:t=fill,"
+                      f"drawtext=textfile='{ribbon}':font='{FONT}\\:style=Bold':fontsize=19:fontcolor=white:x=({pw}-text_w)/2:y=12[ph];"
+                      f"[bg]drawbox=x={x - 14}:y={y - 14}:w={pw + 28}:h={ph + 28}:color=#111820:t=fill[bz];[bz][ph]overlay={x}:{y}:shortest=1," + side)
+                run('-i', src, '-filter_complex', vf, *enc)
+            elif phone_live:      # an empty, clearly marked screen instead of the simulated recording
                 vf = (f"color=c=#E8ECEF:s={W}x{H}:r=30,drawbox=x={x - 14}:y={y - 14}:w={pw + 28}:h={ph + 28}:color=#111820:t=fill,drawbox=x={x}:y={y}:w={pw}:h={ph}:color=#2A3440:t=fill,"
                       f"drawtext=textfile='{hole}':font='{FONT}\\:style=Bold':fontsize=40:fontcolor=#9AA7B4:line_spacing=18:x={x}+({pw}-text_w)/2:y={y}+({ph}-text_h)/2," + side)
                 run('-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo', '-filter_complex', vf, '-t', f'{dur(src):.3f}', *enc)
@@ -105,11 +115,11 @@ def main():
             vf += draw(bf, f":enable='not(between(t,{b0},{b1}))'") + draw(lf, f":enable='between(t,{b0},{b1})'")
         else:
             vf += draw(bf, '')
-    final = out / ('ThreadPilot_Demo_phone_frame.mp4' if phone_live else 'ThreadPilot_Demo.mp4')
+    final = out / ('ThreadPilot_Demo_phone_guide.mp4' if phone_guide else 'ThreadPilot_Demo_phone_frame.mp4' if phone_live else 'ThreadPilot_Demo.mp4')
     # Sound: the phone's spoken replies (demo/voice_audio, from make_voice_audio.py), each laid where the phone part's
     # marks say the reply started. Everything else is silence, left for the presenters' voice-over.
     audio_dir, marks_file, voice = Path(__file__).resolve().parent / 'voice_audio', parts / 'b' / 'marks_cut.json', []
-    if (audio_dir / 'index.json').exists() and marks_file.exists() and not phone_live:      # a real phone brings its own voice
+    if (audio_dir / 'index.json').exists() and marks_file.exists() and (phone_guide or not phone_live):      # a real phone brings its own voice
         by_text = {r['text']: r for r in json.loads((audio_dir / 'index.json').read_text())}
         for m in json.loads(marks_file.read_text()):
             r = by_text.get(json.loads(m['text']).get('speak')) if m['text'].startswith('{') else None
