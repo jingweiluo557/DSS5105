@@ -58,22 +58,34 @@ Two steps act for real on the live system: `Confirm send` (sends the chase-up th
   `voice/README.md`. Or let the captions carry the narration and add music.
 - A take that goes wrong: fix the step in the timeline and re-run; nothing is cached.
 
-## Full product demo (Video.mp4 in Group19.zip), version of 14 Nov: desk, phone and voice, desk
+## Full product demo (Video.mp4 in Group19.zip), version of 14 Nov: desk, phone and voice, desk — with the phone's replies as sound
 
 ```
 python3 demo/make_timeline_demo.py            # writes demo_timeline_demo_a.json (desk 07:00), _b.json (phone, voice), _c.json (desk, rest of the day)
 REPLAY_NOW=2026-04-01T07:00:00+08:00 REPLAY_STEP_PACE=0.35 python3 demo/replay_server.py 8765 &
 for p in a b c; do node demo/record_demo.cjs --timeline demo/demo_timeline_demo_$p.json --out dist/parts/$p --compress-waits 4 --no-wait-tag; done
-python3 demo/assemble_demo.py dist/parts dist/demo --badge "Offline replay · real interface and engine on the factory records · the model's reading of each message is scripted · microphone and speaker simulated · no real email"
-python3 demo/make_demo_script.py --srt dist/demo/ThreadPilot_Demo.srt --duration <seconds> --out dist/demo/ThreadPilot_Demo_script.txt
+python3 demo/assemble_demo.py dist/parts dist/demo --badge "Offline replay · real interface and engine on the factory records · the model's reading of each message is scripted · microphone simulated, replies in a recorded synthetic voice · no real email"
+python3 demo/make_demo_script.py --srt dist/demo/ThreadPilot_Demo.srt --duration <seconds> --parts dist/demo/parts.json --out dist/demo/ThreadPilot_Demo_script.txt
 python3 demo/make_prompter.py demo --srt dist/demo/ThreadPilot_Demo.srt --duration <seconds> --out dist/demo/ThreadPilot_Demo_prompter.mp4
 ```
 
 Record the three parts in order on one server run: part A sends the ORD-002 chase-up that the later Activity Log shows.
 
-The phone part (B) is the real frontend in a 414x720 browser. A recording browser has no microphone or speaker, so
-`voice_standin.js` (the timeline's `initScript`) stands in for both: it feeds the words of each `speak(...)` step to the
-page's speech recognition one by one, and shows what the page asks the speaker to say as a labelled strip, because the
-video is silent. `frontend/voice.js` is not changed for the recording. The captions and the line under them say that the
-microphone and speaker are simulated. For a recording with no such caveat, screen-record a real phone doing the same
-five steps with the sound on and put it in place of part B (0:56-2:00).
+**Length.** `READ_WPS` in `make_timeline_demo.py` sets how long each caption stays up (2.75 words a second gives about
+4:50, so no spoken line needs more than about 135 words a minute). Raise it to shorten the video; the limit is 5:00.
+
+**The phone part (B)** is the real frontend in a 414x720 browser. A recording browser has no microphone or speaker, so
+`voice_standin.js` (the timeline's `initScript`) stands in for both. Microphone: it feeds the words of each `speak(...)`
+step to the page's speech recognition one by one. Speaker: it logs the exact words `frontend/voice.js` hands to the
+speaker (an `@mark` line, saved by the recorder with its time) and shows them in a strip.
+
+**The spoken replies you hear.** `python3 demo/make_voice_audio.py dist/parts/b` renders those words with ffmpeg's
+built-in flite voice (offline, plain) into `demo/voice_audio/reply_NN.wav`, and writes each reply's length into
+`voice_standin.js` and `voice_audio/index.json`. The timeline then holds each reply for its length, and
+`assemble_demo.py` lays each file where the mark says the reply started. The wavs in the repository match the current
+answers; if an answer's wording changes, record part B, run `make_voice_audio.py`, regenerate the timeline and record
+part B again. The rest of the sound track is silent, for the presenters' voice-over (`ThreadPilot_Demo_prompter.mp4`
+marks the three stretches where the phone speaks and the presenter does not).
+
+For a recording with no caveat, screen-record a real phone doing the same steps with the sound on and put it in place
+of part B.

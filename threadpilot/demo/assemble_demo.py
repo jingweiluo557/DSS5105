@@ -5,7 +5,8 @@
 <parts dir>/a, /b, /c each hold demo_cut.mp4 and demo_cut.srt from record_demo.cjs (timelines demo_timeline_demo_{a,b,c}.json,
 recorded with --compress-waits 4 --no-wait-tag and captions hidden). Parts a and c are the desk (1920x972). Part b is the
 phone (414x720 at 2x): it is scaled into a phone frame in the middle of the same canvas, with a short label on each side.
-Writes ThreadPilot_Demo.mp4, ThreadPilot_Demo.srt and parts.json (where each part starts, for the script).
+Writes ThreadPilot_Demo.mp4, ThreadPilot_Demo.srt and parts.json (where each part starts and where each spoken reply
+plays). The sound track holds only the phone's spoken replies (demo/voice_audio); the rest is silent for the voice-over.
 """
 import json, re, subprocess, sys
 from pathlib import Path
@@ -53,7 +54,7 @@ def main():
             x, y = (W - pw) // 2, (H - ph) // 2
             left = work / 'left.txt'; left.write_text('On the factory floor\nA phone, by voice')
             right = work / 'right.txt'; right.write_text('Voice in  ·  spoken reply\nSame rules as at the desk')
-            note = work / 'note.txt'; note.write_text('Real app in a phone-sized browser.\nMicrophone and speaker are simulated\nfor this silent recording.')
+            note = work / 'note.txt'; note.write_text('Real app in a phone-sized browser.\nThe microphone is simulated; the replies\nyou hear are a recorded synthetic voice\nsaying the words the app speaks.')
             vf = (f"color=c=#E8ECEF:s={W}x{H}:r=30[bg];[0:v]scale={pw}:{ph}:flags=lanczos,fps=30[ph];"
                   f"[bg]drawbox=x={x - 14}:y={y - 14}:w={pw + 28}:h={ph + 28}:color=#111820:t=fill[bz];[bz][ph]overlay={x}:{y}:shortest=1,"
                   f"drawtext=textfile='{left}':font='{FONT}\\:style=Bold':fontsize=44:fontcolor=#1C2733:line_spacing=14:x={x - 14 - 80}-text_w:y=300,"
@@ -83,8 +84,24 @@ def main():
         bf = work / 'badge.txt'; bf.write_text(badge)
         vf += f",drawtext=textfile='{esc(bf)}':font='{FONT}':fontsize={round(foot * 0.72)}:fontcolor=0x9AA7B4:x=(w-text_w)/2:y=h-{foot}-2"
     final = out / 'ThreadPilot_Demo.mp4'
-    run('-i', joined, '-vf', vf, '-r', '30', '-an', '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', final)
-    (out / 'parts.json').write_text(json.dumps({'starts': starts, 'total_s': round(offset, 2)}, indent=1))
+    # Sound: the phone's spoken replies (demo/voice_audio, from make_voice_audio.py), each laid where the phone part's
+    # marks say the reply started. Everything else is silence, left for the presenters' voice-over.
+    audio_dir, marks_file, voice = Path(__file__).resolve().parent / 'voice_audio', parts / 'b' / 'marks_cut.json', []
+    if (audio_dir / 'index.json').exists() and marks_file.exists():
+        by_text = {r['text']: r for r in json.loads((audio_dir / 'index.json').read_text())}
+        for m in json.loads(marks_file.read_text()):
+            r = by_text.get(json.loads(m['text']).get('speak')) if m['text'].startswith('{') else None
+            if r:
+                voice.append({'at_s': round(starts['b'] + m['t_s'], 2), 'seconds': r['seconds'], 'file': str(audio_dir / r['file']), 'text': r['text']})
+    inputs, graph = ['-i', joined, '-f', 'lavfi', '-t', f'{offset:.3f}', '-i', 'anullsrc=r=48000:cl=stereo'], f'[0:v]{vf}[v];'
+    for n, v in enumerate(voice):
+        inputs += ['-i', v['file']]
+        graph += f"[{n + 2}:a]adelay={round(v['at_s'] * 1000)}:all=1[a{n}];"
+    graph += '[1:a]' + ''.join(f'[a{n}]' for n in range(len(voice))) + f'amix=inputs={len(voice) + 1}:duration=first:normalize=0[a]'
+    run(*inputs, '-filter_complex', graph, '-map', '[v]', '-map', '[a]', '-r', '30', '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-pix_fmt', 'yuv420p',
+        '-c:a', 'aac', '-b:a', '128k', '-t', f'{offset:.3f}', '-movflags', '+faststart', final)
+    (out / 'parts.json').write_text(json.dumps({'starts': starts, 'total_s': round(offset, 2), 'voice': [{k: v[k] for k in ('at_s', 'seconds', 'text')} for v in voice]}, indent=1))
+    print(f'{len(voice)} spoken replies laid in: ' + ', '.join(f"{v['at_s']:.1f}-{v['at_s'] + v['seconds']:.1f} s" for v in voice))
     print(f'{final} · {offset:.1f} s ({int(offset // 60)}:{int(offset % 60):02d}) · {len(all_cues)} captions · parts start at {starts}')
 
 

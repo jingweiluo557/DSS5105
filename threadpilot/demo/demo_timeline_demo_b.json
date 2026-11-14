@@ -23,91 +23,91 @@
    }
   },
   {
-   "at": 4.2,
+   "at": 5.0,
    "goto": "#/ai"
   },
   {
-   "at": 5.3,
-   "say": "She taps the microphone and speaks. (The app is the real one; this recording simulates the microphone and speaker.)"
+   "at": 6.9,
+   "evaluate": "window.__voiceSay = \"where is o r d zero zero five\";",
+   "say": "She taps the microphone and asks out loud: “Where is O R D zero zero five?”"
   },
   {
-   "at": 9.5,
-   "evaluate": "window.__voiceSay = \"where is o r d zero zero five\";"
-  },
-  {
-   "at": 9.8,
+   "at": 7.2,
    "click": "[data-form=\"chat\"] [data-action=\"voice\"]"
   },
   {
-   "at": 13.8,
+   "at": 11.2,
    "waitAnswer": true
   },
   {
-   "at": 14.2,
-   "say": "Spoken “O R D zero zero five” became ORD-005 and was sent. A spoken question gets a spoken answer."
+   "at": 12.7,
+   "say": "🔊 It heard ORD-005, sent the question, and answers out loud. (Listen: this is the phone speaking.)"
   },
   {
-   "at": 19.8,
+   "at": 25.2,
    "click": "[data-action=\"voice-replies\"] >> nth=0",
    "say": "The speaker button keeps spoken replies on for every answer, typed or spoken."
   },
   {
-   "at": 23.2,
-   "evaluate": "window.__voiceSay = \"which customer has the most pieces in progress\";"
+   "at": 29.9,
+   "evaluate": "window.__voiceSay = \"which customer has the most pieces in progress\";",
+   "say": "She asks: “Which customer has the most pieces in progress?”"
   },
   {
-   "at": 23.5,
+   "at": 30.2,
    "click": "[data-form=\"chat\"] [data-action=\"voice\"]"
   },
   {
-   "at": 27.5,
+   "at": 34.2,
    "waitAnswer": true
   },
   {
-   "at": 27.9,
-   "say": "A “most” question is computed from the order book, not guessed: Northwind Apparel, 8,000 pieces, and it says so aloud."
+   "at": 34.5,
+   "say": "🔊 Computed from the order book, not guessed, and said aloud: Northwind Apparel, 8,000 pieces."
   },
   {
-   "at": 34.3,
-   "evaluate": "window.__voiceSay = \"chase washing on o r d zero eight three\";"
+   "at": 40.2,
+   "evaluate": "window.__voiceSay = \"chase washing on o r d zero eight three\";",
+   "say": "Actions work by voice too: “Chase washing on O R D zero eight three.”"
   },
   {
-   "at": 34.6,
+   "at": 40.5,
    "click": "[data-form=\"chat\"] [data-action=\"voice\"]"
   },
   {
-   "at": 38.9,
+   "at": 44.8,
    "waitAnswer": true
   },
   {
-   "at": 39.3,
-   "say": "Actions work by voice too: a draft to washing about ORD-083. Still only a draft."
+   "at": 45.3,
+   "say": "🔊 A draft to washing about ORD-083. It says so in one line, and that nothing has been sent."
   },
   {
-   "at": 43.9,
-   "evaluate": "window.__voiceSay = \"send now\";"
+   "at": 52.2,
+   "evaluate": "window.__voiceSay = \"send now\";",
+   "say": "She says “send now”…"
   },
   {
-   "at": 44.2,
+   "at": 52.5,
    "click": "[data-form=\"chat\"] [data-action=\"voice\"]"
   },
   {
-   "at": 46.5,
-   "say": "But a spoken “send now” is never sent. It waits in the box for a tap, so a misheard word cannot send an email."
+   "at": 55.2,
+   "say": "A spoken “send now” is never sent. It waits in the box for a tap, so a misheard word cannot send an email."
   },
   {
-   "at": 53.2,
+   "at": 63.6,
    "goto": "#/orders",
    "say": "Every page fits the phone: wide tables scroll inside their card, buttons are thumb-sized."
   },
   {
-   "at": 55.2,
+   "at": 65.6,
    "scroll": {
     "by": 380
    }
   },
   {
-   "at": 57.8,
+   "at": 68.2,
    "hold": 0.2
   }
  ],

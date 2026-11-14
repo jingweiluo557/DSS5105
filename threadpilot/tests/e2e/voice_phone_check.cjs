@@ -48,6 +48,8 @@ const mic = p => p.locator('[data-action="voice"]').first();
   check(b[0] === 'where is ORD-005', '1 spoken order number is cleaned up and the question is sent');
   check((b[1] || '').includes('ORD-005'), '1 the question is answered');
   check((await p.evaluate(() => window.__spoken.join(' '))).includes('order 0 0 5'), '1 the answer is read aloud, order number digit by digit');
+  const said = await p.evaluate(() => window.__spoken.join(' '));
+  check(/\b20 April\b/.test(said) && !/\d{4}-\d{2}-\d{2}/.test(said) && said.split(/\s+/).length <= 40, '1 dates are spoken as "20 April" and the reply is the headline, not the whole answer');
   await p.evaluate(() => { window.__say = 'send now'; });
   await mic(p).click(); await p.waitForTimeout(1500);
   check((await bubbles(p)).length === b.length && await p.locator('textarea[name="visible-question"]').first().inputValue() === 'send now', '4 "send now" by voice waits in the box for a tap');

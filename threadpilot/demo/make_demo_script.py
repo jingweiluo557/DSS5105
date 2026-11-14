@@ -17,24 +17,24 @@ sys.path.insert(0, str(HERE))
 import prompter_lines  # noqa: E402
 from make_prompter import SHORT, clock, srt  # noqa: E402
 
-CHAPTERS = [(0, '07:00 · At the desk: the screen speaks first'), (9, '09:40 · On the floor: a phone, by voice'), (17, '10:30 · Back at the desk: questions'),
-            (21, '11:15 · Can we take it?'), (26, '14:30 · Actions with a safety catch'), (32, 'Alerts, rationed'), (33, 'Honesty under pressure'), (37, 'Close')]
+CHAPTERS = [(0, '07:00 · At the desk: the screen speaks first'), (9, '09:40 · On the floor: a phone, by voice'), (20, '10:30 · Back at the desk: questions'),
+            (24, '11:15 · Can we take it?'), (29, '14:30 · Actions with a safety catch'), (35, 'Alerts, rationed'), (36, 'Honesty under pressure'), (40, 'Close')]
 SHOWS = [(1, 'Proactive is a dial', 'decision cards, drafted chase-ups, rationed alerts'),
          (4, 'Action tools with confirmation + audit', 'drafted chase-up, core-task chase, watch, Activity Log'),
          (7, 'Concise first, one click to detail', "3-line status, cards, 'Show more', 'i' buttons"),
          (8, 'Scheduled morning briefing', '07:00 briefing on the home screen'),
          (9, 'Used from a phone', 'home screen, chat and Orders page at phone width'),
          (10, 'Voice input', "microphone tapped; 'O R D zero zero five' becomes ORD-005 and is sent"),
-         (11, 'Spoken reply', 'the answer is read aloud; speaker button keeps replies on'),
-         (13, 'The model does no arithmetic', "'most pieces' computed by a tool over the order book"),
-         (15, 'No send without a tap', "a spoken 'send now' waits in the box"),
-         (18, 'Judgement tool, inspectable', "'was assembly normal?' + the 'i' on the pulse"),
-         (19, "Ask, don't guess", 'TrendCart has six orders, so it asks which'),
-         (20, 'Tracing to the rows', "'Show more': planner reading, tool calls, source rows"),
-         (22, 'Feasibility with assumptions, not a yes', '800 hoodies in chat + Feasibility page, same figures'),
-         (30, 'Watches and alerts, rationed', 'conditional watch; alert policy in Settings'),
-         (34, 'Says what the data cannot answer', 'revenue question; ORD-218 not on file'),
-         (35, "Checks the manager's premise", "'hasn't moved in a week' true; 'stuck since last week' false")]
+         (11, 'Spoken reply (you hear it)', 'the answer is said aloud; speaker button keeps replies on'),
+         (14, 'The model does no arithmetic', "'most pieces' computed by a tool over the order book"),
+         (18, 'No send without a tap', "a spoken 'send now' waits in the box"),
+         (21, 'Judgement tool, inspectable', "'was assembly normal?' + the 'i' on the pulse"),
+         (22, "Ask, don't guess", 'TrendCart has six orders, so it asks which'),
+         (23, 'Tracing to the rows', "'Show more': planner reading, tool calls, source rows"),
+         (25, 'Feasibility with assumptions, not a yes', '800 hoodies in chat + Feasibility page, same figures'),
+         (33, 'Watches and alerts, rationed', 'conditional watch; alert policy in Settings'),
+         (37, 'Says what the data cannot answer', 'revenue question; ORD-218 not on file'),
+         (38, "Checks the manager's premise", "'hasn't moved in a week' true; 'stuck since last week' false")]
 
 
 def actions(steps):
@@ -74,6 +74,7 @@ def main():
     ap.add_argument('--srt', required=True, type=Path)
     ap.add_argument('--duration', required=True, type=float)
     ap.add_argument('--out', required=True, type=Path)
+    ap.add_argument('--parts', type=Path, help='parts.json from assemble_demo.py: where the phone\'s spoken replies play')
     a = ap.parse_args()
     cues = srt(a.srt)
     lines = prompter_lines.DEMO
@@ -91,20 +92,27 @@ def main():
            'clock follows the day (07:00, 09:40, 10:30, 11:15, 14:30). Captions are burned',
            'in at the bottom and paced for reading.',
            '',
+           'SOUND',
+           "The video's sound track holds only the phone's three spoken replies (times",
+           'below). Everything else is silent, for your voice-over. While the phone',
+           'speaks, say nothing: those lines are marked PHONE.',
+           '',
            'HOW IT WAS RECORDED (say this if asked)',
            'Offline replay: the real interface and engine on the Track 1 records, with the',
            "language model's reading of each message scripted so the recording is",
            'repeatable; nothing is emailed. The phone chapter is the real app in a',
-           'phone-sized browser. A recording browser has no microphone or speaker, so',
-           'both are simulated: the words "spoken" are fed to the app\'s own voice code,',
-           'and the spoken reply is shown as a dark strip of text because the video is',
-           'silent. A line under the captions says all of this throughout.',
+           'phone-sized browser. A recording browser has no microphone or speaker, so the',
+           'microphone is simulated (the words are fed to the app\'s own voice code) and',
+           'the replies you hear are the exact words the app hands to the speaker, said',
+           'by an offline synthetic voice and laid in at the moment the app speaks. A',
+           "real phone uses its own, better voice. The video's captions say this.",
            'Business date: 1 April 2026.',
            '',
            'TO MAKE IT STRONGER BEFORE SUBMITTING (optional)',
            '  1. Record the voice-over with the SAY lines below (three voices).',
-           '  2. Replace 0:56-2:00 with a real phone screen recording, sound on, doing',
-           '     the same five steps. That removes the "simulated" caveat.', '', 'CHAPTERS', '']
+           '  2. Replace the phone chapter with a real phone screen recording, sound',
+           '     on, doing the same steps. That removes the "simulated" caveat.',
+           '', 'CHAPTERS', '']
     for n, (i, title) in enumerate(CHAPTERS):
         stop = cues[CHAPTERS[n + 1][0]]['start'] if n + 1 < len(CHAPTERS) else a.duration
         out.append(f'  {n + 1 if title != "Close" else "—"}  {clock(cues[i]["start"])}-{clock(stop)}  {title}')
@@ -113,9 +121,14 @@ def main():
     out += ['', 'VOICES', '']
     spans = {}
     for first, last, who, _ in lines:
+        if who == prompter_lines.P:
+            continue
         s0, e0 = spans.get(who, (cues[first]['start'], 0))
         spans[who] = (s0, end(last))
     out += [f'  {who:<24} {clock(s)}-{clock(e)}  ({round(e - s)} s)' for who, (s, e) in spans.items()]
+    if a.parts and a.parts.exists():
+        out += ['', '  The phone speaks (already in the video; stay silent):']
+        out += [f"    {clock(v['at_s'])}-{clock(v['at_s'] + v['seconds'])}  “{v['text']}”" for v in json.loads(a.parts.read_text()).get('voice', [])]
     out += ['', '  Say the SAY lines, not the captions: the captions are written for reading.',
             '  ThreadPilot_Demo_prompter.mp4 shows the same lines, filling in at speaking pace.', '',
             '=' * W, 'SCRIPT   [time]  CAPTION on screen  /  SAY aloud  /  what happens on screen', '=' * W]
@@ -126,7 +139,7 @@ def main():
         out += ['', f'[{clock(c["start"])}-{clock(end(i))}]', f'  CAPTION  {c["text"]}']
         if i in spoken:
             who, text, _ = spoken[i]
-            out.append(f'  SAY ({SHORT[who]})  {text}')
+            out.append(f'  PHONE  {text}   <- in the video already; do not speak' if who == prompter_lines.P else f'  SAY ({SHORT[who]})  {text}')
         if acts[i]:
             out.append('  ON SCREEN  ' + '; '.join(acts[i]) + '.')
     a.out.write_text('\n'.join(out) + '\n', encoding='utf-8')
