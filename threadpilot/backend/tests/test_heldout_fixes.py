@@ -221,3 +221,51 @@ def test_alert_email_is_rationed_one_email_then_nothing_until_something_new():
     second = alert_policy.gate(alert_policy.detect(data, NOW), history, NOW)
     assert not [d for d in second if d.channel == 'email_now'], 'the same items are not emailed again'
     assert sum('already reported' in d.reason for d in second if d.channel == 'suppressed') == len(urgent)
+
+
+def test_alert_history_ignores_undelivered_and_later_timeline_rows():
+    """Found when asking why switching alert emails on sent nothing: every dry-run tick had been recorded as "reported",
+    so the items were in cooldown for ever; and after moving the demo clock back, rows stamped later read as reported
+    "-5 h ago". Neither reached the manager at that business time, so neither may hold an email back."""
+    from datetime import timedelta
+    from app.services import alert_policy
+    data = {'today': TODAY.isoformat(), 'orders': ROWS,
+            'production_log': list(csv.DictReader(open(Path(DATA) / 'production_log.csv', newline=''))),
+            'workshops': list(csv.DictReader(open(Path(DATA) / 'workshops.csv', newline='')))}
+    alerts = alert_policy.detect(data, NOW)
+    urgent = [d for d in alert_policy.gate(alerts, [], NOW) if d.channel == 'email_now']
+    row = lambda d, at, status: {'key': d.alert.key, 'tier': d.alert.tier, 'score': d.alert.score, 'channel': 'email_now', 'sent_at': at.isoformat(), 'status': status}
+    emailed = lambda history, delivered_only: [d for d in alert_policy.gate(alerts, history, NOW, None, delivered_only) if d.channel == 'email_now']
+    dry = [row(d, NOW - timedelta(hours=1), 'dry_run') for d in urgent]
+    assert emailed(dry, False) == [], 'while emails are off, a dry run still counts, so the dry-run ledger does not repeat itself'
+    assert len(emailed(dry, True)) == len(urgent), 'once emails are on, what was never delivered does not hold the first real email back'
+    assert emailed([row(d, NOW - timedelta(hours=1), 'accepted') for d in urgent], True) == [], 'a delivered email does'
+    later = [row(d, NOW + timedelta(days=3), 'accepted') for d in urgent]
+    assert len(emailed(later, True)) == len(urgent), 'rows from a later timeline (the clock was moved back) are ignored'
+
+
+def test_first_real_check_after_switching_on_sends_once_even_after_weeks_of_dry_runs(tmp_path):
+    """The whole tick, as the timer and "Run the check now" call it, with a stand-in mailbox."""
+    import asyncio
+    from types import SimpleNamespace
+    from app.services.alert_delivery import AlertDelivery, AlertLedger
+    data = {'today': TODAY.isoformat(), 'orders': ROWS,
+            'production_log': list(csv.DictReader(open(Path(DATA) / 'production_log.csv', newline=''))),
+            'workshops': list(csv.DictReader(open(Path(DATA) / 'workshops.csv', newline='')))}
+    sent = []
+    prefs = {'manager_email': 'gm@example.com', 'manager_name': 'Wendy', 'alert_emails_enabled': False}
+    delivery = AlertDelivery.__new__(AlertDelivery)
+    delivery.settings = SimpleNamespace(alert_emails_enabled=False)
+    delivery.ledger = AlertLedger(tmp_path / 'alerts.sqlite3')
+    delivery.preferences = SimpleNamespace(read=lambda: prefs)
+    delivery.outlook = SimpleNamespace(missing=lambda: False, send=lambda mid, mail: sent.append(mail) or {'status': 'accepted'})
+    tick = lambda: asyncio.run(delivery._run(lambda: data, NOW))
+    assert tick()['p1_email']['status'] == 'dry_run' and sent == []          # switch off: recorded as a dry run, nothing leaves
+    assert 'p1_email' not in tick()                                           # and the dry-run ledger does not repeat itself
+    prefs['alert_emails_enabled'] = True                                      # the manager ticks the switch
+    first = tick()
+    assert first['p1_email']['status'] == 'accepted' and len(sent) == 1 and sent[0]['to'] == ['gm@example.com']
+    assert sent[0]['subject'].startswith('[ThreadPilot P1]') and 'Hello Wendy' in sent[0]['body']
+    second = tick()
+    assert 'p1_email' not in second and second['held_back'] == len(first['p1_email']['keys']) and len(sent) == 1
+    assert delivery.ledger.kpis(NOW)['delivered_today'] == 1

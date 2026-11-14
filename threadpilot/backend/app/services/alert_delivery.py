@@ -45,8 +45,8 @@ class AlertLedger:
 
     def history(self, days: int = 30) -> list[dict]:
         with self.connect() as db:
-            rows = db.execute('SELECT key, tier, score, channel, sent_at FROM alert_decisions ORDER BY sent_at').fetchall()
-        return [{'key': k, 'tier': t, 'score': s, 'channel': c, 'sent_at': a} for k, t, s, c, a in rows][-5000:]
+            rows = db.execute('SELECT key, tier, score, channel, sent_at, email_status FROM alert_decisions ORDER BY sent_at').fetchall()
+        return [{'key': k, 'tier': t, 'score': s, 'channel': c, 'sent_at': a, 'status': st} for k, t, s, c, a, st in rows][-5000:]
 
     def shelved(self) -> dict[str, str]:
         with self.connect() as db:
@@ -84,8 +84,12 @@ class AlertLedger:
             week = (now.date().toordinal() - 7)
             weekly = db.execute("SELECT COUNT(DISTINCT email_id) FROM alert_decisions WHERE channel='email_now' AND email_id IS NOT NULL AND sent_at >= ?", (datetime.fromordinal(week).isoformat(),)).fetchone()[0]
             digests = db.execute('SELECT COUNT(*), AVG(json_array_length(keys)) FROM alert_digests WHERE sent_at >= ?', (datetime.fromordinal(week).isoformat(),)).fetchone()
+            # really delivered (not a dry run, not refused), up to the business time now: what "Sent today" shows in Settings
+            real = "SELECT COUNT(DISTINCT email_id) FROM alert_decisions WHERE channel='email_now' AND email_id IS NOT NULL AND COALESCE(email_status,'') NOT IN ('dry_run','not_configured','rejected') AND sent_at >= ? AND sent_at <= ?"
+            delivered_today = db.execute(real, (now.date().isoformat(), now.isoformat())).fetchone()[0]
+            delivered_week = db.execute(real, (datetime.fromordinal(week).isoformat(), now.isoformat())).fetchone()[0]
             fb = db.execute('SELECT COUNT(*), SUM(useful) FROM alert_feedback').fetchone()
-        return {'p1_emails_today': emails, 'p1_emails_last_7_days': weekly, 'digests_last_7_days': digests[0], 'avg_items_per_digest': round(digests[1] or 0, 1),
+        return {'p1_emails_today': emails, 'p1_emails_last_7_days': weekly, 'delivered_today': delivered_today, 'delivered_last_7_days': delivered_week, 'digests_last_7_days': digests[0], 'avg_items_per_digest': round(digests[1] or 0, 1),
                 'feedback_count': fb[0], 'rated_useful_pct': round(100 * (fb[1] or 0) / fb[0], 1) if fb[0] else None,
                 'targets': {'p1_emails_per_week': '<= 5', 'rated_useful_pct': '>= 70', 'note': 'alarm-management practice: few, actionable, never repeated'}}
 
@@ -101,8 +105,12 @@ class AlertDelivery:
         else:
             self.ledger = AlertLedger(ledger_path or settings.workflow_db.with_name('alerts.sqlite3'))
 
-    def evaluate(self, data: dict, now: datetime) -> list[alert_policy.Decision]:
-        return alert_policy.gate(alert_policy.detect(data, now), self.ledger.history(), now, self.ledger.shelved())
+    def evaluate(self, data: dict, now: datetime, delivered_only: bool | None = None) -> list[alert_policy.Decision]:
+        """delivered_only defaults to whether alert emails are on: once they are, only emails that really went out count
+        as "already reported" (see alert_policy.relevant_history)."""
+        if delivered_only is None:
+            delivered_only = self.enabled()
+        return alert_policy.gate(alert_policy.detect(data, now), self.ledger.history(), now, self.ledger.shelved(), delivered_only)
 
     async def run(self, snapshot_loader, now: datetime | None = None, send: bool | None = None) -> dict:
         if hasattr(self.ledger, 'engine'):
@@ -121,8 +129,9 @@ class AlertDelivery:
         if send is None:
             send = self.enabled(prefs)
         data = await asyncio.to_thread(snapshot_loader)
-        decisions = await asyncio.to_thread(self.evaluate, data, now)
-        result = {'business_date': now.date().isoformat(), 'send': send, **{k: len(v) for k, v in alert_policy.summarize(decisions).items() if isinstance(v, list)}}
+        decisions = await asyncio.to_thread(self.evaluate, data, now, bool(send))
+        result = {'business_date': now.date().isoformat(), 'business_now': now.isoformat(), 'send': send, 'recipient': prefs.get('manager_email'),
+                  'held_back': sum(1 for d in decisions if d.channel == 'suppressed' and 'already reported' in d.reason), **{k: len(v) for k, v in alert_policy.summarize(decisions).items() if isinstance(v, list)}}
         immediate = [d for d in decisions if d.channel == 'email_now']
         digest = [d for d in decisions if d.channel == 'digest']
         recipient, name = prefs.get('manager_email'), prefs.get('manager_name', 'Manager')
@@ -132,7 +141,10 @@ class AlertDelivery:
             email_id = str(uuid4())
             await asyncio.to_thread(self.ledger.record, immediate, now, email_id, status)
             result['p1_email'] = {'subject': mail['subject'], 'status': status, 'keys': mail['keys']}
-        if digest and alert_policy.digest_due(now, await asyncio.to_thread(self.ledger.last_digest)):
+        last_digest = await asyncio.to_thread(self.ledger.last_digest)
+        if last_digest is not None and last_digest > now:      # sent on a later timeline (the demo clock was moved back)
+            last_digest = None
+        if digest and alert_policy.digest_due(now, last_digest):
             mail = alert_policy.render_email(digest, now, name)
             status = await self._send(mail, recipient, send)
             await asyncio.to_thread(self.ledger.record, digest, now, None, status)

@@ -6,6 +6,9 @@ GET  /api/alerts/kpis         emails per week, items per digest, usefulness rati
 PUT  /api/alerts/shelve       mute a key or a kind until a date (X-Confirm-Write: true)
 POST /api/alerts/feedback     the manager rates an alert useful / not useful
 POST /api/alerts/test         send the manager a test of the alert email now (manager, X-Confirm-Write: true)
+POST /api/alerts/run-now      run the scheduler's alert check now instead of waiting for the next tick (manager,
+                              X-Confirm-Write: true). The same code path, caps and cooldowns; it sends only if alert
+                              emails are on and a mailbox is connected, and says which of those is missing otherwise
 POST /api/internal/alerts/run scheduler tick (Bearer SCHEDULER_TOKEN); sends only when ALERT_EMAILS_ENABLED=true or the
                               manager turned alert emails on in Settings
 """
@@ -106,6 +109,27 @@ async def test_alert(request: Request, x_confirm_write: str = Header(default='')
     if x_confirm_write.lower() != 'true':
         raise HTTPException(409, 'Confirm before sending a test email.')
     return await delivery(request).test(snapshot_loader(request), business_now())
+
+
+@router.post('/api/alerts/run-now')
+async def run_now(request: Request, x_confirm_write: str = Header(default='')):
+    """The check the timer runs every few minutes, run on request. Nothing here bypasses the policy: an item already
+    emailed is held back, the daily cap applies, and with alert emails off the result is a dry run."""
+    from .security import require_manager
+    require_manager(request)
+    if x_confirm_write.lower() != 'true':
+        raise HTTPException(409, 'Confirm before running the alert check.')
+    result = await delivery(request).run(snapshot_loader(request))
+    mail = result.get('p1_email') or result.get('digest_email')
+    status = mail['status'] if mail else None
+    result['message'] = (
+        'Another check is running; try again in a moment.' if result.get('status') == 'busy' else
+        f"Nothing new to email: {result.get('held_back', 0)} open item(s) were already emailed and are held back." if not mail else
+        'Alert emails are switched off, so this was a dry run: nothing was sent. Tick the switch under Manager delivery preferences.' if status == 'dry_run' else
+        'Not sent: connect Outlook and set the manager recipient email first.' if status == 'not_configured' else
+        f"Email handed to Outlook for {result.get('recipient')}: {mail['subject']}" if status == 'accepted' else
+        f"Outlook returned “{status}” for {result.get('recipient')}; check the mailbox before running again.")
+    return result
 
 
 @router.post('/api/internal/alerts/run')

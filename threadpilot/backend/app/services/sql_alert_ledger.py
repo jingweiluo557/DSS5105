@@ -34,7 +34,7 @@ class SQLAlertLedger:
     def history(self, days=30):
         with self.engine.connect() as db:
             rows = db.execute(sa.select(decisions.c.key, decisions.c.tier, decisions.c.score,
-                decisions.c.channel, decisions.c.sent_at).order_by(decisions.c.sent_at.desc()).limit(5000)).mappings().all()
+                decisions.c.channel, decisions.c.sent_at, decisions.c.email_status.label('status')).order_by(decisions.c.sent_at.desc()).limit(5000)).mappings().all()
         return [dict(r) for r in reversed(rows)]
 
     def shelved(self):
@@ -75,12 +75,16 @@ class SQLAlertLedger:
         def count_since(since):
             return sa.select(sa.func.count(sa.distinct(decisions.c.email_id))).where(
                 decisions.c.channel == 'email_now', decisions.c.sent_at >= since)
+        def delivered_since(since):   # really delivered, up to the business time now (see AlertLedger.kpis)
+            return count_since(since).where(decisions.c.email_id.is_not(None), sa.func.coalesce(decisions.c.email_status, '').not_in(('dry_run', 'not_configured', 'rejected')),
+                                            decisions.c.sent_at <= now.isoformat())
         with self.engine.connect() as db:
+            delivered_today, delivered_week = db.scalar(delivered_since(now.date().isoformat())), db.scalar(delivered_since(week))
             today = db.scalar(count_since(now.date().isoformat()))
             weekly = db.scalar(count_since(week))
             batches = db.execute(sa.select(digests.c['keys']).where(digests.c.sent_at >= week)).scalars().all()
             count, useful = db.execute(sa.select(sa.func.count(), sa.func.sum(feedback.c.useful)).select_from(feedback)).one()
-        return {'p1_emails_today': today, 'p1_emails_last_7_days': weekly,
+        return {'p1_emails_today': today, 'p1_emails_last_7_days': weekly, 'delivered_today': delivered_today, 'delivered_last_7_days': delivered_week,
             'digests_last_7_days': len(batches), 'avg_items_per_digest': round(sum(len(json.loads(x)) for x in batches) / len(batches), 1) if batches else 0,
             'feedback_count': count, 'rated_useful_pct': round(100 * (useful or 0) / count, 1) if count else None,
             'targets': {'p1_emails_per_week': '<= 5', 'rated_useful_pct': '>= 70', 'note': 'alarm-management practice: few, actionable, never repeated'}}
