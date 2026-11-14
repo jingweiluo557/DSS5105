@@ -13,7 +13,7 @@
   function clockForm(){
     const c=model.clock;
     const local=new Date(Date.parse(c.now)+8*3600000).toISOString().slice(0,16);
-    return `<section class="card business-clock-card"><div class="eyebrow">DEMO</div><h2>Business clock</h2><p class="muted">For demonstrations only: moves the business date the whole workspace uses.</p><p><strong id="business-clock-live"></strong></p><form id="business-clock-form"><label class="field">Date and time<input name="business_time" type="datetime-local" value="${local}"></label><div class="actions"><button class="primary" type="submit" value="demo">Start demo clock</button><button type="submit" value="live">Use real time</button></div></form></section>`;
+    return `<section class="card business-clock-card"><div class="eyebrow">DEMO</div><h2>Business clock</h2><p class="muted">For demonstrations only: moves the business date the whole workspace uses.</p><p><strong id="business-clock-live"></strong></p><form id="business-clock-form"><label class="field">Date and time<input name="business_time" type="datetime-local" value="${local}"></label><div class="actions"><button class="primary" type="submit" value="demo">Start demo clock</button><button type="submit" value="live">Use real time</button></div><div class="clock-morning"><button type="submit" value="morning">Jump to 06:59:59 and run the 07:00 check</button><p class="muted">Sets the clock to one second before 07:00 on the date above, waits for 07:00, then runs the alert check the server runs every few minutes. If alert emails are on and Outlook is connected, a real email goes to the manager; the 07:00 briefing follows on the server's next timer tick, within about a minute.</p></div></form></section>`;
   }
   setInterval(()=>{const el=document.getElementById('business-clock-live');if(el&&window.threadpilotNow)el.textContent=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(window.threadpilotNow());},1000);
   function content() {
@@ -32,19 +32,19 @@
     // what the next check would send, word for word, and how many went out today against the daily limit
     const mail=a?.would_send,k=model.alertKpis;
     const held=(a?.suppressed||[]).filter(x=>/already reported/.test(x.reason||''));
-    const sentLine=k?`<p class="alert-sent"><strong>Sent today:</strong> ${k.p1_emails_today} alert email${k.p1_emails_today===1?'':'s'}${k.p1_emails_last_7_days!=null?' · '+k.p1_emails_last_7_days+' in the last 7 days (target: 5 or fewer a week)':''}.${held.length?' '+held.length+' open item'+(held.length===1?' is':'s are')+' held back because '+(held.length===1?'it was':'they were')+' already emailed: no repeat within 24 hours.':''}</p>`:'';
+    const sentLine=k?`<p class="alert-sent"><strong>Sent today:</strong> ${k.delivered_today??k.p1_emails_today} alert email${(k.delivered_today??k.p1_emails_today)===1?'':'s'}${(k.delivered_last_7_days??k.p1_emails_last_7_days)!=null?' · '+(k.delivered_last_7_days??k.p1_emails_last_7_days)+' in the last 7 days (target: 5 or fewer a week)':''}.${held.length?' '+held.length+' open item'+(held.length===1?' is':'s are')+' held back because '+(held.length===1?'it was':'they were')+' already emailed: no repeat within 24 hours.':''}</p>`:'';
     const mailBox=mail&&mail.subject?`<details class="alert-mail"${now.length?' open':''}><summary>${now.length?'The email the next check sends':'The next digest email, as it stands'} <small>to ${esc(p.manager_email||'the manager')}</small></summary><p class="alert-mail-subject"><strong>Subject:</strong> ${esc(mail.subject)}</p><pre>${esc(mail.body)}</pre></details>`:'';
     return `<section class="card ${on?'':'attention'}"><div class="section-heading"><div><div class="eyebrow">ALERT EMAILS</div><h2>Interrupt me only when it matters${infoButton('alerts')}</h2></div><span class="badge ${on?'ok':'watch'}">${on?'On':'Off: decisions are recorded, nothing is sent'}</span></div>
       <p class="muted">Checked every few minutes. An email goes out at once only for a decision you must take today: a stage far outside its normal range, a stage below it three working days in a row, an order that will miss even in the best case, or a customer whose orders all stopped. At most 3 a day, never the same item twice in 24 hours; the rest waits for the 07:00 briefing or the 14:00 digest.</p>
       ${a?`<p><strong>Right now:</strong> ${now.length?now.length+' would email at once: '+now.map(x=>esc(x.title)).join('; '):'nothing needs an immediate email'}. ${digest} for the digest, ${watch} watch items for the briefing.</p>`:''}
       ${sentLine}${mailBox}
-      <div class="actions">${action('test-alert','Send me a test alert now')}<a href="#/messages">Watches &amp; receipts →</a></div>
+      <div class="actions">${action('run-alerts','Run the check now')}${action('test-alert','Send me a test alert now')}<a href="#/messages">Watches &amp; receipts →</a></div>
       <p class="muted">Turn alert emails on or off with the tick box under Manager delivery preferences.</p></section>`;
   }
   async function load() {
     const root=document.getElementById('email-settings-content');if(!root||loading)return;
     loading=true;
-    try{model=await api('email/settings');model.alerts=await api('alerts/preview').catch(()=>null);model.alertKpis=await api('alerts/kpis').catch(()=>null);if(root.isConnected)root.innerHTML=content();}
+    try{model=await api('email/settings');model.alerts=await api('alerts/preview').catch(()=>null);model.alertKpis=await api('alerts/kpis').catch(()=>null);if(root.isConnected)root.innerHTML=content();try{const done=sessionStorage.getItem('threadpilot.alertRun');if(done){sessionStorage.removeItem('threadpilot.alertRun');notice(done);if(typeof toast==='function')toast(done);}}catch{}}
     catch(e){root.innerHTML='<p>Unable to load email settings.</p>'+action('reload','Try again');notice(e.message);}
     finally{loading=false;}
   }
@@ -67,6 +67,21 @@
     if(form.id==='business-clock-form'){
       e.preventDefault();const button=e.submitter;const mode=button?.value==='live'?'live':'demo';
       const value=form.elements.business_time.value;
+      if(button?.value==='morning'){
+        if(!value){notice('Choose a business date first.');return;}
+        const to=model.preferences.manager_email||'the manager';
+        if(!confirm('Set the business clock to '+value.slice(0,10)+' 06:59:59 and run the 07:00 alert check? '+(model.alerts?.emails_enabled?'Alert emails are ON: a real email goes to '+to+' if something new needs a decision.':'Alert emails are OFF: this will be a dry run and nothing is sent.')))return;
+        button.disabled=true;
+        try{
+          await api('email/clock','PUT',{mode:'demo',version:model.clock.version,target:value.slice(0,10)+'T06:59:59+08:00'});
+          notice('Clock set to 06:59:59. Waiting for 07:00…');
+          await new Promise(r=>setTimeout(r,1600));
+          const r=await api('alerts/run-now','POST',{});
+          try{sessionStorage.setItem('threadpilot.alertRun',r.message||'Alert check finished.');}catch{}
+          location.reload();
+        }catch(err){notice(err.message);button.disabled=false;}
+        return;
+      }
       if(mode==='demo'&&!value){notice('Choose a business date and time.');return;}
       button.disabled=true;
       try{await api('email/clock','PUT',{mode,version:model.clock.version,target:mode==='demo'?value+':00+08:00':null});location.reload();}catch(err){notice(err.message);button.disabled=false;}return;
@@ -85,7 +100,7 @@
     if(name==='remove-contact'){b.closest('.email-contact').remove();document.getElementById('contacts-empty').hidden=!!document.querySelector('.email-contact');return;}
     if(name==='add-contact'){document.getElementById('email-contacts').insertAdjacentHTML('beforeend',contact());document.getElementById('contacts-empty').hidden=true;return;}
     b.disabled=true;
-    try{if(name==='reload')await load();if(name==='refresh-activity')await loadActivity();if(name==='connect'){const r=await api('email/connect','POST');location.assign(r.authorization_url);}if(name==='test-alert'&&confirm('Send a test alert email to '+model.preferences.manager_email+' now? It goes only to you and does not count against the daily limit.')){const r=await api('alerts/test','POST',{});notice(r.status==='accepted'||r.status==='sent'?'Test alert sent to '+r.recipient+': '+r.subject:r.status==='not_configured'?'Connect Outlook first; this is what would be sent: '+r.subject:r.status==='nothing_to_send'?'No open alert right now, so there is nothing to test with.':'Test alert status: '+r.status);}if(name==='disconnect'&&confirm('Disconnect Outlook? Automatic emails will require reconnecting this mailbox.')){await api('email/disconnect','POST',{});await load();}}catch(e){notice(e.message);}finally{b.disabled=false;}
+    try{if(name==='reload')await load();if(name==='run-alerts'&&confirm('Run the alert check now? It is the same check the server runs every few minutes. '+(model.alerts?.emails_enabled?'Alert emails are ON: if something new needs a decision today, a real email goes to '+(model.preferences.manager_email||'the manager')+'.':'Alert emails are OFF: this will be a dry run and nothing is sent.'))){b.disabled=true;try{const r=await api('alerts/run-now','POST',{});await load();notice(r.message||'Alert check finished.');}catch(err){notice(err.message);}finally{b.disabled=false;}}if(name==='refresh-activity')await loadActivity();if(name==='connect'){const r=await api('email/connect','POST');location.assign(r.authorization_url);}if(name==='test-alert'&&confirm('Send a test alert email to '+model.preferences.manager_email+' now? It goes only to you and does not count against the daily limit.')){const r=await api('alerts/test','POST',{});notice(r.status==='accepted'||r.status==='sent'?'Test alert sent to '+r.recipient+': '+r.subject:r.status==='not_configured'?'Connect Outlook first; this is what would be sent: '+r.subject:r.status==='nothing_to_send'?'No open alert right now, so there is nothing to test with.':'Test alert status: '+r.status);}if(name==='disconnect'&&confirm('Disconnect Outlook? Automatic emails will require reconnecting this mailbox.')){await api('email/disconnect','POST',{});await load();}}catch(e){notice(e.message);}finally{b.disabled=false;}
   });
   render();
 })();

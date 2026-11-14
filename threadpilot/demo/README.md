@@ -89,3 +89,22 @@ marks the three stretches where the phone speaks and the presenter does not).
 
 For a recording with no caveat, screen-record a real phone doing the same steps with the sound on and put it in place
 of part B.
+
+## Recording a real alert email on the live site (not the replay)
+
+The replay never delivers email. To film the automatic alert email arriving in a real inbox, use the deployed site:
+
+1. Settings › Mailbox connection: connect Outlook. Settings › Manager delivery preferences: set the recipient and tick
+   "Email me at once when something needs a decision today"; save.
+2. Open the inbox beside the app and start the screen recording.
+3. Settings › Business clock: choose the date (1 April 2026 for the course data) and press **Jump to 06:59:59 and run
+   the 07:00 check**. The clock is set to one second before 07:00, the page waits for 07:00 and then runs the same alert
+   check the server's timer runs. The page says what happened: handed to Outlook, a dry run (switch off), or not sent
+   (no mailbox). The 07:00 briefing follows on the server's next timer tick, within about a minute.
+4. Press **Run the check now** (Alert emails card) to show that nothing is sent twice.
+
+Why step 3 sends even after weeks of running: only emails that were really delivered, at or before the current business
+time, count as "already emailed". Dry runs recorded while the switch was off, and rows stamped later than a clock that
+was moved back, do not hold an email back (`alert_policy.relevant_history`). To film it a second time on the same day,
+jump to the same date again: the earlier send is then at 07:00 and counts, so pick the next business date, or accept
+"nothing new" as the honest result.

@@ -212,9 +212,34 @@ class Decision:
     reason: str
 
 
-def gate(alerts: list[Alert], history: list[dict], now: datetime, shelved: dict[str, str] | None = None) -> list[Decision]:
-    """Apply the anti-spam rules. history = past decisions [{key, tier, score, sent_at(iso), channel}]; shelved = {key_or_kind: until_iso}."""
+UNDELIVERED = ('dry_run', 'not_configured', 'rejected')   # recorded, but it never reached the manager
+
+
+def relevant_history(history: list[dict], now: datetime, delivered_only: bool = False) -> list[dict]:
+    """The past decisions that count against cooldowns and the daily cap.
+
+    - A decision stamped later than `now` belongs to another timeline (the demo clock was moved back): it is ignored,
+      otherwise an item would read as "already reported -5 h ago" and never be sent.
+    - With delivered_only (alert emails are switched on), a decision recorded as a dry run or with no mailbox connected
+      does not count: the manager never received it, so the first real check after switching on does send it.
+    """
+    kept = []
+    for h in history:
+        try:
+            if datetime.fromisoformat(h['sent_at']) > now:
+                continue
+        except (TypeError, ValueError):
+            continue
+        if delivered_only and h.get('status') in UNDELIVERED:
+            continue
+        kept.append(h)
+    return kept
+
+
+def gate(alerts: list[Alert], history: list[dict], now: datetime, shelved: dict[str, str] | None = None, delivered_only: bool = False) -> list[Decision]:
+    """Apply the anti-spam rules. history = past decisions [{key, tier, score, sent_at(iso), channel, status?}]; shelved = {key_or_kind: until_iso}."""
     shelved = shelved or {}
+    history = relevant_history(history, now, delivered_only)
     last: dict[str, dict] = {}
     for h in sorted(history, key=lambda h: h['sent_at']):
         if h.get('channel') in ('email_now', 'digest'):

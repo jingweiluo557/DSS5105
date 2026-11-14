@@ -73,13 +73,15 @@ alerts = alert_policy.summarize(alert_policy.gate(alert_policy.detect(data, NOW)
 class ReplayAlertLedger:
     """The alert ledger's history and KPIs in memory, in the shapes services/alert_delivery.AlertLedger returns."""
     def __init__(self): self.rows = []
-    def history(self): return [{k: r[k] for k in ('key', 'tier', 'score', 'channel', 'sent_at')} for r in self.rows]
+    def history(self): return [{**{k: r[k] for k in ('key', 'tier', 'score', 'channel', 'sent_at')}, 'status': 'replay'} for r in self.rows]
     def shelved(self): return {}
     def record(self, decisions, now, email_id, status):
         self.rows += [{'key': d.alert.key, 'tier': d.alert.tier, 'score': d.alert.score, 'channel': d.channel, 'sent_at': now.isoformat(), 'email_id': email_id} for d in decisions]
     def kpis(self, now):
-        today = {r['email_id'] for r in self.rows if r['channel'] == 'email_now' and r['sent_at'][:10] == now.date().isoformat()}
-        return {'p1_emails_today': len(today), 'p1_emails_last_7_days': len({r['email_id'] for r in self.rows if r['channel'] == 'email_now'}), 'digests_last_7_days': 0,
+        seen = [r for r in self.rows if r['channel'] == 'email_now' and r['sent_at'] <= now.isoformat()]
+        today = {r['email_id'] for r in seen if r['sent_at'][:10] == now.date().isoformat()}
+        return {'p1_emails_today': len(today), 'p1_emails_last_7_days': len({r['email_id'] for r in seen}), 'delivered_today': len(today),
+                'delivered_last_7_days': len({r['email_id'] for r in seen}), 'digests_last_7_days': 0,
                 'avg_items_per_digest': 0, 'feedback_count': 0, 'rated_useful_pct': None, 'targets': {'p1_emails_per_week': '<= 5', 'rated_useful_pct': '>= 70'}}
 
 
@@ -88,19 +90,22 @@ ALERT_LOG: list[dict] = []
 
 
 def alert_decisions():
-    return alert_policy.gate(alert_policy.detect(data, NOW), ALERT_LEDGER.history(), NOW, ALERT_LEDGER.shelved())
+    return alert_policy.gate(alert_policy.detect(data, NOW), ALERT_LEDGER.history(), NOW, ALERT_LEDGER.shelved(), True)
 
 
 def alert_tick() -> dict:
     """One scheduler tick, as AlertDelivery._run does it: evaluate, render one email for the immediate items, record them."""
     decisions = alert_decisions()
     immediate = [d for d in decisions if d.channel == 'email_now']
-    result = {'business_now': NOW.isoformat(), 'email_now': len(immediate), 'sent': False}
+    held = sum(1 for d in decisions if d.channel == 'suppressed' and 'already reported' in d.reason)
+    result = {'business_now': NOW.isoformat(), 'email_now': len(immediate), 'sent': False, 'held_back': held, 'recipient': 'manager@example.com',
+              'message': f'Nothing new to email: {held} open item(s) were already emailed and are held back.'}
     if immediate:
         mail = alert_policy.render_email(immediate, NOW, 'Manager')
         ALERT_LEDGER.record(immediate, NOW, f'replay-{len(ALERT_LOG) + 1}', 'replay')
         ALERT_LOG.append({'at': NOW.isoformat(), 'subject': mail['subject'], 'body': mail['body'], 'items': len(immediate)})
-        result.update(sent=True, subject=mail['subject'], items=len(immediate), status='recorded, not delivered (replay)')
+        result.update(sent=True, subject=mail['subject'], items=len(immediate), status='recorded, not delivered (replay)',
+                      message=f"Email recorded for manager@example.com (offline replay: not delivered): {mail['subject']}")
     return result
 
 
@@ -387,6 +392,12 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/feasibility/estimate':
             n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')
             return self.send_json(feasibility_estimate(body))
+        if path == '/api/alerts/run-now':      # Settings: "Run the check now" and the 06:59:59 button
+            global NOW
+            n = self.headers.get('Content-Length'); self.rfile.read(int(n or 0))
+            if NOW.hour == 6 and NOW.minute == 59:   # the replay clock does not tick: the second before 07:00 has passed
+                NOW = NOW.replace(hour=7, minute=0, second=0)
+            return self.send_json(alert_tick())
         if path == '/api/dashboard/tasks':
             n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')
             TASKS.insert(0, {'id': 'manual:' + str(body.get('id', len(TASKS))), 'order_id': None, 'title': body.get('title', ''), 'origin': 'manual', 'done': False, 'version': 1, 'reasons': []})
@@ -397,7 +408,13 @@ class Handler(SimpleHTTPRequestHandler):
         return self.send_json({'error': {'code': 'NOT_FOUND', 'message': 'replay'}}, 404)
 
     def do_PUT(self):
-        n = self.headers.get('Content-Length'); self.rfile.read(int(n or 0))
+        global NOW
+        n = self.headers.get('Content-Length'); raw = self.rfile.read(int(n or 0))
+        if urlparse(self.path).path == '/api/email/clock':     # Settings: the business clock (the replay clock does not tick)
+            target = (json.loads(raw or b'{}') or {}).get('target')
+            if target:
+                NOW = datetime.fromisoformat(target)
+            return self.send_json({'now': NOW.isoformat(), 'mode': 'legacy', 'version': 1})
         return self.send_json({'ok': True})
 
 
