@@ -68,6 +68,40 @@ for row in risk['orders']:
     row['forecast'] = {k: f[k] for k in ('delay_probability', 'expected_completion_date', 'completion_range_80pct', 'typical_lead_days_for_this_size')}
 home = home_service.home(data, NOW)
 alerts = alert_policy.summarize(alert_policy.gate(alert_policy.detect(data, NOW), [], NOW))
+# Alert emails in the replay: the real policy (detect, gate, render_email) over an in-memory ledger, so cooldowns and the
+# daily cap behave as live. Nothing is delivered: a check that would send records its decisions with status "replay".
+class ReplayAlertLedger:
+    """The alert ledger's history and KPIs in memory, in the shapes services/alert_delivery.AlertLedger returns."""
+    def __init__(self): self.rows = []
+    def history(self): return [{k: r[k] for k in ('key', 'tier', 'score', 'channel', 'sent_at')} for r in self.rows]
+    def shelved(self): return {}
+    def record(self, decisions, now, email_id, status):
+        self.rows += [{'key': d.alert.key, 'tier': d.alert.tier, 'score': d.alert.score, 'channel': d.channel, 'sent_at': now.isoformat(), 'email_id': email_id} for d in decisions]
+    def kpis(self, now):
+        today = {r['email_id'] for r in self.rows if r['channel'] == 'email_now' and r['sent_at'][:10] == now.date().isoformat()}
+        return {'p1_emails_today': len(today), 'p1_emails_last_7_days': len({r['email_id'] for r in self.rows if r['channel'] == 'email_now'}), 'digests_last_7_days': 0,
+                'avg_items_per_digest': 0, 'feedback_count': 0, 'rated_useful_pct': None, 'targets': {'p1_emails_per_week': '<= 5', 'rated_useful_pct': '>= 70'}}
+
+
+ALERT_LEDGER = ReplayAlertLedger()
+ALERT_LOG: list[dict] = []
+
+
+def alert_decisions():
+    return alert_policy.gate(alert_policy.detect(data, NOW), ALERT_LEDGER.history(), NOW, ALERT_LEDGER.shelved())
+
+
+def alert_tick() -> dict:
+    """One scheduler tick, as AlertDelivery._run does it: evaluate, render one email for the immediate items, record them."""
+    decisions = alert_decisions()
+    immediate = [d for d in decisions if d.channel == 'email_now']
+    result = {'business_now': NOW.isoformat(), 'email_now': len(immediate), 'sent': False}
+    if immediate:
+        mail = alert_policy.render_email(immediate, NOW, 'Manager')
+        ALERT_LEDGER.record(immediate, NOW, f'replay-{len(ALERT_LOG) + 1}', 'replay')
+        ALERT_LOG.append({'at': NOW.isoformat(), 'subject': mail['subject'], 'body': mail['body'], 'items': len(immediate)})
+        result.update(sent=True, subject=mail['subject'], items=len(immediate), status='recorded, not delivered (replay)')
+    return result
 
 
 def _d(iso):
@@ -296,10 +330,14 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/morning': return {'business_date': data['today'], 'reports': [BRIEFING], 'current_fingerprint': 'replay', 'model_configured': False}
         if path == '/api/v1/health': return {'status': 'ok', 'configured': True, 'model': 'offline replay', 'streaming': True}
         if path == '/api/v1/whoami': return {'role': 'manager'}
-        if path == '/api/alerts/preview': return {**alerts, 'emails_enabled': False}
+        if path == '/api/alerts/preview':
+            decisions = alert_decisions()
+            return {**alert_policy.summarize(decisions), 'emails_enabled': True, 'business_now': NOW.isoformat(), 'would_send': alert_policy.render_email(decisions, NOW, 'Manager') or None}
+        if path == '/api/alerts/kpis': return ALERT_LEDGER.kpis(NOW)
+        if path == '/__replay/alert-tick': return alert_tick()   # the scheduler's check, run on demand for the recording
         if path == '/api/predictions': return {'business_date': data['today'], 'imported_at': NOW.isoformat(), 'rows': []}
         if path == '/api/email/settings': return {'clock': {'now': NOW.isoformat(), 'mode': 'legacy', 'version': 1}, 'connection': {'connected': True, 'account': 'manager@example.com'},
-                                                 'preferences': {'version': 1, 'manager_email': 'manager@example.com', 'manager_name': 'Manager', 'briefing_enabled': True, 'start_day': data['today'], 'customers': [],
+                                                 'preferences': {'version': 1, 'manager_email': 'manager@example.com', 'manager_name': 'Manager', 'briefing_enabled': True, 'alert_emails_enabled': True, 'subject_prefix': 'ThreadPilot', 'start_day': data['today'], 'customers': [],
                                                                  'departments': {d: d.lower() + '@example.com' for d in ('KNITTING', 'ASSEMBLY', 'WASHING', 'PACKING')}}}
         if path == '/api/email/activity':   # the live server's row shape; status says plainly that nothing was delivered
             return {'entries': [{'day': e['at'][:10], 'kind': 'chase_email', 'recipient': e['recipient'], 'status': 'Recorded, not delivered (replay)',

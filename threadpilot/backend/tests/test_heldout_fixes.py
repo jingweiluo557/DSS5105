@@ -202,3 +202,22 @@ def test_M06_which_of_them_is_due_soonest_after_a_customer_count(tmp_path):
                   ('order.lookup', {'customer': 'Harbor Knits'}, 'which of those is the biggest?'))
     big = max((x for x in ACTIVE if x['customer'] == 'Harbor Knits'), key=lambda x: (int(x['pieces']), x['order_id']))
     assert int(big['pieces']) == max(int(x['pieces']) for x in ACTIVE if x['customer'] == 'Harbor Knits') and f"{int(big['pieces']):,} pieces" in r.answer
+
+
+# ---------------------------------------------------------------- the alert email shown in Settings (14 Nov)
+def test_alert_email_is_rationed_one_email_then_nothing_until_something_new():
+    """What the Settings card and the demo show: the first check emails the urgent items once; the next check, with
+    that email in the history, sends nothing and says why; the email names each item, its rule and how to mute it."""
+    from app.services import alert_policy
+    data = {'today': TODAY.isoformat(), 'orders': ROWS,
+            'production_log': list(csv.DictReader(open(Path(DATA) / 'production_log.csv', newline=''))),
+            'workshops': list(csv.DictReader(open(Path(DATA) / 'workshops.csv', newline='')))}
+    first = alert_policy.gate(alert_policy.detect(data, NOW), [], NOW)
+    urgent = [d for d in first if d.channel == 'email_now']
+    assert 1 <= len(urgent) <= alert_policy.MAX_P1_PER_DAY
+    mail = alert_policy.render_email(first, NOW, 'Manager')
+    assert mail['subject'].startswith('[ThreadPilot P1]') and 'Rule:' in mail['body'] and 'Why you got this' in mail['body'] and 'Mute:' in mail['body']
+    history = [{'key': d.alert.key, 'tier': d.alert.tier, 'score': d.alert.score, 'channel': d.channel, 'sent_at': NOW.isoformat()} for d in urgent]
+    second = alert_policy.gate(alert_policy.detect(data, NOW), history, NOW)
+    assert not [d for d in second if d.channel == 'email_now'], 'the same items are not emailed again'
+    assert sum('already reported' in d.reason for d in second if d.channel == 'suppressed') == len(urgent)

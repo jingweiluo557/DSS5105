@@ -140,7 +140,7 @@
   {
    "at": 39.8,
    "click": "nav.workspace-tools a[href=\"#/feasibility\"]",
-   "say": "The Feasibility page runs the same tool over the whole queue and shows why."
+   "say": "The Feasibility page runs the same tool over the whole queue: the same 30 April, and it shows why."
   },
   {
    "at": 41.2,
@@ -168,26 +168,25 @@
    }
   },
   {
-   "at": 44.9,
+   "at": 44.2,
    "scroll": {
     "to": "#capacity-picture"
-   },
-   "say": "The same figures as the chat: 30 April, five days late, because the later stages are over capacity before the 25th."
+   }
   },
   {
-   "at": 50.7,
+   "at": 50.0,
    "goto": "#/ai"
   },
   {
-   "at": 50.9,
+   "at": 50.2,
    "evaluate": "await fetch('/__replay/clock?t=14:30'); const r = await fetch('/api/email/clock', {cache: 'no-store'}); window.threadpilotClock = await r.json(); window.threadpilotClockAnchor = performance.now();"
   },
   {
-   "at": 52.5,
+   "at": 50.6,
    "say": "14:30 · The core task: chase a stalled order, typed the way it is said on the floor."
   },
   {
-   "at": 53.5,
+   "at": 51.6,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "ORD 5 hasn’t moved in a week, chase knitting",
@@ -195,19 +194,19 @@
    }
   },
   {
-   "at": 55.1,
+   "at": 53.2,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 55.2,
+   "at": 53.3,
    "waitAnswer": true
   },
   {
-   "at": 59.0,
+   "at": 57.1,
    "say": "It checks the claim against the record first (last activity 24 March, 8 days: true), then drafts to knitting."
   },
   {
-   "at": 63.6,
+   "at": 61.7,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Preview draft 1",
@@ -215,19 +214,19 @@
    }
   },
   {
-   "at": 64.3,
+   "at": 62.4,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 64.4,
+   "at": 62.5,
    "waitAnswer": true
   },
   {
-   "at": 65.9,
+   "at": 64.0,
    "say": "Preview first. Nothing is sent until the manager confirms this exact draft."
   },
   {
-   "at": 69.5,
+   "at": 67.6,
    "click": {
     "text": "Confirm send"
    },
@@ -235,17 +234,17 @@
    "real": true
   },
   {
-   "at": 69.9,
+   "at": 68.0,
    "waitAnswer": true,
    "optional": true,
    "real": true
   },
   {
-   "at": 70.5,
+   "at": 68.6,
    "say": "Confirmed and sent. On the live system it leaves from the manager’s own mailbox."
   },
   {
-   "at": 72.5,
+   "at": 70.6,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Remind me tmrw 10am if knitting doesn’t reply",
@@ -253,19 +252,19 @@
    }
   },
   {
-   "at": 74.1,
+   "at": 72.2,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 74.2,
+   "at": 72.3,
    "waitAnswer": true
   },
   {
-   "at": 75.6,
+   "at": 73.7,
    "say": "A standing watch: at 10:00 tomorrow the server checks, and notifies only if no reply was recorded."
   },
   {
-   "at": 79.4,
+   "at": 77.5,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Confirm.",
@@ -274,22 +273,22 @@
    "real": true
   },
   {
-   "at": 79.9,
+   "at": 78.0,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]",
    "real": true
   },
   {
-   "at": 80.0,
+   "at": 78.1,
    "waitAnswer": true,
    "real": true
   },
   {
-   "at": 81.8,
+   "at": 79.9,
    "goto": "#/activity",
    "say": "Every action is logged, with recipient, orders and subject."
   },
   {
-   "at": 82.4,
+   "at": 80.5,
    "waitFor": {
     "text": "Order chase-up",
     "timeout": 15000
@@ -297,28 +296,17 @@
    "optional": true
   },
   {
-   "at": 84.0,
+   "at": 82.1,
    "click": "#email-activity details >> nth=0 >> summary",
    "optional": true
   },
   {
-   "at": 86.6,
-   "goto": "#/settings",
-   "say": "It also speaks first, but rationed: an alert only for a decision needed today, at most 3 a day."
-  },
-  {
-   "at": 87.6,
-   "scroll": {
-    "to": "[data-email=\"test-alert\"]"
-   }
-  },
-  {
-   "at": 93.5,
+   "at": 85.1,
    "goto": "#/ai",
    "say": "Honesty under pressure. A question the data cannot answer:"
   },
   {
-   "at": 94.1,
+   "at": 85.7,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "What revenue did the TrendCart orders bring in this quarter?",
@@ -326,19 +314,19 @@
    }
   },
   {
-   "at": 95.5,
+   "at": 87.1,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 95.6,
+   "at": 87.2,
    "waitAnswer": true
   },
   {
-   "at": 96.8,
+   "at": 88.4,
    "say": "No prices in the records, so no revenue figure. It says what it can answer instead."
   },
   {
-   "at": 99.8,
+   "at": 91.4,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Chase ord 29, stuck at washing since last wk",
@@ -346,19 +334,19 @@
    }
   },
   {
-   "at": 101.2,
+   "at": 92.8,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 101.3,
+   "at": 92.9,
    "waitAnswer": true
   },
   {
-   "at": 102.6,
+   "at": 94.2,
    "say": "A wrong premise: the record says ORD-029 moved today. It says so, and asks before writing anything."
   },
   {
-   "at": 106.0,
+   "at": 97.6,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Is ORD-218 shipped?",
@@ -366,23 +354,23 @@
    }
   },
   {
-   "at": 106.8,
+   "at": 98.4,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 106.9,
+   "at": 98.5,
    "waitAnswer": true
   },
   {
-   "at": 108.8,
+   "at": 100.4,
    "say": "Not in the records, and it says so. It never invents an order, a stage or a number."
   },
   {
-   "at": 115.3,
+   "at": 106.9,
    "say": "Every number comes from a tool with its rows · it asks instead of guessing · by voice or by hand, nothing leaves without a confirmed preview."
   },
   {
-   "at": 122.3,
+   "at": 113.9,
    "hold": 0.4
   }
  ]

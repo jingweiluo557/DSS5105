@@ -29,16 +29,22 @@
   function alertsCard(){
     const p=model.preferences,a=model.alerts,on=a?a.emails_enabled:p.alert_emails_enabled;
     const now=(a?.email_now||[]),digest=(a?.digest||[]).length,watch=(a?.briefing_only||[]).length;
+    // what the next check would send, word for word, and how many went out today against the daily limit
+    const mail=a?.would_send,k=model.alertKpis;
+    const held=(a?.suppressed||[]).filter(x=>/already reported/.test(x.reason||''));
+    const sentLine=k?`<p class="alert-sent"><strong>Sent today:</strong> ${k.p1_emails_today} alert email${k.p1_emails_today===1?'':'s'}${k.p1_emails_last_7_days!=null?' · '+k.p1_emails_last_7_days+' in the last 7 days (target: 5 or fewer a week)':''}.${held.length?' '+held.length+' open item'+(held.length===1?' is':'s are')+' held back because '+(held.length===1?'it was':'they were')+' already emailed: no repeat within 24 hours.':''}</p>`:'';
+    const mailBox=mail&&mail.subject?`<details class="alert-mail"${now.length?' open':''}><summary>${now.length?'The email the next check sends':'The next digest email, as it stands'} <small>to ${esc(p.manager_email||'the manager')}</small></summary><p class="alert-mail-subject"><strong>Subject:</strong> ${esc(mail.subject)}</p><pre>${esc(mail.body)}</pre></details>`:'';
     return `<section class="card ${on?'':'attention'}"><div class="section-heading"><div><div class="eyebrow">ALERT EMAILS</div><h2>Interrupt me only when it matters${infoButton('alerts')}</h2></div><span class="badge ${on?'ok':'watch'}">${on?'On':'Off: decisions are recorded, nothing is sent'}</span></div>
       <p class="muted">Checked every few minutes. An email goes out at once only for a decision you must take today: a stage far outside its normal range, a stage below it three working days in a row, an order that will miss even in the best case, or a customer whose orders all stopped. At most 3 a day, never the same item twice in 24 hours; the rest waits for the 07:00 briefing or the 14:00 digest.</p>
       ${a?`<p><strong>Right now:</strong> ${now.length?now.length+' would email at once: '+now.map(x=>esc(x.title)).join('; '):'nothing needs an immediate email'}. ${digest} for the digest, ${watch} watch items for the briefing.</p>`:''}
+      ${sentLine}${mailBox}
       <div class="actions">${action('test-alert','Send me a test alert now')}<a href="#/messages">Watches &amp; receipts →</a></div>
       <p class="muted">Turn alert emails on or off with the tick box under Manager delivery preferences.</p></section>`;
   }
   async function load() {
     const root=document.getElementById('email-settings-content');if(!root||loading)return;
     loading=true;
-    try{model=await api('email/settings');model.alerts=await api('alerts/preview').catch(()=>null);if(root.isConnected)root.innerHTML=content();}
+    try{model=await api('email/settings');model.alerts=await api('alerts/preview').catch(()=>null);model.alertKpis=await api('alerts/kpis').catch(()=>null);if(root.isConnected)root.innerHTML=content();}
     catch(e){root.innerHTML='<p>Unable to load email settings.</p>'+action('reload','Try again');notice(e.message);}
     finally{loading=false;}
   }
