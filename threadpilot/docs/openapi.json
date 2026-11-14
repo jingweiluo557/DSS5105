@@ -2547,6 +2547,54 @@
         }
       }
     },
+    "/api/alerts/next-trigger": {
+      "get": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Next Trigger",
+        "description": "For the demo button in Settings: when would the alert check next have something to email, and what.",
+        "operationId": "next_trigger_api_alerts_next_trigger_get",
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/alerts/run-now": {
       "post": {
         "tags": [
