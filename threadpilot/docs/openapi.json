@@ -2547,6 +2547,48 @@
         }
       }
     },
+    "/api/alerts/run-now": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "summary": "Run Now",
+        "description": "The check the timer runs every few minutes, run on request. Nothing here bypasses the policy: an item already\nemailed is held back, the daily cap applies, and with alert emails off the result is a dry run.",
+        "operationId": "run_now_api_alerts_run_now_post",
+        "parameters": [
+          {
+            "name": "x-confirm-write",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Confirm-Write"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/internal/alerts/run": {
       "post": {
         "tags": [
