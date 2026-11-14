@@ -110,8 +110,6 @@ def main():
             run('-i', src, '-vf', f'scale={W}:{H}:flags=lanczos,fps=30', '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', dst)
         d = dur(dst); starts[name] = round(offset, 3)
         for a, b, text in cues(parts / name / 'demo_cut.srt'):
-            if phone_live and name == 'b':
-                text = text.replace(' (Listen: this is the phone speaking.)', '')
             all_cues.append([a + offset, min(b, d) + offset, text])
         files.append(dst); offset += d
     for i in range(len(all_cues) - 1):               # a caption ends where the next begins

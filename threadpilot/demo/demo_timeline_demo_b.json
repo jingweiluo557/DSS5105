@@ -41,7 +41,11 @@
   },
   {
    "at": 12.7,
-   "say": "🔊 It heard ORD-005, sent the question, and answers out loud. (Listen: this is the phone speaking.)"
+   "say": "🔊 AI agent: “Order 0 0 5, TrendCart, 500 Scarf: in progress, stage knitting, due 20 April; last recorded activity 24 March.”"
+  },
+  {
+   "at": 20.6,
+   "say": "🔊 AI agent: “Due in 19 days. No recorded activity for 8 days.”"
   },
   {
    "at": 25.2,
@@ -63,51 +67,51 @@
   },
   {
    "at": 34.5,
-   "say": "🔊 Computed from the order book, not guessed, and said aloud: Northwind Apparel, 8,000 pieces."
+   "say": "🔊 AI agent: “Northwind Apparel has the most active pieces: 8,000 pieces across 5 active orders.”"
   },
   {
-   "at": 40.2,
+   "at": 40.3,
    "evaluate": "window.__voiceSay = \"chase washing on o r d zero eight three\";",
    "say": "Actions work by voice too: “Chase washing on O R D zero eight three.”"
   },
   {
-   "at": 40.5,
+   "at": 40.6,
    "click": "[data-form=\"chat\"] [data-action=\"voice\"]"
   },
   {
-   "at": 44.8,
+   "at": 44.9,
    "waitAnswer": true
   },
   {
-   "at": 45.3,
-   "say": "🔊 A draft to washing about ORD-083. It says so in one line, and that nothing has been sent."
+   "at": 45.4,
+   "say": "🔊 AI agent: “A draft to washing about order 0 8 3 is ready. Nothing has been sent. Read it, then tap to confirm.”"
   },
   {
-   "at": 52.2,
+   "at": 54.1,
    "evaluate": "window.__voiceSay = \"send now\";",
    "say": "She says “send now”…"
   },
   {
-   "at": 52.5,
+   "at": 54.4,
    "click": "[data-form=\"chat\"] [data-action=\"voice\"]"
   },
   {
-   "at": 55.2,
+   "at": 57.1,
    "say": "A spoken “send now” is never sent. It waits in the box for a tap, so a misheard word cannot send an email."
   },
   {
-   "at": 63.6,
+   "at": 65.5,
    "goto": "#/orders",
    "say": "Every page fits the phone: wide tables scroll inside their card, buttons are thumb-sized."
   },
   {
-   "at": 65.6,
+   "at": 67.5,
    "scroll": {
     "by": 380
    }
   },
   {
-   "at": 68.2,
+   "at": 70.1,
    "hold": 0.2
   }
  ],

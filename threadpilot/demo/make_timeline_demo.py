@@ -107,12 +107,18 @@ def speak(dt, words, caption=None, wait=True):
         steps.append({'at': at(0.1), 'waitAnswer': True})
 
 
-def reply(caption):
-    """The phone answers aloud: hold for as long as the recorded reply lasts. Presenters stay silent here."""
+def reply(caption, then=None, split=0.6):
+    """The AI agent answers aloud: the caption is what it says, held for as long as the recorded reply lasts. A long
+    reply is subtitled in two parts (`then` appears after `split` of its length). Presenters stay silent here."""
     say(0.3, caption)
     seconds = REPLIES[_reply[0]] if _reply[0] < len(REPLIES) else 7.0
     _reply[0] += 1
-    _cap['need'] = max(_cap['need'], seconds + 0.9)
+    if then:
+        _cap['need'] = seconds * split          # the second part appears where the voice reaches it
+        say(0, then)
+        _cap['need'] = seconds * (1 - split) + 0.9
+    else:
+        _cap['need'] = max(_cap['need'], seconds + 0.9)
 
 
 # ---------------------------------------------------------------- A. 07:00, at the desk: the screen speaks first
@@ -153,12 +159,13 @@ clock('09:40')
 do(1.6, scroll={'by': 520})
 do(3.2, goto='#/ai')
 speak(0.6, 'where is o r d zero zero five', 'She taps the microphone and asks out loud: “Where is O R D zero zero five?”')
-reply('🔊 It heard ORD-005, sent the question, and answers out loud. (Listen: this is the phone speaking.)')
+reply('🔊 AI agent: “Order 0 0 5, TrendCart, 500 Scarf: in progress, stage knitting, due 20 April; last recorded activity 24 March.”',
+      '🔊 AI agent: “Due in 19 days. No recorded activity for 8 days.”', split=0.68)
 do(0.2, 'The speaker button keeps spoken replies on for every answer, typed or spoken.', click='[data-action="voice-replies"] >> nth=0')
 speak(0.4, 'which customer has the most pieces in progress', 'She asks: “Which customer has the most pieces in progress?”')
-reply('🔊 Computed from the order book, not guessed, and said aloud: Northwind Apparel, 8,000 pieces.')
+reply('🔊 AI agent: “Northwind Apparel has the most active pieces: 8,000 pieces across 5 active orders.”')
 speak(0.2, 'chase washing on o r d zero eight three', 'Actions work by voice too: “Chase washing on O R D zero eight three.”')
-reply('🔊 A draft to washing about ORD-083. It says so in one line, and that nothing has been sent.')
+reply('🔊 AI agent: “A draft to washing about order 0 8 3 is ready. Nothing has been sent. Read it, then tap to confirm.”')
 speak(0.2, 'send now', 'She says “send now”…', wait=False)
 say(0.6, 'A spoken “send now” is never sent. It waits in the box for a tap, so a misheard word cannot send an email.')
 do(0.2, 'Every page fits the phone: wide tables scroll inside their card, buttons are thumb-sized.', goto='#/orders')
