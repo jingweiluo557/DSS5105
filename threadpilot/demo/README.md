@@ -117,3 +117,13 @@ hour, which on whole-day rules meant 00:00:00. `alert_policy.next_trigger` compu
 
 Why it sends even after weeks of running: only emails that were really delivered, at or before the current business
 time, count as "already emailed" (`alert_policy.relevant_history`).
+
+## A real phone recording in the phone chapter (`--phone-live`)
+
+`python3 demo/assemble_demo.py <parts> <out> --badge "…" --phone-live` writes `ThreadPilot_Demo_phone_frame.mp4`: the
+same video, with the phone chapter worded for a screen recording of a real phone ("A real phone, by voice · Recorded
+live on a real phone. Real microphone, real speaker: the voice you hear is the phone's own."), the line under the
+captions changed for that chapter, no synthetic voice, and the phone screen left as a marked empty frame. That wording
+is never rendered over the simulated recording. Lay the real recording, with its own sound, into the frame:
+`parts.json` gives the rectangle (`phone_screen_in_1920x1080`: x 693, y 21, 534 × 930) and the chapter's start and end.
+The captions keep the simulated run's timing, so check each against what the phone really shows and says.
