@@ -17,7 +17,7 @@ import re
 import sys
 import tempfile
 import types
-from datetime import datetime
+from datetime import datetime, timedelta
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -89,8 +89,17 @@ ALERT_LEDGER = ReplayAlertLedger()
 ALERT_LOG: list[dict] = []
 
 
+def snapshot_for(day):
+    """The queue snapshot for a business date, as scheduling_service.current_snapshot gives it live."""
+    snap, _ = tools.queue_snapshot(datetime(day.year, day.month, day.day, 9, tzinfo=NOW.tzinfo))
+    for name in ('orders', 'production_log', 'workshops'):
+        snap.setdefault(name, [e.record for e in tools.rows(name + '.csv')])
+    snap['today'] = day.isoformat()
+    return snap
+
+
 def alert_decisions():
-    return alert_policy.gate(alert_policy.detect(data, NOW), ALERT_LEDGER.history(), NOW, ALERT_LEDGER.shelved(), True)
+    return alert_policy.gate(alert_policy.detect(snapshot_for(NOW.date()), NOW), ALERT_LEDGER.history(), NOW, ALERT_LEDGER.shelved(), True)
 
 
 def alert_tick() -> dict:
@@ -339,6 +348,12 @@ class Handler(SimpleHTTPRequestHandler):
             decisions = alert_decisions()
             return {**alert_policy.summarize(decisions), 'emails_enabled': True, 'business_now': NOW.isoformat(), 'would_send': alert_policy.render_email(decisions, NOW, 'Manager') or None}
         if path == '/api/alerts/kpis': return ALERT_LEDGER.kpis(NOW)
+        if path == '/api/alerts/next-trigger':
+            from datetime import date as _date
+            q = parse_qs(urlparse(self.path).query).get('date_from')
+            start = _date.fromisoformat(q[0]) if q else NOW.date()
+            return {'business_now': NOW.isoformat(), 'searched_from': start.isoformat(), 'days_searched': 14, 'emails_enabled': True, 'mailbox_connected': True,
+                    'recipient': 'manager@example.com', 'next': alert_policy.next_trigger(snapshot_for, ALERT_LEDGER.history(), {}, start, NOW.tzinfo, 14, True)}
         if path == '/__replay/alert-tick': return alert_tick()   # the scheduler's check, run on demand for the recording
         if path == '/api/predictions': return {'business_date': data['today'], 'imported_at': NOW.isoformat(), 'rows': []}
         if path == '/api/email/settings': return {'clock': {'now': NOW.isoformat(), 'mode': 'legacy', 'version': 1}, 'connection': {'connected': True, 'account': 'manager@example.com'},
@@ -395,8 +410,8 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/alerts/run-now':      # Settings: "Run the check now" and the 06:59:59 button
             global NOW
             n = self.headers.get('Content-Length'); self.rfile.read(int(n or 0))
-            if NOW.hour == 6 and NOW.minute == 59:   # the replay clock does not tick: the second before 07:00 has passed
-                NOW = NOW.replace(hour=7, minute=0, second=0)
+            if NOW.hour == 23 and NOW.minute == 59 and NOW.second >= 55:   # the replay clock does not tick: midnight has passed
+                NOW = (NOW + timedelta(seconds=10)).replace(hour=0, minute=0, second=0)
             return self.send_json(alert_tick())
         if path == '/api/dashboard/tasks':
             n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')

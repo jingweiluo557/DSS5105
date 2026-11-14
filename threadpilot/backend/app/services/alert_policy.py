@@ -276,6 +276,29 @@ def gate(alerts: list[Alert], history: list[dict], now: datetime, shelved: dict[
     return decisions
 
 
+def next_trigger(snapshot_for, history: list[dict], shelved: dict[str, str] | None, start: date, tz, days: int = 14, delivered_only: bool = True) -> dict | None:
+    """The next moment an immediate (P1) alert email becomes due, from `start` onwards, on the records as they stand.
+
+    The urgent rules read whole days: which production days are complete, how many working days are left to a due date.
+    None of them reads the hour (quiet hours hold only the digest items). So what is urgent can only change when the
+    business date changes, at 00:00:00. This walks the next `days` midnights and returns the first at which the check
+    would send: {'trigger_at', 'items': [{key, title}], 'reason'}. Only history up to each midnight counts, as in gate().
+    snapshot_for(date) -> the queue snapshot for that business date.
+    """
+    for offset in range(days):
+        day = date.fromordinal(start.toordinal() + offset)
+        moment = datetime(day.year, day.month, day.day, 0, 0, 0, tzinfo=tz)
+        decisions = gate(detect(snapshot_for(day), moment), history, moment, shelved, delivered_only)
+        immediate = [d for d in decisions if d.channel == 'email_now']
+        if immediate:
+            before = date.fromordinal(day.toordinal() - 1)      # one second earlier is still the previous business date
+            earlier = {a.key for a in detect(snapshot_for(before), moment - timedelta(seconds=1)) if a.tier == P1}
+            return {'trigger_at': moment.isoformat(), 'items': [{'key': d.alert.key, 'title': d.alert.title, 'new_at_this_moment': d.alert.key not in earlier} for d in immediate],
+                    'held_back': sum(1 for d in decisions if d.channel == 'suppressed' and 'already reported' in d.reason),
+                    'rule': 'Urgent rules read whole days, so the set of urgent items changes only at 00:00:00 when the business date changes.'}
+    return None
+
+
 def digest_due(now: datetime, last_digest_at: datetime | None) -> bool:
     """A P2 digest goes out at the first tick after each DIGEST_HOURS slot, once per slot."""
     slot = max((h for h in DIGEST_HOURS if now.hour >= h), default=None)

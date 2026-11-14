@@ -6,6 +6,8 @@ GET  /api/alerts/kpis         emails per week, items per digest, usefulness rati
 PUT  /api/alerts/shelve       mute a key or a kind until a date (X-Confirm-Write: true)
 POST /api/alerts/feedback     the manager rates an alert useful / not useful
 POST /api/alerts/test         send the manager a test of the alert email now (manager, X-Confirm-Write: true)
+GET  /api/alerts/next-trigger the next moment an immediate alert email becomes due (?date_from=YYYY-MM-DD to search from that
+                              date; default the business date). Read-only: nothing is sent or recorded
 POST /api/alerts/run-now      run the scheduler's alert check now instead of waiting for the next tick (manager,
                               X-Confirm-Write: true). The same code path, caps and cooldowns; it sends only if alert
                               emails are on and a mailbox is connected, and says which of those is missing otherwise
@@ -109,6 +111,23 @@ async def test_alert(request: Request, x_confirm_write: str = Header(default='')
     if x_confirm_write.lower() != 'true':
         raise HTTPException(409, 'Confirm before sending a test email.')
     return await delivery(request).test(snapshot_loader(request), business_now())
+
+
+@router.get('/api/alerts/next-trigger')
+def next_trigger(request: Request, date_from: str | None = None):
+    """For the demo button in Settings: when would the alert check next have something to email, and what."""
+    svc = delivery(request)
+    now = business_now()
+    try:
+        start = date.fromisoformat(date_from) if date_from else now.date()
+    except ValueError:
+        raise HTTPException(422, 'date_from must be YYYY-MM-DD.')
+    database = request.app.state.database
+    found = alert_policy.next_trigger(lambda day: current_snapshot(database, day.isoformat()), svc.ledger.history(), svc.ledger.shelved(),
+                                      start, now.tzinfo, 14, svc.enabled())
+    prefs = svc.preferences.read() or {}
+    return {'business_now': now.isoformat(), 'searched_from': start.isoformat(), 'days_searched': 14, 'emails_enabled': svc.enabled(),
+            'mailbox_connected': not svc.outlook.missing(), 'recipient': prefs.get('manager_email'), 'next': found}
 
 
 @router.post('/api/alerts/run-now')

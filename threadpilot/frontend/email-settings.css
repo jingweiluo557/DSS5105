@@ -5,3 +5,4 @@
 /* Alert emails card: the email the next check would send, word for word */
 .alert-mail{margin:10px 0 14px;border:1px solid #d9dfd8;border-radius:12px;background:#fbfcfa}.alert-mail>summary{cursor:pointer;padding:10px 14px;font-weight:600}.alert-mail>summary small{font-weight:400;color:#5b6875;margin-left:6px}.alert-mail-subject{margin:0;padding:10px 14px;border-top:1px solid #e6eae5}.alert-mail pre{margin:0;padding:12px 14px;border-top:1px solid #e6eae5;white-space:pre-wrap;word-break:break-word;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;max-height:340px;overflow:auto}.alert-sent{margin:8px 0}
 .clock-morning{margin-top:14px;padding-top:12px;border-top:1px solid #e6eae5}.clock-morning p{margin:8px 0 0;font-size:13px}#email-notice:not(:empty){padding:10px 14px;border:1px solid #cfd8cf;border-radius:10px;background:#f3f7f2;font-weight:600}
+.trigger-items{margin:6px 0 10px;padding-left:18px;font-size:13.5px}.trigger-items li{margin:3px 0}
