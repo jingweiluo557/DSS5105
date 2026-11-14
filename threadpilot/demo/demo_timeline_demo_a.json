@@ -13,69 +13,69 @@
    "say": "ThreadPilot, the general manager’s co-pilot. One working day at a knitwear factory, on its own records: 1 April 2026."
   },
   {
-   "at": 5.3,
+   "at": 6.9,
    "say": "07:00 · Before she asks, the day is on one screen: RED, 8 overdue, assembly below normal for 6 days, 3 decisions."
   },
   {
-   "at": 5.7,
+   "at": 7.3,
    "scroll": {
     "to": "article.decision >> nth=0"
    }
   },
   {
-   "at": 11.4,
+   "at": 14.9,
    "say": "Each decision has one button. “Review options” runs the queue simulation for ORD-029, which will miss today."
   },
   {
-   "at": 12.6,
+   "at": 16.1,
    "click": "article.decision >> nth=1 >> text=Review options"
   },
   {
-   "at": 14.2,
+   "at": 17.7,
    "click": "aside.risk-detail button >> nth=0"
   },
   {
-   "at": 14.6,
+   "at": 18.1,
    "waitFor": {
     "text": "Expedite review",
     "timeout": 20000
    }
   },
   {
-   "at": 16.1,
+   "at": 21.1,
    "say": "Moving ORD-029 up saves it 5 days but adds 11 to six other orders, so it recommends keeping the current order."
   },
   {
-   "at": 21.7,
+   "at": 26.7,
    "click": {
     "text": "Close"
    }
   },
   {
-   "at": 22.3,
+   "at": 27.3,
    "goto": "#/dashboard"
   },
   {
-   "at": 23.1,
+   "at": 28.7,
    "scroll": {
     "to": "section.ready-drafts"
    },
    "say": "Drafted before she asks: the two stalled orders already have a chase-up, written from the records."
   },
   {
-   "at": 27.5,
+   "at": 33.1,
    "click": "section.ready-drafts [data-action=\"ready-draft\"] >> nth=0"
   },
   {
-   "at": 27.6,
+   "at": 33.2,
    "waitAnswer": true
   },
   {
-   "at": 28.0,
+   "at": 34.5,
    "say": "“Review & send” opens the preview: to washing, 9 days idle, 3 days overdue. She reads it and confirms."
   },
   {
-   "at": 32.8,
+   "at": 39.3,
    "click": {
     "text": "Confirm send"
    },
@@ -83,47 +83,47 @@
    "real": true
   },
   {
-   "at": 33.2,
+   "at": 39.7,
    "waitAnswer": true,
    "optional": true,
    "real": true
   },
   {
-   "at": 33.6,
+   "at": 41.4,
    "say": "Sent and logged. Nothing went out before her click."
   },
   {
-   "at": 36.6,
+   "at": 44.4,
    "click": "[aria-label=\"Close AI drawer\"]",
    "optional": true
   },
   {
-   "at": 37.6,
+   "at": 45.4,
    "scroll": {
     "to": "section.home-pulse"
    }
   },
   {
-   "at": 38.0,
+   "at": 45.8,
    "say": "Every chart has an “i”. “Normal” means the previous 8 same weekdays, which cut false alerts from 0.67 to 0.1 a month."
   },
   {
-   "at": 38.8,
+   "at": 46.6,
    "click": "section.home-pulse [data-info=\"pulse\"]"
   },
   {
-   "at": 44.4,
+   "at": 52.2,
    "press": "Escape"
   },
   {
-   "at": 44.8,
+   "at": 53.8,
    "scroll": {
     "to": "section.home-briefing"
    },
    "say": "The 07:00 briefing is written on a schedule: yesterday, what is at risk, what to decide."
   },
   {
-   "at": 49.2,
+   "at": 58.2,
    "hold": 0.2
   }
  ]

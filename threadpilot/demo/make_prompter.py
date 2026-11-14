@@ -28,8 +28,8 @@ import prompter_lines  # noqa: E402
 W, H = 1920, 1080
 NATURAL_WPS = 2.4          # the karaoke fill pace when the window allows it (about 145 words a minute)
 MAX_WPS = 2.75             # warn above this: hard to say clearly
-COLOURS = {prompter_lines.W: '&H00B48CFF', prompter_lines.M: '&H00FFB45A', prompter_lines.K: '&H0078DC8C'}   # BGR
-SHORT = {prompter_lines.W: 'Wendy', prompter_lines.M: 'Matthew', prompter_lines.K: 'Kevin'}
+COLOURS = {prompter_lines.W: '&H00B48CFF', prompter_lines.M: '&H00FFB45A', prompter_lines.K: '&H0078DC8C', prompter_lines.P: '&H0080B8F2'}   # BGR
+SHORT = {prompter_lines.W: 'Wendy', prompter_lines.M: 'Matthew', prompter_lines.K: 'Kevin', prompter_lines.P: 'PHONE'}
 
 
 def srt(path: Path) -> list[dict]:

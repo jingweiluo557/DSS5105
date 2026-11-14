@@ -103,19 +103,39 @@
     return voices.find(v => v.lang && v.lang.replace('_', '-').toLowerCase() === lang.toLowerCase()) || voices.find(v => v.lang && v.lang.toLowerCase().startsWith(base)) || null;
   }
   // Spoken form: order numbers digit by digit, ISO dates as dates, no table pipes or arrows.
+  const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  // Spoken form: order numbers digit by digit, dates as "20 April" (not "2026 dash 04 dash 20"), no arrows or pipes.
   function spokenForm(text, zh){
-    return text.replace(/\bORD-(\d)(\d)(\d)\b/g, zh ? '订单 $1 $2 $3' : 'order $1 $2 $3').replace(/\u2192|->/g, zh ? '到' : ' to ').replace(/\s*[\u2014\u2013]\s*/g, ', ').replace(/\s{2,}/g, ' ');
+    const year = new Date().getFullYear();
+    return text
+      .replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (m, y, mo, d) => +mo < 1 || +mo > 12 ? m : zh ? `${+mo}月${+d}日` : `${+d} ${MONTH_NAMES[+mo - 1]}` + (Math.abs(+y - year) > 1 ? ' ' + y : ''))
+      .replace(/\bORD-(\d)(\d)(\d)\b/g, zh ? '订单 $1 $2 $3' : 'order $1 $2 $3')
+      .replace(/\u2192|->/g, zh ? '到' : ' to ').replace(/\s*[\u2014\u2013|]\s*/g, ', ').replace(/\s*\u00b7\s*/g, ', ').replace(/\s{2,}/g, ' ');
+  }
+  // A drafted email is not read out header by header: one line says what it is and that nothing has gone.
+  function draftSummary(text){
+    if (!/^Draft \d+\b/.test(text.trim())) return '';
+    const dept = (text.match(/Department:\s*([A-Za-z &]+)/) || [])[1], to = (text.match(/To:\s*(\S+)/) || [])[1];
+    const order = (text.match(/\bORD-\d{3}\b/) || [])[0];
+    const who = dept ? dept.trim().toLowerCase() : to ? to.split('@')[0] : 'the recipient';
+    return /[\u4e00-\u9fff]/.test(text.slice(0, 80)) ? '' : `A draft to ${who}${order ? ' about ' + order : ''} is ready. Nothing has been sent. Read it, then tap to confirm.`;
   }
   function speakText(text, button){
     if (!canSpeak || !text) return;
-    const lead = firstLines(text); if (!lead) return;
+    const lead = draftSummary(text) || firstLines(text); if (!lead) return;
     resetReadButtons();
     const zh = /[\u4e00-\u9fff]/.test(lead), lang = zh ? 'zh-CN' : 'en-SG';
     window.speechSynthesis.cancel();
     // Short sentences one at a time: some browsers cut off a long single utterance.
-    const parts = spokenForm(lead, zh).split(/(?<=[.!?;])\s+|(?<=[。！？；])/);   // not inside washing@example.com or 60.5%
     const voice = voiceFor(lang) || (zh ? null : voiceFor('en-GB') || voiceFor('en-US'));
-    parts.map(t => t.trim()).filter(Boolean).forEach((t, i, all) => {
+    // A spoken reply is the headline, not the whole table: whole sentences up to about 32 words (always at least one).
+    const size = t => zh ? t.length / 2 : t.split(/\s+/).length;
+    let used = 0;
+    const sentences = spokenForm(lead, zh).split(/(?<=[.!?])\s+|(?<=[。！？])/).map(t => t.trim()).filter(Boolean)   // not inside washing@example.com or 60.5%
+      .filter((t, i) => { used += size(t); return i === 0 || used <= 32; });
+    // spoken in short pieces: some browsers cut off a long single utterance
+    const brief = sentences.flatMap(t => t.split(/(?<=;)\s+|(?<=；)/)).map(t => t.trim()).filter(Boolean);
+    brief.forEach((t, i, all) => {
       const utter = new SpeechSynthesisUtterance(t);
       utter.lang = voice ? voice.lang : lang; if (voice) utter.voice = voice; utter.rate = 1.0;
       if (i === all.length - 1) utter.onend = utter.onerror = () => resetReadButtons();

@@ -34,7 +34,12 @@ HERE = Path(__file__).resolve().parent
 base = json.loads((HERE / 'demo_timeline_final.json').read_text())
 T = '[data-form="chat"] textarea'
 B = '[data-form="chat"] button[type="submit"]'
-READ_WPS = 3.6                     # captions are read, not spoken: about 200 words a minute
+READ_WPS = 2.75                    # a caption stays up long enough to be read AND for the presenter's line to be said
+                                   # without rushing (14 Nov: was 3.6; the video now runs close to the full five minutes)
+try:                               # seconds of recorded audio per spoken reply, in order (demo/make_voice_audio.py)
+    REPLIES = [r['seconds'] for r in json.loads((HERE / 'voice_audio' / 'index.json').read_text())]
+except FileNotFoundError:
+    REPLIES = []
 steps, t = [], 0.0
 _cap = {'at': 0.0, 'need': 0.0}
 parts = {}
@@ -90,6 +95,9 @@ def clock(hhmm):
 MIC = '[data-form="chat"] [data-action="voice"]'
 
 
+_reply = [0]
+
+
 def speak(dt, words, caption=None, wait=True):
     """The manager says `words` into the phone: set the stand-in microphone, tap the button, let the words arrive."""
     do(dt, caption, evaluate=f"window.__voiceSay = {json.dumps(words)};")
@@ -97,6 +105,14 @@ def speak(dt, words, caption=None, wait=True):
     at(len(words.split()) / 2.8 + 1.0)
     if wait:
         steps.append({'at': at(0.1), 'waitAnswer': True})
+
+
+def reply(caption):
+    """The phone answers aloud: hold for as long as the recorded reply lasts. Presenters stay silent here."""
+    say(0.3, caption)
+    seconds = REPLIES[_reply[0]] if _reply[0] < len(REPLIES) else 7.0
+    _reply[0] += 1
+    _cap['need'] = max(_cap['need'], seconds + 0.9)
 
 
 # ---------------------------------------------------------------- A. 07:00, at the desk: the screen speaks first
@@ -131,18 +147,17 @@ part('b')
 do(0, '09:40 · On the factory floor she has a phone, not a desk. The same home screen fits it.', goto='#/dashboard')
 clock('09:40')
 do(1.6, scroll={'by': 520})
-do(2.4, goto='#/ai')
-say(0.6, 'She taps the microphone and speaks. (The app is the real one; this recording simulates the microphone and speaker.)')
-speak(4.2, 'where is o r d zero zero five')
-say(0.4, 'Spoken “O R D zero zero five” became ORD-005 and was sent. A spoken question gets a spoken answer.')
-do(5.6, 'The speaker button keeps spoken replies on for every answer, typed or spoken.', click='[data-action="voice-replies"] >> nth=0')
-speak(3.4, 'which customer has the most pieces in progress')
-say(0.4, 'A “most” question is computed from the order book, not guessed: Northwind Apparel, 8,000 pieces, and it says so aloud.')
-speak(6.4, 'chase washing on o r d zero eight three')
-say(0.4, 'Actions work by voice too: a draft to washing about ORD-083. Still only a draft.')
-speak(4.6, 'send now', wait=False)
-say(0.6, 'But a spoken “send now” is never sent. It waits in the box for a tap, so a misheard word cannot send an email.')
-do(6.6, 'Every page fits the phone: wide tables scroll inside their card, buttons are thumb-sized.', goto='#/orders')
+do(3.2, goto='#/ai')
+speak(0.6, 'where is o r d zero zero five', 'She taps the microphone and asks out loud: “Where is O R D zero zero five?”')
+reply('🔊 It heard ORD-005, sent the question, and answers out loud. (Listen: this is the phone speaking.)')
+do(0.2, 'The speaker button keeps spoken replies on for every answer, typed or spoken.', click='[data-action="voice-replies"] >> nth=0')
+speak(0.4, 'which customer has the most pieces in progress', 'She asks: “Which customer has the most pieces in progress?”')
+reply('🔊 Computed from the order book, not guessed, and said aloud: Northwind Apparel, 8,000 pieces.')
+speak(0.2, 'chase washing on o r d zero eight three', 'Actions work by voice too: “Chase washing on O R D zero eight three.”')
+reply('🔊 A draft to washing about ORD-083. It says so in one line, and that nothing has been sent.')
+speak(0.2, 'send now', 'She says “send now”…', wait=False)
+say(0.6, 'A spoken “send now” is never sent. It waits in the box for a tap, so a misheard word cannot send an email.')
+do(0.2, 'Every page fits the phone: wide tables scroll inside their card, buttons are thumb-sized.', goto='#/orders')
 do(2.0, scroll={'by': 380})
 do(2.6, hold=0.2)
 

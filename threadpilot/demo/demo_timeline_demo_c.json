@@ -36,11 +36,11 @@
    "waitAnswer": true
   },
   {
-   "at": 3.7,
+   "at": 4.6,
    "say": "A judgement tool with a written definition: 455 pieces against 687–807 for the previous eight Tuesdays, 39% below."
   },
   {
-   "at": 7.3,
+   "at": 8.2,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "How is the TrendCart order doing?",
@@ -48,19 +48,19 @@
    }
   },
   {
-   "at": 8.4,
+   "at": 9.3,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 8.5,
+   "at": 9.4,
    "waitAnswer": true
   },
   {
-   "at": 9.1,
+   "at": 11.1,
    "say": "A vague question: TrendCart has six active orders, so it asks instead of guessing."
   },
   {
-   "at": 11.9,
+   "at": 13.9,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "The scarf one.",
@@ -68,37 +68,37 @@
    }
   },
   {
-   "at": 12.6,
+   "at": 14.6,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 12.7,
+   "at": 14.7,
    "waitAnswer": true
   },
   {
-   "at": 13.3,
+   "at": 16.2,
    "say": "Only one is a scarf: ORD-005. “Show more” lists the planner’s reading, each tool call and the rows behind the answer."
   },
   {
-   "at": 14.9,
+   "at": 17.8,
    "click": "details.tool-steps >> nth=-1 >> summary",
    "optional": true
   },
   {
-   "at": 19.5,
+   "at": 22.4,
    "click": "details.tool-steps >> nth=-1 >> summary",
    "optional": true
   },
   {
-   "at": 19.7,
+   "at": 22.6,
    "evaluate": "await fetch('/__replay/clock?t=11:15'); const r = await fetch('/api/email/clock', {cache: 'no-store'}); window.threadpilotClock = await r.json(); window.threadpilotClockAnchor = performance.now();"
   },
   {
-   "at": 20.1,
+   "at": 23.8,
    "say": "11:15 · A customer wants 800 hoodies by the 25th."
   },
   {
-   "at": 20.7,
+   "at": 24.4,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Can we take 800 hoodies by the 25th?",
@@ -106,19 +106,19 @@
    }
   },
   {
-   "at": 21.9,
+   "at": 25.6,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 22.0,
+   "at": 25.7,
    "waitAnswer": true
   },
   {
-   "at": 23.1,
+   "at": 27.4,
    "say": "It asks the one thing that changes the answer: ready at the factory, or delivered?"
   },
   {
-   "at": 25.9,
+   "at": 30.2,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Ready at the factory.",
@@ -126,68 +126,68 @@
    }
   },
   {
-   "at": 26.7,
+   "at": 31.0,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 26.8,
+   "at": 31.1,
    "waitAnswer": true
   },
   {
-   "at": 27.4,
+   "at": 32.9,
    "say": "An estimate, not a yes: unlikely. The queue finishes 30 April; it names the bottleneck and the outside workshops."
   },
   {
-   "at": 33.0,
+   "at": 39.8,
    "click": "nav.workspace-tools a[href=\"#/feasibility\"]",
    "say": "The Feasibility page runs the same tool over the whole queue and shows why."
   },
   {
-   "at": 34.4,
+   "at": 41.2,
    "fill": {
     "into": "#feasibility-form input[name=\"qty\"]",
     "value": "800"
    }
   },
   {
-   "at": 35.3,
+   "at": 42.1,
    "fill": {
     "into": "#feasibility-form input[name=\"due\"]",
     "value": "2026-04-25"
    }
   },
   {
-   "at": 36.2,
+   "at": 43.0,
    "click": "#feasibility-form button[type=\"submit\"]"
   },
   {
-   "at": 36.8,
+   "at": 43.6,
    "waitFor": {
     "text": "with usual new orders",
     "timeout": 20000
    }
   },
   {
-   "at": 37.4,
+   "at": 44.9,
    "scroll": {
     "to": "#capacity-picture"
    },
    "say": "The same figures as the chat: 30 April, five days late, because the later stages are over capacity before the 25th."
   },
   {
-   "at": 43.2,
+   "at": 50.7,
    "goto": "#/ai"
   },
   {
-   "at": 43.4,
+   "at": 50.9,
    "evaluate": "await fetch('/__replay/clock?t=14:30'); const r = await fetch('/api/email/clock', {cache: 'no-store'}); window.threadpilotClock = await r.json(); window.threadpilotClockAnchor = performance.now();"
   },
   {
-   "at": 43.8,
+   "at": 52.5,
    "say": "14:30 · The core task: chase a stalled order, typed the way it is said on the floor."
   },
   {
-   "at": 44.8,
+   "at": 53.5,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "ORD 5 hasn’t moved in a week, chase knitting",
@@ -195,19 +195,19 @@
    }
   },
   {
-   "at": 46.4,
+   "at": 55.1,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 46.5,
+   "at": 55.2,
    "waitAnswer": true
   },
   {
-   "at": 48.8,
+   "at": 59.0,
    "say": "It checks the claim against the record first (last activity 24 March, 8 days: true), then drafts to knitting."
   },
   {
-   "at": 53.4,
+   "at": 63.6,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Preview draft 1",
@@ -215,19 +215,19 @@
    }
   },
   {
-   "at": 54.1,
+   "at": 64.3,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 54.2,
+   "at": 64.4,
    "waitAnswer": true
   },
   {
-   "at": 54.8,
+   "at": 65.9,
    "say": "Preview first. Nothing is sent until the manager confirms this exact draft."
   },
   {
-   "at": 58.4,
+   "at": 69.5,
    "click": {
     "text": "Confirm send"
    },
@@ -235,17 +235,17 @@
    "real": true
   },
   {
-   "at": 58.8,
+   "at": 69.9,
    "waitAnswer": true,
    "optional": true,
    "real": true
   },
   {
-   "at": 59.4,
+   "at": 70.5,
    "say": "Confirmed and sent. On the live system it leaves from the manager’s own mailbox."
   },
   {
-   "at": 61.4,
+   "at": 72.5,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Remind me tmrw 10am if knitting doesn’t reply",
@@ -253,19 +253,19 @@
    }
   },
   {
-   "at": 63.0,
+   "at": 74.1,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 63.1,
+   "at": 74.2,
    "waitAnswer": true
   },
   {
-   "at": 63.7,
+   "at": 75.6,
    "say": "A standing watch: at 10:00 tomorrow the server checks, and notifies only if no reply was recorded."
   },
   {
-   "at": 67.5,
+   "at": 79.4,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Confirm.",
@@ -274,22 +274,22 @@
    "real": true
   },
   {
-   "at": 68.0,
+   "at": 79.9,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]",
    "real": true
   },
   {
-   "at": 68.1,
+   "at": 80.0,
    "waitAnswer": true,
    "real": true
   },
   {
-   "at": 69.5,
+   "at": 81.8,
    "goto": "#/activity",
    "say": "Every action is logged, with recipient, orders and subject."
   },
   {
-   "at": 70.1,
+   "at": 82.4,
    "waitFor": {
     "text": "Order chase-up",
     "timeout": 15000
@@ -297,28 +297,28 @@
    "optional": true
   },
   {
-   "at": 71.7,
+   "at": 84.0,
    "click": "#email-activity details >> nth=0 >> summary",
    "optional": true
   },
   {
-   "at": 74.3,
+   "at": 86.6,
    "goto": "#/settings",
    "say": "It also speaks first, but rationed: an alert only for a decision needed today, at most 3 a day."
   },
   {
-   "at": 75.3,
+   "at": 87.6,
    "scroll": {
     "to": "[data-email=\"test-alert\"]"
    }
   },
   {
-   "at": 79.7,
+   "at": 93.5,
    "goto": "#/ai",
    "say": "Honesty under pressure. A question the data cannot answer:"
   },
   {
-   "at": 80.3,
+   "at": 94.1,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "What revenue did the TrendCart orders bring in this quarter?",
@@ -326,19 +326,19 @@
    }
   },
   {
-   "at": 81.7,
+   "at": 95.5,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 81.8,
+   "at": 95.6,
    "waitAnswer": true
   },
   {
-   "at": 82.7,
+   "at": 96.8,
    "say": "No prices in the records, so no revenue figure. It says what it can answer instead."
   },
   {
-   "at": 85.7,
+   "at": 99.8,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Chase ord 29, stuck at washing since last wk",
@@ -346,19 +346,19 @@
    }
   },
   {
-   "at": 87.1,
+   "at": 101.2,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 87.2,
+   "at": 101.3,
    "waitAnswer": true
   },
   {
-   "at": 87.8,
+   "at": 102.6,
    "say": "A wrong premise: the record says ORD-029 moved today. It says so, and asks before writing anything."
   },
   {
-   "at": 91.2,
+   "at": 106.0,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Is ORD-218 shipped?",
@@ -366,23 +366,23 @@
    }
   },
   {
-   "at": 92.0,
+   "at": 106.8,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 92.1,
+   "at": 106.9,
    "waitAnswer": true
   },
   {
-   "at": 92.7,
+   "at": 108.8,
    "say": "Not in the records, and it says so. It never invents an order, a stage or a number."
   },
   {
-   "at": 97.7,
+   "at": 115.3,
    "say": "Every number comes from a tool with its rows · it asks instead of guessing · by voice or by hand, nothing leaves without a confirmed preview."
   },
   {
-   "at": 104.7,
+   "at": 122.3,
    "hold": 0.4
   }
  ]

@@ -199,6 +199,10 @@ async function chatIdle(page, timeoutMs = 180000) {
   }
   const page = await context.newPage();
   page.on('pageerror', e => console.error('page error:', e.message));
+  // "@mark <text>" on the page's console is a time mark: written to marks.json (and marks_cut.json after --compress-waits)
+  // in recording time, e.g. the moment voice_standin.js starts "speaking" a reply, so the audio can be laid there later
+  const marks = [];
+  page.on('console', m => { const t = m.text(); if (t.startsWith('@mark ')) marks.push({ t: now(), text: t.slice(6) }); });
   // a click that opens another page (e.g. the full briefing) destroys the context mid-step: wait for the new page and retry
   const evaluate = page.evaluate.bind(page);
   page.evaluate = async (fn, arg) => {
@@ -294,6 +298,8 @@ async function chatIdle(page, timeoutMs = 180000) {
   // ---------------------------------------------------------------- captions and the run log
   const srt = cues.map((c, i) => `${i + 1}\n${srtTime(c.start)} --> ${srtTime(c.end ?? total)}\n${c.text}\n`).join('\n');
   fs.writeFileSync(path.join(outDir, 'demo.srt'), srt);
+  for (const m of marks) m.t = Math.max(0, m.t - t0);
+  fs.writeFileSync(path.join(outDir, 'marks.json'), JSON.stringify(marks.map(m => ({ t_s: m.t / 1000, text: m.text })), null, 1));
   fs.writeFileSync(path.join(outDir, 'waits.json'), JSON.stringify({ total_ms: total, waits }, null, 2));
   fs.writeFileSync(path.join(outDir, 'run_log.json'), JSON.stringify({ base: BASE, viewport: vp, total_s: total / 1000, drift_s: drift / 1000, steps: log }, null, 2));
   console.log(`recorded ${(total / 1000).toFixed(1)} s → ${webm}; ${cues.length} captions → demo.srt; model waits ${waits.length} (${(waits.reduce((a, w) => a + (w.end - w.start), 0) / 1000).toFixed(1)} s)`);
@@ -323,6 +329,7 @@ async function chatIdle(page, timeoutMs = 180000) {
       const remap = ms => { let out = 0; for (const [s, e, f] of segs) { if (ms <= s) break; out += (Math.min(ms, e) - s) / f; } return out; };
       const srt2 = cues.map((c, i) => `${i + 1}\n${srtTime(remap(c.start))} --> ${srtTime(remap(c.end ?? total))}\n${c.text}\n`).join('\n');
       fs.writeFileSync(path.join(outDir, 'demo_cut.srt'), srt2);
+      fs.writeFileSync(path.join(outDir, 'marks_cut.json'), JSON.stringify(marks.map(m => ({ t_s: remap(m.t) / 1000, text: m.text })), null, 1));
       const newLen = segs.reduce((a, [s, e, f]) => a + (e - s) / f, 0);
       console.log(`compressed waits ×${factor} → ${cut} (${(newLen / 1000).toFixed(1)} s) + demo_cut.srt`);
       input = cut; srtForBurn = path.join(outDir, 'demo_cut.srt');
