@@ -97,10 +97,17 @@ def main():
            'clock follows the day (07:00, 09:40, 10:30, 11:15, 14:30). Captions are burned',
            'in at the bottom and paced for reading.',
            '',
-           'SOUND',
-           "The video's sound track holds only the phone's three spoken replies (times",
-           'below). Everything else is silent, for your voice-over. While the phone',
-           'speaks, say nothing: those lines are marked PHONE.',
+           'WHO SPEAKS WHEN',
+           '  SAY          a presenter, as voice-over.',
+           '  LIVE         the manager speaking a question into the phone. It is in the',
+           '               recording. No voice-over.',
+           '  AI AGENT     the AI agent answering aloud. It is in the recording. Stay',
+           '               silent from its first word until it has finished, then count',
+           '               one beat before the next SAY line.',
+           'In the phone chapter the presenter speaks only in the gaps: before the tap on',
+           'the microphone, and after the AI agent has finished. Never talk over either',
+           'voice. If your live recording runs at a different pace, keep the order of the',
+           'lines and wait for the AI agent to finish; do not go by the clock.',
            '',
            'HOW IT WAS RECORDED (say this if asked)',
            'Offline replay: the real interface and engine on the Track 1 records, with the',
@@ -136,7 +143,7 @@ def main():
         spans[who] = (s0, end(last))
     out += [f'  {who:<24} {clock(s)}-{clock(e)}  ({round(e - s)} s)' for who, (s, e) in spans.items()]
     if a.parts and a.parts.exists():
-        out += ['', '  The phone speaks (already in the video; stay silent):']
+        out += ['', '  The AI agent speaks (stay silent; times are from the guide video, a live recording will differ):']
         out += [f"    {clock(v['at_s'])}-{clock(v['at_s'] + v['seconds'])}  “{v['text']}”" for v in json.loads(a.parts.read_text()).get('voice', [])]
     out += ['', '  Say the SAY lines, not the captions: the captions are written for reading.',
             '  ThreadPilot_Demo_prompter.mp4 shows the same lines, filling in at speaking pace.', '',
@@ -148,7 +155,9 @@ def main():
         out += ['', f'[{clock(c["start"])}-{clock(end(i))}]', f'  CAPTION  {c["text"]}']
         if i in spoken:
             who, text, _ = spoken[i]
-            out.append(f'  PHONE  {text}   <- in the video already; do not speak' if who == prompter_lines.P else f'  SAY ({SHORT[who]})  {text}')
+            out.append(f'  AI AGENT SPEAKS  {text}\n  >>> SILENCE: no voice-over until the AI agent has finished' if who == prompter_lines.P else f'  SAY ({SHORT[who]})  {text}')
+            if i in prompter_lines.LIVE:
+                out.append(f'  LIVE (manager, on the phone)  “{prompter_lines.LIVE[i]}”\n  >>> SILENCE: her own voice is in the recording')
         if acts[i]:
             out.append('  ON SCREEN  ' + '; '.join(acts[i]) + '.')
     a.out.write_text('\n'.join(out) + '\n', encoding='utf-8')

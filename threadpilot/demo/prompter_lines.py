@@ -9,9 +9,13 @@ Each entry: (first_cue, last_cue, speaker, text). The line starts when first_cue
 last_cue ends.
 """
 W, M, K = 'Le Wenni (Wendy)', 'Foo Toon Ming (Matthew)', 'Kevin Royce Thomson'
-P = 'The phone speaks (recorded in the video: stay silent)'
+P = 'The AI agent speaks (stay silent until it finishes)'
 
 # ThreadPilot_Demo.mp4 (the full product demo with the phone and voice chapter, 4:24) — cues from ThreadPilot_Demo.srt
+# In the phone chapter two voices are already in the recording and get no voice-over: the manager speaking each question
+# into the phone (LIVE below) and the AI agent answering aloud (speaker P). The presenter speaks only in the gaps.
+LIVE = {11: 'Where is order five?', 14: 'Which customer has the most pieces in progress?', 16: 'Chase washing on order eighty-three.', 18: 'Send now.'}
+
 DEMO = [
     (0, 0, W, 'ThreadPilot: one working day of a factory manager, on the factory’s own records.'),
     (1, 1, W, 'Before she is at her desk, it emails her without being asked. This is the email, word for word.'),
@@ -24,14 +28,14 @@ DEMO = [
     (8, 8, W, 'Review and send opens the preview. She reads it, and confirms.'),
     (9, 9, W, 'Sent and logged. Nothing went out before her click.'),
     (10, 10, M, 'At nine forty she is on the floor with a phone. The same screen fits it.'),
-    (11, 11, M, 'She taps the microphone and asks: where is order five?'),
-    (12, 12, P, '(the phone answers aloud: order five, TrendCart, knitting, due 20 April)'),
-    (13, 13, M, 'The speaker button keeps spoken replies on for every answer.'),
-    (14, 14, M, 'Which customer has the most pieces in progress?'),
-    (15, 15, P, '(the phone answers aloud: Northwind Apparel, eight thousand pieces)'),
-    (16, 16, M, 'Actions work by voice too. Chase washing on order 83.'),
-    (17, 17, P, '(the phone answers aloud: a draft is ready, nothing has been sent)'),
-    (18, 18, M, 'Now she says: send now.'),
+    (11, 11, M, 'She taps the microphone and asks out loud.'),
+    (12, 12, P, '(the AI agent answers aloud: order five, TrendCart, knitting, due 20 April)'),
+    (13, 13, M, 'It heard order five. The speaker button keeps spoken replies on.'),
+    (14, 14, M, 'A harder question.'),
+    (15, 15, P, '(the AI agent answers aloud: Northwind Apparel, eight thousand pieces)'),
+    (16, 16, M, 'Computed, not guessed. Actions work by voice too.'),
+    (17, 17, P, '(the AI agent answers aloud: a draft is ready, nothing has been sent)'),
+    (18, 18, M, 'Still only a draft.'),
     (19, 19, M, 'A spoken send now is never sent. It waits for her tap.'),
     (20, 20, M, 'And every page fits the phone, tables included.'),
     (21, 21, M, 'Back at the desk. Was yesterday’s assembly output normal?'),
