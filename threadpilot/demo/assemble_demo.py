@@ -52,6 +52,11 @@ def main():
     # to record against and to cover, with a ribbon across the top of the phone screen saying it is guide footage. The
     # team's recording, laid over the same rectangle, covers the ribbon too.
     phone_guide = phone_live and '--phone-guide' in sys.argv
+    # --email-phone: while the alert check fires (the caption that starts "06:59:58"), the desk recording moves to the
+    # left and a phone-shaped frame is reserved on the right for a recording of the real email arriving on the manager's
+    # phone. The frame is empty and marked; parts.json gives its rectangle and times.
+    email_phone = '--email-phone' in sys.argv
+    email_slot = None
     live_badge = 'Recorded live on a real phone · real microphone and speaker · no email is sent in this chapter'
     work = out / 'work'; work.mkdir(exist_ok=True)
     files, all_cues, starts, offset = [], [], {}, 0.0
@@ -85,6 +90,22 @@ def main():
                 vf = (f"color=c=#E8ECEF:s={W}x{H}:r=30[bg];[0:v]scale={pw}:{ph}:flags=lanczos,fps=30[ph];"
                       f"[bg]drawbox=x={x - 14}:y={y - 14}:w={pw + 28}:h={ph + 28}:color=#111820:t=fill[bz];[bz][ph]overlay={x}:{y}:shortest=1," + side)
                 run('-i', src, '-filter_complex', vf, *enc)
+        elif name == 'a' and email_phone and any(t.startswith('06:59:58') for _, _, t in cues(parts / name / 'demo_cut.srt')):
+            t0, t1 = next((a, b) for a, b, t in cues(parts / name / 'demo_cut.srt') if t.startswith('06:59:58'))
+            eh = 820; ew = 470; ex = W - ew - 62; ey = (H - eh) // 2 + 16          # the phone screen on the right
+            dw = ex - 14 - 40 - 40; dh = round(dw * H / W / 2) * 2; dx = 40; dy = (H - dh) // 2 + 16   # the desk recording, smaller, on the left
+            t_desk = work / 'slot_desk.txt'; t_desk.write_text('On the laptop: the 07:00:00 check fires')
+            t_phone = work / 'slot_phone.txt'; t_phone.write_text('On her phone: the email arrives')
+            t_hole = work / 'slot_hole.txt'; t_hole.write_text('YOUR PHONE\nRECORDING\nGOES HERE\n\nthe alert email\narriving in\nthe inbox')
+            vf = (f"[0:v]scale={W}:{H}:flags=lanczos,fps=30,split[full][s];[s]scale={dw}:{dh}:flags=lanczos[small];"
+                  f"color=c=#E8ECEF:s={W}x{H}:r=30,drawbox=x={dx - 2}:y={dy - 2}:w={dw + 4}:h={dh + 4}:color=#C9D1D8:t=fill,"
+                  f"drawbox=x={ex - 14}:y={ey - 14}:w={ew + 28}:h={eh + 28}:color=#111820:t=fill,drawbox=x={ex}:y={ey}:w={ew}:h={eh}:color=#2A3440:t=fill,"
+                  f"drawtext=textfile='{t_hole}':font='{FONT}\\:style=Bold':fontsize=34:fontcolor=#9AA7B4:line_spacing=16:x={ex}+({ew}-text_w)/2:y={ey}+({eh}-text_h)/2,"
+                  f"drawtext=textfile='{t_desk}':font='{FONT}\\:style=Bold':fontsize=30:fontcolor=#1C2733:x={dx}:y={dy - 52},"
+                  f"drawtext=textfile='{t_phone}':font='{FONT}\\:style=Bold':fontsize=26:fontcolor=#1C2733:x={ex}+({ew}-text_w)/2:y={ey - 14 - 44}[bg];"
+                  f"[bg][small]overlay={dx}:{dy}:shortest=1[alt];[full][alt]overlay=0:0:enable='between(t,{t0:.3f},{t1:.3f})'[v]")
+            run('-i', src, '-filter_complex', vf, '-map', '[v]', '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', dst)
+            email_slot = {'from_s': round(t0, 2), 'to_s': round(t1, 2), 'x': ex, 'y': ey, 'w': ew, 'h': eh}
         else:
             run('-i', src, '-vf', f'scale={W}:{H}:flags=lanczos,fps=30', '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', dst)
         d = dur(dst); starts[name] = round(offset, 3)
@@ -132,7 +153,7 @@ def main():
     graph += '[1:a]' + ''.join(f'[a{n}]' for n in range(len(voice))) + f'amix=inputs={len(voice) + 1}:duration=first:normalize=0[a]'
     run(*inputs, '-filter_complex', graph, '-map', '[v]', '-map', '[a]', '-r', '30', '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-pix_fmt', 'yuv420p',
         '-c:a', 'aac', '-b:a', '128k', '-t', f'{offset:.3f}', '-movflags', '+faststart', final)
-    (out / 'parts.json').write_text(json.dumps({'starts': starts, 'total_s': round(offset, 2), 'phone_screen_in_1920x1080': phone_rect, 'voice': [{k: v[k] for k in ('at_s', 'seconds', 'text')} for v in voice]}, indent=1))
+    (out / 'parts.json').write_text(json.dumps({'starts': starts, 'total_s': round(offset, 2), 'phone_screen_in_1920x1080': phone_rect, 'email_phone_slot_in_1920x1080': email_slot, 'voice': [{k: v[k] for k in ('at_s', 'seconds', 'text')} for v in voice]}, indent=1))
     print(f'{len(voice)} spoken replies laid in: ' + ', '.join(f"{v['at_s']:.1f}-{v['at_s'] + v['seconds']:.1f} s" for v in voice))
     print(f'{final} · {offset:.1f} s ({int(offset // 60)}:{int(offset % 60):02d}) · {len(all_cues)} captions · parts start at {starts}')
 
