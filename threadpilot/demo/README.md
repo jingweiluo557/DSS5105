@@ -132,3 +132,7 @@ Add `--phone-guide` to keep the simulated phone recording and its synthetic voic
 against (`ThreadPilot_Demo_phone_guide.mp4`). A ribbon across the top of the phone screen says "GUIDE FOOTAGE · replace
 with the live recording"; a real recording laid over the same rectangle covers it. Mute the track from the chapter's
 start to its end when the real recording's sound goes in.
+
+Add `--email-phone` to reserve a place for the real alert email arriving on the manager's phone: while the check fires
+(the caption that starts "06:59:58", 0:25.5 to 0:37), the desk recording moves to the left and an empty, marked phone
+frame stands on the right (`email_phone_slot_in_1920x1080` in `parts.json`: x 1388, y 92, 470 × 820).
