@@ -95,7 +95,7 @@ def main():
            'the desk (home screen, chat, Feasibility page, Activity Log, Settings) and,',
            'from 09:40, on a phone on the factory floor, by voice. No slides. The header',
            'clock follows the day (07:00, 09:40, 10:30, 11:15, 14:30). Captions are burned',
-           'in at the bottom and paced for reading.',
+           'in at the bottom: each one is the line the presenter says.',
            '',
            'WHO SPEAKS WHEN',
            '  SAY          a presenter, as voice-over.',
@@ -145,16 +145,21 @@ def main():
     if a.parts and a.parts.exists():
         out += ['', '  The AI agent speaks (stay silent; times are from the guide video, a live recording will differ):']
         out += [f"    {clock(v['at_s'])}-{clock(v['at_s'] + v['seconds'])}  “{v['text']}”" for v in json.loads(a.parts.read_text()).get('voice', [])]
-    out += ['', '  Say the SAY lines, not the captions: the captions are written for reading.',
+    out += ['', '  Every SAY line is the subtitle on screen at that moment: read it off the video.',
             '  ThreadPilot_Demo_prompter.mp4 shows the same lines, filling in at speaking pace.', '',
-            '=' * W, 'SCRIPT   [time]  CAPTION on screen  /  SAY aloud  /  what happens on screen', '=' * W]
+            '=' * W, 'SCRIPT   [time]  SAY aloud (= the subtitle)  /  what happens on screen', '=' * W]
     chapter = dict(CHAPTERS)
     for i, c in enumerate(cues):
         if i in chapter:
             out += ['', f'--- {chapter[i].upper()} ({clock(c["start"])}) ---']
-        out += ['', f'[{clock(c["start"])}-{clock(end(i))}]', f'  CAPTION  {c["text"]}']
+        out += ['', f'[{clock(c["start"])}-{clock(end(i))}]']
+        same = i in spoken and spoken[i][0] != prompter_lines.P and c['text'].startswith(spoken[i][1])
+        if not same:
+            out.append(f'  SUBTITLE  {c["text"]}')
         if i in spoken:
             who, text, _ = spoken[i]
+            if same:
+                text += '     [= the subtitle on screen]'
             out.append(f'  AI AGENT SPEAKS  {text}\n  >>> SILENCE: no voice-over until the AI agent has finished' if who == prompter_lines.P else f'  SAY ({SHORT[who]})  {text}')
             if i in prompter_lines.LIVE:
                 out.append(f'  LIVE (manager, on the phone)  “{prompter_lines.LIVE[i]}”\n  >>> SILENCE: her own voice is in the recording')

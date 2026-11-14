@@ -1,6 +1,6 @@
 """Join the three recordings of the product demo into one 1920x1080 video with the captions burned into a band.
 
-  python3 demo/assemble_demo.py <parts dir> <out dir> [--badge "text"] [--phone-live]
+  python3 demo/assemble_demo.py <parts dir> <out dir> [--badge "text"] [--spoken-subs] [--phone-live [--phone-guide]] [--email-phone]
 
 <parts dir>/a, /b, /c each hold demo_cut.mp4 and demo_cut.srt from record_demo.cjs (timelines demo_timeline_demo_{a,b,c}.json,
 recorded with --compress-waits 4 --no-wait-tag and captions hidden). Parts a and c are the desk (1920x972). Part b is the
@@ -112,6 +112,16 @@ def main():
         for a, b, text in cues(parts / name / 'demo_cut.srt'):
             all_cues.append([a + offset, min(b, d) + offset, text])
         files.append(dst); offset += d
+    if '--spoken-subs' in sys.argv:
+        # The subtitle is the line the presenter says (demo/prompter_lines.py), so the voice-over can be read off the
+        # screen. A question the manager speaks into the phone follows in quotes; the AI agent's replies keep their own
+        # word-for-word subtitles. The recording's captions set the timing only.
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import prompter_lines as pl
+        assert len(all_cues) == max(last for _, last, _, _ in pl.DEMO) + 1, 'prompter_lines.DEMO does not match the recording: ' + str(len(all_cues))
+        for first, last, who, text in pl.DEMO:
+            if who != pl.P:
+                all_cues[first][2] = text + (f' “{pl.LIVE[first]}”' if first in pl.LIVE else '')
     for i in range(len(all_cues) - 1):               # a caption ends where the next begins
         all_cues[i][1] = min(all_cues[i][1], all_cues[i + 1][0])
     srt = out / 'ThreadPilot_Demo.srt'
