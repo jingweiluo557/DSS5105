@@ -17,26 +17,26 @@ sys.path.insert(0, str(HERE))
 import prompter_lines  # noqa: E402
 from make_prompter import SHORT, clock, srt  # noqa: E402
 
-CHAPTERS = [(0, '07:00 · At the desk: the screen speaks first'), (8, '07:05 · The automatic alert email'), (11, '09:40 · On the floor: a phone, by voice'),
-            (22, '10:30 · Back at the desk: questions'), (26, '11:15 · Can we take it?'), (30, '14:30 · Actions with a safety catch'), (36, 'Honesty under pressure'), (40, 'Close')]
-SHOWS = [(1, 'Proactive is a dial', 'decision cards, drafted chase-ups, rationed alerts'),
-         (4, 'Action tools with confirmation + audit', 'drafted chase-up, core-task chase, watch, Activity Log'),
-         (7, 'Charts that explain themselves', 'production pulse: assembly against its normal range'),
-         (8, 'Automatic alert email to the manager', 'Settings: switched on, checked every few minutes'),
-         (9, 'The alert email, word for word', 'three urgent items, the rule behind each, why, how to mute'),
-         (10, 'Alerts, rationed', 'the check sends one email; the next check sends none (24 h, 3 a day)'),
-         (11, 'Used from a phone', 'home screen, chat and Orders page at phone width'),
-         (12, 'Voice input', "microphone tapped; 'O R D zero zero five' becomes ORD-005 and is sent"),
-         (13, 'Spoken reply (you hear it)', 'the answer is said aloud; speaker button keeps replies on'),
-         (16, 'The model does no arithmetic', "'most pieces' computed by a tool over the order book"),
-         (20, 'No send without a tap', "a spoken 'send now' waits in the box"),
-         (23, 'Judgement tool, inspectable', "'was assembly normal?' against the last eight same weekdays"),
-         (24, "Ask, don't guess", 'TrendCart has six orders, so it asks which'),
-         (25, 'Tracing to the rows', "'Show more': planner reading, tool calls, source rows"),
-         (27, 'Feasibility with assumptions, not a yes', '800 hoodies in chat + Feasibility page, same date'),
-         (34, 'Standing watch', 'conditional reminder: notify only if no reply'),
-         (37, 'Says what the data cannot answer', 'revenue question; ORD-218 not on file'),
-         (38, "Checks the manager's premise", "'hasn't moved in a week' true; 'stuck since last week' false")]
+CHAPTERS = [(0, 'Opening'), (1, '07:00:00 · The automatic alert email'), (4, '07:00 · At the desk: the screen speaks first'), (10, '09:40 · On the floor: a phone, by voice'),
+            (21, '10:30 · Back at the desk: questions'), (25, '11:15 · Can we take it?'), (29, '14:30 · Actions with a safety catch'), (35, 'Honesty under pressure'), (39, 'Close')]
+SHOWS = [(1, 'Automatic alert email to the manager', 'Settings: the email the next check sends, word for word'),
+         (2, 'The trigger is computed, not staged', 'clock card: due at 07:00:00, three urgent items, one new today'),
+         (3, 'Alerts, rationed and in the daytime', 'the check fires at 07:00:00; one email; items then held back'),
+         (4, 'Proactive is a dial', 'decision cards, drafted chase-ups, rationed alerts'),
+         (5, 'Simulation behind a decision', "'Review options': the queue with and without the expedite"),
+         (7, 'Action tools with confirmation + audit', 'drafted chase-up, core-task chase, watch, Activity Log'),
+         (10, 'Used from a phone', 'home screen, chat and Orders page at phone width'),
+         (11, 'Voice input', "microphone tapped; 'O R D zero zero five' becomes ORD-005 and is sent"),
+         (12, 'Spoken reply (you hear it)', 'the answer is said aloud; speaker button keeps replies on'),
+         (15, 'The model does no arithmetic', "'most pieces' computed by a tool over the order book"),
+         (19, 'No send without a tap', "a spoken 'send now' waits in the box"),
+         (22, 'Judgement tool, inspectable', "'was assembly normal?' against the last eight same weekdays"),
+         (23, "Ask, don't guess", 'TrendCart has six orders, so it asks which'),
+         (24, 'Tracing to the rows', "'Show more': planner reading, tool calls, source rows"),
+         (26, 'Feasibility with assumptions, not a yes', '800 hoodies in chat + Feasibility page, same date'),
+         (33, 'Standing watch', 'conditional reminder: notify only if no reply'),
+         (36, 'Says what the data cannot answer', 'revenue question; ORD-218 not on file'),
+         (37, "Checks the manager's premise", "'hasn't moved in a week' true; 'stuck since last week' false")]
 
 
 def actions(steps):
@@ -53,8 +53,9 @@ def actions(steps):
                                    '#/settings': 'Settings (Alert emails)', '#/orders': 'the Orders page'}.get(s['goto'], s['goto']))
         if 'type' in s:
             cur.append(f'types “{s["type"]["text"]}”')
-        if 'evaluate' in s and 'alert-tick' in s['evaluate']:
-            cur.append('the server\'s alert check runs')
+        if 'click' in s and isinstance(s['click'], str) and 'alert-trigger-box' in s['click']:
+            cur.append('presses “Jump to 06:59:58, 2 seconds before, and let it fire”; the button counts down; the page reports the email')
+            continue
         if 'evaluate' in s and '__voiceSay' in s['evaluate']:
             cur.append('taps the microphone and says “' + json.loads(s['evaluate'].split('=', 1)[1].strip().rstrip(';')) + '”')
         if isinstance(s.get('click'), dict) and s['click'].get('text'):
@@ -104,9 +105,10 @@ def main():
            'HOW IT WAS RECORDED (say this if asked)',
            'Offline replay: the real interface and engine on the Track 1 records, with the',
            "language model's reading of each message scripted so the recording is",
-           'repeatable; nothing is emailed. The alert email (0:54) is produced by the real',
-           'alert policy; in the live system a timer runs the check every few minutes,',
-           'here the recording triggers the same check twice, and the email is recorded,',
+           'repeatable; nothing is emailed. The alert email (0:07) is produced by the real',
+           'alert policy. Urgent emails go out only between 07:00 and 22:00, so the moment',
+           'is 07:00:00; the Settings page computes it, and the presenter presses "Jump to',
+           '06:59:58" so the real check fires two seconds later. Here the email is recorded,',
            'not delivered. The phone chapter is the real app in a',
            'phone-sized browser. A recording browser has no microphone or speaker, so the',
            'microphone is simulated (the words are fed to the app\'s own voice code) and',
