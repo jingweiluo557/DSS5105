@@ -95,7 +95,7 @@ def main():
            'the desk (home screen, chat, Feasibility page, Activity Log, Settings) and,',
            'from 09:40, on a phone on the factory floor, by voice. No slides. The header',
            'clock follows the day (07:00, 09:40, 10:30, 11:15, 14:30). Captions are burned',
-           'in at the bottom and paced for reading.',
+           'in at the bottom: each one is the line the presenter says.',
            '',
            'WHO SPEAKS WHEN',
            '  SAY          a presenter, as voice-over.',
