@@ -10,10 +10,29 @@
     return data;
   }
   const contact = (c={}) => `<div class="email-contact"><label class="field">Customer<input name="customer" value="${esc(c.customer||'')}" maxlength="160" required></label><label class="field">Contact name<input name="name" value="${esc(c.name||'')}" maxlength="160"></label><label class="field">Email<input name="email" type="email" value="${esc(c.email||'')}" maxlength="254" required></label>${action('remove-contact','Remove')}</div>`;
+  // The next moment an alert email becomes due from the chosen date, and a button that jumps to two seconds before it.
+  const two=n=>String(n).padStart(2,'0');
+  const stamp=iso=>iso.slice(0,10)+' '+iso.slice(11,19);
+  function triggerBox(){
+    const t=model.trigger;
+    if(!t)return '<p class="muted">Looking for the next alert trigger…</p>';
+    if(!t.next)return `<p><strong>Alert trigger:</strong> none in the ${t.days_searched} days from ${esc(t.searched_from)}. Everything urgent in that period has already been emailed.</p>`;
+    const at=t.next.trigger_at,before=new Date(Date.parse(at)-2000+8*3600000).toISOString();
+    const fresh=t.next.items.filter(x=>x.new_at_this_moment).length;
+    return `<p><strong>From the date above, an alert email becomes due at ${esc(stamp(at))}</strong> (${t.next.items.length} urgent item${t.next.items.length===1?'':'s'}${fresh&&fresh<t.next.items.length?', '+fresh+' of them new at that second':''}).</p>
+      <ul class="trigger-items">${t.next.items.map(x=>`<li>${esc(x.title)}${x.new_at_this_moment?' <span class="badge watch">new at this second</span>':''}</li>`).join('')}</ul>
+      <button type="submit" value="trigger" data-at="${esc(at)}">Jump to ${esc(before.slice(11,19))}, 2 seconds before, and let it fire</button>
+      <p class="muted">${esc(t.next.rule)} The button sets the clock to ${esc(before.slice(0,10)+' '+before.slice(11,19))}, waits for ${esc(at.slice(11,19))} and runs the same check the server runs every few minutes. ${t.emails_enabled?(t.mailbox_connected?'Alert emails are on and Outlook is connected: a real email goes to '+esc(t.recipient||'the manager')+'.':'Alert emails are on but Outlook is not connected: nothing can be sent yet.'):'Alert emails are off: it will be a dry run and nothing is sent.'}</p>`;
+  }
+  async function loadTrigger(from){
+    try{model.trigger=await api('alerts/next-trigger'+(from?'?date_from='+encodeURIComponent(from):''));}catch{model.trigger={next:null,days_searched:14,searched_from:from||''};}
+    const box=document.getElementById('alert-trigger-box');if(box)box.innerHTML=triggerBox();
+  }
+  document.addEventListener('change',e=>{if(e.target.name==='business_time'&&e.target.form?.id==='business-clock-form'&&e.target.value)loadTrigger(e.target.value.slice(0,10));});
   function clockForm(){
     const c=model.clock;
     const local=new Date(Date.parse(c.now)+8*3600000).toISOString().slice(0,16);
-    return `<section class="card business-clock-card"><div class="eyebrow">DEMO</div><h2>Business clock</h2><p class="muted">For demonstrations only: moves the business date the whole workspace uses.</p><p><strong id="business-clock-live"></strong></p><form id="business-clock-form"><label class="field">Date and time<input name="business_time" type="datetime-local" value="${local}"></label><div class="actions"><button class="primary" type="submit" value="demo">Start demo clock</button><button type="submit" value="live">Use real time</button></div><div class="clock-morning"><button type="submit" value="morning">Jump to 06:59:59 and run the 07:00 check</button><p class="muted">Sets the clock to one second before 07:00 on the date above, waits for 07:00, then runs the alert check the server runs every few minutes. If alert emails are on and Outlook is connected, a real email goes to the manager; the 07:00 briefing follows on the server's next timer tick, within about a minute.</p></div></form></section>`;
+    return `<section class="card business-clock-card"><div class="eyebrow">DEMO</div><h2>Business clock</h2><p class="muted">For demonstrations only: moves the business date the whole workspace uses.</p><p><strong id="business-clock-live"></strong></p><form id="business-clock-form"><label class="field">Date and time<input name="business_time" type="datetime-local" value="${local}"></label><div class="actions"><button class="primary" type="submit" value="demo">Start demo clock</button><button type="submit" value="live">Use real time</button></div><div class="clock-morning" id="alert-trigger-box">${triggerBox()}</div></form></section>`;
   }
   setInterval(()=>{const el=document.getElementById('business-clock-live');if(el&&window.threadpilotNow)el.textContent=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(window.threadpilotNow());},1000);
   function content() {
@@ -44,7 +63,7 @@
   async function load() {
     const root=document.getElementById('email-settings-content');if(!root||loading)return;
     loading=true;
-    try{model=await api('email/settings');model.alerts=await api('alerts/preview').catch(()=>null);model.alertKpis=await api('alerts/kpis').catch(()=>null);if(root.isConnected)root.innerHTML=content();try{const done=sessionStorage.getItem('threadpilot.alertRun');if(done){sessionStorage.removeItem('threadpilot.alertRun');notice(done);if(typeof toast==='function')toast(done);}}catch{}}
+    try{model=await api('email/settings');model.alerts=await api('alerts/preview').catch(()=>null);model.alertKpis=await api('alerts/kpis').catch(()=>null);if(root.isConnected)root.innerHTML=content();loadTrigger(new Date(Date.parse(model.clock.now)+8*3600000).toISOString().slice(0,10));try{const done=sessionStorage.getItem('threadpilot.alertRun');if(done){sessionStorage.removeItem('threadpilot.alertRun');notice(done);if(typeof toast==='function')toast(done);}}catch{}}
     catch(e){root.innerHTML='<p>Unable to load email settings.</p>'+action('reload','Try again');notice(e.message);}
     finally{loading=false;}
   }
@@ -67,15 +86,15 @@
     if(form.id==='business-clock-form'){
       e.preventDefault();const button=e.submitter;const mode=button?.value==='live'?'live':'demo';
       const value=form.elements.business_time.value;
-      if(button?.value==='morning'){
-        if(!value){notice('Choose a business date first.');return;}
-        const to=model.preferences.manager_email||'the manager';
-        if(!confirm('Set the business clock to '+value.slice(0,10)+' 06:59:59 and run the 07:00 alert check? '+(model.alerts?.emails_enabled?'Alert emails are ON: a real email goes to '+to+' if something new needs a decision.':'Alert emails are OFF: this will be a dry run and nothing is sent.')))return;
+      if(button?.value==='trigger'){
+        const at=button.dataset.at,jump=new Date(Date.parse(at)-2000),to=model.trigger?.recipient||'the manager';
+        const jumpIso=new Date(jump.getTime()+8*3600000).toISOString().slice(0,19)+'+08:00';
+        if(!confirm('Set the business clock to '+stamp(jumpIso)+', 2 seconds before the alert becomes due, and run the check at '+at.slice(11,19)+'? '+(model.trigger?.emails_enabled?(model.trigger.mailbox_connected?'A real email goes to '+to+'.':'Outlook is not connected, so nothing can be sent.'):'Alert emails are OFF: this will be a dry run and nothing is sent.')))return;
         button.disabled=true;
         try{
-          await api('email/clock','PUT',{mode:'demo',version:model.clock.version,target:value.slice(0,10)+'T06:59:59+08:00'});
-          notice('Clock set to 06:59:59. Waiting for 07:00…');
-          await new Promise(r=>setTimeout(r,1600));
+          await api('email/clock','PUT',{mode:'demo',version:model.clock.version,target:jumpIso});
+          for(let left=2;left>0;left--){notice('Clock set to '+stamp(jumpIso)+'. The alert becomes due in '+left+'…');await new Promise(r=>setTimeout(r,1000));}
+          await new Promise(r=>setTimeout(r,500));     // the clock has passed the trigger moment
           const r=await api('alerts/run-now','POST',{});
           try{sessionStorage.setItem('threadpilot.alertRun',r.message||'Alert check finished.');}catch{}
           location.reload();

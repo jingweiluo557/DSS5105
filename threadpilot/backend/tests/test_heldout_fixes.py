@@ -269,3 +269,34 @@ def test_first_real_check_after_switching_on_sends_once_even_after_weeks_of_dry_
     second = tick()
     assert 'p1_email' not in second and second['held_back'] == len(first['p1_email']['keys']) and len(sent) == 1
     assert delivery.ledger.kpis(NOW)['delivered_today'] == 1
+
+
+def test_next_alert_trigger_is_the_midnight_at_which_something_urgent_is_new():
+    """Settings shows when the next alert email becomes due and offers to jump to two seconds before it. The urgent
+    rules read whole days, so that moment is always 00:00:00 of a business date; the hour never matters."""
+    from datetime import datetime, timedelta
+    from app.services import alert_policy
+    from app.workflow_tools import DataTools
+    tools = DataTools(Path(DATA))
+
+    def snapshot_for(day):
+        snap, _ = tools.queue_snapshot(datetime(day.year, day.month, day.day, 9, tzinfo=NOW.tzinfo))
+        for name in ('orders', 'production_log', 'workshops'):
+            snap.setdefault(name, [e.record for e in tools.rows(name + '.csv')])
+        snap['today'] = day.isoformat()
+        return snap
+
+    found = alert_policy.next_trigger(snapshot_for, [], {}, TODAY, NOW.tzinfo)
+    assert found['trigger_at'] == TODAY.isoformat() + 'T00:00:00+08:00'
+    keys = {i['key'] for i in found['items']}
+    assert 'stage_drop:ASSEMBLY' in keys and 1 <= len(keys) <= alert_policy.MAX_P1_PER_DAY
+    assert any(i['new_at_this_moment'] for i in found['items']), 'at least one item was not urgent one second earlier'
+    # the hour does not change what is urgent: one second after midnight and late in the evening give the same items
+    midnight = datetime.fromisoformat(found['trigger_at'])
+    urgent = lambda at: {d.alert.key for d in alert_policy.gate(alert_policy.detect(snapshot_for(at.date()), at), [], at) if d.channel == 'email_now'}
+    assert urgent(midnight) == urgent(midnight + timedelta(seconds=1)) == urgent(midnight + timedelta(hours=21, minutes=30)) == keys
+    assert urgent(midnight - timedelta(seconds=1)) != keys, 'one second before midnight is still the previous business date'
+    # once those are delivered at midnight, the next trigger is a later midnight, with only what is new by then
+    history = [{'key': k, 'tier': 'P1', 'score': 100, 'channel': 'email_now', 'sent_at': found['trigger_at'], 'status': 'accepted'} for k in keys]
+    later = alert_policy.next_trigger(snapshot_for, history, {}, TODAY, NOW.tzinfo)
+    assert later is None or (later['trigger_at'] > found['trigger_at'] and later['trigger_at'].endswith('T00:00:00+08:00') and not ({i['key'] for i in later['items']} & keys))

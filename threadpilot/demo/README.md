@@ -97,14 +97,20 @@ The replay never delivers email. To film the automatic alert email arriving in a
 1. Settings › Mailbox connection: connect Outlook. Settings › Manager delivery preferences: set the recipient and tick
    "Email me at once when something needs a decision today"; save.
 2. Open the inbox beside the app and start the screen recording.
-3. Settings › Business clock: choose the date (1 April 2026 for the course data) and press **Jump to 06:59:59 and run
-   the 07:00 check**. The clock is set to one second before 07:00, the page waits for 07:00 and then runs the same alert
-   check the server's timer runs. The page says what happened: handed to Outlook, a dry run (switch off), or not sent
-   (no mailbox). The 07:00 briefing follows on the server's next timer tick, within about a minute.
-4. Press **Run the check now** (Alert emails card) to show that nothing is sent twice.
+3. Settings › Business clock: choose the date (1 April 2026 for the course data). The card works out the moment an
+   alert email becomes due from that date and lists what it will contain, for example "2026-04-01 00:00:00, 3 urgent
+   items, 1 of them new at that second". Press **Jump to 23:59:58, 2 seconds before, and let it fire**. The clock is
+   set two seconds early, the page counts down, and at the trigger moment it runs the same alert check the server's
+   timer runs. The page then says what happened: handed to Outlook, a dry run (switch off), or not sent (no mailbox).
+4. Press **Run the check now** (Alert emails card) to show that nothing is sent twice. The clock card now shows the
+   next trigger (the following midnight with something new), so the demonstration can be repeated.
 
-Why step 3 sends even after weeks of running: only emails that were really delivered, at or before the current business
-time, count as "already emailed". Dry runs recorded while the switch was off, and rows stamped later than a clock that
-was moved back, do not hold an email back (`alert_policy.relevant_history`). To film it a second time on the same day,
-jump to the same date again: the earlier send is then at 07:00 and counts, so pick the next business date, or accept
-"nothing new" as the honest result.
+**Why the trigger is always 00:00:00.** The urgent rules read whole days: which production days are complete (a stage
+below its range three working days running) and how many working days are left to a due date (an order that will miss
+even in the best case). None reads the hour; quiet hours hold back only the digest items. So what is urgent can change
+only when the business date changes. On the course data, at 2026-04-01 00:00:00 ORD-108 (due 3 April) comes within two
+working days and joins assembly's sixth day below range and ORD-029. `alert_policy.next_trigger` computes this; a test
+checks that one second before midnight gives a different set and that 00:00:01 and 21:30 give the same one.
+
+Why it sends even after weeks of running: only emails that were really delivered, at or before the current business
+time, count as "already emailed" (`alert_policy.relevant_history`).
