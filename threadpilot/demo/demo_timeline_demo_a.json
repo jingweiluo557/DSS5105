@@ -98,32 +98,68 @@
    "optional": true
   },
   {
-   "at": 45.4,
+   "at": 45.2,
    "scroll": {
     "to": "section.home-pulse"
-   }
+   },
+   "say": "Production pulse: assembly is 39% below its normal range, for the sixth working day. Remember that figure."
   },
   {
-   "at": 45.8,
-   "say": "Every chart has an “i”. “Normal” means the previous 8 same weekdays, which cut false alerts from 0.67 to 0.1 a month."
+   "at": 46.0,
+   "hold": 0.2
   },
   {
-   "at": 46.6,
-   "click": "section.home-pulse [data-info=\"pulse\"]"
+   "at": 51.4,
+   "goto": "#/settings",
+   "say": "It also emails her unasked. Alert emails are on, and the server checks every few minutes."
   },
   {
    "at": 52.2,
-   "press": "Escape"
+   "waitFor": {
+    "text": "The email the next check sends",
+    "timeout": 20000
+   }
   },
   {
-   "at": 53.8,
+   "at": 52.6,
    "scroll": {
-    "to": "section.home-briefing"
-   },
-   "say": "The 07:00 briefing is written on a schedule: yesterday, what is at risk, what to decide."
+    "to": "details.alert-mail"
+   }
   },
   {
-   "at": 58.2,
+   "at": 57.2,
+   "say": "The email the next check sends, word for word: three urgent items, the rule behind each, and how to mute it."
+  },
+  {
+   "at": 60.2,
+   "scroll": {
+    "by": 260
+   }
+  },
+  {
+   "at": 64.8,
+   "evaluate": "await fetch('/__replay/alert-tick'); document.querySelector('[data-email=\"reload\"]').click();",
+   "say": "The check runs: one email, three items. The next check sends nothing: no item is emailed twice in 24 hours, at most three urgent items a day."
+  },
+  {
+   "at": 65.6,
+   "waitFor": {
+    "text": "held back",
+    "timeout": 20000
+   }
+  },
+  {
+   "at": 65.9,
+   "scroll": {
+    "to": ".alert-sent"
+   }
+  },
+  {
+   "at": 69.9,
+   "evaluate": "await fetch('/__replay/alert-tick'); document.querySelector('[data-email=\"reload\"]').click();"
+  },
+  {
+   "at": 73.9,
    "hold": 0.2
   }
  ]

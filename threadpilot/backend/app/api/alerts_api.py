@@ -42,7 +42,8 @@ def preview(request: Request):
     body = alert_policy.summarize(decisions)
     body['business_now'] = now.isoformat()
     body['emails_enabled'] = svc.enabled()
-    body['would_send'] = alert_policy.render_email(decisions, now) or None
+    prefs = svc.preferences.read() or {}
+    body['would_send'] = alert_policy.render_email(decisions, now, prefs.get('manager_name', 'Manager')) or None   # shown word for word in Settings
     return body
 
 
