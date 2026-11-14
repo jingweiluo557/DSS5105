@@ -18,7 +18,7 @@ import prompter_lines  # noqa: E402
 from make_prompter import SHORT, clock, srt  # noqa: E402
 
 CHAPTERS = [(0, 'Opening'), (1, '07:00:00 · The automatic alert email'), (4, '07:00 · At the desk: the screen speaks first'), (10, '09:40 · On the floor: a phone, by voice'),
-            (21, '10:30 · Back at the desk: questions'), (25, '11:15 · Can we take it?'), (29, '14:30 · Actions with a safety catch'), (35, 'Honesty under pressure'), (39, 'Close')]
+            (22, '10:30 · Back at the desk: questions'), (26, '11:15 · Can we take it?'), (30, '14:30 · Actions with a safety catch'), (36, 'Honesty under pressure'), (40, 'Close')]
 SHOWS = [(1, 'Automatic alert email to the manager', 'Settings: the email the next check sends, word for word'),
          (2, 'The trigger is computed, not staged', 'clock card: due at 07:00:00, three urgent items, one new today'),
          (3, 'Alerts, rationed and in the daytime', 'the check fires at 07:00:00; one email; items then held back'),
@@ -27,16 +27,16 @@ SHOWS = [(1, 'Automatic alert email to the manager', 'Settings: the email the ne
          (7, 'Action tools with confirmation + audit', 'drafted chase-up, core-task chase, watch, Activity Log'),
          (10, 'Used from a phone', 'home screen, chat and Orders page at phone width'),
          (11, 'Voice input', "microphone tapped; 'O R D zero zero five' becomes ORD-005 and is sent"),
-         (12, 'Spoken reply (you hear it)', 'the answer is said aloud; speaker button keeps replies on'),
-         (15, 'The model does no arithmetic', "'most pieces' computed by a tool over the order book"),
-         (19, 'No send without a tap', "a spoken 'send now' waits in the box"),
-         (22, 'Judgement tool, inspectable', "'was assembly normal?' against the last eight same weekdays"),
-         (23, "Ask, don't guess", 'TrendCart has six orders, so it asks which'),
-         (24, 'Tracing to the rows', "'Show more': planner reading, tool calls, source rows"),
-         (26, 'Feasibility with assumptions, not a yes', '800 hoodies in chat + Feasibility page, same date'),
-         (33, 'Standing watch', 'conditional reminder: notify only if no reply'),
-         (36, 'Says what the data cannot answer', 'revenue question; ORD-218 not on file'),
-         (37, "Checks the manager's premise", "'hasn't moved in a week' true; 'stuck since last week' false")]
+         (12, 'Spoken reply (you hear it, and it is subtitled)', 'the answer is said aloud; speaker button keeps replies on'),
+         (16, 'The model does no arithmetic', "'most pieces' computed by a tool over the order book"),
+         (20, 'No send without a tap', "a spoken 'send now' waits in the box"),
+         (23, 'Judgement tool, inspectable', "'was assembly normal?' against the last eight same weekdays"),
+         (24, "Ask, don't guess", 'TrendCart has six orders, so it asks which'),
+         (25, 'Tracing to the rows', "'Show more': planner reading, tool calls, source rows"),
+         (27, 'Feasibility with assumptions, not a yes', '800 hoodies in chat + Feasibility page, same date'),
+         (34, 'Standing watch', 'conditional reminder: notify only if no reply'),
+         (37, 'Says what the data cannot answer', 'revenue question; ORD-218 not on file'),
+         (38, "Checks the manager's premise", "'hasn't moved in a week' true; 'stuck since last week' false")]
 
 
 def actions(steps):
