@@ -131,7 +131,8 @@ class AlertDelivery:
         data = await asyncio.to_thread(snapshot_loader)
         decisions = await asyncio.to_thread(self.evaluate, data, now, bool(send))
         result = {'business_date': now.date().isoformat(), 'business_now': now.isoformat(), 'send': send, 'recipient': prefs.get('manager_email'),
-                  'held_back': sum(1 for d in decisions if d.channel == 'suppressed' and 'already reported' in d.reason), **{k: len(v) for k, v in alert_policy.summarize(decisions).items() if isinstance(v, list)}}
+                  'held_back': sum(1 for d in decisions if d.channel == 'suppressed' and 'already reported' in d.reason),
+                  'held_until_morning': sum(1 for d in decisions if d.channel == 'suppressed' and d.reason.startswith('held until')), **{k: len(v) for k, v in alert_policy.summarize(decisions).items() if isinstance(v, list)}}
         immediate = [d for d in decisions if d.channel == 'email_now']
         digest = [d for d in decisions if d.channel == 'digest']
         recipient, name = prefs.get('manager_email'), prefs.get('manager_name', 'Manager')

@@ -107,8 +107,10 @@ def alert_tick() -> dict:
     decisions = alert_decisions()
     immediate = [d for d in decisions if d.channel == 'email_now']
     held = sum(1 for d in decisions if d.channel == 'suppressed' and 'already reported' in d.reason)
-    result = {'business_now': NOW.isoformat(), 'email_now': len(immediate), 'sent': False, 'held_back': held, 'recipient': 'manager@example.com',
-              'message': f'Nothing new to email: {held} open item(s) were already emailed and are held back.'}
+    night = sum(1 for d in decisions if d.channel == 'suppressed' and d.reason.startswith('held until'))
+    result = {'business_now': NOW.isoformat(), 'email_now': len(immediate), 'sent': False, 'held_back': held, 'held_until_morning': night, 'recipient': 'manager@example.com',
+              'message': (f'Nothing sent: {night} urgent item(s) are held until 07:00, because urgent emails are not sent at night.' if night else
+                          f'Nothing new to email: {held} open item(s) were already emailed and are held back.')}
     if immediate:
         mail = alert_policy.render_email(immediate, NOW, 'Manager')
         ALERT_LEDGER.record(immediate, NOW, f'replay-{len(ALERT_LOG) + 1}', 'replay')
@@ -410,8 +412,8 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/api/alerts/run-now':      # Settings: "Run the check now" and the 06:59:59 button
             global NOW
             n = self.headers.get('Content-Length'); self.rfile.read(int(n or 0))
-            if NOW.hour == 23 and NOW.minute == 59 and NOW.second >= 55:   # the replay clock does not tick: midnight has passed
-                NOW = (NOW + timedelta(seconds=10)).replace(hour=0, minute=0, second=0)
+            if NOW.hour == 6 and NOW.minute == 59 and NOW.second >= 55:   # the replay clock does not tick: 07:00:00 has arrived
+                NOW = NOW.replace(hour=7, minute=0, second=0)
             return self.send_json(alert_tick())
         if path == '/api/dashboard/tasks':
             n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')
