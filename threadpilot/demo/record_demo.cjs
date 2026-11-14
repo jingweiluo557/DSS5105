@@ -199,6 +199,7 @@ async function chatIdle(page, timeoutMs = 180000) {
   }
   const page = await context.newPage();
   page.on('pageerror', e => console.error('page error:', e.message));
+  page.on('dialog', d => d.accept().catch(() => {}));   // the app asks 'are you sure?' before a send or a clock change: the presenter says yes
   // "@mark <text>" on the page's console is a time mark: written to marks.json (and marks_cut.json after --compress-waits)
   // in recording time, e.g. the moment voice_standin.js starts "speaking" a reply, so the audio can be laid there later
   const marks = [];

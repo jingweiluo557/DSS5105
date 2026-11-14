@@ -118,7 +118,17 @@ def reply(caption):
 # ---------------------------------------------------------------- A. 07:00, at the desk: the screen speaks first
 part('a')
 do(0, 'ThreadPilot, the general manager’s co-pilot. One working day at a knitwear factory, on its own records: 1 April 2026.', goto='#/dashboard')
-say(4.0, '07:00 · Before she asks, the day is on one screen: RED, 8 overdue, assembly below normal for 6 days, 3 decisions.')
+# the automatic alert email: nobody asks for it. Urgent emails go out in the daytime only, so the moment is 07:00:00.
+do(3.0, 'Before she is at her desk, it emails her unasked, in the daytime only. This is the email the next check sends, word for word.', goto='#/settings')
+do(0.8, waitFor={'css': 'details.alert-mail', 'timeout': 20000})
+do(0.4, scroll={'to': 'details.alert-mail'})
+do(6.6, 'When is it due? The clock card works it out from the records: 07:00:00, three urgent items. For the demo we jump to two seconds before.', scroll={'to': '#alert-trigger-box'})
+do(7.4, '06:59:58 … 07:00:00: the check fires. One email to the manager, three urgent items, never sent twice. (Offline replay: recorded, not delivered.)', click='#alert-trigger-box button')
+do(3.2, waitFor={'text': 'Email recorded for', 'timeout': 20000})
+do(0.3, scroll={'to': '#email-notice'})
+do(3.4, scroll={'to': '.alert-sent'})
+do(3.2, goto='#/dashboard')
+say(0.8, '07:00 · She opens the app. Before she asks, the day is on one screen: RED, 8 overdue, assembly below normal for 6 days, 3 decisions.')
 do(0.4, scroll={'to': 'article.decision >> nth=0'})
 say(3.6, 'Each decision has one button. “Review options” runs the queue simulation for ORD-029, which will miss today.')
 do(1.2, click='article.decision >> nth=1 >> text=Review options')
@@ -134,21 +144,7 @@ say(0.4, '“Review & send” opens the preview: to washing, 9 days idle, 3 days
 do(4.8, click={'text': 'Confirm send'}, optional=True, real=True)
 do(0.4, waitAnswer=True, optional=True, real=True)
 say(0.4, 'Sent and logged. Nothing went out before her click.')
-do(3.0, click='[aria-label="Close AI drawer"]', optional=True)
-do(0.8, 'Production pulse: assembly is 39% below its normal range, for the sixth working day. Remember that figure.', scroll={'to': 'section.home-pulse'})
-do(0.8, hold=0.2)
-# the automatic alert email: nobody asks for it; the server's check finds something that needs a decision today
-do(3.6, 'It also emails her unasked. Alert emails are on, and the server checks every few minutes.', goto='#/settings')
-do(0.8, waitFor={'text': 'The email the next check sends', 'timeout': 20000})
-do(0.4, scroll={'to': 'details.alert-mail'})
-say(2.6, 'The email the next check sends, word for word: three urgent items, the rule behind each, and how to mute it.')
-do(3.0, scroll={'by': 260})
-TICK = "await fetch('/__replay/alert-tick'); document.querySelector('[data-email=\"reload\"]').click();"
-do(4.2, 'The check runs: one email, three items. The next check sends nothing: no item is emailed twice in 24 hours, at most three urgent items a day.', evaluate=TICK)
-do(0.8, waitFor={'text': 'held back', 'timeout': 20000})
-do(0.3, scroll={'to': '.alert-sent'})
-do(4.0, evaluate=TICK)
-do(4.0, hold=0.2)
+do(3.4, hold=0.2)
 
 # ---------------------------------------------------------------- B. 09:40, on the floor: a phone, by voice
 part('b')

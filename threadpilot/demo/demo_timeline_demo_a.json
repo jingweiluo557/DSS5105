@@ -14,68 +14,121 @@
   },
   {
    "at": 6.9,
-   "say": "07:00 · Before she asks, the day is on one screen: RED, 8 overdue, assembly below normal for 6 days, 3 decisions."
+   "goto": "#/settings",
+   "say": "Before she is at her desk, it emails her unasked, in the daytime only. This is the email the next check sends, word for word."
   },
   {
-   "at": 7.3,
+   "at": 7.7,
+   "waitFor": {
+    "css": "details.alert-mail",
+    "timeout": 20000
+   }
+  },
+  {
+   "at": 8.1,
+   "scroll": {
+    "to": "details.alert-mail"
+   }
+  },
+  {
+   "at": 16.0,
+   "scroll": {
+    "to": "#alert-trigger-box"
+   },
+   "say": "When is it due? The clock card works it out from the records: 07:00:00, three urgent items. For the demo we jump to two seconds before."
+  },
+  {
+   "at": 25.5,
+   "click": "#alert-trigger-box button",
+   "say": "06:59:58 … 07:00:00: the check fires. One email to the manager, three urgent items, never sent twice. (Offline replay: recorded, not delivered.)"
+  },
+  {
+   "at": 28.7,
+   "waitFor": {
+    "text": "Email recorded for",
+    "timeout": 20000
+   }
+  },
+  {
+   "at": 29.0,
+   "scroll": {
+    "to": "#email-notice"
+   }
+  },
+  {
+   "at": 32.4,
+   "scroll": {
+    "to": ".alert-sent"
+   }
+  },
+  {
+   "at": 35.6,
+   "goto": "#/dashboard"
+  },
+  {
+   "at": 36.4,
+   "say": "07:00 · She opens the app. Before she asks, the day is on one screen: RED, 8 overdue, assembly below normal for 6 days, 3 decisions."
+  },
+  {
+   "at": 36.8,
    "scroll": {
     "to": "article.decision >> nth=0"
    }
   },
   {
-   "at": 14.9,
+   "at": 45.9,
    "say": "Each decision has one button. “Review options” runs the queue simulation for ORD-029, which will miss today."
   },
   {
-   "at": 16.1,
+   "at": 47.1,
    "click": "article.decision >> nth=1 >> text=Review options"
   },
   {
-   "at": 17.7,
+   "at": 48.7,
    "click": "aside.risk-detail button >> nth=0"
   },
   {
-   "at": 18.1,
+   "at": 49.1,
    "waitFor": {
     "text": "Expedite review",
     "timeout": 20000
    }
   },
   {
-   "at": 21.1,
+   "at": 52.1,
    "say": "Moving ORD-029 up saves it 5 days but adds 11 to six other orders, so it recommends keeping the current order."
   },
   {
-   "at": 26.7,
+   "at": 57.7,
    "click": {
     "text": "Close"
    }
   },
   {
-   "at": 27.3,
+   "at": 58.3,
    "goto": "#/dashboard"
   },
   {
-   "at": 28.7,
+   "at": 59.7,
    "scroll": {
     "to": "section.ready-drafts"
    },
    "say": "Drafted before she asks: the two stalled orders already have a chase-up, written from the records."
   },
   {
-   "at": 33.1,
+   "at": 64.1,
    "click": "section.ready-drafts [data-action=\"ready-draft\"] >> nth=0"
   },
   {
-   "at": 33.2,
+   "at": 64.2,
    "waitAnswer": true
   },
   {
-   "at": 34.5,
+   "at": 65.5,
    "say": "“Review & send” opens the preview: to washing, 9 days idle, 3 days overdue. She reads it and confirms."
   },
   {
-   "at": 39.3,
+   "at": 70.3,
    "click": {
     "text": "Confirm send"
    },
@@ -83,83 +136,17 @@
    "real": true
   },
   {
-   "at": 39.7,
+   "at": 70.7,
    "waitAnswer": true,
    "optional": true,
    "real": true
   },
   {
-   "at": 41.4,
+   "at": 72.4,
    "say": "Sent and logged. Nothing went out before her click."
   },
   {
-   "at": 44.4,
-   "click": "[aria-label=\"Close AI drawer\"]",
-   "optional": true
-  },
-  {
-   "at": 45.2,
-   "scroll": {
-    "to": "section.home-pulse"
-   },
-   "say": "Production pulse: assembly is 39% below its normal range, for the sixth working day. Remember that figure."
-  },
-  {
-   "at": 46.0,
-   "hold": 0.2
-  },
-  {
-   "at": 51.4,
-   "goto": "#/settings",
-   "say": "It also emails her unasked. Alert emails are on, and the server checks every few minutes."
-  },
-  {
-   "at": 52.2,
-   "waitFor": {
-    "text": "The email the next check sends",
-    "timeout": 20000
-   }
-  },
-  {
-   "at": 52.6,
-   "scroll": {
-    "to": "details.alert-mail"
-   }
-  },
-  {
-   "at": 57.2,
-   "say": "The email the next check sends, word for word: three urgent items, the rule behind each, and how to mute it."
-  },
-  {
-   "at": 60.2,
-   "scroll": {
-    "by": 260
-   }
-  },
-  {
-   "at": 64.8,
-   "evaluate": "await fetch('/__replay/alert-tick'); document.querySelector('[data-email=\"reload\"]').click();",
-   "say": "The check runs: one email, three items. The next check sends nothing: no item is emailed twice in 24 hours, at most three urgent items a day."
-  },
-  {
-   "at": 65.6,
-   "waitFor": {
-    "text": "held back",
-    "timeout": 20000
-   }
-  },
-  {
-   "at": 65.9,
-   "scroll": {
-    "to": ".alert-sent"
-   }
-  },
-  {
-   "at": 69.9,
-   "evaluate": "await fetch('/__replay/alert-tick'); document.querySelector('[data-email=\"reload\"]').click();"
-  },
-  {
-   "at": 73.9,
+   "at": 75.8,
    "hold": 0.2
   }
  ]
