@@ -127,3 +127,8 @@ captions changed for that chapter, no synthetic voice, and the phone screen left
 is never rendered over the simulated recording. Lay the real recording, with its own sound, into the frame:
 `parts.json` gives the rectangle (`phone_screen_in_1920x1080`: x 693, y 21, 534 × 930) and the chapter's start and end.
 The captions keep the simulated run's timing, so check each against what the phone really shows and says.
+
+Add `--phone-guide` to keep the simulated phone recording and its synthetic voice in the frame as a guide to record
+against (`ThreadPilot_Demo_phone_guide.mp4`). A ribbon across the top of the phone screen says "GUIDE FOOTAGE · replace
+with the live recording"; a real recording laid over the same rectangle covers it. Mute the track from the chapter's
+start to its end when the real recording's sound goes in.
