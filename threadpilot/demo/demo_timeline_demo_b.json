@@ -115,5 +115,8 @@
    "hold": 0.2
   }
  ],
- "initScript": "voice_standin.js"
+ "initScript": [
+  "signin_name.js",
+  "voice_standin.js"
+ ]
 }

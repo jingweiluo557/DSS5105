@@ -18,8 +18,8 @@ import prompter_lines  # noqa: E402
 from make_prompter import SHORT, clock, srt  # noqa: E402
 
 CHAPTERS = [(0, 'Opening'), (1, '07:00:00 · The automatic alert email'), (4, '07:00 · At the desk: the screen speaks first'), (10, '09:40 · On the floor: a phone, by voice'),
-            (22, '10:30 · Back at the desk: questions'), (26, '11:15 · Can we take it?'), (30, '14:30 · Actions with a safety catch'), (36, 'Honesty under pressure'), (40, 'Close')]
-SHOWS = [(1, 'Automatic alert email to the manager', 'Settings: the email the next check sends, word for word'),
+            (22, '10:30 · Back at the desk: questions'), (26, '11:15 · Can we take it?'), (30, '14:30 · Actions with a safety catch'), (36, 'Notes and follow-ups on the order'), (38, 'Honesty under pressure'), (39, 'Close')]
+SHOWS = sorted([(1, 'Automatic alert email to the manager', 'Settings: the email the next check sends, word for word'),
          (2, 'The trigger is computed, not staged', 'clock card: due at 07:00:00, three urgent items, one new today'),
          (3, 'Alerts, rationed and in the daytime', 'the check fires at 07:00:00; one email; items then held back'),
          (4, 'Proactive is a dial', 'decision cards, drafted chase-ups, rationed alerts'),
@@ -35,8 +35,10 @@ SHOWS = [(1, 'Automatic alert email to the manager', 'Settings: the email the ne
          (25, 'Tracing to the rows', "'Show more': planner reading, tool calls, source rows"),
          (27, 'Feasibility with assumptions, not a yes', '800 hoodies in chat + Feasibility page, same date'),
          (34, 'Standing watch', 'conditional reminder: notify only if no reply'),
-         (37, 'Says what the data cannot answer', 'revenue question; ORD-218 not on file'),
-         (38, "Checks the manager's premise", "'hasn't moved in a week' true; 'stuck since last week' false")]
+         (0, 'Named sign-in', 'her name beside the workspace key; it labels what she saves, it is not an account'),
+         (36, 'Management notes on the order', 'a note saved on ORD-005 with author, order and time'),
+         (37, 'Follow-ups, complete and reopen', 'a next action filed by written rules; marked complete; nothing sent'),
+         (38, "Checks the manager's premise", "'hasn't moved in a week' true; 'stuck since last week' false")])
 
 
 def actions(steps):
@@ -50,7 +52,7 @@ def actions(steps):
             continue
         if 'goto' in s:
             cur.append('opens ' + {'#/dashboard': 'the home screen', '#/ai': 'the AI workspace', '#/activity': 'the Activity Log',
-                                   '#/settings': 'Settings (Alert emails)', '#/orders': 'the Orders page'}.get(s['goto'], s['goto']))
+                                   '#/settings': 'Settings (Alert emails)', '#/orders': 'the Orders page'}.get(s['goto'], 'the order page of ' + s['goto'].split('=')[-1] if '#/order?id=' in s['goto'] else s['goto']))
         if 'type' in s:
             cur.append(f'types “{s["type"]["text"]}”')
         if 'click' in s and isinstance(s['click'], str) and 'alert-trigger-box' in s['click']:
@@ -92,7 +94,8 @@ def main():
            f'Length: {clock(a.duration)} (limit 5:00) · file: Video.mp4 in Group19.zip (also ThreadPilot_Demo.mp4)', '=' * W, '',
            'WHAT IT IS',
            'One working day of the general manager, shown entirely in the product: at',
-           'the desk (home screen, chat, Feasibility page, Activity Log, Settings) and,',
+           'the desk (sign-in, home screen, chat, Feasibility page, an order page, Activity Log,',
+           'Settings) and,',
            'from 09:40, on a phone on the factory floor, by voice. No slides. The header',
            'clock follows the day (07:00, 09:40, 10:30, 11:15, 14:30). Captions are burned',
            'in at the bottom: each one is the line the presenter says.',
@@ -123,6 +126,11 @@ def main():
            'by an offline synthetic voice and laid in at the moment the app speaks. A',
            "real phone uses its own, better voice. The video's captions say this.",
            'Business date: 1 April 2026.',
+           '',
+           'Sign-in (0:00): the app’s own box. The name is typed on camera; the key field',
+           'holds a placeholder, masked, because the offline replay checks no key. The name',
+           'is a label on saved records, not a personal account. Notes and follow-ups are',
+           'sorted by written keyword rules, not by the AI model, and send nothing.',
            '',
            'TO MAKE IT STRONGER BEFORE SUBMITTING (optional)',
            '  1. Record the voice-over with the SAY lines below (three voices).',

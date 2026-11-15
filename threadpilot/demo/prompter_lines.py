@@ -18,11 +18,11 @@ P = 'The AI agent speaks (stay silent until it finishes)'
 LIVE = {11: 'Where is O R D zero zero five?', 15: 'Which customer has the most pieces in progress?', 17: 'Chase washing on O R D zero eight three.', 19: 'Send now.'}
 
 DEMO = [
-    (0, 0, W, 'ThreadPilot, the general manager’s co-pilot: one working day at a knitwear factory, on its own records.'),
-    (1, 1, W, 'Before she is at her desk, it emails her unasked, in the daytime only. This is the email, word for word.'),
-    (2, 2, W, 'When is it due? The system works it out: seven o’clock, three urgent items. We jump to two seconds before.'),
+    (0, 0, W, 'ThreadPilot, the general manager’s co-pilot. She signs in with her name, so saved records show who wrote them.'),
+    (1, 1, W, 'Before she is at her desk, it emails her unasked, daytime only. This is the email, word for word.'),
+    (2, 2, W, 'When is it due? The system works it out: seven o’clock, three urgent items. We jump two seconds before.'),
     (3, 3, W, 'Seven o’clock: the check fires. One email to the manager, three urgent items, never sent twice. In this replay it is recorded, not delivered.'),
-    (4, 4, W, 'She opens the app. The day is on one screen: red, 8 overdue, assembly below normal for 6 days, 3 decisions.'),
+    (4, 4, W, 'She opens the app. One screen: red, 8 overdue, assembly below normal for 6 days, 3 decisions.'),
     (5, 5, W, 'Each decision has one button. Review options simulates the queue for order 29.'),
     (6, 6, W, 'Moving order 29 up saves 5 days but adds 11 to six other orders, so it says: keep the order.'),
     (7, 7, W, 'Drafted before she asks: chase-ups for the two stalled orders, written from the records.'),
@@ -53,11 +53,10 @@ DEMO = [
     (33, 33, K, 'Confirmed and sent. On the live system it leaves from her own mailbox.'),
     (34, 34, K, 'A standing watch: tomorrow at ten the server checks, and tells her only if nobody replied.'),
     (35, 35, K, 'Every action is logged, with recipient, orders and subject.'),
-    (36, 36, K, 'Honesty under pressure. A question the data cannot answer:'),
-    (37, 37, K, 'No prices in the records, so no revenue figure. It says what it can answer instead.'),
-    (38, 38, K, 'A wrong premise: the record says order 29 moved today. It says so, and asks before writing.'),
-    (39, 39, K, 'Order 218 is not in the records, and it says so. It never invents one.'),
-    (40, 40, K, 'Every number comes from a tool. It asks instead of guessing. By voice or by hand, nothing leaves without her.'),
+    (36, 36, K, 'On the order she saves a note. It is filed under management notes, with her name, the order and the time.'),
+    (37, 37, K, 'A next action goes to related follow-ups, by written rules, not AI. She marks it complete; nothing is emailed.'),
+    (38, 38, K, 'Honesty under pressure: a wrong premise. The record says order 29 moved today. It says so, and asks before writing.'),
+    (39, 39, K, 'Every number comes from a tool. It asks instead of guessing. By voice or by hand, nothing leaves without her.'),
 ]
 
 # Presentation_Group19.mp4 (Sprint 3, 4:49) — cues from Presentation_Group19.srt

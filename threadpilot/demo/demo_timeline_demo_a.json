@@ -10,125 +10,151 @@
   {
    "at": 0.0,
    "goto": "#/dashboard",
-   "say": "ThreadPilot, the general manager’s co-pilot. One working day at a knitwear factory, on its own records: 1 April 2026."
+   "say": "ThreadPilot, the general manager’s co-pilot. She signs in with her name, so saved records show who wrote them."
   },
   {
-   "at": 6.9,
+   "at": 0.4,
+   "waitFor": {
+    "css": "#access-dialog [name=\"display-name\"]",
+    "timeout": 20000
+   }
+  },
+  {
+   "at": 1.4,
+   "type": {
+    "into": "#access-dialog [name=\"display-name\"]",
+    "text": "Alex Morgan",
+    "cps": 12
+   }
+  },
+  {
+   "at": 2.9,
+   "click": "#access-dialog button[type=\"submit\"]"
+  },
+  {
+   "at": 3.5,
+   "waitFor": {
+    "css": ".sidebar",
+    "timeout": 20000
+   }
+  },
+  {
+   "at": 6.5,
    "goto": "#/settings",
-   "say": "Before she is at her desk, it emails her unasked, in the daytime only. This is the email the next check sends, word for word."
+   "say": "Before she is at her desk, it emails her unasked, in the daytime only. This is the email, word for word."
   },
   {
-   "at": 7.7,
+   "at": 7.3,
    "waitFor": {
     "css": "details.alert-mail",
     "timeout": 20000
    }
   },
   {
-   "at": 8.1,
+   "at": 7.7,
    "scroll": {
     "to": "details.alert-mail"
    }
   },
   {
-   "at": 16.0,
+   "at": 14.1,
    "scroll": {
     "to": "#alert-trigger-box"
    },
-   "say": "When is it due? The clock card works it out from the records: 07:00:00, three urgent items. For the demo we jump to two seconds before."
+   "say": "When is it due? The system works it out: seven o’clock, three urgent items. We jump to two seconds before."
   },
   {
-   "at": 25.5,
+   "at": 21.4,
    "click": "#alert-trigger-box button",
    "say": "06:59:58 … 07:00:00: the check fires. One email to the manager, three urgent items, never sent twice. (Offline replay: recorded, not delivered.)"
   },
   {
-   "at": 28.7,
+   "at": 24.6,
    "waitFor": {
     "text": "Email recorded for",
     "timeout": 20000
    }
   },
   {
-   "at": 29.0,
+   "at": 24.9,
    "scroll": {
     "to": "#email-notice"
    }
   },
   {
-   "at": 32.4,
+   "at": 27.4,
    "scroll": {
     "to": ".alert-sent"
    }
   },
   {
-   "at": 35.6,
+   "at": 29.8,
    "goto": "#/dashboard"
   },
   {
-   "at": 36.4,
-   "say": "07:00 · She opens the app. Before she asks, the day is on one screen: RED, 8 overdue, assembly below normal for 6 days, 3 decisions."
+   "at": 30.6,
+   "say": "She opens the app. The day is on one screen: red, 8 overdue, assembly below normal for 6 days, 3 decisions."
   },
   {
-   "at": 36.8,
+   "at": 31.0,
    "scroll": {
     "to": "article.decision >> nth=0"
    }
   },
   {
-   "at": 45.9,
+   "at": 38.2,
    "say": "Each decision has one button. “Review options” runs the queue simulation for ORD-029, which will miss today."
   },
   {
-   "at": 47.1,
+   "at": 39.4,
    "click": "article.decision >> nth=1 >> text=Review options"
   },
   {
-   "at": 48.7,
+   "at": 41.0,
    "click": "aside.risk-detail button >> nth=0"
   },
   {
-   "at": 49.1,
+   "at": 41.4,
    "waitFor": {
     "text": "Expedite review",
     "timeout": 20000
    }
   },
   {
-   "at": 52.1,
+   "at": 44.4,
    "say": "Moving ORD-029 up saves it 5 days but adds 11 to six other orders, so it recommends keeping the current order."
   },
   {
-   "at": 57.7,
+   "at": 50.0,
    "click": {
     "text": "Close"
    }
   },
   {
-   "at": 58.3,
+   "at": 50.6,
    "goto": "#/dashboard"
   },
   {
-   "at": 59.7,
+   "at": 52.0,
    "scroll": {
     "to": "section.ready-drafts"
    },
    "say": "Drafted before she asks: the two stalled orders already have a chase-up, written from the records."
   },
   {
-   "at": 64.1,
+   "at": 56.4,
    "click": "section.ready-drafts [data-action=\"ready-draft\"] >> nth=0"
   },
   {
-   "at": 64.2,
+   "at": 56.5,
    "waitAnswer": true
   },
   {
-   "at": 65.5,
+   "at": 57.8,
    "say": "“Review & send” opens the preview: to washing, 9 days idle, 3 days overdue. She reads it and confirms."
   },
   {
-   "at": 70.3,
+   "at": 62.6,
    "click": {
     "text": "Confirm send"
    },
@@ -136,18 +162,19 @@
    "real": true
   },
   {
-   "at": 70.7,
+   "at": 63.0,
    "waitAnswer": true,
    "optional": true,
    "real": true
   },
   {
-   "at": 72.4,
+   "at": 64.7,
    "say": "Sent and logged. Nothing went out before her click."
   },
   {
-   "at": 75.8,
+   "at": 68.1,
    "hold": 0.2
   }
- ]
+ ],
+ "initScript": "signin_prompt.js"
 }

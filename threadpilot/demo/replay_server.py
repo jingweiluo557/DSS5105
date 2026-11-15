@@ -20,7 +20,7 @@ import types
 from datetime import datetime, timedelta
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'backend'))
@@ -46,11 +46,14 @@ from app.prediction.aft import LeadTimeModel  # noqa: E402
 from app.schemas import ChatRequest, Classification, Intent, Slots  # noqa: E402
 from app.services import alert_policy, home_service  # noqa: E402
 from app.services.ready_drafts import recently_chased  # noqa: E402
+from app.services.record_category import category as record_category  # noqa: E402
+from app.services.record_identity import clean_author  # noqa: E402
 from app.services.queue_engine import QueueAnalysis  # noqa: E402
 from app.workflow_engine import WorkflowEngine  # noqa: E402
 from app.workflow_store import WorkflowStore  # noqa: E402
 from app.workflow_tools import DataTools  # noqa: E402
 
+RECORDS = []   # management notes and follow-ups saved during the replay
 PACE = float(os.environ.get('REPLAY_STEP_PACE', '0') or 0)   # seconds between streamed steps; 0 = as fast as the server runs
 NOW = datetime.fromisoformat(os.environ.get('REPLAY_NOW', '2026-04-01T09:00:00+08:00'))
 tools = DataTools(ROOT / 'data')
@@ -338,6 +341,9 @@ class Handler(SimpleHTTPRequestHandler):
 
     def route(self, path):
         if path == '/api/snapshot': return snapshot
+        if path == '/api/v1/management-records':   # shared notes and follow-ups, held in memory for the replay
+            order = (parse_qs(urlparse(self.path).query).get('order_id') or [None])[0]
+            return {'records': [dict(r, category=record_category(r['kind'], r)) for r in RECORDS if not order or r['order_id'] == order], 'can_delete': True}
         if path == '/api/email/clock': return {'now': NOW.isoformat(), 'mode': 'legacy', 'version': 1, 'schedule_start_day': data['today']}
         if path == '/api/scheduling/risk': return risk
         if path == '/api/dashboard/home':   # recomputed, so a chase sent from "Drafted for you" leaves the list, as live
@@ -415,6 +421,17 @@ class Handler(SimpleHTTPRequestHandler):
             if NOW.hour == 6 and NOW.minute == 59 and NOW.second >= 55:   # the replay clock does not tick: 07:00:00 has arrived
                 NOW = NOW.replace(hour=7, minute=0, second=0)
             return self.send_json(alert_tick())
+        if path == '/api/v1/management-records/notes':   # the live categorisation rules and name header, on an in-memory list
+            n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')
+            text = str(body.get('text', '')).strip()
+            if not text: return self.send_json({'detail': 'Enter a note.'}, 422)
+            rec = {'id': 'manual:' + str(body.get('request_id', len(RECORDS))), 'order_id': body.get('order_id'), 'kind': 'note', 'status': 'saved',
+                   'created_at': NOW.isoformat(), 'text': text, 'visibility': 'internal', 'category': body.get('category', 'auto'), 'report_id': None}
+            rec['category'] = record_category('note', rec)
+            author = clean_author(self.headers.get('X-ThreadPilot-Name', ''))
+            if author: rec['author'] = author
+            if not any(r['id'] == rec['id'] for r in RECORDS): RECORDS.insert(0, rec)
+            return self.send_json({'id': rec['id'], 'status': 'saved', 'kind': 'note', 'category': rec['category']})
         if path == '/api/dashboard/tasks':
             n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')
             TASKS.insert(0, {'id': 'manual:' + str(body.get('id', len(TASKS))), 'order_id': None, 'title': body.get('title', ''), 'origin': 'manual', 'done': False, 'version': 1, 'reasons': []})
@@ -423,6 +440,20 @@ class Handler(SimpleHTTPRequestHandler):
             oid = path.split('/')[4]
             return self.send_json({'id': 'draft-1', 'review_id': 'review-1', 'order_id': oid, 'version': 1, 'analysis': queue.expedite(oid), 'candidate': '', 'status': 'ready', 'instruction': '', 'text': '', 'reviewer': '', 'decision': 'save', 'stale': False})
         return self.send_json({'error': {'code': 'NOT_FOUND', 'message': 'replay'}}, 404)
+
+    def do_PATCH(self):   # a manual follow-up marked complete, or reopened (the live rule: only follow-ups)
+        rid = unquote(urlparse(self.path).path.rsplit('/', 1)[-1])
+        n = self.headers.get('Content-Length'); body = json.loads(self.rfile.read(int(n or 0)) or b'{}')
+        for r in RECORDS:
+            if r['id'] == rid and record_category(r['kind'], r) == 'follow_up':
+                r['status'] = 'completed' if body.get('completed') else 'saved'
+                return self.send_json({'status': r['status']})
+        return self.send_json({'detail': 'Manual follow-up not found.'}, 404)
+
+    def do_DELETE(self):
+        rid = unquote(urlparse(self.path).path.rsplit('/', 1)[-1])
+        RECORDS[:] = [r for r in RECORDS if r['id'] != rid]
+        return self.send_json({'status': 'deleted'})
 
     def do_PUT(self):
         global NOW
