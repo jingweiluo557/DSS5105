@@ -10,6 +10,8 @@ from ..business_clock import BusinessClock, LOCAL
 from ..db.base import Base
 from ..models.data_record import Order
 from ..sql_workflow_store import actions
+from .record_category import category
+from .record_identity import record_author
 
 journal = sa.Table('order_status_journal', Base.metadata,
     sa.Column('id', sa.String(64), primary_key=True),
@@ -59,20 +61,24 @@ class OrderRecords:
 
     def save(self, action, session_id, now):
         kind = 'briefing_watch' if action.kind == 'reminder' else 'note'
+        payload = dict(action.payload)
+        payload['category'] = category(kind, payload)
+        if record_author.get():
+            payload['author'] = record_author.get()
         with self.database.engine.begin() as db:
             if kind == 'briefing_watch':
                 start_history(db, now)
             insert = mysql_insert if db.dialect.name == 'mysql' else sqlite_insert
             stmt = insert(actions).values(id=action.id, session_id=session_id, kind=kind,
-                order_id=action.order_id, payload=json.dumps(action.payload, ensure_ascii=False),
+                order_id=action.order_id, payload=json.dumps(payload, ensure_ascii=False),
                 status='pending' if kind == 'briefing_watch' else 'saved', created_at=now.isoformat())
             db.execute(stmt.on_duplicate_key_update(id=actions.c.id) if db.dialect.name == 'mysql'
                        else stmt.on_conflict_do_nothing())
             stored = db.execute(sa.select(actions).where(actions.c.id == action.id)).mappings().one()
             if (stored.session_id != session_id or stored.order_id != action.order_id or
-                    stored.kind != kind or json.loads(stored.payload) != action.payload):
+                    stored.kind != kind or json.loads(stored.payload) != payload):
                 raise ValueError('This confirmation was already used for another record.')
-        return {'id': action.id, 'status': 'saved', 'kind': kind}
+        return {'id': action.id, 'status': 'saved', 'kind': kind, 'category': payload['category']}
 
     def confirmed(self, action_id, session_id):
         with self.database.engine.connect() as db:
@@ -105,9 +111,22 @@ class OrderRecords:
             q = q.where(actions.c.order_id == order_id)
         with self.database.engine.connect() as db:
             rows = db.execute(q.order_by(actions.c.created_at.desc(), actions.c.id)).mappings()
-            return [dict(id=r.id, order_id=r.order_id, kind=r.kind, status=r.status,
-                         created_at=r.created_at, **json.loads(r.payload),
-                         report_id=r.receipt) for r in rows]
+            result = []
+            for r in rows:
+                payload = json.loads(r.payload)
+                payload['category'] = category(r.kind, payload)
+                result.append(dict(payload, id=r.id, order_id=r.order_id, kind=r.kind,
+                                   status=r.status, created_at=r.created_at, report_id=r.receipt))
+            return result
+
+    def complete(self, record_id, completed):
+        with self.database.engine.begin() as db:
+            row = db.execute(sa.select(actions).where(actions.c.id == record_id,
+                actions.c.kind == 'note', actions.c.status != 'deleted').with_for_update()).mappings().first()
+            if row is None or category(row.kind, json.loads(row.payload)) != 'follow_up':
+                return False
+            db.execute(actions.update().where(actions.c.id == record_id).values(status='completed' if completed else 'saved'))
+            return True
 
     def evaluate(self, now):
         with self.database.engine.begin() as db:

@@ -6,7 +6,7 @@ import secrets
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import AsyncIterator
+from typing import AsyncIterator, Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -76,6 +76,11 @@ class ManualNote(BaseModel):
     order_id: str = Field(pattern=r'^ORD-\d{3}$')
     text: str = Field(min_length=1, max_length=2000)
     request_id: str = Field(pattern=r'^[a-f0-9-]{36}$')
+    category: Literal['auto', 'note', 'follow_up'] = 'auto'
+
+
+class RecordCompletion(BaseModel):
+    completed: bool
 
 
 class ReplyEvent(BaseModel):
@@ -202,7 +207,7 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
             raise HTTPException(422, 'Enter a note.')
         now = workflow.clock()
         action = PendingAction(id='manual:' + body.request_id, kind='note', order_id=body.order_id,
-            payload={'text': text, 'visibility': 'internal'}, preview=text, created_at=now)
+            payload={'text': text, 'visibility': 'internal', 'category': body.category}, preview=text, created_at=now)
         return workflow.order_records.save(action, 'manual', now)
 
     @app.get('/api/v1/management-records', tags=['Workflow'])
@@ -217,6 +222,14 @@ def install_workflow_routes(app: FastAPI, data: Path) -> None:
         if not app.state.workflow.order_records.delete(record_id):
             raise HTTPException(404, 'Management record not found.')
         return {'status': 'deleted'}
+
+    @app.patch('/api/v1/management-records/{record_id}', tags=['Workflow'])
+    def complete_management_record(record_id: str, body: RecordCompletion, request: Request):
+        from .api.security import require_manager
+        require_manager(request)
+        if not app.state.workflow.order_records.complete(record_id, body.completed):
+            raise HTTPException(404, 'Manual follow-up not found.')
+        return {'status': 'completed' if body.completed else 'saved'}
 
     @app.get('/api/v1/workflow/notifications/{session_id}', tags=['Workflow'])
     async def notifications(session_id: str) -> list[dict]:

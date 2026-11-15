@@ -35,7 +35,7 @@ function go(path){location.hash='/'+path}
 function head(title,sub,actions=''){return `<div class="page-head"><div><div class="eyebrow">THREADPILOT / MANAGEMENT WORKSPACE</div><h1>${title}</h1><p class="muted">${sub}</p></div><div class="actions">${actions}</div></div>`}
 function orderActions(o){return `${link('evidence','View evidence',o.id)}${btn('ask-order','Ask AI','',idAttr(o))}${link('draft','Draft chase-up',o.id,'button primary')}`}
 const nav=[['dashboard','◫','Dashboard'],['orders','▤','Orders'],['exceptions','△','Exceptions'],['risk','↗','Risk Orders'],['feasibility','▦','Feasibility'],['ai','✧','AI Co-Pilot'],['messages','▧','Messages & Watches'],['activity','◷','Activity Log'],['settings','⚙','Settings']];
-function shell(content){const active={order:'orders',evidence:'orders',draft:'messages',result:'feasibility'}[route]||route;return `<aside class="sidebar"><a href="#/cover" class="brand"><span class="brandmark">↝</span>ThreadPilot</a><nav>${nav.map(([r,i,t])=>`<a href="#/${r}" class="${active===r?'active':''}" ${active===r?'aria-current="page"':''}><span class="nav-icon">${i}</span>${t}</a>`).join('')}</nav><footer><strong>Track 1 Apparel</strong><br><span class="muted">General Manager workspace</span><br><span class="badge spaced">LOCAL DEMO</span></footer></aside><main class="app-main"><header class="topbar">${btn('menu','☰','mobile-menu','aria-label="Toggle navigation"')}<form class="search-form" id="global-search"><span>⌕</span><label class="screenreader" for="global-query">Search orders or customers</label><input id="global-query" name="query" class="search" placeholder="Search orders or customers…" required></form><div class="toolbar"><small class="freshness">Data · ${SNAPSHOT}</small>${btn('ai-drawer','✧ Ask AI','primary')}<a class="button" href="#/messages" aria-label="Open messages">♧</a><span class="language badge">EN</span><span class="avatar">JW</span></div></header><div class="demo-banner">Interactive local demo · 120 source orders · Business date Apr 01, 2026 · AI and delivery are local simulations</div><div class="page">${content}</div></main>${btn('ai-drawer','✧ Ask AI','primary floating')}`}
+function shell(content){const active={order:'orders',evidence:'orders',draft:'messages',result:'feasibility'}[route]||route;return `<aside class="sidebar"><a href="#/cover" class="brand"><span class="brandmark">↝</span>ThreadPilot</a><nav>${nav.map(([r,i,t])=>`<a href="#/${r}" class="${active===r?'active':''}" ${active===r?'aria-current="page"':''}><span class="nav-icon">${i}</span>${t}</a>`).join('')}</nav><footer><strong>Track 1 Apparel</strong><br><span class="muted">General Manager workspace</span><br><span class="badge spaced">LOCAL DEMO</span></footer></aside><main class="app-main"><header class="topbar">${btn('menu','☰','mobile-menu','aria-label="Toggle navigation"')}<form class="search-form" id="global-search"><span>⌕</span><label class="screenreader" for="global-query">Search orders or customers</label><input id="global-query" name="query" class="search" placeholder="Search orders or customers…" required></form><div class="toolbar"><small class="freshness">Data · ${SNAPSHOT}</small>${btn('ai-drawer','✧ Ask AI','primary')}<a class="button" href="#/messages" aria-label="Open messages">♧</a><span class="language badge">EN</span><span class="avatar" title="${esc(window.threadpilotName?.()||'Workspace member')}">${esc((window.threadpilotName?.()||'GM').slice(0,2).toUpperCase())}</span></div></header><div class="demo-banner">Interactive local demo · 120 source orders · Business date Apr 01, 2026 · AI and delivery are local simulations</div><div class="page">${content}</div></main>${btn('ai-drawer','✧ Ask AI','primary floating')}`}
 function cover(){return `<main class="cover"><section class="cover-left"><a class="brand" href="#/cover"><span class="brandmark">↝</span>ThreadPilot</a><div class="eyebrow">See clearly. Decide confidently.</div><h1>General Manager’s<br><em>AI Co-Pilot</em></h1><div class="actions">${link('dashboard','Enter today’s dashboard ↗','','button primary')}</div><div class="grid three spaced"><div><strong>01</strong><br><small>Spot the risk</small></div><div><strong>02</strong><br><small>See the evidence</small></div><div><strong>03</strong><br><small>Act with confidence</small></div></div><footer><strong>Track 1 Apparel</strong><br><small>Data updated ${SNAPSHOT}<br>Local demonstration · English interface</small></footer></section><section class="cover-right"><div class="hero-photo"><img src="assets/factory-hero.png" alt="Bright apparel production workshop"><div class="float-label">✧ Your morning brief is ready</div><div class="float-label">✓ Evidence behind every decision</div></div><div class="cover-caption"><h2>A calmer view of a complex day.</h2><p class="muted">From the production floor to your next decision.</p></div></section></main>`}
 function composer(){return `<form class="composer" data-form="chat"><textarea aria-label="Ask ThreadPilot" name="visible-question" placeholder="Ask about an order, a risk, or your next move…" required maxlength="1500"></textarea><div class="actions"><small>Context · ${esc(state.selected)} · Demo</small><div class="actions">${btn('voice','♩','','aria-label="Voice input"')}<button class="primary" type="submit">Send ↗</button></div></div></form>`}
 function messagesPage(){return head('Messages & standing watches','Keep follow-ups visible, with human review at every external action.',btn('watch','Create watch','primary',idAttr(current())))+`<div class="tabs">${['records','watches','messages','assessments'].map(t=>btn('message-tab',({records:'Management records',watches:'Standing watches',messages:'Demo receipts',assessments:'Saved assessments'})[t],messageTab===t?'active':'',`data-tab="${t}"`)).join('')}</div>${messageTab==='records'?'<section class="card" data-management-list>Loading management records…</section>':messageTab==='watches'?`<div class="callout">Watches run only when you click “Check now” in this local demo. No background scheduler or notifications are connected.</div><div class="grid equal">${state.watches.map(w=>`<section class="card"><div class="section-heading"><h2>${w.order}</h2><span class="badge ${w.active?'watch':''}">${w.active?'Active':'Paused'}</span></div><p>Alert when inactivity reaches ${w.threshold} calendar days.</p><p class="muted">${esc(w.last||'Not checked yet')}</p><div class="actions">${btn('toggle-watch',w.active?'Pause':'Resume','',`data-id="${w.id}"`)}${btn('check-watch','Check now','',`data-id="${w.id}" ${w.active?'':'disabled'}`)}${link('order','View order',w.order)}</div></section>`).join('')||'<section class="card empty"><h2>No standing watches yet.</h2><p>Create a watch from any order or risk explanation.</p></section>'}</div>`:messageTab==='messages'?`<div class="grid equal">${state.messages.map(m=>`<section class="card"><span class="badge watch">Simulated receipt</span><h2 class="spaced">${m.order}</h2><p>${esc(m.recipient)} · ${m.channel}</p><p class="note">${esc(m.text)}</p><small>${m.id} · ${formatWorkspaceTime(m.time)}</small><div class="actions spaced">${link('activity','View audit record')}</div></section>`).join('')||'<section class="card empty">No confirmed demo messages.</section>'}</div>`:`<div class="grid equal">${state.assessments.map(a=>`<section class="card"><h2>${a.qty} ${a.category}</h2><p>Requested ${date(a.due)} · Estimated ${date(a.estimate)}</p><small>${a.outside?'External scenario allowed':'Internal only'}</small></section>`).join('')||'<section class="card empty">No saved assessments.</section>'}</div>`}`}
@@ -64,7 +64,16 @@ case 'exception-filter':$$('#exception-list button').forEach(x=>x.hidden=b.datas
 case 'reset-feasibility':feasibility={category:'TOPS',qty:800,due:'2026-04-25',outside:true};render();break;
 case 'save-assessment':modal('Save this assessment?',`<p>${feasibility.qty} ${feasibility.category}<br>Requested ${date(feasibility.due)}<br>Estimated ${date(estimate())}</p><p>This saves a scenario, without assigning a workshop.</p>`,'confirm-assessment');break;
 case 'confirm-assessment':state.assessments.unshift({...feasibility,estimate:estimate()});audit('Assessment saved','Saved a demo planning scenario',state.assessments[0]);closeOverlay();toast('Assessment saved to Messages & Watches.');break;
-case 'note':modal('Add an order note',`<label>Note for ${id}<textarea id="note-text" maxlength="2000" placeholder="Record a verified update…"></textarea></label>`,'confirm-note','Save note');pending=id;break;
+case 'note':modal('Add a management record',`<p>Order ${esc(id)} · Recorded by ${esc(window.threadpilotName?.()||'Name not provided')}</p><label>Note or follow-up<textarea id="note-text" maxlength="2000" placeholder="Record an update, or describe a next action…"></textarea></label><label>Save under<select id="note-category"><option value="auto">Automatic — based on the content</option><option value="note">Management notes</option><option value="follow_up">Related follow-ups</option></select></label><p class="muted">Updates and decisions stay in notes. Clear next actions go to follow-ups. Saving a follow-up does not schedule a reminder or send an email.</p>`,'confirm-note','Save record');pending=id;break;
+case 'complete-record': {
+  b.disabled=true;
+  try {
+    const r=await window.threadpilotFetch(window.THREADPILOT_API_BASE+'/api/v1/management-records/'+encodeURIComponent(id),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({completed:b.dataset.completed!=='true'})});
+    if(!r.ok)throw Error('Could not update follow-up. Manager access is required.');
+    await loadManagementRecords();
+  } catch(error){toast(error.message);b.disabled=false}
+  break;
+}
 case 'delete-record': {
   const followUp=b.dataset.label==='Morning briefing follow-up';
   if(!window.confirm('Delete this '+b.dataset.label.toLowerCase()+' for '+b.dataset.order+'?'+(followUp?' Pending checks will stop. Previously generated briefings will be kept.':'')))break;
@@ -78,6 +87,7 @@ case 'delete-record': {
   break;
 }
 case 'confirm-note': await saveManagementNote(b); break;
+case 'management-filter': managementCategory=b.dataset.category||''; await loadManagementRecords(); break;
 case 'watch':if(find(id||state.selected)?.status==='Complete'){toast('This order is complete. Choose an active order to create a watch.');break}modal('Review standing watch',`<p>Order ${id||state.selected}</p><label>Alert after inactivity reaches<select id="watch-threshold">${[1,2,3,5,7].map(n=>`<option ${String(n)===state.settings.idle?'selected':''} value="${n}">${n} calendar days</option>`).join('')}</select></label><p class="callout">Manual checks only. No background alerts or external messages.</p>`,'confirm-watch','Confirm watch');pending=id||state.selected;break;
 case 'confirm-watch':{const w={id:'W-'+Date.now(),order:pending,threshold:Number($('#watch-threshold').value),active:true};state.watches.unshift(w);audit('Watch created','Created a local standing watch',w);closeOverlay();if(route==='messages')render();toast('Watch created. Review it in Messages & Watches.');break}
 case 'toggle-watch':{const w=state.watches.find(x=>x.id===id);w.active=!w.active;audit('Watch updated',`${w.order} watch ${w.active?'resumed':'paused'}`,{...w});render();break}
@@ -99,6 +109,7 @@ case 'confirm-voice':{const q=$('#voice-transcript').value.trim();if(!q){toast('
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay();if(e.key==='Tab'&&$('#overlay .overlay')){const list=$$('#overlay button, #overlay a, #overlay input, #overlay select, #overlay textarea').filter(x=>!x.disabled&&x.offsetParent!==null);const first=list[0],last=list.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}});
 window.addEventListener('hashchange',render);
 
+let managementCategory='';
 async function loadManagementRecords() {
   const panels=[...document.querySelectorAll('[data-management-list]')];
   if(!panels.length)return;
@@ -110,14 +121,18 @@ async function loadManagementRecords() {
     for(const panel of panels){
       if(!panel.isConnected)continue;
       const kind=panel.dataset.managementList;
-      const matching=records.filter(item=>!kind||item.kind===kind);
-      panel.innerHTML=matching.map(item=>{
-        const label=item.kind==='note'?'Internal note':'Morning briefing follow-up';
-        const status={pending:'Pending check',changed:'Checked · status or stage changed',no_change:'No change recorded',unverified:'Incomplete history'}[item.status]||'Saved';
+      const selected=kind||managementCategory;
+      const matching=records.filter(item=>!selected||(item.category|| (item.kind==='note'?'note':'follow_up'))===selected);
+      const filters=kind?'':'<div class="tabs" aria-label="Management record categories">'+[['','All records'],['note','Management notes'],['follow_up','Related follow-ups']].map(([key,label])=>'<button type="button" data-action="management-filter" data-category="'+key+'" aria-pressed="'+(selected===key)+'" class="'+(selected===key?'active':'')+'">'+label+'</button>').join('')+'</div>';
+      panel.innerHTML=filters+(matching.map(item=>{
+        const follow=item.category==='follow_up';
+        const label=item.kind==='briefing_watch'?'Morning briefing follow-up':follow?'Follow-up task':'Management note';
+        const status={pending:'Pending check',changed:'Checked · status or stage changed',no_change:'No change recorded',unverified:'Incomplete history',completed:'Completed'}[item.status]||(follow?'Open · manual follow-up':'Saved');
         const summary=item.kind==='note'?item.text:'Observe '+item.observation_day+' · Report '+item.report_day;
         const remove=can_delete?'<button type="button" class="record-delete" data-action="delete-record" data-id="'+esc(item.id)+'" data-label="'+esc(label)+'" data-order="'+esc(item.order_id)+'" aria-label="Delete '+esc(label)+' for '+esc(item.order_id)+'" title="Delete record">×</button>':'';
-        return '<article>'+remove+'<strong>'+esc(label)+'</strong> · '+link('order',item.order_id,item.order_id)+'<p class="note">'+esc(summary)+'</p><small>'+esc(status)+(item.report_id?' · <a href="briefing.html?report='+encodeURIComponent(item.report_id)+'">View briefing</a>':'')+' · '+esc(formatWorkspaceTime(item.created_at))+'</small></article>';
-      }).join('')||'<p class="muted">No shared records yet.</p>';
+        const complete=can_delete&&follow&&item.kind==='note'?'<button type="button" data-action="complete-record" data-id="'+esc(item.id)+'" data-completed="'+(item.status==='completed')+'">'+(item.status==='completed'?'Reopen':'Mark complete')+'</button>':'';
+        return '<article>'+remove+'<strong>'+esc(label)+'</strong> · '+link('order',item.order_id,item.order_id)+'<p class="note">'+esc(summary)+'</p><small>'+esc(status)+(item.report_id?' · <a href="briefing.html?report='+encodeURIComponent(item.report_id)+'">View briefing</a>':'')+' · '+esc(item.author||'Author not recorded')+' · '+esc(formatWorkspaceTime(item.created_at))+'</small>'+complete+'</article>';
+      }).join('')||'<p class="muted">'+(kind==='note'?'No management notes for this order.':kind==='follow_up'?'No follow-up tasks or morning briefing watches for this order.':'No shared management records in this category.')+'</p>');
     }
   } catch { for(const panel of panels)if(panel.isConnected)panel.textContent='Could not load shared records. Refresh to retry.'; }
 }
@@ -132,11 +147,12 @@ async function saveManagementNote(button) {
   try {
     const response=await window.threadpilotFetch(window.THREADPILOT_API_BASE+'/api/v1/management-records/notes',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({request_id:requestId,order_id:order,text})
+      body:JSON.stringify({request_id:requestId,order_id:order,text,category:$('#note-category')?.value||'auto'})
     });
     if(!response.ok)throw Error(response.status===403?'Manager access required.':'Could not save the note.');
+    const result=await response.json();
     if(button.isConnected){closeOverlay();render();}
-    toast('Note saved.');
+    toast(result.category==='follow_up'?'Saved to Related follow-ups.':'Saved to Management notes.');
   } catch(error) {
     toast(error.message);
     button.disabled=false;

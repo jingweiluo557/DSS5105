@@ -387,6 +387,54 @@
             }
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "Workflow"
+        ],
+        "summary": "Complete Management Record",
+        "operationId": "complete_management_record_api_v1_management_records__record_id__patch",
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Record Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordCompletion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/workflow/notifications/{session_id}": {
@@ -3655,6 +3703,16 @@
             "type": "string",
             "pattern": "^[a-f0-9-]{36}$",
             "title": "Request Id"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "note",
+              "follow_up"
+            ],
+            "title": "Category",
+            "default": "auto"
           }
         },
         "type": "object",
@@ -3816,6 +3874,19 @@
           "queried_at"
         ],
         "title": "QueryEvidence"
+      },
+      "RecordCompletion": {
+        "properties": {
+          "completed": {
+            "type": "boolean",
+            "title": "Completed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "completed"
+        ],
+        "title": "RecordCompletion"
       },
       "RecordRead": {
         "properties": {

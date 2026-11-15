@@ -43,12 +43,14 @@ def test_manager_chat_records_and_briefing(business_database, monkeypatch, tmp_p
             return preview['confirmation_id']
         for oid in ('ORD-005', 'ORD-017'):
             save(f'如果今天{oid}状态没更新，明天的晨报告诉我。')
+        client.headers['X-ThreadPilot-Name'] = 'Test%20Manager'
         save('给 ORD-005 备注下，客户需求量有变化。')
         url = '/api/v1/management-records'
         assert len(client.get(url).json()['records']) == 3
         order_rows = client.get(url, params={'order_id':'ORD-005'}).json()['records']
         assert len(order_rows) == 2
         assert next(r['text'] for r in order_rows if r['kind']=='note') == '客户需求量有变化。'
+        assert next(r['author'] for r in order_rows if r['kind']=='note') == 'Test Manager'
         with business_database.sessions.begin() as session:
             order = session.scalar(sa.select(Order).where(Order.order_id=='ORD-017'))
             order.current_stage = 'PACKING' if order.current_stage != 'PACKING' else 'WASHING'

@@ -104,7 +104,12 @@ def create_app() -> FastAPI:
             if role is None:
                 return JSONResponse(status_code=401, content={'error': {'code': 'UNAUTHORIZED', 'message': 'Application access token required.'}})
             request.state.role = role
-        response = await call_next(request)
+        from .services.record_identity import record_author, clean_author
+        author_context = record_author.set(clean_author(request.headers.get('X-ThreadPilot-Name', '')))
+        try:
+            response = await call_next(request)
+        finally:
+            record_author.reset(author_context)
         response.headers['X-Request-ID'] = request.state.request_id
         # Revalidate application assets so a normal reload cannot mix old and new UI.
         if request.method in ('GET', 'HEAD') and not request.url.path.startswith('/api/'):
@@ -116,7 +121,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=Settings().cors_origins,
         allow_credentials=True,
-        allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allow_headers=['Content-Type', 'Authorization', 'X-Confirm-Write', 'X-ThreadPilot-Token'],
+        allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], allow_headers=['Content-Type', 'Authorization', 'X-Confirm-Write', 'X-ThreadPilot-Token', 'X-ThreadPilot-Name'],
     )
 
     @app.exception_handler(HTTPException)
