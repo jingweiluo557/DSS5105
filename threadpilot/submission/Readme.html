@@ -45,7 +45,7 @@ cp backend/.env.example backend/.env
 cd backend
 uv run python -m scripts.init_db --seed-existing     # creates the schema and imports the three CSVs
 uv run python -m scripts.serve                       # http://127.0.0.1:8000</pre>
-<p>Then open the address, enter the workspace access key you set as <code>API_ACCESS_TOKEN</code> (any string locally), and start with the home screen. The 07:00 briefing is written when you press "Write it now" or when the business clock passes 07:00 (Settings → Business clock → Start demo clock).</p>
+<p>Then open the address, enter your name and the workspace access key you set as <code>API_ACCESS_TOKEN</code> (any string locally; the name only labels the notes and follow-ups you save, access is still the key), and start with the home screen. The 07:00 briefing is written when you press "Write it now" or when the business clock passes 07:00 (Settings → Business clock → Start demo clock).</p>
 
 <h3>3c. MySQL and Docker</h3>
 <pre>cp .env.example .env            # root of threadpilot/: set the passwords and tokens

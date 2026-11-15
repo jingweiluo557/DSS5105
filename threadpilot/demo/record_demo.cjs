@@ -185,7 +185,7 @@ async function chatIdle(page, timeoutMs = 180000) {
   await context.addInitScript(OVERLAY);
   // "initScript": a file beside the timeline that runs before every page (e.g. voice_standin.js: a headless browser has no
   // microphone or speaker, so the recording needs stand-ins that the real voice.js then drives)
-  if (timeline.initScript) await context.addInitScript({ path: path.resolve(path.dirname(timelinePath), timeline.initScript) });
+  for (const f of [].concat(timeline.initScript || [])) await context.addInitScript({ path: path.resolve(path.dirname(timelinePath), f) });   // one file or a list
   if (KEY) {
     const origin = process.env.THREADPILOT_API_ORIGIN || '';
     await context.addInitScript(([key, origin]) => {

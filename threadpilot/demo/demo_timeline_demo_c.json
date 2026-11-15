@@ -40,7 +40,7 @@
    "say": "A judgement tool with a written definition: 455 pieces against 687–807 for the previous eight Tuesdays, 39% below."
   },
   {
-   "at": 8.2,
+   "at": 7.2,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "How is the TrendCart order doing?",
@@ -48,11 +48,11 @@
    }
   },
   {
-   "at": 9.3,
+   "at": 8.3,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 9.4,
+   "at": 8.4,
    "waitAnswer": true
   },
   {
@@ -85,12 +85,12 @@
    "optional": true
   },
   {
-   "at": 22.4,
+   "at": 21.4,
    "click": "details.tool-steps >> nth=-1 >> summary",
    "optional": true
   },
   {
-   "at": 22.6,
+   "at": 21.6,
    "evaluate": "await fetch('/__replay/clock?t=11:15'); const r = await fetch('/api/email/clock', {cache: 'no-store'}); window.threadpilotClock = await r.json(); window.threadpilotClockAnchor = performance.now();"
   },
   {
@@ -143,50 +143,50 @@
    "say": "The Feasibility page runs the same tool over the whole queue: the same 30 April, and it shows why."
   },
   {
-   "at": 41.2,
+   "at": 40.6,
    "fill": {
     "into": "#feasibility-form input[name=\"qty\"]",
     "value": "800"
    }
   },
   {
-   "at": 42.1,
+   "at": 41.5,
    "fill": {
     "into": "#feasibility-form input[name=\"due\"]",
     "value": "2026-04-25"
    }
   },
   {
-   "at": 43.0,
+   "at": 42.4,
    "click": "#feasibility-form button[type=\"submit\"]"
   },
   {
-   "at": 43.6,
+   "at": 43.0,
    "waitFor": {
     "text": "with usual new orders",
     "timeout": 20000
    }
   },
   {
-   "at": 44.2,
+   "at": 43.6,
    "scroll": {
     "to": "#capacity-picture"
    }
   },
   {
-   "at": 50.0,
+   "at": 45.8,
    "goto": "#/ai"
   },
   {
-   "at": 50.2,
+   "at": 46.0,
    "evaluate": "await fetch('/__replay/clock?t=14:30'); const r = await fetch('/api/email/clock', {cache: 'no-store'}); window.threadpilotClock = await r.json(); window.threadpilotClockAnchor = performance.now();"
   },
   {
-   "at": 50.6,
+   "at": 46.7,
    "say": "14:30 · The core task: chase a stalled order, typed the way it is said on the floor."
   },
   {
-   "at": 51.6,
+   "at": 47.7,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "ORD 5 hasn’t moved in a week, chase knitting",
@@ -194,19 +194,19 @@
    }
   },
   {
-   "at": 53.2,
+   "at": 49.3,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 53.3,
+   "at": 49.4,
    "waitAnswer": true
   },
   {
-   "at": 57.1,
+   "at": 53.2,
    "say": "It checks the claim against the record first (last activity 24 March, 8 days: true), then drafts to knitting."
   },
   {
-   "at": 61.7,
+   "at": 56.8,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Preview draft 1",
@@ -214,19 +214,19 @@
    }
   },
   {
-   "at": 62.4,
+   "at": 57.5,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 62.5,
+   "at": 57.6,
    "waitAnswer": true
   },
   {
-   "at": 64.0,
+   "at": 60.1,
    "say": "Preview first. Nothing is sent until the manager confirms this exact draft."
   },
   {
-   "at": 67.6,
+   "at": 63.7,
    "click": {
     "text": "Confirm send"
    },
@@ -234,17 +234,17 @@
    "real": true
   },
   {
-   "at": 68.0,
+   "at": 64.1,
    "waitAnswer": true,
    "optional": true,
    "real": true
   },
   {
-   "at": 68.6,
+   "at": 64.7,
    "say": "Confirmed and sent. On the live system it leaves from the manager’s own mailbox."
   },
   {
-   "at": 70.6,
+   "at": 66.7,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Remind me tmrw 10am if knitting doesn’t reply",
@@ -252,19 +252,19 @@
    }
   },
   {
-   "at": 72.2,
+   "at": 68.3,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 72.3,
+   "at": 68.4,
    "waitAnswer": true
   },
   {
-   "at": 73.7,
+   "at": 69.8,
    "say": "A standing watch: at 10:00 tomorrow the server checks, and notifies only if no reply was recorded."
   },
   {
-   "at": 77.5,
+   "at": 73.6,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Confirm.",
@@ -273,22 +273,22 @@
    "real": true
   },
   {
-   "at": 78.0,
+   "at": 74.1,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]",
    "real": true
   },
   {
-   "at": 78.1,
+   "at": 74.2,
    "waitAnswer": true,
    "real": true
   },
   {
-   "at": 79.9,
+   "at": 76.0,
    "goto": "#/activity",
    "say": "Every action is logged, with recipient, orders and subject."
   },
   {
-   "at": 80.5,
+   "at": 76.6,
    "waitFor": {
     "text": "Order chase-up",
     "timeout": 15000
@@ -296,37 +296,86 @@
    "optional": true
   },
   {
-   "at": 82.1,
+   "at": 78.2,
    "click": "#email-activity details >> nth=0 >> summary",
    "optional": true
   },
   {
-   "at": 85.1,
-   "goto": "#/ai",
-   "say": "Honesty under pressure. A question the data cannot answer:"
+   "at": 80.6,
+   "goto": "#/order?id=ORD-005",
+   "say": "On the order she saves a note. It is filed under management notes, with her name, the order and the time."
   },
   {
-   "at": 85.7,
-   "type": {
-    "into": "[data-form=\"chat\"] textarea",
-    "text": "What revenue did the TrendCart orders bring in this quarter?",
-    "cps": 55
+   "at": 81.0,
+   "scroll": {
+    "to": "[data-management-list=\"note\"]"
    }
   },
   {
-   "at": 87.1,
-   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
+   "at": 81.6,
+   "click": "[data-action=\"note\"] >> nth=0"
   },
   {
-   "at": 87.2,
-   "waitAnswer": true
+   "at": 82.0,
+   "type": {
+    "into": "#note-text",
+    "text": "Customer confirmed the quantity.",
+    "cps": 40
+   }
   },
   {
-   "at": 88.4,
-   "say": "No prices in the records, so no revenue figure. It says what it can answer instead."
+   "at": 83.1,
+   "click": "[data-action=\"confirm-note\"]"
   },
   {
-   "at": 91.4,
+   "at": 83.5,
+   "waitFor": {
+    "css": "[data-management-list=\"note\"] article",
+    "timeout": 15000
+   }
+  },
+  {
+   "at": 88.2,
+   "click": "[data-action=\"note\"] >> nth=1",
+   "say": "A next action goes to related follow-ups, by written rules, not AI. She marks it complete; nothing is emailed."
+  },
+  {
+   "at": 88.6,
+   "type": {
+    "into": "#note-text",
+    "text": "Please confirm the delivery date tomorrow.",
+    "cps": 45
+   }
+  },
+  {
+   "at": 89.8,
+   "click": "[data-action=\"confirm-note\"]"
+  },
+  {
+   "at": 90.2,
+   "waitFor": {
+    "css": "[data-management-list=\"follow_up\"] article",
+    "timeout": 15000
+   }
+  },
+  {
+   "at": 91.2,
+   "click": "[data-action=\"complete-record\"]"
+  },
+  {
+   "at": 91.5,
+   "waitFor": {
+    "text": "Reopen",
+    "timeout": 10000
+   }
+  },
+  {
+   "at": 95.1,
+   "goto": "#/ai",
+   "say": "Honesty under pressure: a wrong premise. The record says order 29 moved today. It says so, and asks before writing."
+  },
+  {
+   "at": 95.7,
    "type": {
     "into": "[data-form=\"chat\"] textarea",
     "text": "Chase ord 29, stuck at washing since last wk",
@@ -334,44 +383,21 @@
    }
   },
   {
-   "at": 92.8,
+   "at": 97.1,
    "click": "[data-form=\"chat\"] button[type=\"submit\"]"
   },
   {
-   "at": 92.9,
+   "at": 97.2,
    "waitAnswer": true
   },
   {
-   "at": 94.2,
-   "say": "A wrong premise: the record says ORD-029 moved today. It says so, and asks before writing anything."
-  },
-  {
-   "at": 97.6,
-   "type": {
-    "into": "[data-form=\"chat\"] textarea",
-    "text": "Is ORD-218 shipped?",
-    "cps": 40
-   }
-  },
-  {
-   "at": 98.4,
-   "click": "[data-form=\"chat\"] button[type=\"submit\"]"
-  },
-  {
-   "at": 98.5,
-   "waitAnswer": true
-  },
-  {
-   "at": 100.4,
-   "say": "Not in the records, and it says so. It never invents an order, a stage or a number."
-  },
-  {
-   "at": 106.9,
+   "at": 102.4,
    "say": "Every number comes from a tool with its rows · it asks instead of guessing · by voice or by hand, nothing leaves without a confirmed preview."
   },
   {
-   "at": 113.9,
+   "at": 110.9,
    "hold": 0.4
   }
- ]
+ ],
+ "initScript": "signin_name.js"
 }
